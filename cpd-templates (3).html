@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPD // Terminal de rédaction</title>
+<style>
+  :root{
+    --bg:#0b0f14;
+    --bg-panel:#11161d;
+    --bg-panel-2:#151b23;
+    --line:#232b35;
+    --steel:#4a6fa5;
+    --steel-dim:#2c3d54;
+    --gold:#c9a227;
+    --text:#dfe4e8;
+    --text-dim:#7c8894;
+    --amber:#e0a13a;
+    --font-display:'Oswald', 'Arial Narrow', sans-serif;
+    --font-mono:'IBM Plex Mono', 'Consolas', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(74,111,165,0.10), transparent 40%),
+      radial-gradient(circle at 100% 100%, rgba(201,162,39,0.06), transparent 45%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-mono);
+    min-height:100vh;
+    padding:0 0 60px 0;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  /* ---- Header ---- */
+  header{
+    position:relative;
+    border-bottom:1px solid var(--line);
+    padding:28px 32px 22px;
+    overflow:hidden;
+    background:linear-gradient(180deg, rgba(74,111,165,0.06), transparent);
+  }
+  header::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+  }
+  .badge-row{display:flex; align-items:center; justify-content:space-between; gap:18px; position:relative;}
+  .badge-left{display:flex; align-items:center; gap:18px;}
+  .guide-link{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:10px 16px;
+    border:1px solid var(--steel);
+    color:var(--steel);
+    text-decoration:none;
+    white-space:nowrap;
+    transition:all .15s;
+    flex:0 0 auto;
+  }
+  .guide-link:hover{background:var(--steel); color:#0b0f14;}
+  .star{
+    width:66px; height:66px; flex:0 0 auto;
+  }
+  .brand-title{
+    font-family:var(--font-display);
+    font-size:26px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--text);
+    line-height:1.1;
+  }
+  .brand-sub{
+    font-size:11px;
+    letter-spacing:3px;
+    color:var(--steel);
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+  .status-line{
+    margin-top:16px;
+    font-size:11px;
+    color:var(--text-dim);
+    letter-spacing:1px;
+    display:flex; gap:22px; flex-wrap:wrap;
+  }
+  .status-line span b{color:var(--amber); font-weight:600;}
+  .dot{width:6px;height:6px;border-radius:50%;background:#4caf6f;display:inline-block;margin-right:6px;box-shadow:0 0 6px #4caf6f;}
+
+  /* ---- Nav ---- */
+  nav{
+    display:flex;
+    gap:2px;
+    padding:0 32px;
+    margin-top:22px;
+    flex-wrap:wrap;
+  }
+  nav button{
+    font-family:var(--font-display);
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-bottom:none;
+    color:var(--text-dim);
+    padding:12px 20px;
+    font-size:13px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:color .15s, background .15s;
+  }
+  nav button:hover{color:var(--text);}
+  nav button.active{
+    color:var(--gold);
+    background:var(--bg-panel-2);
+    border-color:var(--steel-dim);
+    position:relative;
+  }
+  nav button.active::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-1px; height:2px;
+    background:var(--gold);
+  }
+
+  /* ---- Main panel ---- */
+  main{padding:0 32px;}
+  .panel{
+    background:var(--bg-panel-2);
+    border:1px solid var(--steel-dim);
+    border-top:2px solid var(--gold);
+    padding:28px;
+  }
+  .panel-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin-bottom:18px;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .panel-title{
+    font-family:var(--font-display);
+    font-size:20px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--text);
+  }
+  .panel-desc{
+    font-size:12px;
+    color:var(--text-dim);
+    margin-top:6px;
+    max-width:520px;
+    line-height:1.5;
+  }
+  .actions{display:flex; gap:10px; flex:0 0 auto;}
+  .btn{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    padding:10px 16px;
+    border:1px solid var(--steel);
+    background:transparent;
+    color:var(--steel);
+    cursor:pointer;
+    transition:all .15s;
+    white-space:nowrap;
+  }
+  .btn:hover{background:var(--steel); color:#0b0f14;}
+  .btn.primary{
+    border-color:var(--gold);
+    color:var(--gold);
+  }
+  .btn.primary:hover{background:var(--gold); color:#0b0f14;}
+  .btn.copied{
+    border-color:#4caf6f; color:#4caf6f; background:transparent;
+  }
+
+  .tpl-box{
+    background:#0c1015;
+    border:1px solid var(--line);
+    padding:20px 22px;
+    white-space:pre-wrap;
+    font-size:13.5px;
+    line-height:1.8;
+    color:var(--text);
+    max-height:520px;
+    overflow-y:auto;
+  }
+  .tpl-box .ph{
+    color:var(--amber);
+    background:rgba(224,161,58,0.08);
+    padding:0 2px;
+  }
+  .tpl-box .lbl{
+    color:var(--steel);
+    font-weight:600;
+  }
+
+  footer{
+    padding:20px 32px 0;
+    font-size:10.5px;
+    color:var(--text-dim);
+    letter-spacing:1px;
+    text-align:center;
+  }
+
+  @media (max-width:640px){
+    header{padding:20px;}
+    main{padding:0 16px;}
+    nav{padding:0 16px;}
+    .panel{padding:18px;}
+    .brand-title{font-size:20px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge-row">
+    <div class="badge-left">
+    <svg class="star" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <path id="arc-top" d="M 34 100 A 66 66 0 0 1 166 100" />
+        <path id="arc-bottom" d="M 47 128 A 60 60 0 0 0 153 128" />
+        <path id="mini-star" d="M0,-7 L1.76,-2.43 L6.66,-2.16 L2.85,0.93 L4.12,5.66 L0,3 L-4.12,5.66 L-2.85,0.93 L-6.66,-2.16 L-1.76,-2.43 Z" />
+      </defs>
+
+      <path d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
+        fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linejoin="round"/>
+
+      <circle cx="100" cy="100" r="78" fill="#151b23" stroke="var(--gold)" stroke-width="2"/>
+      <circle cx="100" cy="100" r="74" fill="none" stroke="var(--gold)" stroke-width="1"/>
+      <circle cx="100" cy="100" r="55" fill="#0c1015" stroke="var(--gold)" stroke-width="1.5"/>
+
+      <text font-family="Oswald, sans-serif" font-size="16" font-weight="700" letter-spacing="2" fill="var(--gold)">
+        <textPath href="#arc-top" startOffset="50%" text-anchor="middle">CHICAGO</textPath>
+      </text>
+      <text font-family="Oswald, sans-serif" font-size="16" font-weight="700" letter-spacing="2" fill="var(--gold)">
+        <textPath href="#arc-bottom" startOffset="50%" text-anchor="middle">POLICE</textPath>
+      </text>
+
+      <use href="#mini-star" transform="translate(27,100) scale(1.1)" fill="var(--gold)"/>
+      <use href="#mini-star" transform="translate(173,100) scale(1.1)" fill="var(--gold)"/>
+
+      <use href="#mini-star" transform="translate(100,88) scale(2.4)" fill="var(--gold)" opacity="0.9"/>
+      <rect x="64" y="116" width="72" height="17" rx="2" fill="var(--gold)"/>
+      <text x="100" y="128" font-family="Oswald, sans-serif" font-size="9.5" font-weight="700" letter-spacing="0.5" text-anchor="middle" fill="#0c1015">URBS IN HORTO</text>
+    </svg>
+    <div>
+      <div class="brand-title">Chicago Police Department</div>
+      <div class="brand-sub">Terminal de rédaction — Tablette de service</div>
+    </div>
+    </div>
+    <a class="guide-link" href="https://guidejuridiquesp.netlify.app/" target="_blank" rel="noopener">📖 Guide juridique</a>
+  </div>
+  <div class="status-line">
+    <span><span class="dot"></span>Connexion sécurisée</span>
+    <span id="clock">--/--/---- --:--</span>
+  </div>
+</header>
+
+<nav id="tabs"></nav>
+
+<main>
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <div class="panel-title" id="panel-title"></div>
+        <div class="panel-desc" id="panel-desc"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="copy-btn">Copier le texte</button>
+      </div>
+    </div>
+    <div class="tpl-box" id="tpl-box"></div>
+  </div>
+</main>
+
+<footer>CPD INTERNAL SYSTEM — USAGE ROLEPLAY UNIQUEMENT — NE PAS DIFFUSER HORS SERVEUR</footer>
+
+<script>
+const templates = [
+  {
+    id: "arrestation",
+    label: "Rapport d'arrestation",
+    desc: "À copier-coller dans le rapport officiel lors d'une interpellation.",
+    body:
+`═══ RAPPORT D'ARRESTATION — CPD ═══
+Dossier N° [N° DOSSIER]
+Date/Heure : [DATE] [HEURE]
+Lieu : [LIEU DE L'ARRESTATION]
+Agent(s) : [NOM/MATRICULE]
+
+Suspect : [NOM COMPLET]
+Description : [ÂGE APPROX / SIGNES DISTINCTIFS]
+
+Motif de l'interpellation :
+[RÉSUMÉ COURT DES FAITS OBSERVÉS]
+
+Charges retenues :
+- [CHARGE 1]
+- [CHARGE 2]
+
+Objets saisis : [LISTE OU "NÉANT"]
+Résistance/Incident lors de l'arrestation : [OUI/NON — détail si oui]
+
+Suite donnée : [TRANSFERT AU POSTE / MISE EN GARDE À VUE / AUTRE]
+
+Rapport rédigé par : [NOM/MATRICULE]`
+  },
+  {
+    id: "deposition",
+    label: "Prise de déposition",
+    desc: "Pour recueillir la déclaration d'un témoin ou d'une victime.",
+    body:
+`═══ PRISE DE DÉPOSITION — CPD ═══
+Dossier N° [N° DOSSIER]
+Date/Heure : [DATE] [HEURE]
+Agent recueillant la déposition : [NOM/MATRICULE]
+
+Déposant : [NOM COMPLET]
+Statut : [TÉMOIN / VICTIME]
+Contact : [NUMÉRO OU MOYEN DE CONTACT]
+
+Déclaration :
+"[RÉSUMÉ DES PROPOS DU DÉPOSANT]"
+
+Éléments corroborants : [OUI/NON — détail]
+
+Déposition lue et validée par le déposant : [OUI/NON]
+Signature : [NOM]`
+  },
+  {
+    id: "incident",
+    label: "Rapport d'incident",
+    desc: "Pour consigner un événement en intervention, hors arrestation directe.",
+    body:
+`═══ RAPPORT D'INCIDENT — CPD ═══
+Dossier N° [N° DOSSIER]
+Date/Heure : [DATE] [HEURE]
+Lieu : [LIEU DE L'INCIDENT]
+Agent(s) mobilisé(s) : [NOM/MATRICULE]
+
+Nature de l'incident : [TYPE — ex: tapage, différend, accident, etc.]
+
+Description des faits :
+[RÉSUMÉ COURT DE CE QUI S'EST PASSÉ]
+
+Personnes impliquées : [NOMS / RÔLES]
+Blessés ou dégâts : [OUI/NON — détail]
+
+Suite donnée : [RAPPEL À L'ORDRE / VERBALISATION / TRANSMISSION AUTRE SERVICE / AUCUNE SUITE]
+
+Rapport rédigé par : [NOM/MATRICULE]`
+  },
+  {
+    id: "plainte",
+    label: "Dépôt de plainte",
+    desc: "Pour enregistrer une plainte déposée par un citoyen au poste.",
+    body:
+`═══ DÉPÔT DE PLAINTE — CPD ═══
+Dossier N° [N° DOSSIER]
+Date/Heure : [DATE] [HEURE]
+Agent receveur : [NOM/MATRICULE]
+
+Plaignant : [NOM COMPLET]
+Contact : [NUMÉRO OU MOYEN DE CONTACT]
+
+Nature de la plainte : [TYPE — ex: vol, agression, menace, etc.]
+Mis en cause (si connu) : [NOM OU "INCONNU"]
+
+Résumé des faits :
+[RÉSUMÉ COURT DE LA PLAINTE]
+
+Preuves fournies : [LISTE OU "AUCUNE"]
+
+Suite donnée : [OUVERTURE D'ENQUÊTE / CLASSEMENT / TRANSMISSION]
+
+Plainte enregistrée par : [NOM/MATRICULE]`
+  }
+];
+
+let currentIndex = 0;
+
+function renderTabs(){
+  const nav = document.getElementById('tabs');
+  nav.innerHTML = '';
+  templates.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = t.label;
+    btn.className = i === currentIndex ? 'active' : '';
+    btn.onclick = () => { currentIndex = i; render(); };
+    nav.appendChild(btn);
+  });
+}
+
+function highlight(text){
+  return text
+    .replace(/\[([^\]]+)\]/g, '<span class="ph">[$1]</span>')
+    .replace(/^([A-Za-zÀ-ÿ0-9\/\(\)éèêà' ]+) :/gm, '<span class="lbl">$1</span> :');
+}
+
+function render(){
+  const t = templates[currentIndex];
+  document.getElementById('panel-title').textContent = t.label;
+  document.getElementById('panel-desc').textContent = t.desc;
+  document.getElementById('tpl-box').innerHTML = highlight(t.body);
+  document.getElementById('copy-btn').textContent = 'Copier le texte';
+  document.getElementById('copy-btn').classList.remove('copied');
+  renderTabs();
+}
+
+document.getElementById('copy-btn').onclick = () => {
+  const t = templates[currentIndex];
+  navigator.clipboard.writeText(t.body).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copié';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copier le texte'; btn.classList.remove('copied'); }, 1800);
+  });
+};
+
+function updateClock(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+updateClock();
+setInterval(updateClock, 15000);
+
+render();
+</script>
+
+</body>
+</html>
