@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>CPD // Templates</title>
+<title>CPD // Procédures</title>
 
 <style>
 
@@ -321,14 +321,14 @@
 
 
   /* =========================
-     TEMPLATES
+     Procédures
   ========================= */
 
-  .templates{
+  .Procédures{
     padding:12px 28px 28px;
   }
 
-  .template{
+  .Procedure{
     border:1px solid var(--line);
     background:var(--bg-dark);
     margin-top:14px;
@@ -338,13 +338,13 @@
       background .15s;
   }
 
-  .template:hover{
+  .Procedure:hover{
     border-color:var(--steel-dim);
     background:#0e141b;
     transform:translateY(-1px);
   }
 
-  .template-header{
+  .Procedure-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -354,14 +354,14 @@
     background:rgba(74,111,165,0.04);
   }
 
-  .template-number{
+  .Procedure-number{
     color:var(--gold);
     font-size:11px;
     letter-spacing:1px;
     min-width:65px;
   }
 
-  .template-title{
+  .Procedure-title{
     flex:1;
     font-family:var(--font-display);
     font-size:15px;
@@ -370,7 +370,7 @@
     color:var(--text);
   }
 
-  .template-type{
+  .Procedure-type{
     font-size:9px;
     letter-spacing:1px;
     padding:5px 8px;
@@ -380,18 +380,18 @@
     border-color:var(--steel);
   }
 
-  .template-body{
+  .Procedure-body{
     padding:18px;
     font-size:12px;
     line-height:1.75;
     color:var(--text);
   }
 
-  .template-body p{
+  .Procedure-body p{
     margin:0 0 12px;
   }
 
-  .template-body p:last-child{
+  .Procedure-body p:last-child{
     margin-bottom:0;
   }
 
@@ -400,14 +400,14 @@
      BUTTONS
   ========================= */
 
-  .template-actions{
+  .Procedure-actions{
     display:flex;
     gap:8px;
     flex-wrap:wrap;
     margin-top:16px;
   }
 
-  .template-button{
+  .Procedure-button{
     display:inline-block;
     padding:10px 15px;
     border:1px solid var(--steel);
@@ -422,27 +422,27 @@
     transition:all .15s;
   }
 
-  .template-button:hover{
+  .Procedure-button:hover{
     background:var(--steel);
     color:#0b0f14;
   }
 
-  .template-button.gold{
+  .Procedure-button.gold{
     border-color:var(--gold);
     color:var(--gold);
   }
 
-  .template-button.gold:hover{
+  .Procedure-button.gold:hover{
     background:var(--gold);
     color:#0b0f14;
   }
 
-  .template-button.green{
+  .Procedure-button.green{
     border-color:var(--green);
     color:var(--green);
   }
 
-  .template-button.green:hover{
+  .Procedure-button.green:hover{
     background:var(--green);
     color:#0b0f14;
   }
@@ -546,34 +546,34 @@
       padding:20px;
     }
 
-    .templates{
+    .Procédures{
       padding:10px 15px 20px;
     }
 
-    .template-header{
+    .Procedure-header{
       align-items:flex-start;
       flex-wrap:wrap;
     }
 
-    .template-number{
+    .Procedure-number{
       min-width:auto;
     }
 
-    .template-type{
+    .Procedure-type{
       order:3;
       width:100%;
       text-align:center;
     }
 
-    .template-body{
+    .Procedure-body{
       font-size:11.5px;
     }
 
-    .template-actions{
+    .Procedure-actions{
       flex-direction:column;
     }
 
-    .template-button{
+    .Procedure-button{
       width:100%;
       text-align:center;
     }
@@ -746,7 +746,7 @@
           </div>
 
           <div class="brand-sub">
-            Templates opérationnels — Manuel CPD
+            Procédures opérationnels — Manuel CPD
           </div>
 
         </div>
@@ -762,7 +762,7 @@
           class="header-link current"
           href="index.html">
 
-          🗂 Templates
+          🗂 Procédures
 
         </a>
 
@@ -851,7 +851,7 @@
     type="text"
     id="search"
     class="search-box"
-    placeholder="⌕ Rechercher un template : arrestation, rapport, contrôle, amende..."
+    placeholder="⌕ Rechercher un Procedure : arrestation, rapport, contrôle, amende..."
     autocomplete="off">
 
 </div>
@@ -881,7 +881,7 @@
         class="panel-title"
         id="panel-title">
 
-        Templates généraux
+        Procédures généraux
 
       </div>
 
@@ -899,7 +899,7 @@
         class="article-count"
         id="article-count">
 
-        00 TEMPLATES
+        00 Procédures
 
       </div>
 
@@ -908,8 +908,8 @@
 
 
     <div
-      class="templates"
-      id="templates"></div>
+      class="Procédures"
+      id="Procédures"></div>
 
 
   </div>
@@ -924,7 +924,7 @@
 
 <footer>
 
-  CPD INTERNAL SYSTEM — TEMPLATES OPÉRATIONNELS —
+  CPD INTERNAL SYSTEM — Procédures OPÉRATIONNELS —
   USAGE INTERNE UNIQUEMENT — NE PAS DIFFUSER
 
 </footer>
@@ -945,9 +945,9 @@ const categories = [
 
     label:"Général",
 
-    desc:"Templates généraux utilisés dans le cadre des opérations du CPD.",
+    desc:"Procédures généraux utilisés dans le cadre des opérations du CPD.",
 
-    templates:[
+    Procédures:[
 
       {
         number:"01",
@@ -972,7 +972,7 @@ const categories = [
         type:"RAPPORT",
 
         description:
-          "Template destiné à documenter un incident nécessitant un suivi administratif ou hiérarchique.",
+          "Procedure destiné à documenter un incident nécessitant un suivi administratif ou hiérarchique.",
 
         file:"https://docs.google.com/document/d/1El4E35B-fStabW3TSJFoQIyvIJgCsr3G5vqPMZSLFRU/edit?usp=sharing"
 
@@ -1002,7 +1002,7 @@ const categories = [
         type:"Droit",
 
         description:
-          "Template destiné à l'annonce des droits miranda",
+          "Procedure destiné à l'annonce des droits miranda",
 
         file:"https://docs.google.com/document/d/1ohEObrjaYPbMRByq0nK7I8iS87Q_jDMFbNGEzmt3I_o/edit?usp=sharing"
 
@@ -1020,7 +1020,7 @@ const categories = [
 
     desc:"Documents utilisés lors des procédures et interventions de police.",
 
-    templates:[
+    Procédures:[
 
       {
         number:"05",
@@ -1032,7 +1032,7 @@ const categories = [
         description:
           "Modèle de compte rendu pour un contrôle d'une personne.",
 
-        file:"templates/controle-identite.html"
+        file:"Procédures/controle-identite.html"
 
       },
 
@@ -1045,9 +1045,9 @@ const categories = [
         type:"PROCÉDURE",
 
         description:
-          "Template permettant de documenter une fouille effectuée dans le cadre d'une intervention.",
+          "Procedure permettant de documenter une fouille effectuée dans le cadre d'une intervention.",
 
-        file:"templates/fouille.html"
+        file:"Procédures/fouille.html"
 
       },
 
@@ -1062,7 +1062,7 @@ const categories = [
         description:
           "Document de suivi relatif à une interpellation.",
 
-        file:"templates/interpellation.html"
+        file:"Procédures/interpellation.html"
 
       },
 
@@ -1075,9 +1075,9 @@ const categories = [
         type:"PROCÉDURE",
 
         description:
-          "Template utilisé pour le suivi du transport d'une personne détenue.",
+          "Procedure utilisé pour le suivi du transport d'une personne détenue.",
 
-        file:"templates/transport-detenu.html"
+        file:"Procédures/transport-detenu.html"
 
       }
 
@@ -1091,9 +1091,9 @@ const categories = [
 
     label:"Véhicules",
 
-    desc:"Templates liés aux véhicules et aux interventions routières.",
+    desc:"Procédures liés aux véhicules et aux interventions routières.",
 
-    templates:[
+    Procédures:[
 
       {
         number:"09",
@@ -1118,9 +1118,9 @@ const categories = [
         type:"VÉHICULE",
 
         description:
-          "Template destiné aux contrôles et interventions liés à la circulation.",
+          "Procedure destiné aux contrôles et interventions liés à la circulation.",
 
-        file:"templates/controle-routier.html"
+        file:"Procédures/controle-routier.html"
 
       },
 
@@ -1135,7 +1135,7 @@ const categories = [
         description:
           "Compte rendu permettant de documenter une poursuite automobile.",
 
-        file:"templates/poursuite.html"
+        file:"Procédures/poursuite.html"
 
       }
 
@@ -1151,7 +1151,7 @@ const categories = [
 
     desc:"Documents administratifs et rapports internes.",
 
-    templates:[
+    Procédures:[
 
       {
         number:"12",
@@ -1163,7 +1163,7 @@ const categories = [
         description:
           "Modèle permettant de formaliser une demande de renfort opérationnel.",
 
-        file:"templates/demande-renfort.html"
+        file:"Procédures/demande-renfort.html"
 
       },
 
@@ -1176,9 +1176,9 @@ const categories = [
         type:"ADMIN",
 
         description:
-          "Template destiné au signalement d'un problème ou d'un événement à la hiérarchie.",
+          "Procedure destiné au signalement d'un problème ou d'un événement à la hiérarchie.",
 
-        file:"templates/signalement-hierarchique.html"
+        file:"Procédures/signalement-hierarchique.html"
 
       },
 
@@ -1193,7 +1193,7 @@ const categories = [
         description:
           "Document permettant de transmettre une demande nécessitant une validation hiérarchique.",
 
-        file:"templates/demande-autorisation.html"
+        file:"Procédures/demande-autorisation.html"
 
       }
 
@@ -1209,7 +1209,7 @@ const categories = [
 
     desc:"Documents utilisés pour les enquêtes et le traitement des éléments.",
 
-    templates:[
+    Procédures:[
 
       {
         number:"15",
@@ -1219,9 +1219,9 @@ const categories = [
         type:"ENQUÊTE",
 
         description:
-          "Template permettant de formaliser l'ouverture d'une nouvelle enquête.",
+          "Procedure permettant de formaliser l'ouverture d'une nouvelle enquête.",
 
-        file:"templates/ouverture-enquete.html"
+        file:"Procédures/ouverture-enquete.html"
 
       },
 
@@ -1236,7 +1236,7 @@ const categories = [
         description:
           "Document permettant de synthétiser les éléments recueillis au cours d'une enquête.",
 
-        file:"templates/compte-rendu-enquete.html"
+        file:"Procédures/compte-rendu-enquete.html"
 
       },
 
@@ -1251,7 +1251,7 @@ const categories = [
         description:
           "Modèle permettant de répertorier les éléments recueillis dans le cadre d'une enquête.",
 
-        file:"templates/inventaire-preuves.html"
+        file:"Procédures/inventaire-preuves.html"
 
       }
 
@@ -1265,9 +1265,9 @@ const categories = [
 
     label:"Radio",
 
-    desc:"Templates et formats de communication radio opérationnelle.",
+    desc:"Procédures et formats de communication radio opérationnelle.",
 
-    templates:[
+    Procédures:[
 
       {
         number:"18",
@@ -1279,7 +1279,7 @@ const categories = [
         description:
           "Modèle de transmission radio permettant de communiquer les informations essentielles.",
 
-        file:"templates/compte-rendu-radio.html"
+        file:"Procédures/compte-rendu-radio.html"
 
       },
 
@@ -1294,7 +1294,7 @@ const categories = [
         description:
           "Format de communication destiné à demander rapidement des unités supplémentaires.",
 
-        file:"templates/renfort-radio.html"
+        file:"Procédures/renfort-radio.html"
 
       }
 
@@ -1310,7 +1310,7 @@ const categories = [
 
     desc:"Documents destinés à la coordination et au dispatch.",
 
-    templates:[
+    Procédures:[
 
       {
         number:"20",
@@ -1320,9 +1320,9 @@ const categories = [
         type:"DISPATCH",
 
         description:
-          "Template permettant de structurer les informations nécessaires à la création d'un appel.",
+          "Procedure permettant de structurer les informations nécessaires à la création d'un appel.",
 
-        file:"templates/creation-appel.html"
+        file:"Procédures/creation-appel.html"
 
       },
 
@@ -1337,7 +1337,7 @@ const categories = [
         description:
           "Modèle permettant de documenter la fin d'une intervention.",
 
-        file:"templates/cloture-appel.html"
+        file:"Procédures/cloture-appel.html"
 
       }
 
@@ -1445,11 +1445,11 @@ function render(){
 
   document.getElementById("article-count")
     .textContent =
-      `${String(category.templates.length).padStart(2,"0")} TEMPLATES`;
+      `${String(category.Procédures.length).padStart(2,"0")} Procédures`;
 
 
-  renderTemplates(
-    category.templates
+  renderProcédures(
+    category.Procédures
   );
 
 
@@ -1460,19 +1460,19 @@ function render(){
 
 
 /* ==========================================================
-   TEMPLATES
+   Procédures
 ========================================================== */
 
-function renderTemplates(templates){
+function renderProcédures(Procédures){
 
   const container =
-    document.getElementById("templates");
+    document.getElementById("Procédures");
 
 
   container.innerHTML = "";
 
 
-  if(templates.length === 0){
+  if(Procédures.length === 0){
 
     container.innerHTML = `
 
@@ -1482,7 +1482,7 @@ function renderTemplates(templates){
           Aucun résultat
         </div>
 
-        Aucun template ne correspond
+        Aucun Procedure ne correspond
         à votre recherche.
 
       </div>
@@ -1494,57 +1494,57 @@ function renderTemplates(templates){
   }
 
 
-  templates.forEach(template => {
+  Procédures.forEach(Procedure => {
 
     const element =
       document.createElement("article");
 
 
     element.className =
-      "template";
+      "Procedure";
 
 
     element.innerHTML = `
 
-      <div class="template-header">
+      <div class="Procedure-header">
 
-        <div class="template-number">
+        <div class="Procedure-number">
 
-          TPL. ${template.number}
-
-        </div>
-
-
-        <div class="template-title">
-
-          ${template.title}
+          TPL. ${Procedure.number}
 
         </div>
 
 
-        <div class="template-type">
+        <div class="Procedure-title">
 
-          ${template.type}
+          ${Procedure.title}
+
+        </div>
+
+
+        <div class="Procedure-type">
+
+          ${Procedure.type}
 
         </div>
 
       </div>
 
 
-      <div class="template-body">
+      <div class="Procedure-body">
 
         <p>
-          ${template.description}
+          ${Procedure.description}
         </p>
 
 
-        <div class="template-actions">
+        <div class="Procedure-actions">
 
           <a
-            class="template-button gold"
-            href="${template.file}">
+            class="Procedure-button gold"
+            href="${Procedure.file}">
 
-            📄 Ouvrir le template
+            📄 Ouvrir la procédure
 
           </a>
 
@@ -1621,7 +1621,7 @@ document
 
       categories.forEach(category => {
 
-        category.templates.forEach(template => {
+        category.Procédures.forEach(Procedure => {
 
           const searchable = (
 
@@ -1629,18 +1629,18 @@ document
             " " +
             category.desc +
             " " +
-            template.title +
+            Procedure.title +
             " " +
-            template.type +
+            Procedure.type +
             " " +
-            template.description
+            Procedure.description
 
           ).toLowerCase();
 
 
           if(searchable.includes(query)){
 
-            results.push(template);
+            results.push(Procedure);
 
           }
 
@@ -1664,7 +1664,7 @@ document
           `${String(results.length).padStart(2,"0")} RÉSULTAT(S)`;
 
 
-      renderTemplates(results);
+      renderProcédures(results);
 
     }
   );
