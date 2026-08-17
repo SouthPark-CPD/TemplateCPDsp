@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CPD // Guide radio</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0b0f14;
@@ -24,7 +21,6 @@
     --font-display:'Oswald', 'Arial Narrow', sans-serif;
     --font-mono:'IBM Plex Mono', 'Consolas', monospace;
   }
-
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -37,6 +33,7 @@
     min-height:100vh;
     padding:0 0 60px 0;
   }
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
   header{
     position:relative;
@@ -48,123 +45,137 @@
   header::before{
     content:"";
     position:absolute; inset:0;
-    background-image:linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    background-image:repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
     pointer-events:none;
   }
   .badge-row{display:flex; align-items:center; justify-content:space-between; gap:18px; position:relative;}
   .badge-left{display:flex; align-items:center; gap:18px;}
-  .star{width:52px; height:52px; flex:0 0 auto; fill:var(--gold);}
+  .star{width:52px; height:52px; flex:0 0 auto;}
   .brand-title{
     font-family:var(--font-display);
-    font-size:28px;
+    font-size:24px;
     letter-spacing:2px;
     text-transform:uppercase;
     font-weight:600;
     color:var(--text);
-    margin:0;
+    line-height:1.1;
   }
-  .brand-subtitle{
-    font-size:12px;
+  .brand-sub{
+    font-size:11px;
+    letter-spacing:3px;
     color:var(--steel);
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+  .back-link{
+    font-family:var(--font-mono);
+    font-size:11.5px;
     letter-spacing:1px;
-    margin-top:2px;
+    text-transform:uppercase;
+    padding:10px 16px;
+    border:1px solid var(--steel);
+    color:var(--steel);
+    text-decoration:none;
+    white-space:nowrap;
+    transition:all .15s;
+    flex:0 0 auto;
   }
+  .back-link:hover{background:var(--steel); color:#0b0f14;}
 
-  .container{
-    max-width:1400px;
-    margin:0 auto;
-    padding:24px 20px;
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap:20px;
+  .search-row{
+    padding:20px 32px 0;
   }
-
-  .panel{
-    background:var(--bg-panel);
-    border:1px solid var(--line);
-    border-radius:4px;
-    padding:20px;
-    box-shadow:0 4px 20px rgba(0,0,0,0.3);
+  .search-box{
+    width:100%;
+    max-width:420px;
+    background:var(--bg-panel-2);
+    border:1px solid var(--steel-dim);
+    color:var(--text);
+    font-family:var(--font-mono);
+    font-size:13px;
+    padding:12px 16px;
+    letter-spacing:0.5px;
   }
+  .search-box:focus{outline:none; border-color:var(--gold);}
+  .search-box::placeholder{color:var(--text-dim);}
 
-  .panel-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+  main{padding:24px 32px 0;}
+
+  .cat-block{margin-bottom:32px;}
+  .cat-head{
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:12px;
     border-bottom:1px solid var(--line);
     padding-bottom:10px;
-    margin-bottom:15px;
   }
-
-  .panel-title{
+  .cat-title{
     font-family:var(--font-display);
-    font-size:18px;
+    font-size:17px;
     letter-spacing:1.5px;
     text-transform:uppercase;
     color:var(--gold);
-    margin:0;
+  }
+  .cat-count{
+    font-size:10.5px;
+    color:var(--text-dim);
+    letter-spacing:1px;
+    margin-left:auto;
   }
 
-  .data-list{
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
-
-  .data-item{
-    display:flex;
-    align-items:baseline;
+  .code-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
     gap:10px;
-    font-size:13px;
-    line-height:1.4;
-    padding:4px 6px;
-    border-radius:2px;
+  }
+  .code-card{
     background:var(--bg-panel-2);
+    border:1px solid var(--line);
+    border-left:3px solid var(--steel);
+    padding:12px 14px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    transition:border-color .15s, background .15s;
   }
-
-  .code{
-    color:var(--steel);
-    font-weight:600;
+  .code-card:hover{border-left-color:var(--gold); background:#171e27;}
+  .code-card.urgent{border-left-color:var(--red);}
+  .code-tag{
+    font-family:var(--font-display);
+    font-size:15px;
+    font-weight:700;
+    color:var(--gold);
     white-space:nowrap;
-    min-width:65px;
+    min-width:52px;
   }
-
-  .desc{
+  .code-card.urgent .code-tag{color:var(--red);}
+  .code-desc{
+    font-size:12.5px;
+    line-height:1.5;
     color:var(--text);
   }
+  .code-card.hidden{display:none;}
 
-  .desc-highlight{
-    color:var(--amber);
-  }
-
-  .alert-code{
-    background:rgba(192, 80, 74, 0.15);
-    border-left:3px solid var(--red);
-  }
-  .alert-code .code{
-    color:var(--red);
-  }
-
-  .grid-2col{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-  }
-
-  .section-desc{
-    font-size:12px;
+  footer{
+    padding:20px 32px 0;
+    font-size:10.5px;
     color:var(--text-dim);
-    margin-bottom:12px;
-    line-height:1.4;
+    letter-spacing:1px;
+    text-align:center;
   }
 
-  .sub-title{
-    font-family:var(--font-display);
-    font-size:14px;
-    color:var(--steel);
-    text-transform:uppercase;
-    margin:12px 0 6px 0;
-    letter-spacing:1px;
+  .empty-msg{
+    display:none;
+    color:var(--text-dim);
+    font-size:13px;
+    padding:20px 0;
+  }
+
+  @media (max-width:640px){
+    header{padding:20px;}
+    main{padding:20px 16px 0;}
+    .search-row{padding:20px 16px 0;}
+    .brand-title{font-size:19px;}
+    .code-grid{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -173,186 +184,256 @@
 <header>
   <div class="badge-row">
     <div class="badge-left">
-      <svg class="star" viewBox="0 0 24 24">
-        <path d="M12 2l2.4 6.9h7.3l-5.9 4.3 2.3 6.9-6.1-4.4-6.1 4.4 2.3-6.9-5.9-4.3h7.3z"/>
+      <svg class="star" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <path id="arc-top2" d="M 34 100 A 66 66 0 0 1 166 100" />
+          <path id="arc-bottom2" d="M 47 128 A 60 60 0 0 0 153 128" />
+          <path id="mini-star2" d="M0,-7 L1.76,-2.43 L6.66,-2.16 L2.85,0.93 L4.12,5.66 L0,3 L-4.12,5.66 L-2.85,0.93 L-6.66,-2.16 L-1.76,-2.43 Z" />
+        </defs>
+        <path d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
+          fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="100" cy="100" r="78" fill="#151b23" stroke="var(--gold)" stroke-width="2"/>
+        <circle cx="100" cy="100" r="74" fill="none" stroke="var(--gold)" stroke-width="1"/>
+        <circle cx="100" cy="100" r="55" fill="#0c1015" stroke="var(--gold)" stroke-width="1.5"/>
+        <text font-family="Oswald, sans-serif" font-size="16" font-weight="700" letter-spacing="2" fill="var(--gold)">
+          <textPath href="#arc-top2" startOffset="50%" text-anchor="middle">CHICAGO</textPath>
+        </text>
+        <text font-family="Oswald, sans-serif" font-size="16" font-weight="700" letter-spacing="2" fill="var(--gold)">
+          <textPath href="#arc-bottom2" startOffset="50%" text-anchor="middle">POLICE</textPath>
+        </text>
+        <use href="#mini-star2" transform="translate(27,100) scale(1.1)" fill="var(--gold)"/>
+        <use href="#mini-star2" transform="translate(173,100) scale(1.1)" fill="var(--gold)"/>
+        <use href="#mini-star2" transform="translate(100,88) scale(2.4)" fill="var(--gold)" opacity="0.9"/>
+        <rect x="64" y="116" width="72" height="17" rx="2" fill="var(--gold)"/>
+        <text x="100" y="128" font-family="Oswald, sans-serif" font-size="9.5" font-weight="700" letter-spacing="0.5" text-anchor="middle" fill="#0c1015">URBS IN HORTO</text>
       </svg>
       <div>
-        <h1 class="brand-title">LOS SANTOS POLICE DEPT</h1>
-        <div class="brand-subtitle">GUIDE RADIO &amp; CODES D'INTERVENTION</div>
+        <div class="brand-title">Guide radio — CPD</div>
+        <div class="brand-sub">Codes 10 &amp; procédures de communication</div>
       </div>
     </div>
+    <a class="back-link" href="index.html">← Retour templates</a>
   </div>
 </header>
 
-<div class="container">
-
-  <!-- CODES 10 -->
-  <div class="panel">
-    <div class="panel-header">
-      <h2 class="panel-title">Code 10</h2>
-    </div>
-    <div class="data-list">
-      <div class="data-item"><span class="code">10-1</span><span class="desc">Mauvaise réception radio / Radio défectueuse</span></div>
-      <div class="data-item"><span class="code">10-2</span><span class="desc">Signal clair, bonne réception</span></div>
-      <div class="data-item"><span class="code">10-3</span><span class="desc">Fin de transmission / Silence radio</span></div>
-      <div class="data-item"><span class="code">10-4</span><span class="desc">Bien reçu / OK</span></div>
-      <div class="data-item"><span class="code">10-5</span><span class="desc">Relayer le message</span></div>
-      <div class="data-item"><span class="code">10-6</span><span class="desc">Occupé / Attendre avant de poursuivre sauf urgence</span></div>
-      <div class="data-item"><span class="code">10-7</span><span class="desc">Hors service temporaire / Indisponible pour appel</span></div>
-      <div class="data-item"><span class="code">10-8</span><span class="desc">En service / Disponible pour appel</span></div>
-      <div class="data-item"><span class="code">10-9</span><span class="desc">Répéter le dernier message</span></div>
-      <div class="data-item"><span class="code">10-10</span><span class="desc">Fin de service</span></div>
-      <div class="data-item"><span class="code">10-12</span><span class="desc">Présence de visiteurs et peuvent entendre la radio</span></div>
-      <div class="data-item"><span class="code">10-13</span><span class="desc">Veut connaître la météo ou les conditions routières</span></div>
-      <div class="data-item"><span class="code">10-14</span><span class="desc">Escorte ou convoi</span></div>
-      <div class="data-item"><span class="code">10-15</span><span class="desc">Suspect détenu / Transport du prisonnier</span></div>
-      <div class="data-item"><span class="code">10-17</span><span class="desc">Ajout de carburant</span></div>
-      <div class="data-item"><span class="code">10-19</span><span class="desc">En route vers ... (préciser la localisation)</span></div>
-      <div class="data-item"><span class="code">10-20</span><span class="desc">Votre localisation</span></div>
-      <div class="data-item"><span class="code">10-22</span><span class="desc">Annuler ou ignorer</span></div>
-      <div class="data-item"><span class="code">10-23</span><span class="desc">Standby / Attente</span></div>
-      <div class="data-item"><span class="code">10-24</span><span class="desc">Demande une transmission de voiture à voiture (Dispatch présent)</span></div>
-      <div class="data-item"><span class="code">10-27</span><span class="desc">Sujet recherché</span></div>
-      <div class="data-item"><span class="code">10-28</span><span class="desc">Vérification immatriculation</span></div>
-      <div class="data-item"><span class="code">10-29</span><span class="desc">Vérification mandats / Dossier criminel</span></div>
-      <div class="data-item"><span class="code">10-31</span><span class="desc">Tirs d'armes à feu</span></div>
-      <div class="data-item alert-code"><span class="code">10-35</span><span class="desc">Demande de renfort sur position de l'officier (préciser rue, etc.)</span></div>
-      <div class="data-item"><span class="code">10-36</span><span class="desc">Contrôle routier / Traffic Stop</span></div>
-      <div class="data-item"><span class="code">10-37</span><span class="desc">Cambriolage en cours</span></div>
-      <div class="data-item"><span class="code">10-40</span><span class="desc">Braquage de supérette</span></div>
-      <div class="data-item"><span class="code">10-50</span><span class="desc">Accident (circulation par défaut, précisez si blessure corpo)</span></div>
-      <div class="data-item"><span class="code">10-51</span><span class="desc">Demande dépanneuse / Tow Truck</span></div>
-      <div class="data-item"><span class="code">10-52</span><span class="desc">Demande ambulance / Paramedics</span></div>
-      <div class="data-item"><span class="code">10-56</span><span class="desc">Refus d'obtempérer</span></div>
-      <div class="data-item"><span class="code">10-57</span><span class="desc">Délit de fuite</span></div>
-      <div class="data-item"><span class="code">10-59</span><span class="desc">Vol de Véhicule</span></div>
-      <div class="data-item"><span class="code">10-60</span><span class="desc">Vente de drogue</span></div>
-      <div class="data-item"><span class="code">10-91</span><span class="desc">Braquage de banque</span></div>
-      <div class="data-item"><span class="code">10-97</span><span class="desc">Arrivé sur scène (couramment remplacé par code 6)</span></div>
-      <div class="data-item"><span class="code">10-98</span><span class="desc">Assignment terminée / Fin du 10-97 / Dispo pour appel</span></div>
-      <div class="data-item alert-code"><span class="code">11-99</span><span class="desc">Officier en danger, a besoin d'aide en urgence (similaire Code 99)</span></div>
-    </div>
-  </div>
-
-  <!-- NUMÉRO D'UNITÉ & DIVISIONS -->
-  <div class="panel">
-    <div class="panel-header">
-      <h2 class="panel-title">Numéro d'unité</h2>
-    </div>
-    <div class="section-desc">
-      Il se compose d'un chiffre, d'une lettre et d'un second chiffre, dans cet ordre.<br>
-      Le 1er chiffre correspond à la <strong>Division/District</strong>.<br>
-      La lettre correspond au <strong>Code Opérationnel</strong>.<br>
-      Le 2nd chiffre correspond à la <strong>Position</strong> par rapport aux autres unités du même secteur.
-    </div>
-
-    <div class="sub-title">Numéro de Division</div>
-    <div class="data-list">
-      <div class="data-item"><span class="code">35</span><span class="desc">Autoroute Freeway (totalité)</span></div>
-      <div class="data-item"><span class="code">17</span><span class="desc">Los Santos [SUD]</span></div>
-      <div class="data-item"><span class="code">18</span><span class="desc">Los Santos [NORD]</span></div>
-      <div class="data-item"><span class="code">16</span><span class="desc">Secteur superviseur [NORD] et [SUD]</span></div>
-    </div>
-
-    <div class="sub-title">Type d'unité</div>
-    <div class="data-list">
-      <div class="data-item"><span class="code">A</span><span class="desc">Deux Agents en patrouille véhiculé ("Adam")</span></div>
-      <div class="data-item"><span class="code">Air</span><span class="desc">Aéronef ("Air Unit")</span></div>
-      <div class="data-item"><span class="code">B</span><span class="desc">Unité Bateau ("Bravo")</span></div>
-      <div class="data-item"><span class="code">E</span><span class="desc">Traffic Division ("Edward")</span></div>
-      <div class="data-item"><span class="code">FB</span><span class="desc">Foot Beat (Foot Patrol - Patrouille à pied)</span></div>
-      <div class="data-item"><span class="code">K-9</span><span class="desc">Patrouille avec un officier canin</span></div>
-      <div class="data-item"><span class="code">K</span><span class="desc">Gang and Narcotics Division, Gang Section ("King")</span></div>
-      <div class="data-item"><span class="code">L</span><span class="desc">Un Agent en patrouille véhiculé ("Lincoln"), aussi utilisé par les superviseurs</span></div>
-      <div class="data-item"><span class="code">M</span><span class="desc">Motorcycle Unit ("Mary")</span></div>
-      <div class="data-item"><span class="code">C</span><span class="desc">"Cycle" Unit</span></div>
-      <div class="data-item"><span class="code">Q</span><span class="desc">Événement spécial ou unité non-traditionnel ("Queen")</span></div>
-      <div class="data-item"><span class="code">SLO</span><span class="desc">Senior Lead Officer (SL - SLO Lincoln)(SAM - SLO Adam)</span></div>
-      <div class="data-item"><span class="code">SI</span><span class="desc">Sierra, Investigation Division</span></div>
-      <div class="data-item"><span class="code">N</span><span class="desc">Narcotics ("Nora")</span></div>
-      <div class="data-item"><span class="code">W</span><span class="desc">Detective ID ("William")</span></div>
-      <div class="data-item"><span class="code">Y</span><span class="desc">Gang and Narcotics Division, Narcotics Section ("Young")</span></div>
-    </div>
-  </div>
-
-  <!-- CODES GENERALS -->
-  <div class="panel">
-    <div class="panel-header">
-      <h2 class="panel-title">Codes d'intervention</h2>
-    </div>
-    <div class="data-list">
-      <div class="data-item"><span class="code">Code 1</span><span class="desc">Répondez à votre radio</span></div>
-      <div class="data-item"><span class="code">Code 2</span><span class="desc">Prioritaire - répondre sans sirène</span></div>
-      <div class="data-item alert-code"><span class="code">Code 3</span><span class="desc">Urgent - Répondre avec lumières et sirène</span></div>
-      <div class="data-item"><span class="code">Code 4</span><span class="desc">Aucune autre assistance nécessaire, situation stable</span></div>
-      <div class="data-item"><span class="code">Code 4-Adam</span><span class="desc">Idem, mais suspect toujours en fuite, des unités sont mobilisées</span></div>
-      <div class="data-item"><span class="code">Code 5</span><span class="desc">En surveillance, autres unités doivent éviter lieu</span></div>
-      <div class="data-item"><span class="code">Code 6</span><span class="desc">Arrivé sur scène ou déjà occupé en intervention / investigation</span></div>
-      <div class="data-item"><span class="code">Code 6-Adam</span><span class="desc">Arrivé, peut avoir besoin de l'assistance d'unités proches</span></div>
-      <div class="data-item"><span class="code">Code 6-Charles</span><span class="desc">Idem, suspect dangereux (mandat), attente confirmation assistance</span></div>
-      <div class="data-item"><span class="code">Code 7</span><span class="desc">Pause repas (requête, renseignement du lieu)(couramment remplacé par 10-7)</span></div>
-      <div class="data-item"><span class="code">Code 20</span><span class="desc">Notifiez les médias ou soyez avisé que les médias sont sur les lieux</span></div>
-      <div class="data-item"><span class="code">Code 37</span><span class="desc">Véhicule rapporté volé</span></div>
-      <div class="data-item alert-code"><span class="code">Code 99</span><span class="desc">Officier en danger, a besoin d'aide en urgence (identique 11-99)</span></div>
-      <div class="data-item"><span class="code">Code 100</span><span class="desc">Unités en position pour intercepter suspect en fuite</span></div>
-      <div class="data-item"><span class="code">Code Robert</span><span class="desc">Requête pour déploiement fusil / carabine sur scène</span></div>
-      <div class="data-item"><span class="code">Code Sam</span><span class="desc">Requête pour déploiement d'un Beanbag PG</span></div>
-    </div>
-  </div>
-
-  <!-- CRIMINAL CODE & PHONETIQUE -->
-  <div class="panel">
-    <div class="panel-header">
-      <h2 class="panel-title">Criminal Code</h2>
-    </div>
-    <div class="data-list">
-      <div class="data-item"><span class="code">187</span><span class="desc">Homicide</span></div>
-      <div class="data-item"><span class="code">207</span><span class="desc">Kidnapping</span></div>
-      <div class="data-item"><span class="code">211</span><span class="desc">Braquage de magasin</span></div>
-      <div class="data-item"><span class="code">212</span><span class="desc">Braquage Banque</span></div>
-      <div class="data-item"><span class="code">240</span><span class="desc">Agression</span></div>
-      <div class="data-item"><span class="code">374</span><span class="desc">Plongée illégale</span></div>
-      <div class="data-item"><span class="code">415</span><span class="desc">Trouble à l'ordre public</span></div>
-      <div class="data-item"><span class="code">417</span><span class="desc">Individu armé</span></div>
-      <div class="data-item"><span class="code">459</span><span class="desc">Cambriolage</span></div>
-      <div class="data-item"><span class="code">487</span><span class="desc">Vol de véhicule</span></div>
-      <div class="data-item"><span class="code">502</span><span class="desc">Conduite sous influence</span></div>
-      <div class="data-item alert-code"><span class="code">998</span><span class="desc">OIS (Officer Involved Shooting)</span></div>
-      <div class="data-item alert-code"><span class="code">999</span><span class="desc">Identique Code-99</span></div>
-    </div>
-
-    <div class="sub-title" style="margin-top:20px;">Alphabet phonétique</div>
-    <div class="data-list grid-2col">
-      <div class="data-item"><span class="code">A</span><span class="desc">Adam</span></div>
-      <div class="data-item"><span class="code">B</span><span class="desc">Boy</span></div>
-      <div class="data-item"><span class="code">C</span><span class="desc">Charles</span></div>
-      <div class="data-item"><span class="code">D</span><span class="desc">David</span></div>
-      <div class="data-item"><span class="code">E</span><span class="desc">Edward</span></div>
-      <div class="data-item"><span class="code">F</span><span class="desc">Frank</span></div>
-      <div class="data-item"><span class="code">G</span><span class="desc">George</span></div>
-      <div class="data-item"><span class="code">H</span><span class="desc">Henry</span></div>
-      <div class="data-item"><span class="code">I</span><span class="desc">Ida</span></div>
-      <div class="data-item"><span class="code">J</span><span class="desc">John</span></div>
-      <div class="data-item"><span class="code">K</span><span class="desc">King</span></div>
-      <div class="data-item"><span class="code">L</span><span class="desc">Lincoln</span></div>
-      <div class="data-item"><span class="code">M</span><span class="desc">Mary</span></div>
-      <div class="data-item"><span class="code">N</span><span class="desc">Nora</span></div>
-      <div class="data-item"><span class="code">O</span><span class="desc">Ocean</span></div>
-      <div class="data-item"><span class="code">P</span><span class="desc">Paul</span></div>
-      <div class="data-item"><span class="code">Q</span><span class="desc">Queen</span></div>
-      <div class="data-item"><span class="code">R</span><span class="desc">Robert</span></div>
-      <div class="data-item"><span class="code">S</span><span class="desc">Sam</span></div>
-      <div class="data-item"><span class="code">T</span><span class="desc">Tom</span></div>
-      <div class="data-item"><span class="code">U</span><span class="desc">Union</span></div>
-      <div class="data-item"><span class="code">V</span><span class="desc">Victor</span></div>
-      <div class="data-item"><span class="code">W</span><span class="desc">William</span></div>
-      <div class="data-item"><span class="code">X</span><span class="desc">X-ray</span></div>
-      <div class="data-item"><span class="code">Y</span><span class="desc">Young</span></div>
-      <div class="data-item"><span class="code">Z</span><span class="desc">Zebra</span></div>
-    </div>
-  </div>
-
+<div class="search-row">
+  <input type="text" class="search-box" id="search" placeholder="Rechercher un code ou un mot-clé (ex: 10-4, poursuite, blessé...)">
 </div>
+
+<main id="content"></main>
+
+<div class="empty-msg" id="empty-msg">Aucun code ne correspond à ta recherche.</div>
+
+<footer>CPD INTERNAL SYSTEM — USAGE ROLEPLAY UNIQUEMENT — NE PAS DIFFUSER HORS SERVEUR</footer>
+
+<script>
+const categories = [
+  {
+    title: "Statuts & accusés de réception",
+    codes: [
+      ["10-1", "Mauvaise réception radio / Radio défectueuse"],
+      ["10-2", "Signal clair, bonne réception"],
+      ["10-3", "Fin de transmission / silence radio"],
+      ["10-4", "Bien reçu / OK"],
+      ["10-5", "Relayer le message"],
+      ["10-6", "Occupé / attendre avant de poursuivre sauf urgence"],
+      ["10-7", "Hors service temporaire / indisponible pour appel"],
+      ["10-8", "En service / disponible pour appel"],
+      ["10-9", "Répéter le dernier message"],
+      ["10-10", "Fin de service"],
+      ["10-22", "Annuler ou ignorer"],
+      ["10-23", "Standby / attente"],
+      ["10-98", "Assignation terminée / fin du 10-97 / disponible pour appel"],
+      ["10-99", "Officier en danger, a besoin d'aide en urgence (similaire Code 99)"],
+    ]
+  },
+  {
+    title: "Communication & renseignements",
+    codes: [
+      ["10-12", "Présence de visiteurs et peuvent entendre la radio"],
+      ["10-13", "Veut connaître la météo ou les conditions routières"],
+      ["10-14", "Écoute ou convoi"],
+      ["10-20", "Votre localisation"],
+      ["10-24", "Demande une transmission de voiture à voiture (Dispatch présent)"],
+      ["10-25", "Sujet recherché"],
+      ["10-28", "Vérification immatriculation"],
+      ["10-29", "Vérification mandats / dossier criminel"],
+      ["10-35", "Demande de renfort sur position de l'officier (préciser rue, etc.)"],
+    ]
+  },
+  {
+    title: "Déplacements & interventions",
+    codes: [
+      ["10-17", "Ajout de carburant"],
+      ["10-18", "En route vers... (préciser la localisation)"],
+      ["10-19", "Retour au commissariat"],
+      ["10-21", "Contactez-moi par téléphone"],
+      ["10-23", "Standby / attente"],
+      ["10-30", "Danger / précaution supplémentaire"],
+      ["10-36", "Heure exacte"],
+      ["10-37", "Cambriolage en cours"],
+      ["10-38", "Contrôle routier / Traffic Stop"],
+      ["10-40", "Accident (caractériser par défaut, préciser si blessure corpo)"],
+      ["10-50", "Demande dépanneuse / Tow Truck"],
+      ["10-51", "Demande ambulance / Paramedics"],
+      ["10-56", "Refus d'obtempérer"],
+      ["10-57", "Délit de fuite"],
+      ["10-59", "Vol de véhicule"],
+    ]
+  },
+  {
+    title: "Situations criminelles",
+    codes: [
+      ["10-70", "Vente de drogue"],
+      ["10-91", "Braquage de banque"],
+      ["10-97", "Arrivé sur scène (couramment remplacé par le code 6)"],
+    ]
+  },
+  {
+    title: "Codes de priorité d'intervention",
+    codes: [
+      ["Code 1", "Répondez à votre radio"],
+      ["Code 2", "Prioritaire – répondre sans sirène"],
+      ["Code 3", "Urgent – répondre avec lumières et sirène"],
+      ["Code 4", "Aucune autre assistance nécessaire, situation stable"],
+      ["Code 4-Adam", "Idem, mais suspect toujours en fuite, les unités sont mobilisées"],
+      ["Code 5", "En surveillance, autres unités doivent éviter le lieu"],
+      ["Code 6", "Arrivé sur scène ou déjà occupé en intervention / investigation"],
+      ["Code 6-Adam", "Arrivé, peut avoir besoin de l'assistance d'unités proches"],
+      ["Code 6-Charles", "Idem, suspect dangereux (mandat), attente confirmation assistance"],
+      ["Code 7", "Pause repas (requête, renseignement du lieu)"],
+      ["Code 20", "Notifiez les médias ou soyez avisé que les médias sont sur les lieux"],
+      ["Code 37", "Véhicule rapporté volé"],
+      ["Code 99", "Officier en danger, a besoin d'aide en urgence (identique 11-99)"],
+      ["Code 100", "Unités en position pour intercepter suspect en fuite"],
+      ["Code Robert", "Requête pour déploiement fusil / carabine sur scène"],
+      ["Code Sam", "Requête pour déploiement d'un Beanbag PG"],
+    ]
+  },
+  {
+    title: "Codes criminels",
+    codes: [
+      ["187", "Homicide"],
+      ["207", "Kidnapping"],
+      ["211", "Braquage de magasin"],
+      ["212", "Braquage Banque"],
+      ["240", "Agression"],
+      ["374", "Plongée illégale"],
+      ["415", "Trouble à l'ordre public"],
+      ["417", "Individu armé"],
+      ["459", "Cambriolage"],
+      ["487", "Vol de véhicule"],
+      ["502", "Conduite sous influence"],
+      ["998", "Officier Involved Shooting"],
+      ["999", "Identique Code-99"],
+    ]
+  },
+  {
+    title: "Numéro d'unité",
+    codes: [
+      ["Format", "Un chiffre + une lettre + un second chiffre, dans cet ordre. Le premier chiffre correspond à la Division ou au District de l'unité, la lettre à son type opérationnel, et le second chiffre à sa position parmi les autres unités du même secteur."],
+      ["35", "Autoroute Freeway (totalité)"],
+      ["17", "Los Santos [SUD]"],
+      ["18", "Los Santos [NORD]"],
+      ["16", "Secteur superviseur [NORD] et [SUD]"],
+    ]
+  },
+  {
+    title: "Types d'unités",
+    codes: [
+      ["A", "Deux Agents en patrouille véhiculée (\"Adam\")"],
+      ["Air", "Aéronef (\"Air Unit\")"],
+      ["B", "Unité Bateau (\"Bravo\")"],
+      ["E", "Traffic Division (\"Edward\")"],
+      ["F3", "Foot Beat (Foot Patrol – Patrouille à pied)"],
+      ["K-9", "Patrouille avec un officier canin"],
+      ["K", "Gang and Narcotics Division, Gang Section (\"King\")"],
+      ["L", "Un Agent en patrouille véhiculée (\"Lincoln\"), aussi utilisé par les superviseurs"],
+      ["M", "Motorcycle Unit (\"Mary\")"],
+      ["C", "Cycle Unit"],
+      ["O", "Événement spécial ou unité non-traditionnel (\"Queen\")"],
+      ["SLO", "Senior Logistic Officer (SLO – SLO Lincoln) (SAM – SLO Adam)"],
+      ["S", "Sierra, Investigation Division"],
+      ["N", "Narcotics (\"Nora\")"],
+      ["W", "Detective ID (\"William\")"],
+      ["Y", "Gang and Narcotics Division, Narcotics Section (\"Young\")"],
+    ]
+  },
+  {
+    title: "Alphabet phonétique",
+    codes: [
+      ["A", "Adam"],
+      ["B", "Boy"],
+      ["C", "Charles"],
+      ["D", "David"],
+      ["E", "Edward"],
+      ["F", "Frank"],
+      ["G", "George"],
+      ["H", "Henry"],
+      ["I", "Ida"],
+      ["J", "John"],
+      ["K", "King"],
+      ["L", "Lincoln"],
+      ["M", "Mary"],
+      ["N", "Nora"],
+      ["O", "Ocean"],
+      ["P", "Paul"],
+      ["Q", "Queen"],
+      ["R", "Robert"],
+      ["S", "Sam"],
+      ["T", "Tom"],
+      ["U", "Union"],
+      ["V", "Victor"],
+      ["W", "William"],
+      ["X", "X-Ray"],
+      ["Y", "Young"],
+      ["Z", "Zebra"],
+    ]
+  }
+];
+
+const urgentTitles = ["Urgences & priorités"];
+
+function render(filter=""){
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+  const f = filter.trim().toLowerCase();
+  let totalVisible = 0;
+
+  categories.forEach(cat => {
+    const isUrgentCat = urgentTitles.includes(cat.title);
+    const matches = cat.codes.filter(([tag, desc]) =>
+      !f || tag.toLowerCase().includes(f) || desc.toLowerCase().includes(f)
+    );
+    if(matches.length === 0) return;
+    totalVisible += matches.length;
+
+    const block = document.createElement('div');
+    block.className = 'cat-block';
+    block.innerHTML = `
+      <div class="cat-head">
+        <div class="cat-title">${cat.title}</div>
+        <div class="cat-count">${matches.length} code${matches.length>1?'s':''}</div>
+      </div>
+      <div class="code-grid">
+        ${matches.map(([tag, desc]) => `
+          <div class="code-card${isUrgentCat ? ' urgent' : ''}">
+            <div class="code-tag">${tag}</div>
+            <div class="code-desc">${desc}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    content.appendChild(block);
+  });
+
+  document.getElementById('empty-msg').style.display = totalVisible === 0 ? 'block' : 'none';
+}
+
+document.getElementById('search').addEventListener('input', (e) => render(e.target.value));
+
+render();
+</script>
 
 </body>
 </html>
