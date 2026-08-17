@@ -89,6 +89,8 @@
 
   .header-inner{
     position:relative;
+    max-width:1100px;
+    margin:0 auto;
   }
 
   .badge-row{
@@ -106,14 +108,14 @@
   }
 
   .star{
-    width:66px;
-    height:66px;
+    width:60px;
+    height:60px;
     flex:0 0 auto;
   }
 
   .brand-title{
     font-family:var(--font-display);
-    font-size:26px;
+    font-size:25px;
     letter-spacing:2px;
     text-transform:uppercase;
     font-weight:600;
@@ -142,10 +144,12 @@
     text-transform:uppercase;
     padding:10px 16px;
     border:1px solid var(--steel);
+    background:transparent;
     color:var(--steel);
     text-decoration:none;
     white-space:nowrap;
     transition:all .15s;
+    cursor:pointer;
   }
 
   .header-link:hover{
@@ -161,6 +165,14 @@
   .header-link.gold:hover{
     background:var(--gold);
     color:#0b0f14;
+  }
+
+  .header-link.current{
+    background:var(--gold);
+    color:#0b0f14;
+    border-color:var(--gold);
+    pointer-events:none;
+    font-weight:600;
   }
 
   .status-line{
@@ -494,8 +506,8 @@
   footer{
     max-width:1100px;
     margin:0 auto;
-    padding:25px 32px 0;
-    font-size:10px;
+    padding:20px 32px 0;
+    font-size:10.5px;
     color:var(--text-dim);
     letter-spacing:1px;
     text-align:center;
@@ -561,7 +573,7 @@
     }
 
     .brand-title{
-      font-size:20px;
+      font-size:19px;
     }
 
     .brand-sub{
@@ -749,18 +761,20 @@
       <div class="header-actions">
 
         <a class="header-link" href="index.html">
-          ← Terminal
+          🗂 Templates
         </a>
 
         <a class="header-link" href="code.html">
           📻 Guide radio
         </a>
 
-        <button
-          class="header-link gold"
-          onclick="window.print()">
-          🖨 Imprimer
-        </button>
+        <a class="header-link current" href="reglement.html">
+          ⚖ Règlement
+        </a>
+
+        <a class="header-link gold" href="https://guidejuridiquesp.netlify.app/" target="_blank" rel="noopener">
+          📖 Guide juridique ↗
+        </a>
 
       </div>
 
