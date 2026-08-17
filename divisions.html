@@ -107,45 +107,64 @@ header::before{
 
 .header-inner{
   position:relative;
+
   max-width:1100px;
+
   margin:0 auto;
 }
 
 .badge-row{
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   gap:20px;
+
   flex-wrap:wrap;
 }
 
 .badge-left{
   display:flex;
+
   align-items:center;
+
   gap:18px;
 }
 
 .star{
   width:60px;
   height:60px;
+
   flex:0 0 auto;
 }
 
 .brand-title{
   font-family:var(--font-display);
+
   font-size:25px;
+
   letter-spacing:2px;
+
   text-transform:uppercase;
+
   font-weight:600;
+
   color:var(--text);
+
   line-height:1.1;
 }
 
 .brand-sub{
   font-size:11px;
+
   letter-spacing:3px;
+
   color:var(--steel);
+
   text-transform:uppercase;
+
   margin-top:4px;
 }
 
@@ -156,14 +175,19 @@ header::before{
 
 .header-actions{
   display:flex;
+
   gap:8px;
+
   flex-wrap:wrap;
 }
 
 .header-link{
   font-family:var(--font-mono);
+
   font-size:11.5px;
+
   letter-spacing:1px;
+
   text-transform:uppercase;
 
   padding:10px 16px;
@@ -171,35 +195,45 @@ header::before{
   border:1px solid var(--steel);
 
   background:transparent;
+
   color:var(--steel);
 
   text-decoration:none;
+
   white-space:nowrap;
 
   transition:all .15s;
+
   cursor:pointer;
 }
 
 .header-link:hover{
   background:var(--steel);
+
   color:#0b0f14;
 }
 
 .header-link.gold{
   border-color:var(--gold);
+
   color:var(--gold);
 }
 
 .header-link.gold:hover{
   background:var(--gold);
+
   color:#0b0f14;
 }
 
 .header-link.current{
   background:var(--gold);
+
   color:#0b0f14;
+
   border-color:var(--gold);
+
   pointer-events:none;
+
   font-weight:600;
 }
 
@@ -226,6 +260,7 @@ header::before{
 
 .status-line span b{
   color:var(--amber);
+
   font-weight:600;
 }
 
@@ -251,7 +286,9 @@ header::before{
 
 main{
   max-width:1100px;
+
   margin:0 auto;
+
   padding:30px 32px 0;
 }
 
@@ -305,9 +342,11 @@ main{
   display:grid;
 
   grid-template-columns:
-    repeat(2, minmax(0,1fr));
+    repeat(2,minmax(0,1fr));
 
   gap:14px;
+
+  align-items:start;
 }
 
 
@@ -324,6 +363,8 @@ main{
     border-color .2s,
     background .2s,
     transform .2s;
+
+  min-width:0;
 }
 
 .division:hover{
@@ -372,6 +413,7 @@ main{
   display:flex;
 
   align-items:center;
+
   justify-content:center;
 
   border:1px solid var(--gold-dim);
@@ -382,13 +424,15 @@ main{
 
   font-family:var(--font-display);
 
-  font-size:18px;
+  font-size:16px;
 
   flex:0 0 auto;
 }
 
 .division-info{
   flex:1;
+
+  min-width:0;
 }
 
 .division-name{
@@ -401,6 +445,18 @@ main{
   text-transform:uppercase;
 
   color:var(--text);
+}
+
+.division-lead{
+  margin-top:4px;
+
+  font-size:9.5px;
+
+  letter-spacing:1px;
+
+  color:var(--amber);
+
+  text-transform:uppercase;
 }
 
 .division-description{
@@ -438,23 +494,6 @@ main{
 
 .division.open .division-arrow{
   transform:rotate(180deg);
-}
-
-
-/* ==========================================================
-   LEAD DIVISION
-========================================================== */
-
-.division-lead{
-  font-size:9px;
-
-  letter-spacing:1px;
-
-  color:var(--amber);
-
-  white-space:nowrap;
-
-  text-transform:uppercase;
 }
 
 
@@ -537,37 +576,6 @@ main{
 
 
 /* ==========================================================
-   LEAD UNIT
-========================================================== */
-
-.unit-lead{
-  margin-top:8px;
-
-  font-size:9px;
-
-  letter-spacing:1px;
-
-  color:var(--amber);
-
-  text-transform:uppercase;
-}
-
-
-/* ==========================================================
-   LARGE DIVISIONS
-========================================================== */
-
-.division.large{
-  grid-column:1 / -1;
-}
-
-.division.large .units{
-  grid-template-columns:
-    repeat(3,minmax(0,1fr));
-}
-
-
-/* ==========================================================
    FOOTER
 ========================================================== */
 
@@ -598,14 +606,6 @@ footer{
     grid-template-columns:1fr;
   }
 
-  .division.large{
-    grid-column:auto;
-  }
-
-  .division.large .units{
-    grid-template-columns:1fr;
-  }
-
 }
 
 @media(max-width:700px){
@@ -624,6 +624,7 @@ footer{
 
   .brand-sub{
     font-size:9px;
+
     letter-spacing:2px;
   }
 
@@ -633,6 +634,7 @@ footer{
 
   .header-link{
     flex:1;
+
     text-align:center;
   }
 
@@ -650,6 +652,7 @@ footer{
 
   .units{
     grid-template-columns:1fr;
+
     padding:0 15px 15px;
   }
 
@@ -946,7 +949,7 @@ footer{
     </div>
 
     <div class="page-count">
-      07 DIVISIONS — UNITÉS OPÉRATIONNELLES
+      04 DIVISIONS — UNITÉS OPÉRATIONNELLES
     </div>
 
   </div>
@@ -989,48 +992,40 @@ const divisions = [
 
     short:"DB",
 
-    lead:"78",
+    lead:"78 & 39",
 
     description:
       "Bureau chargé des enquêtes criminelles et du traitement des affaires majeures.",
-
-    large:true,
 
     units:[
 
       {
         name:"Violent Crimes Unit",
-        lead:"À définir",
         desc:"Homicides, agressions graves et crimes violents."
       },
 
       {
         name:"Financial Crimes Unit",
-        lead:"77",
         desc:"Fraudes, escroqueries, blanchiment et crimes financiers."
       },
 
       {
-        name:"Gang Enforcement Unit",
-        lead:"À définir",
+        name:"Gang Unit",
         desc:"Enquêtes liées aux gangs et à la criminalité organisée."
       },
 
       {
         name:"Narcotics Unit",
-        lead:"À définir",
         desc:"Trafic de stupéfiants et réseaux de distribution."
       },
 
       {
         name:"Major Case Unit",
-        lead:"À définir",
         desc:"Affaires majeures nécessitant une enquête approfondie."
       },
 
       {
         name:"Special Investigations Unit",
-        lead:"À définir",
         desc:"Affaires sensibles et investigations spécialisées."
       }
 
@@ -1040,144 +1035,35 @@ const divisions = [
 
 
   {
-    name:"Patrol Division",
+    name:"SWAT Division",
 
-    short:"PD",
+    short:"SWAT",
 
-    lead:"À définir",
+    lead:"12 & 47",
 
     description:
-      "Division principale chargée de la présence policière et des interventions quotidiennes.",
+      "Division tactique spécialisée dans les interventions à haut risque.",
 
     units:[
 
       {
-        name:"District Patrol",
-        lead:"À définir",
-        desc:"Patrouilles générales et interventions dans les districts."
+        name:"SWAT Tactical Unit",
+        desc:"Interventions à haut risque, suspects barricadés et prises d'otages."
       },
 
       {
-        name:"Community Policing Unit",
-        lead:"À définir",
-        desc:"Relations avec les citoyens et prévention."
+        name:"Hostage Rescue Team",
+        desc:"Interventions spécialisées lors de prises d'otages."
       },
 
       {
-        name:"School Liaison Unit",
-        lead:"À définir",
-        desc:"Présence et sécurité dans les établissements scolaires."
+        name:"Tactical Negotiations",
+        desc:"Gestion et négociation lors des situations de crise."
       },
 
       {
-        name:"Field Training Unit",
-        lead:"À définir",
-        desc:"Accompagnement et formation des nouveaux agents sur le terrain."
-      }
-
-    ]
-
-  },
-
-
-  {
-    name:"Special Operations Division",
-
-    short:"SOD",
-
-    lead:"À définir",
-
-    description:
-      "Unités spécialisées mobilisées lors des situations à haut risque ou nécessitant des moyens particuliers.",
-
-    units:[
-
-      {
-        name:"SWAT / Tactical Unit",
-        lead:"À définir",
-        desc:"Interventions à haut risque, prises d'otages et suspects barricadés."
-      },
-
-      {
-        name:"K-9 Unit",
-        lead:"À définir",
-        desc:"Unités cynophiles spécialisées dans la recherche et l'intervention."
-      },
-
-      {
-        name:"Aviation Unit",
-        lead:"À définir",
-        desc:"Soutien aérien, surveillance et recherche."
-      },
-
-      {
-        name:"Marine Unit",
-        lead:"À définir",
-        desc:"Interventions et opérations sur les zones nautiques."
-      }
-
-    ]
-
-  },
-
-
-  {
-    name:"Traffic Division",
-
-    short:"TRF",
-
-    lead:"À définir",
-
-    description:
-      "Division spécialisée dans la circulation, les infractions routières et les accidents.",
-
-    units:[
-
-      {
-        name:"Traffic Enforcement Unit",
-        lead:"À définir",
-        desc:"Contrôle de la circulation et infractions routières."
-      },
-
-      {
-        name:"Highway Patrol",
-        lead:"À définir",
-        desc:"Surveillance et intervention sur les axes rapides."
-      },
-
-      {
-        name:"Collision Investigation Unit",
-        lead:"À définir",
-        desc:"Enquêtes sur les accidents graves et collisions."
-      }
-
-    ]
-
-  },
-
-
-  {
-    name:"Internal Affairs",
-
-    short:"IA",
-
-    lead:"À définir",
-
-    description:
-      "Unité chargée des enquêtes internes concernant les membres du département.",
-
-    units:[
-
-      {
-        name:"Internal Affairs Unit",
-        lead:"À définir",
-        desc:"Enquêtes concernant les comportements ou faits impliquant des agents."
-      },
-
-      {
-        name:"Professional Standards",
-        lead:"À définir",
-        desc:"Contrôle du respect des procédures et standards professionnels."
+        name:"K-9 Tactical Unit",
+        desc:"Soutien cynophile lors des opérations tactiques."
       }
 
     ]
@@ -1190,34 +1076,30 @@ const divisions = [
 
     short:"TRN",
 
-    lead:"À définir",
+    lead:"20",
 
     description:
-      "Division responsable de la formation, de l'entraînement et du développement des agents.",
+      "Division responsable de la formation et de l'évaluation des membres du département.",
 
     units:[
 
       {
         name:"Police Academy",
-        lead:"À définir",
         desc:"Formation initiale des nouvelles recrues."
       },
 
       {
         name:"Field Training Unit",
-        lead:"À définir",
-        desc:"Formation pratique et accompagnement sur le terrain."
+        desc:"Formation pratique et accompagnement des agents sur le terrain."
       },
 
       {
         name:"Firearms Training",
-        lead:"À définir",
         desc:"Formation et qualification au maniement des armes."
       },
 
       {
         name:"Defensive Tactics",
-        lead:"À définir",
         desc:"Formation aux techniques d'intervention et de contrôle."
       }
 
@@ -1227,33 +1109,35 @@ const divisions = [
 
 
   {
-    name:"Communications Division",
+    name:"Traffic Division",
 
-    short:"COM",
+    short:"TRF",
 
-    lead:"À définir",
+    lead:"07",
 
     description:
-      "Division chargée des communications opérationnelles et de la coordination des appels.",
+      "Division spécialisée dans la circulation, les infractions routières et les accidents.",
 
     units:[
 
       {
-        name:"Emergency Dispatch",
-        lead:"À définir",
-        desc:"Réception et traitement des appels d'urgence."
+        name:"ASD",
+        desc:"Aviation Support Division — soutien aérien et interventions par hélicoptère."
       },
 
       {
-        name:"Police Communications",
-        lead:"À définir",
-        desc:"Gestion des communications radio des unités."
+        name:"Highway Patrol",
+        desc:"Surveillance et intervention sur les axes routiers principaux."
       },
 
       {
-        name:"CAD / Records",
-        lead:"À définir",
-        desc:"Gestion des appels, rapports et informations opérationnelles."
+        name:"Marine Unit",
+        desc:"Patrouilles à moto, escortes et contrôle de la circulation."
+      },
+
+      {
+        name:"VIR",
+        desc:"Véhicules rapides dédiés à l'interception et aux interventions mobiles."
       }
 
     ]
@@ -1278,8 +1162,7 @@ divisions.forEach((division,index) => {
     document.createElement("section");
 
   card.className =
-    "division" +
-    (division.large ? " large" : "");
+    "division";
 
 
   card.innerHTML = `
@@ -1298,14 +1181,14 @@ divisions.forEach((division,index) => {
           ${division.name}
         </div>
 
+        <div class="division-lead">
+          LEAD : ${division.lead}
+        </div>
+
         <div class="division-description">
           ${division.description}
         </div>
 
-      </div>
-
-      <div class="division-lead">
-        LEAD : ${division.lead}
       </div>
 
       <div class="division-count">
@@ -1335,10 +1218,6 @@ divisions.forEach((division,index) => {
 
               <div class="unit-desc">
                 ${unit.desc}
-              </div>
-
-              <div class="unit-lead">
-                LEAD : ${unit.lead}
               </div>
 
             </div>
