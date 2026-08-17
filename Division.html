@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CPD // Divisions & Units</title>
+
+<style>
+
+:root{
+  --bg:#0b0f14;
+  --bg-panel:#11161d;
+  --bg-panel-2:#151b23;
+  --bg-dark:#0c1015;
+  --line:#232b35;
+  --steel:#4a6fa5;
+  --steel-dim:#2c3d54;
+  --gold:#c9a227;
+  --gold-dim:#725d16;
+  --text:#dfe4e8;
+  --text-dim:#7c8894;
+  --amber:#e0a13a;
+  --red:#c94b4b;
+  --green:#4caf6f;
+
+  --font-display:'Oswald','Arial Narrow',sans-serif;
+  --font-mono:'IBM Plex Mono','Consolas',monospace;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+}
+
+body{
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(74,111,165,0.10),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(201,162,39,0.06),
+      transparent 45%
+    ),
+    var(--bg);
+
+  color:var(--text);
+  font-family:var(--font-mono);
+  min-height:100vh;
+  padding-bottom:60px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+header{
+  position:relative;
+
+  border-bottom:1px solid var(--line);
+
+  padding:28px 32px 22px;
+
+  overflow:hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(74,111,165,0.06),
+      transparent
+    );
+}
+
+header::before{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.015) 0px,
+      rgba(255,255,255,0.015) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+
+  pointer-events:none;
+}
+
+.header-inner{
+  position:relative;
+  max-width:1100px;
+  margin:0 auto;
+}
+
+.badge-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.badge-left{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+
+.star{
+  width:60px;
+  height:60px;
+  flex:0 0 auto;
+}
+
+.brand-title{
+  font-family:var(--font-display);
+  font-size:25px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-weight:600;
+  color:var(--text);
+  line-height:1.1;
+}
+
+.brand-sub{
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--steel);
+  text-transform:uppercase;
+  margin-top:4px;
+}
+
+
+/* ==========================================================
+   HEADER NAVIGATION
+========================================================== */
+
+.header-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.header-link{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+
+  padding:10px 16px;
+
+  border:1px solid var(--steel);
+
+  background:transparent;
+  color:var(--steel);
+
+  text-decoration:none;
+  white-space:nowrap;
+
+  transition:all .15s;
+  cursor:pointer;
+}
+
+.header-link:hover{
+  background:var(--steel);
+  color:#0b0f14;
+}
+
+.header-link.gold{
+  border-color:var(--gold);
+  color:var(--gold);
+}
+
+.header-link.gold:hover{
+  background:var(--gold);
+  color:#0b0f14;
+}
+
+.header-link.current{
+  background:var(--gold);
+  color:#0b0f14;
+  border-color:var(--gold);
+  pointer-events:none;
+  font-weight:600;
+}
+
+
+/* ==========================================================
+   STATUS
+========================================================== */
+
+.status-line{
+  margin-top:16px;
+
+  font-size:11px;
+
+  color:var(--text-dim);
+
+  letter-spacing:1px;
+
+  display:flex;
+
+  gap:22px;
+
+  flex-wrap:wrap;
+}
+
+.status-line span b{
+  color:var(--amber);
+  font-weight:600;
+}
+
+.dot{
+  width:6px;
+  height:6px;
+
+  border-radius:50%;
+
+  background:var(--green);
+
+  display:inline-block;
+
+  margin-right:6px;
+
+  box-shadow:0 0 6px var(--green);
+}
+
+
+/* ==========================================================
+   MAIN
+========================================================== */
+
+main{
+  max-width:1100px;
+  margin:0 auto;
+  padding:30px 32px 0;
+}
+
+
+/* ==========================================================
+   PAGE INTRO
+========================================================== */
+
+.page-intro{
+  margin-bottom:24px;
+}
+
+.page-title{
+  font-family:var(--font-display);
+
+  font-size:25px;
+
+  letter-spacing:1.5px;
+
+  text-transform:uppercase;
+
+  color:var(--text);
+}
+
+.page-desc{
+  margin-top:7px;
+
+  font-size:12px;
+
+  color:var(--text-dim);
+
+  line-height:1.6;
+}
+
+.page-count{
+  margin-top:12px;
+
+  font-size:10px;
+
+  color:var(--amber);
+
+  letter-spacing:1px;
+}
+
+
+/* ==========================================================
+   DIVISIONS
+========================================================== */
+
+.divisions{
+  display:grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0,1fr));
+
+  gap:14px;
+}
+
+
+/* ==========================================================
+   DIVISION CARD
+========================================================== */
+
+.division{
+  background:var(--bg-panel-2);
+
+  border:1px solid var(--steel-dim);
+
+  transition:
+    border-color .2s,
+    background .2s,
+    transform .2s;
+}
+
+.division:hover{
+  border-color:var(--steel);
+
+  background:#171e27;
+}
+
+
+/* ==========================================================
+   DIVISION HEADER
+========================================================== */
+
+.division-header{
+  width:100%;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:15px;
+
+  padding:18px;
+
+  border:0;
+
+  background:transparent;
+
+  color:var(--text);
+
+  font-family:var(--font-mono);
+
+  text-align:left;
+
+  cursor:pointer;
+}
+
+.division-header:hover{
+  background:rgba(74,111,165,0.04);
+}
+
+.division-icon{
+  width:42px;
+  height:42px;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  border:1px solid var(--gold-dim);
+
+  color:var(--gold);
+
+  background:rgba(201,162,39,0.04);
+
+  font-family:var(--font-display);
+
+  font-size:18px;
+
+  flex:0 0 auto;
+}
+
+.division-info{
+  flex:1;
+}
+
+.division-name{
+  font-family:var(--font-display);
+
+  font-size:16px;
+
+  letter-spacing:1.2px;
+
+  text-transform:uppercase;
+
+  color:var(--text);
+}
+
+.division-description{
+  margin-top:5px;
+
+  font-size:10.5px;
+
+  color:var(--text-dim);
+
+  line-height:1.5;
+}
+
+.division-count{
+  font-size:9px;
+
+  letter-spacing:1px;
+
+  padding:5px 8px;
+
+  border:1px solid var(--steel);
+
+  color:var(--steel);
+
+  white-space:nowrap;
+}
+
+.division-arrow{
+  color:var(--gold);
+
+  font-size:18px;
+
+  transition:
+    transform .25s ease;
+}
+
+.division.open .division-arrow{
+  transform:rotate(180deg);
+}
+
+
+/* ==========================================================
+   LEAD DIVISION
+========================================================== */
+
+.division-lead{
+  font-size:9px;
+
+  letter-spacing:1px;
+
+  color:var(--amber);
+
+  white-space:nowrap;
+
+  text-transform:uppercase;
+}
+
+
+/* ==========================================================
+   UNIT CONTAINER
+========================================================== */
+
+.units-wrapper{
+  display:grid;
+
+  grid-template-rows:0fr;
+
+  transition:
+    grid-template-rows .3s ease;
+}
+
+.division.open .units-wrapper{
+  grid-template-rows:1fr;
+}
+
+.units-inner{
+  overflow:hidden;
+}
+
+
+/* ==========================================================
+   UNITS
+========================================================== */
+
+.units{
+  padding:0 18px 18px;
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:8px;
+}
+
+.unit{
+  padding:12px;
+
+  background:var(--bg-dark);
+
+  border:1px solid var(--line);
+
+  transition:
+    border-color .15s,
+    background .15s;
+}
+
+.unit:hover{
+  border-color:var(--steel-dim);
+
+  background:#10171f;
+}
+
+.unit-name{
+  color:var(--gold);
+
+  font-family:var(--font-display);
+
+  font-size:12px;
+
+  letter-spacing:.8px;
+
+  text-transform:uppercase;
+}
+
+.unit-desc{
+  margin-top:5px;
+
+  font-size:10.5px;
+
+  line-height:1.55;
+
+  color:var(--text-dim);
+}
+
+
+/* ==========================================================
+   LEAD UNIT
+========================================================== */
+
+.unit-lead{
+  margin-top:8px;
+
+  font-size:9px;
+
+  letter-spacing:1px;
+
+  color:var(--amber);
+
+  text-transform:uppercase;
+}
+
+
+/* ==========================================================
+   LARGE DIVISIONS
+========================================================== */
+
+.division.large{
+  grid-column:1 / -1;
+}
+
+.division.large .units{
+  grid-template-columns:
+    repeat(3,minmax(0,1fr));
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+footer{
+  max-width:1100px;
+
+  margin:0 auto;
+
+  padding:25px 32px 0;
+
+  font-size:10.5px;
+
+  color:var(--text-dim);
+
+  letter-spacing:1px;
+
+  text-align:center;
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media(max-width:800px){
+
+  .divisions{
+    grid-template-columns:1fr;
+  }
+
+  .division.large{
+    grid-column:auto;
+  }
+
+  .division.large .units{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:700px){
+
+  header{
+    padding:20px;
+  }
+
+  main{
+    padding:25px 16px 0;
+  }
+
+  .brand-title{
+    font-size:19px;
+  }
+
+  .brand-sub{
+    font-size:9px;
+    letter-spacing:2px;
+  }
+
+  .header-actions{
+    width:100%;
+  }
+
+  .header-link{
+    flex:1;
+    text-align:center;
+  }
+
+  .status-line{
+    gap:12px;
+  }
+
+  .division-header{
+    padding:15px;
+  }
+
+  .division-description{
+    font-size:10px;
+  }
+
+  .units{
+    grid-template-columns:1fr;
+    padding:0 15px 15px;
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- ==========================================================
+     HEADER
+========================================================== -->
+
+<header>
+
+  <div class="header-inner">
+
+    <div class="badge-row">
+
+
+      <div class="badge-left">
+
+
+        <svg class="star"
+             viewBox="0 0 200 200"
+             xmlns="http://www.w3.org/2000/svg">
+
+          <defs>
+
+            <path
+              id="arc-top"
+              d="M 34 100 A 66 66 0 0 1 166 100"/>
+
+            <path
+              id="arc-bottom"
+              d="M 47 128 A 60 60 0 0 0 153 128"/>
+
+            <path
+              id="mini-star"
+              d="M0,-7 L1.76,-2.43 L6.66,-2.16 L2.85,0.93 L4.12,5.66 L0,3 L-4.12,5.66 L-2.85,0.93 L-6.66,-2.16 L-1.76,-2.43 Z"/>
+
+          </defs>
+
+
+          <path
+            d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
+            fill="none"
+            stroke="var(--gold)"
+            stroke-width="2.5"
+            stroke-linejoin="round"/>
+
+
+          <circle
+            cx="100"
+            cy="100"
+            r="78"
+            fill="#151b23"
+            stroke="var(--gold)"
+            stroke-width="2"/>
+
+
+          <circle
+            cx="100"
+            cy="100"
+            r="74"
+            fill="none"
+            stroke="var(--gold)"
+            stroke-width="1"/>
+
+
+          <circle
+            cx="100"
+            cy="100"
+            r="55"
+            fill="#0c1015"
+            stroke="var(--gold)"
+            stroke-width="1.5"/>
+
+
+          <text
+            font-family="Oswald, sans-serif"
+            font-size="16"
+            font-weight="700"
+            letter-spacing="2"
+            fill="var(--gold)">
+
+            <textPath
+              href="#arc-top"
+              startOffset="50%"
+              text-anchor="middle">
+
+              CHICAGO
+
+            </textPath>
+
+          </text>
+
+
+          <text
+            font-family="Oswald, sans-serif"
+            font-size="16"
+            font-weight="700"
+            letter-spacing="2"
+            fill="var(--gold)">
+
+            <textPath
+              href="#arc-bottom"
+              startOffset="50%"
+              text-anchor="middle">
+
+              POLICE
+
+            </textPath>
+
+          </text>
+
+
+          <use
+            href="#mini-star"
+            transform="translate(27,100) scale(1.1)"
+            fill="var(--gold)"/>
+
+
+          <use
+            href="#mini-star"
+            transform="translate(173,100) scale(1.1)"
+            fill="var(--gold)"/>
+
+
+          <use
+            href="#mini-star"
+            transform="translate(100,88) scale(2.4)"
+            fill="var(--gold)"
+            opacity="0.9"/>
+
+
+          <rect
+            x="64"
+            y="116"
+            width="72"
+            height="17"
+            rx="2"
+            fill="var(--gold)"/>
+
+
+          <text
+            x="100"
+            y="128"
+            font-family="Oswald, sans-serif"
+            font-size="9.5"
+            font-weight="700"
+            letter-spacing="0.5"
+            text-anchor="middle"
+            fill="#0c1015">
+
+            URBS IN HORTO
+
+          </text>
+
+        </svg>
+
+
+        <div>
+
+          <div class="brand-title">
+            Chicago Police Department
+          </div>
+
+          <div class="brand-sub">
+            Divisions & unités opérationnelles
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- NAVIGATION -->
+
+      <div class="header-actions">
+
+        <a
+          class="header-link"
+          href="index.html">
+
+          🗂 Templates
+
+        </a>
+
+
+        <a
+          class="header-link"
+          href="code.html">
+
+          📻 Guide radio
+
+        </a>
+
+
+        <a
+          class="header-link"
+          href="reglement.html">
+
+          ⚖ Règlement
+
+        </a>
+
+
+        <a
+          class="header-link current"
+          href="divisions.html">
+
+          🏛 Divisions
+
+        </a>
+
+
+        <a
+          class="header-link gold"
+          href="https://guidejuridiquesp.netlify.app/"
+          target="_blank"
+          rel="noopener">
+
+          📖 Guide juridique ↗
+
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- STATUS -->
+
+    <div class="status-line">
+
+      <span>
+
+        <span class="dot"></span>
+
+        Système opérationnel
+
+      </span>
+
+
+      <span>
+
+        DOCUMENT :
+        <b>CPD-DIV-001</b>
+
+      </span>
+
+
+      <span>
+
+        VERSION :
+        <b>1.0</b>
+
+      </span>
+
+
+      <span id="clock">
+        --/--/---- --:--
+      </span>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+
+<!-- ==========================================================
+     MAIN
+========================================================== -->
+
+<main>
+
+
+  <div class="page-intro">
+
+    <div class="page-title">
+      Divisions & Units
+    </div>
+
+    <div class="page-desc">
+      Organisation des différentes divisions et unités opérationnelles du Chicago Police Department.
+      Cliquez sur une division pour afficher les unités qui la composent.
+    </div>
+
+    <div class="page-count">
+      07 DIVISIONS — UNITÉS OPÉRATIONNELLES
+    </div>
+
+  </div>
+
+
+  <div
+    class="divisions"
+    id="divisions">
+  </div>
+
+
+</main>
+
+
+
+<!-- ==========================================================
+     FOOTER
+========================================================== -->
+
+<footer>
+
+  CPD INTERNAL SYSTEM — DIVISIONS & UNITÉS —
+  USAGE ROLEPLAY UNIQUEMENT — NE PAS DIFFUSER HORS SERVEUR
+
+</footer>
+
+
+
+<script>
+
+
+/* ==========================================================
+   DONNÉES
+========================================================== */
+
+const divisions = [
+
+  {
+    name:"Detective Bureau",
+
+    short:"DB",
+
+    lead:"78",
+
+    description:
+      "Bureau chargé des enquêtes criminelles et du traitement des affaires majeures.",
+
+    large:true,
+
+    units:[
+
+      {
+        name:"Violent Crimes Unit",
+        lead:"À définir",
+        desc:"Homicides, agressions graves et crimes violents."
+      },
+
+      {
+        name:"Financial Crimes Unit",
+        lead:"77",
+        desc:"Fraudes, escroqueries, blanchiment et crimes financiers."
+      },
+
+      {
+        name:"Gang Enforcement Unit",
+        lead:"À définir",
+        desc:"Enquêtes liées aux gangs et à la criminalité organisée."
+      },
+
+      {
+        name:"Narcotics Unit",
+        lead:"À définir",
+        desc:"Trafic de stupéfiants et réseaux de distribution."
+      },
+
+      {
+        name:"Major Case Unit",
+        lead:"À définir",
+        desc:"Affaires majeures nécessitant une enquête approfondie."
+      },
+
+      {
+        name:"Special Investigations Unit",
+        lead:"À définir",
+        desc:"Affaires sensibles et investigations spécialisées."
+      }
+
+    ]
+
+  },
+
+
+  {
+    name:"Patrol Division",
+
+    short:"PD",
+
+    lead:"À définir",
+
+    description:
+      "Division principale chargée de la présence policière et des interventions quotidiennes.",
+
+    units:[
+
+      {
+        name:"District Patrol",
+        lead:"À définir",
+        desc:"Patrouilles générales et interventions dans les districts."
+      },
+
+      {
+        name:"Community Policing Unit",
+        lead:"À définir",
+        desc:"Relations avec les citoyens et prévention."
+      },
+
+      {
+        name:"School Liaison Unit",
+        lead:"À définir",
+        desc:"Présence et sécurité dans les établissements scolaires."
+      },
+
+      {
+        name:"Field Training Unit",
+        lead:"À définir",
+        desc:"Accompagnement et formation des nouveaux agents sur le terrain."
+      }
+
+    ]
+
+  },
+
+
+  {
+    name:"Special Operations Division",
+
+    short:"SOD",
+
+    lead:"À définir",
+
+    description:
+      "Unités spécialisées mobilisées lors des situations à haut risque ou nécessitant des moyens particuliers.",
+
+    units:[
+
+      {
+        name:"SWAT / Tactical Unit",
+        lead:"À définir",
+        desc:"Interventions à haut risque, prises d'otages et suspects barricadés."
+      },
+
+      {
+        name:"K-9 Unit",
+        lead:"À définir",
+        desc:"Unités cynophiles spécialisées dans la recherche et l'intervention."
+      },
+
+      {
+        name:"Aviation Unit",
+        lead:"À définir",
+        desc:"Soutien aérien, surveillance et recherche."
+      },
+
+      {
+        name:"Marine Unit",
+        lead:"À définir",
+        desc:"Interventions et opérations sur les zones nautiques."
+      }
+
+    ]
+
+  },
+
+
+  {
+    name:"Traffic Division",
+
+    short:"TRF",
+
+    lead:"À définir",
+
+    description:
+      "Division spécialisée dans la circulation, les infractions routières et les accidents.",
+
+    units:[
+
+      {
+        name:"Traffic Enforcement Unit",
+        lead:"À définir",
+        desc:"Contrôle de la circulation et infractions routières."
+      },
+
+      {
+        name:"Highway Patrol",
+        lead:"À définir",
+        desc:"Surveillance et intervention sur les axes rapides."
+      },
+
+      {
+        name:"Collision Investigation Unit",
+        lead:"À définir",
+        desc:"Enquêtes sur les accidents graves et collisions."
+      }
+
+    ]
+
+  },
+
+
+  {
+    name:"Internal Affairs",
+
+    short:"IA",
+
+    lead:"À définir",
+
+    description:
+      "Unité chargée des enquêtes internes concernant les membres du département.",
+
+    units:[
+
+      {
+        name:"Internal Affairs Unit",
+        lead:"À définir",
+        desc:"Enquêtes concernant les comportements ou faits impliquant des agents."
+      },
+
+      {
+        name:"Professional Standards",
+        lead:"À définir",
+        desc:"Contrôle du respect des procédures et standards professionnels."
+      }
+
+    ]
+
+  },
+
+
+  {
+    name:"Training Division",
+
+    short:"TRN",
+
+    lead:"À définir",
+
+    description:
+      "Division responsable de la formation, de l'entraînement et du développement des agents.",
+
+    units:[
+
+      {
+        name:"Police Academy",
+        lead:"À définir",
+        desc:"Formation initiale des nouvelles recrues."
+      },
+
+      {
+        name:"Field Training Unit",
+        lead:"À définir",
+        desc:"Formation pratique et accompagnement sur le terrain."
+      },
+
+      {
+        name:"Firearms Training",
+        lead:"À définir",
+        desc:"Formation et qualification au maniement des armes."
+      },
+
+      {
+        name:"Defensive Tactics",
+        lead:"À définir",
+        desc:"Formation aux techniques d'intervention et de contrôle."
+      }
+
+    ]
+
+  },
+
+
+  {
+    name:"Communications Division",
+
+    short:"COM",
+
+    lead:"À définir",
+
+    description:
+      "Division chargée des communications opérationnelles et de la coordination des appels.",
+
+    units:[
+
+      {
+        name:"Emergency Dispatch",
+        lead:"À définir",
+        desc:"Réception et traitement des appels d'urgence."
+      },
+
+      {
+        name:"Police Communications",
+        lead:"À définir",
+        desc:"Gestion des communications radio des unités."
+      },
+
+      {
+        name:"CAD / Records",
+        lead:"À définir",
+        desc:"Gestion des appels, rapports et informations opérationnelles."
+      }
+
+    ]
+
+  }
+
+];
+
+
+
+/* ==========================================================
+   AFFICHAGE
+========================================================== */
+
+const container =
+  document.getElementById("divisions");
+
+
+divisions.forEach((division,index) => {
+
+  const card =
+    document.createElement("section");
+
+  card.className =
+    "division" +
+    (division.large ? " large" : "");
+
+
+  card.innerHTML = `
+
+    <button
+      class="division-header"
+      type="button">
+
+      <div class="division-icon">
+        ${division.short}
+      </div>
+
+      <div class="division-info">
+
+        <div class="division-name">
+          ${division.name}
+        </div>
+
+        <div class="division-description">
+          ${division.description}
+        </div>
+
+      </div>
+
+      <div class="division-lead">
+        LEAD : ${division.lead}
+      </div>
+
+      <div class="division-count">
+        ${division.units.length} UNITÉS
+      </div>
+
+      <div class="division-arrow">
+        ▼
+      </div>
+
+    </button>
+
+
+    <div class="units-wrapper">
+
+      <div class="units-inner">
+
+        <div class="units">
+
+          ${division.units.map(unit => `
+
+            <div class="unit">
+
+              <div class="unit-name">
+                ${unit.name}
+              </div>
+
+              <div class="unit-desc">
+                ${unit.desc}
+              </div>
+
+              <div class="unit-lead">
+                LEAD : ${unit.lead}
+              </div>
+
+            </div>
+
+          `).join("")}
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  const button =
+    card.querySelector(".division-header");
+
+
+  button.addEventListener("click", () => {
+
+    card.classList.toggle("open");
+
+  });
+
+
+  container.appendChild(card);
+
+});
+
+
+
+/* ==========================================================
+   HORLOGE
+========================================================== */
+
+function updateClock(){
+
+  const d =
+    new Date();
+
+
+  const pad =
+    n =>
+      String(n).padStart(2,"0");
+
+
+  document.getElementById("clock")
+    .textContent =
+      `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+}
+
+
+updateClock();
+
+
+setInterval(
+  updateClock,
+  15000
+);
+
+</script>
+
+
+</body>
+
+</html>
