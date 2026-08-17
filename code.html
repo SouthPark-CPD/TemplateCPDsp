@@ -1,441 +1,1788 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>CPD // Guide radio</title>
+
 <style>
+
   :root{
     --bg:#0b0f14;
     --bg-panel:#11161d;
     --bg-panel-2:#151b23;
+    --bg-dark:#0c1015;
     --line:#232b35;
     --steel:#4a6fa5;
     --steel-dim:#2c3d54;
     --gold:#c9a227;
+    --gold-dim:#725d16;
     --text:#dfe4e8;
     --text-dim:#7c8894;
     --amber:#e0a13a;
-    --red:#c0504a;
+    --red:#c94b4b;
     --green:#4caf6f;
-    --font-display:'Oswald', 'Arial Narrow', sans-serif;
-    --font-mono:'IBM Plex Mono', 'Consolas', monospace;
+
+    --font-display:'Oswald','Arial Narrow',sans-serif;
+    --font-mono:'IBM Plex Mono','Consolas',monospace;
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+
+
+  *{
+    box-sizing:border-box;
+  }
+
+
+  html{
+    scroll-behavior:smooth;
+  }
+
+
+  html,body{
+    margin:0;
+    padding:0;
+  }
+
+
   body{
     background:
-      radial-gradient(circle at 15% 0%, rgba(74,111,165,0.10), transparent 40%),
-      radial-gradient(circle at 100% 100%, rgba(201,162,39,0.06), transparent 45%),
+      radial-gradient(
+        circle at 15% 0%,
+        rgba(74,111,165,0.10),
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 100% 100%,
+        rgba(201,162,39,0.06),
+        transparent 45%
+      ),
       var(--bg);
+
     color:var(--text);
     font-family:var(--font-mono);
     min-height:100vh;
-    padding:0 0 60px 0;
+    padding-bottom:60px;
   }
+
+
   @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+
+  /* ==========================================================
+     HEADER
+  ========================================================== */
 
   header{
     position:relative;
+
     border-bottom:1px solid var(--line);
+
     padding:28px 32px 22px;
+
     overflow:hidden;
-    background:linear-gradient(180deg, rgba(74,111,165,0.06), transparent);
+
+    background:
+      linear-gradient(
+        180deg,
+        rgba(74,111,165,0.06),
+        transparent
+      );
   }
+
+
   header::before{
     content:"";
-    position:absolute; inset:0;
-    background-image:repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+
+    position:absolute;
+    inset:0;
+
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.015) 0px,
+        rgba(255,255,255,0.015) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+
     pointer-events:none;
   }
-  .badge-row{display:flex; align-items:center; justify-content:space-between; gap:18px; position:relative;}
-  .badge-left{display:flex; align-items:center; gap:18px;}
-  .star{width:52px; height:52px; flex:0 0 auto;}
-  .brand-title{
-    font-family:var(--font-display);
-    font-size:24px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    font-weight:600;
-    color:var(--text);
-    line-height:1.1;
+
+
+  .header-inner{
+    position:relative;
+
+    max-width:1100px;
+
+    margin:0 auto;
   }
-  .brand-sub{
-    font-size:11px;
-    letter-spacing:3px;
-    color:var(--steel);
-    text-transform:uppercase;
-    margin-top:4px;
-  }
-  .back-link{
-    font-family:var(--font-mono);
-    font-size:11.5px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    padding:10px 16px;
-    border:1px solid var(--steel);
-    color:var(--steel);
-    text-decoration:none;
-    white-space:nowrap;
-    transition:all .15s;
+
+
+.badge-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:nowrap;
+}
+
+.badge-left{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  flex:1;
+  min-width:0;
+}
+
+.header-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:nowrap;
+  flex-shrink:0;
+}
+
+  .star{
+    width:60px;
+    height:60px;
+
     flex:0 0 auto;
   }
-  .back-link:hover{background:var(--steel); color:#0b0f14;}
 
-  .search-row{
-    padding:20px 32px 0;
-  }
-  .search-box{
-    width:100%;
-    max-width:420px;
-    background:var(--bg-panel-2);
-    border:1px solid var(--steel-dim);
-    color:var(--text);
-    font-family:var(--font-mono);
-    font-size:13px;
-    padding:12px 16px;
-    letter-spacing:0.5px;
-  }
-  .search-box:focus{outline:none; border-color:var(--gold);}
-  .search-box::placeholder{color:var(--text-dim);}
 
-  main{padding:24px 32px 0;}
-
-  .cat-block{margin-bottom:32px;}
-  .cat-head{
-    display:flex; align-items:center; gap:12px;
-    margin-bottom:12px;
-    border-bottom:1px solid var(--line);
-    padding-bottom:10px;
-  }
-  .cat-title{
+  .brand-title{
     font-family:var(--font-display);
-    font-size:17px;
-    letter-spacing:1.5px;
+
+    font-size:25px;
+
+    letter-spacing:2px;
+
     text-transform:uppercase;
+
+    font-weight:600;
+
+    color:var(--text);
+
+    line-height:1.1;
+  }
+
+
+  .brand-sub{
+    font-size:11px;
+
+    letter-spacing:3px;
+
+    color:var(--steel);
+
+    text-transform:uppercase;
+
+    margin-top:4px;
+  }
+
+
+  /* ==========================================================
+     HEADER NAVIGATION
+  ========================================================== */
+
+  .header-actions{
+    display:flex;
+
+    gap:8px;
+
+    flex-wrap:wrap;
+  }
+
+
+  .header-link{
+    font-family:var(--font-mono);
+
+    font-size:11.5px;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+
+    padding:10px 16px;
+
+    border:1px solid var(--steel);
+
+    background:transparent;
+
+    color:var(--steel);
+
+    text-decoration:none;
+
+    white-space:nowrap;
+
+    transition:all .15s;
+
+    cursor:pointer;
+  }
+
+
+  .header-link:hover{
+    background:var(--steel);
+
+    color:#0b0f14;
+  }
+
+
+  .header-link.gold{
+    border-color:var(--gold);
+
     color:var(--gold);
   }
-  .cat-count{
-    font-size:10.5px;
-    color:var(--text-dim);
-    letter-spacing:1px;
-    margin-left:auto;
+
+
+  .header-link.gold:hover{
+    background:var(--gold);
+
+    color:#0b0f14;
   }
+
+
+  .header-link.current{
+    background:var(--gold);
+
+    color:#0b0f14;
+
+    border-color:var(--gold);
+
+    pointer-events:none;
+
+    font-weight:600;
+  }
+
+
+  /* ==========================================================
+     STATUS
+  ========================================================== */
+
+  .status-line{
+    margin-top:16px;
+
+    font-size:11px;
+
+    color:var(--text-dim);
+
+    letter-spacing:1px;
+
+    display:flex;
+
+    gap:22px;
+
+    flex-wrap:wrap;
+  }
+
+
+  .status-line span b{
+    color:var(--amber);
+
+    font-weight:600;
+  }
+
+
+  .dot{
+    width:6px;
+    height:6px;
+
+    border-radius:50%;
+
+    background:var(--green);
+
+    display:inline-block;
+
+    margin-right:6px;
+
+    box-shadow:0 0 6px var(--green);
+  }
+
+
+  /* ==========================================================
+     SEARCH
+  ========================================================== */
+
+  .search-container{
+    position:relative;
+
+    max-width:1100px;
+
+    margin:24px auto 0;
+
+    padding:0 32px;
+  }
+
+
+  .search-box{
+    width:100%;
+
+    background:var(--bg-dark);
+
+    border:1px solid var(--steel-dim);
+
+    color:var(--text);
+
+    padding:15px 18px;
+
+    font-family:var(--font-mono);
+
+    font-size:13px;
+
+    outline:none;
+
+    transition:border-color .15s;
+  }
+
+
+  .search-box:focus{
+    border-color:var(--gold);
+  }
+
+
+  .search-box::placeholder{
+    color:var(--text-dim);
+  }
+
+
+  /* ==========================================================
+     NAVIGATION CATÉGORIES
+  ========================================================== */
+
+  nav{
+    max-width:1100px;
+
+    margin:22px auto 0;
+
+    padding:0 32px;
+
+    display:flex;
+
+    gap:2px;
+
+    flex-wrap:wrap;
+  }
+
+
+  nav button{
+    font-family:var(--font-display);
+
+    background:var(--bg-panel);
+
+    border:1px solid var(--line);
+
+    color:var(--text-dim);
+
+    padding:12px 17px;
+
+    font-size:12px;
+
+    letter-spacing:1.2px;
+
+    text-transform:uppercase;
+
+    cursor:pointer;
+
+    transition:all .15s;
+  }
+
+
+  nav button:hover{
+    color:var(--text);
+
+    border-color:var(--steel-dim);
+  }
+
+
+  nav button.active{
+    color:var(--gold);
+
+    background:var(--bg-panel-2);
+
+    border-color:var(--steel-dim);
+  }
+
+
+  /* ==========================================================
+     MAIN
+  ========================================================== */
+
+  main{
+    max-width:1100px;
+
+    margin:0 auto;
+
+    padding:0 32px;
+  }
+
+
+  .panel{
+    background:var(--bg-panel-2);
+
+    border:1px solid var(--steel-dim);
+
+    border-top:2px solid var(--gold);
+
+    margin-top:0;
+  }
+
+
+  .panel-head{
+    padding:28px;
+
+    border-bottom:1px solid var(--line);
+  }
+
+
+  .panel-title{
+    font-family:var(--font-display);
+
+    font-size:22px;
+
+    letter-spacing:1.5px;
+
+    text-transform:uppercase;
+
+    color:var(--text);
+  }
+
+
+  .panel-desc{
+    font-size:12px;
+
+    color:var(--text-dim);
+
+    margin-top:7px;
+
+    line-height:1.6;
+  }
+
+
+  .article-count{
+    margin-top:12px;
+
+    font-size:10px;
+
+    color:var(--amber);
+
+    letter-spacing:1px;
+  }
+
+
+  /* ==========================================================
+     CODES RADIO
+  ========================================================== */
+
+  .codes{
+    padding:12px 28px 28px;
+  }
+
+
+  .cat-block{
+    border:1px solid var(--line);
+
+    background:var(--bg-dark);
+
+    margin-top:14px;
+
+    transition:
+      border-color .15s,
+      background .15s;
+  }
+
+
+  .cat-block:hover{
+    border-color:var(--steel-dim);
+
+    background:#0e141b;
+  }
+
+
+  .cat-head{
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:15px 18px;
+
+    border-bottom:1px solid var(--line);
+
+    background:rgba(74,111,165,0.04);
+  }
+
+
+  .cat-title{
+    flex:1;
+
+    font-family:var(--font-display);
+
+    font-size:15px;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+
+    color:var(--text);
+  }
+
+
+  .cat-count{
+    font-size:9px;
+
+    letter-spacing:1px;
+
+    padding:5px 8px;
+
+    border:1px solid var(--steel);
+
+    color:var(--steel);
+
+    white-space:nowrap;
+  }
+
 
   .code-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
-    gap:10px;
+
+    grid-template-columns:
+      repeat(
+        auto-fill,
+        minmax(300px,1fr)
+      );
+
+    gap:0;
   }
+
+
   .code-card{
-    background:var(--bg-panel-2);
-    border:1px solid var(--line);
-    border-left:3px solid var(--steel);
-    padding:12px 14px;
     display:flex;
-    gap:12px;
+
     align-items:flex-start;
-    transition:border-color .15s, background .15s;
+
+    gap:15px;
+
+    padding:15px 18px;
+
+    border-bottom:1px solid var(--line);
+
+    border-right:1px solid var(--line);
+
+    min-height:70px;
+
+    transition:
+      background .15s,
+      border-color .15s;
   }
-  .code-card:hover{border-left-color:var(--gold); background:#171e27;}
-  .code-card.urgent{border-left-color:var(--red);}
+
+
+  .code-card:hover{
+    background:#111820;
+  }
+
+
   .code-tag{
     font-family:var(--font-display);
+
     font-size:15px;
+
     font-weight:700;
+
     color:var(--gold);
+
+    min-width:75px;
+
     white-space:nowrap;
-    min-width:52px;
+
+    letter-spacing:.5px;
   }
-  .code-card.urgent .code-tag{color:var(--red);}
+
+
   .code-desc{
-    font-size:12.5px;
-    line-height:1.5;
+    font-size:11.5px;
+
+    line-height:1.65;
+
     color:var(--text);
   }
-  .code-card.hidden{display:none;}
 
-  footer{
-    padding:20px 32px 0;
-    font-size:10.5px;
-    color:var(--text-dim);
-    letter-spacing:1px;
-    text-align:center;
+
+  .code-card.urgent{
+    border-left:3px solid var(--red);
   }
+
+
+  .code-card.urgent .code-tag{
+    color:var(--red);
+  }
+
+
+  /* ==========================================================
+     NOTICE
+  ========================================================== */
+
+  .notice{
+    border-left:3px solid var(--gold);
+
+    background:rgba(201,162,39,0.05);
+
+    padding:14px 16px;
+
+    margin:15px 0;
+
+    font-size:12px;
+
+    line-height:1.6;
+  }
+
+
+  .notice-title{
+    color:var(--gold);
+
+    font-family:var(--font-display);
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+
+    font-size:12px;
+
+    margin-bottom:5px;
+  }
+
+
+  /* ==========================================================
+     EMPTY
+  ========================================================== */
 
   .empty-msg{
     display:none;
+
+    border-left:3px solid var(--amber);
+
+    background:rgba(224,161,58,0.05);
+
+    padding:16px;
+
+    margin-top:14px;
+
     color:var(--text-dim);
-    font-size:13px;
-    padding:20px 0;
+
+    font-size:12px;
   }
 
-  @media (max-width:640px){
-    header{padding:20px;}
-    main{padding:20px 16px 0;}
-    .search-row{padding:20px 16px 0;}
-    .brand-title{font-size:19px;}
-    .code-grid{grid-template-columns:1fr;}
+
+  /* ==========================================================
+     FOOTER
+  ========================================================== */
+
+  footer{
+    max-width:1100px;
+
+    margin:0 auto;
+
+    padding:20px 32px 0;
+
+    font-size:10.5px;
+
+    color:var(--text-dim);
+
+    letter-spacing:1px;
+
+    text-align:center;
   }
+
+
+  /* ==========================================================
+     MOBILE
+  ========================================================== */
+
+  @media(max-width:700px){
+
+    header{
+      padding:20px;
+    }
+
+
+    main{
+      padding:0 16px;
+    }
+
+
+    nav{
+      padding:0 16px;
+    }
+
+
+    .search-container{
+      padding:0 16px;
+    }
+
+
+    .brand-title{
+      font-size:19px;
+    }
+
+
+    .brand-sub{
+      font-size:9px;
+
+      letter-spacing:2px;
+    }
+
+
+    .header-actions{
+      width:100%;
+    }
+
+
+    .header-link{
+      flex:1;
+
+      text-align:center;
+    }
+
+
+    .panel-head{
+      padding:20px;
+    }
+
+
+    .codes{
+      padding:10px 15px 20px;
+    }
+
+
+    .cat-head{
+      align-items:flex-start;
+
+      flex-wrap:wrap;
+    }
+
+
+    .cat-count{
+      order:3;
+
+      width:100%;
+
+      text-align:center;
+    }
+
+
+    .code-grid{
+      grid-template-columns:1fr;
+    }
+
+
+    .code-card{
+      border-right:none;
+    }
+
+
+    .code-tag{
+      min-width:65px;
+    }
+
+
+    .code-desc{
+      font-size:11px;
+    }
+
+  }
+
 </style>
+
 </head>
+
+
 <body>
 
+
+<!-- ==========================================================
+     HEADER
+========================================================== -->
+
 <header>
-  <div class="badge-row">
-    <div class="badge-left">
-      <svg class="star" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <path id="arc-top2" d="M 34 100 A 66 66 0 0 1 166 100" />
-          <path id="arc-bottom2" d="M 47 128 A 60 60 0 0 0 153 128" />
-          <path id="mini-star2" d="M0,-7 L1.76,-2.43 L6.66,-2.16 L2.85,0.93 L4.12,5.66 L0,3 L-4.12,5.66 L-2.85,0.93 L-6.66,-2.16 L-1.76,-2.43 Z" />
-        </defs>
-        <path d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
-          fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linejoin="round"/>
-        <circle cx="100" cy="100" r="78" fill="#151b23" stroke="var(--gold)" stroke-width="2"/>
-        <circle cx="100" cy="100" r="74" fill="none" stroke="var(--gold)" stroke-width="1"/>
-        <circle cx="100" cy="100" r="55" fill="#0c1015" stroke="var(--gold)" stroke-width="1.5"/>
-        <text font-family="Oswald, sans-serif" font-size="16" font-weight="700" letter-spacing="2" fill="var(--gold)">
-          <textPath href="#arc-top2" startOffset="50%" text-anchor="middle">CHICAGO</textPath>
-        </text>
-        <text font-family="Oswald, sans-serif" font-size="16" font-weight="700" letter-spacing="2" fill="var(--gold)">
-          <textPath href="#arc-bottom2" startOffset="50%" text-anchor="middle">POLICE</textPath>
-        </text>
-        <use href="#mini-star2" transform="translate(27,100) scale(1.1)" fill="var(--gold)"/>
-        <use href="#mini-star2" transform="translate(173,100) scale(1.1)" fill="var(--gold)"/>
-        <use href="#mini-star2" transform="translate(100,88) scale(2.4)" fill="var(--gold)" opacity="0.9"/>
-        <rect x="64" y="116" width="72" height="17" rx="2" fill="var(--gold)"/>
-        <text x="100" y="128" font-family="Oswald, sans-serif" font-size="9.5" font-weight="700" letter-spacing="0.5" text-anchor="middle" fill="#0c1015">URBS IN HORTO</text>
-      </svg>
-      <div>
-        <div class="brand-title">Guide radio — CPD</div>
-        <div class="brand-sub">Codes 10 &amp; procédures de communication</div>
+
+  <div class="header-inner">
+
+    <div class="badge-row">
+
+      <div class="badge-left">
+
+        <svg class="star"
+             viewBox="0 0 200 200"
+             xmlns="http://www.w3.org/2000/svg">
+
+          <defs>
+
+            <path
+              id="arc-top"
+              d="M 34 100 A 66 66 0 0 1 166 100"/>
+
+            <path
+              id="arc-bottom"
+              d="M 47 128 A 60 60 0 0 0 153 128"/>
+
+            <path
+              id="mini-star"
+              d="M0,-7 L1.76,-2.43 L6.66,-2.16 L2.85,0.93 L4.12,5.66 L0,3 L-4.12,5.66 L-2.85,0.93 L-6.66,-2.16 L-1.76,-2.43 Z"/>
+
+          </defs>
+
+
+          <path
+            d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
+            fill="none"
+            stroke="var(--gold)"
+            stroke-width="2.5"
+            stroke-linejoin="round"/>
+
+
+          <circle
+            cx="100"
+            cy="100"
+            r="78"
+            fill="#151b23"
+            stroke="var(--gold)"
+            stroke-width="2"/>
+
+
+          <circle
+            cx="100"
+            cy="100"
+            r="74"
+            fill="none"
+            stroke="var(--gold)"
+            stroke-width="1"/>
+
+
+          <circle
+            cx="100"
+            cy="100"
+            r="55"
+            fill="#0c1015"
+            stroke="var(--gold)"
+            stroke-width="1.5"/>
+
+
+          <text
+            font-family="Oswald, sans-serif"
+            font-size="16"
+            font-weight="700"
+            letter-spacing="2"
+            fill="var(--gold)">
+
+            <textPath
+              href="#arc-top"
+              startOffset="50%"
+              text-anchor="middle">
+
+              CHICAGO
+
+            </textPath>
+
+          </text>
+
+
+          <text
+            font-family="Oswald, sans-serif"
+            font-size="16"
+            font-weight="700"
+            letter-spacing="2"
+            fill="var(--gold)">
+
+            <textPath
+              href="#arc-bottom"
+              startOffset="50%"
+              text-anchor="middle">
+
+              POLICE
+
+            </textPath>
+
+          </text>
+
+
+          <use
+            href="#mini-star"
+            transform="translate(27,100) scale(1.1)"
+            fill="var(--gold)"/>
+
+
+          <use
+            href="#mini-star"
+            transform="translate(173,100) scale(1.1)"
+            fill="var(--gold)"/>
+
+
+          <use
+            href="#mini-star"
+            transform="translate(100,88) scale(2.4)"
+            fill="var(--gold)"
+            opacity="0.9"/>
+
+
+          <rect
+            x="64"
+            y="116"
+            width="72"
+            height="17"
+            rx="2"
+            fill="var(--gold)"/>
+
+
+          <text
+            x="100"
+            y="128"
+            font-family="Oswald, sans-serif"
+            font-size="9.5"
+            font-weight="700"
+            letter-spacing="0.5"
+            text-anchor="middle"
+            fill="#0c1015">
+
+            URBS IN HORTO
+
+          </text>
+
+        </svg>
+
+
+        <div>
+
+          <div class="brand-title">
+            Chicago Police Department
+          </div>
+
+          <div class="brand-sub">
+            Guide radio — Codes & procédures de communication
+          </div>
+
+        </div>
+
       </div>
+
+
+      <!-- NAVIGATION PRINCIPALE -->
+
+      <div class="header-actions">
+
+        <a
+          class="header-link"
+          href="index.html">
+
+          🗂 Templates
+
+        </a>
+
+
+        <a
+          class="header-link current"
+          href="code.html">
+
+          📻 Guide radio
+
+        </a>
+
+
+        <a
+          class="header-link"
+          href="reglement.html">
+
+          ⚖ Règlement
+
+        </a>
+
+
+        <a
+          class="header-link gold"
+          href="https://guidejuridiquesp.netlify.app/"
+          target="_blank"
+          rel="noopener">
+
+          📖 Guide juridique ↗
+
+        </a>
+
+      </div>
+
     </div>
-    <a class="back-link" href="index.html">← Retour templates</a>
-<a class="guide-link" href="reglement.html">⚖️ Règlement intérieur</a>
-<a class="guide-link" href="https://guidejuridiquesp.netlify.app/" target="_blank" rel="noopener">📖 Guide juridique</a>
+
+
+    <!-- STATUS -->
+
+    <div class="status-line">
+
+      <span>
+
+        <span class="dot"></span>
+
+        Système opérationnel
+
+      </span>
+
+
+      <span>
+
+        DOCUMENT :
+        <b>CPD-RAD-001</b>
+
+      </span>
+
+
+      <span>
+
+        VERSION :
+        <b>1.0</b>
+
+      </span>
+
+
+      <span id="clock">
+        --/--/---- --:--
+      </span>
+
+    </div>
+
   </div>
+
 </header>
 
-<div class="search-row">
-  <input type="text" class="search-box" id="search" placeholder="Rechercher un code ou un mot-clé (ex: 10-4, poursuite, blessé...)">
+
+
+<!-- ==========================================================
+     RECHERCHE
+========================================================== -->
+
+<div class="search-container">
+
+  <input
+    type="text"
+    class="search-box"
+    id="search"
+    placeholder="⌕ Rechercher un code ou un mot-clé : 10-4, poursuite, blessé..."
+    autocomplete="off">
+
 </div>
 
-<main id="content"></main>
 
-<div class="empty-msg" id="empty-msg">Aucun code ne correspond à ta recherche.</div>
 
-<footer>CPD INTERNAL SYSTEM — USAGE ROLEPLAY UNIQUEMENT — NE PAS DIFFUSER HORS SERVEUR</footer>
+<!-- ==========================================================
+     CATÉGORIES
+========================================================== -->
+
+<nav id="categories"></nav>
+
+
+
+<!-- ==========================================================
+     MAIN
+========================================================== -->
+
+<main>
+
+  <div class="panel">
+
+
+    <div class="panel-head">
+
+      <div
+        class="panel-title"
+        id="panel-title">
+
+        Codes radio
+
+      </div>
+
+
+      <div
+        class="panel-desc"
+        id="panel-desc">
+
+        Référentiel des codes radio, codes de priorité, codes criminels et formats de communication opérationnelle du CPD.
+
+      </div>
+
+
+      <div
+        class="article-count"
+        id="article-count">
+
+        00 CODES
+
+      </div>
+
+    </div>
+
+
+
+    <div
+      class="codes"
+      id="content">
+
+    </div>
+
+
+    <div
+      class="empty-msg"
+      id="empty-msg">
+
+      Aucun code ne correspond à votre recherche.
+
+    </div>
+
+
+  </div>
+
+</main>
+
+
+
+<!-- ==========================================================
+     FOOTER
+========================================================== -->
+
+<footer>
+
+  CPD INTERNAL SYSTEM — GUIDE RADIO OPÉRATIONNEL —
+  USAGE ROLEPLAY UNIQUEMENT — NE PAS DIFFUSER HORS SERVEUR
+
+</footer>
+
+
 
 <script>
+
+
+/* ==========================================================
+   DONNÉES
+========================================================== */
+
 const categories = [
+
   {
-    title: "Statuts & accusés de réception",
-    codes: [
-      ["10-1", "Mauvaise réception radio / Radio défectueuse"],
-      ["10-2", "Signal clair, bonne réception"],
-      ["10-3", "Fin de transmission / silence radio"],
-      ["10-4", "Bien reçu / OK"],
-      ["10-5", "Relayer le message"],
-      ["10-6", "Occupé / attendre avant de poursuivre sauf urgence"],
-      ["10-7", "Hors service temporaire / indisponible pour appel"],
-      ["10-8", "En service / disponible pour appel"],
-      ["10-9", "Répéter le dernier message"],
-      ["10-10", "Fin de service"],
-      ["10-22", "Annuler ou ignorer"],
-      ["10-23", "Standby / attente"],
-      ["10-98", "Assignation terminée / fin du 10-97 / disponible pour appel"],
-      ["10-99", "Officier en danger, a besoin d'aide en urgence (similaire Code 99)"],
+    id:"statuts",
+    label:"Statuts",
+    desc:"Codes utilisés pour indiquer le statut d'une unité et les accusés de réception.",
+
+    codes:[
+
+      ["10-1","Mauvaise réception radio / Radio défectueuse"],
+      ["10-2","Signal clair, bonne réception"],
+      ["10-3","Fin de transmission / silence radio"],
+      ["10-4","Bien reçu / OK"],
+      ["10-5","Relayer le message"],
+      ["10-6","Occupé / attendre avant de poursuivre sauf urgence"],
+      ["10-7","Hors service temporaire / indisponible pour appel"],
+      ["10-8","En service / disponible pour appel"],
+      ["10-9","Répéter le dernier message"],
+      ["10-10","Fin de service"],
+      ["10-22","Annuler ou ignorer"],
+      ["10-23","Standby / attente"],
+      ["10-98","Assignation terminée / fin du 10-97 / disponible pour appel"],
+      ["10-99","Officier en danger, a besoin d'aide en urgence (similaire Code 99)"]
+
     ]
   },
+
+
   {
-    title: "Communication & renseignements",
-    codes: [
-      ["10-12", "Présence de visiteurs et peuvent entendre la radio"],
-      ["10-13", "Veut connaître la météo ou les conditions routières"],
-      ["10-14", "Écoute ou convoi"],
-      ["10-20", "Votre localisation"],
-      ["10-24", "Demande une transmission de voiture à voiture (Dispatch présent)"],
-      ["10-25", "Sujet recherché"],
-      ["10-28", "Vérification immatriculation"],
-      ["10-29", "Vérification mandats / dossier criminel"],
-      ["10-35", "Demande de renfort sur position de l'officier (préciser rue, etc.)"],
+    id:"communication",
+    label:"Communication",
+    desc:"Codes utilisés pour les renseignements et les communications entre unités.",
+
+    codes:[
+
+      ["10-12","Présence de visiteurs et peuvent entendre la radio"],
+      ["10-13","Veut connaître la météo ou les conditions routières"],
+      ["10-14","Écoute ou convoi"],
+      ["10-20","Votre localisation"],
+      ["10-24","Demande une transmission de voiture à voiture (Dispatch présent)"],
+      ["10-25","Sujet recherché"],
+      ["10-28","Vérification immatriculation"],
+      ["10-29","Vérification mandats / dossier criminel"],
+      ["10-35","Demande de renfort sur position de l'officier (préciser rue, etc.)"]
+
     ]
   },
+
+
   {
-    title: "Déplacements & interventions",
-    codes: [
-      ["10-17", "Ajout de carburant"],
-      ["10-18", "En route vers... (préciser la localisation)"],
-      ["10-19", "Retour au commissariat"],
-      ["10-21", "Contactez-moi par téléphone"],
-      ["10-23", "Standby / attente"],
-      ["10-30", "Danger / précaution supplémentaire"],
-      ["10-36", "Heure exacte"],
-      ["10-37", "Cambriolage en cours"],
-      ["10-38", "Contrôle routier / Traffic Stop"],
-      ["10-40", "Accident (caractériser par défaut, préciser si blessure corpo)"],
-      ["10-50", "Demande dépanneuse / Tow Truck"],
-      ["10-51", "Demande ambulance / Paramedics"],
-      ["10-56", "Refus d'obtempérer"],
-      ["10-57", "Délit de fuite"],
-      ["10-59", "Vol de véhicule"],
+    id:"interventions",
+    label:"Interventions",
+    desc:"Codes relatifs aux déplacements, interventions et événements sur le terrain.",
+
+    codes:[
+
+      ["10-17","Ajout de carburant"],
+      ["10-18","En route vers... (préciser la localisation)"],
+      ["10-19","Retour au commissariat"],
+      ["10-21","Contactez-moi par téléphone"],
+      ["10-23","Standby / attente"],
+      ["10-30","Danger / précaution supplémentaire"],
+      ["10-36","Heure exacte"],
+      ["10-37","Cambriolage en cours"],
+      ["10-38","Contrôle routier / Traffic Stop"],
+      ["10-40","Accident (caractériser par défaut, préciser si blessure corpo)"],
+      ["10-50","Demande dépanneuse / Tow Truck"],
+      ["10-51","Demande ambulance / Paramedics"],
+      ["10-56","Refus d'obtempérer"],
+      ["10-57","Délit de fuite"],
+      ["10-59","Vol de véhicule"]
+
     ]
   },
+
+
   {
-    title: "Situations criminelles",
-    codes: [
-      ["10-70", "Vente de drogue"],
-      ["10-91", "Braquage de banque"],
-      ["10-97", "Arrivé sur scène (couramment remplacé par le code 6)"],
+    id:"criminel",
+    label:"Situations criminelles",
+    desc:"Codes utilisés pour signaler différentes situations criminelles.",
+
+    codes:[
+
+      ["10-70","Vente de drogue"],
+      ["10-91","Braquage de banque"],
+      ["10-97","Arrivé sur scène (couramment remplacé par le Code 6)"]
+
     ]
   },
+
+
   {
-    title: "Codes de priorité d'intervention",
-    codes: [
-      ["Code 1", "Répondez à votre radio"],
-      ["Code 2", "Prioritaire – répondre sans sirène"],
-      ["Code 3", "Urgent – répondre avec lumières et sirène"],
-      ["Code 4", "Aucune autre assistance nécessaire, situation stable"],
-      ["Code 4-Adam", "Idem, mais suspect toujours en fuite, les unités sont mobilisées"],
-      ["Code 5", "En surveillance, autres unités doivent éviter le lieu"],
-      ["Code 6", "Arrivé sur scène ou déjà occupé en intervention / investigation"],
-      ["Code 6-Adam", "Arrivé, peut avoir besoin de l'assistance d'unités proches"],
-      ["Code 6-Charles", "Idem, suspect dangereux (mandat), attente confirmation assistance"],
-      ["Code 7", "Pause repas (requête, renseignement du lieu)"],
-      ["Code 20", "Notifiez les médias ou soyez avisé que les médias sont sur les lieux"],
-      ["Code 37", "Véhicule rapporté volé"],
-      ["Code 99", "Officier en danger, a besoin d'aide en urgence (identique 11-99)"],
-      ["Code 100", "Unités en position pour intercepter suspect en fuite"],
-      ["Code Robert", "Requête pour déploiement fusil / carabine sur scène"],
-      ["Code Sam", "Requête pour déploiement d'un Beanbag PG"],
+    id:"priorites",
+    label:"Priorités",
+    desc:"Codes permettant de définir le niveau de priorité d'une intervention.",
+
+    urgent:true,
+
+    codes:[
+
+      ["Code 1","Répondez à votre radio"],
+      ["Code 2","Prioritaire – répondre sans sirène"],
+      ["Code 3","Urgent – répondre avec lumières et sirène"],
+      ["Code 4","Aucune autre assistance nécessaire, situation stable"],
+      ["Code 4-Adam","Idem, mais suspect toujours en fuite, les unités sont mobilisées"],
+      ["Code 5","En surveillance, autres unités doivent éviter le lieu"],
+      ["Code 6","Arrivé sur scène ou déjà occupé en intervention / investigation"],
+      ["Code 6-Adam","Arrivé, peut avoir besoin de l'assistance d'unités proches"],
+      ["Code 6-Charles","Idem, suspect dangereux (mandat), attente confirmation assistance"],
+      ["Code 7","Pause repas (requête, renseignement du lieu)"],
+      ["Code 20","Notifiez les médias ou soyez avisé que les médias sont sur les lieux"],
+      ["Code 37","Véhicule rapporté volé"],
+      ["Code 99","Officier en danger, a besoin d'aide en urgence (identique 11-99)"],
+      ["Code 100","Unités en position pour intercepter suspect en fuite"],
+      ["Code Robert","Requête pour déploiement fusil / carabine sur scène"],
+      ["Code Sam","Requête pour déploiement d'un Beanbag PG"]
+
     ]
   },
+
+
   {
-    title: "Codes criminels",
-    codes: [
-      ["187", "Homicide"],
-      ["207", "Kidnapping"],
-      ["211", "Braquage de magasin"],
-      ["212", "Braquage Banque"],
-      ["240", "Agression"],
-      ["374", "Plongée illégale"],
-      ["415", "Trouble à l'ordre public"],
-      ["417", "Individu armé"],
-      ["459", "Cambriolage"],
-      ["487", "Vol de véhicule"],
-      ["502", "Conduite sous influence"],
-      ["998", "Officier Involved Shooting"],
-      ["999", "Identique Code-99"],
+    id:"codes-criminels",
+    label:"Codes criminels",
+    desc:"Référentiel des principaux codes criminels utilisés par les unités.",
+
+    codes:[
+
+      ["187","Homicide"],
+      ["207","Kidnapping"],
+      ["211","Braquage de magasin"],
+      ["212","Braquage Banque"],
+      ["240","Agression"],
+      ["374","Plongée illégale"],
+      ["415","Trouble à l'ordre public"],
+      ["417","Individu armé"],
+      ["459","Cambriolage"],
+      ["487","Vol de véhicule"],
+      ["502","Conduite sous influence"],
+      ["998","Officier Involved Shooting"],
+      ["999","Identique Code-99"]
+
     ]
   },
+
+
   {
-    title: "Numéro d'unité",
-    codes: [
-      ["Format", "Un chiffre + une lettre + un second chiffre, dans cet ordre. Le premier chiffre correspond à la Division ou au District de l'unité, la lettre à son type opérationnel, et le second chiffre à sa position parmi les autres unités du même secteur."],
-      ["35", "Autoroute Freeway (totalité)"],
-      ["17", "Los Santos [SUD]"],
-      ["18", "Los Santos [NORD]"],
-      ["16", "Secteur superviseur [NORD] et [SUD]"],
+    id:"unites",
+    label:"Unités",
+    desc:"Formats et numérotation des unités du Chicago Police Department.",
+
+    codes:[
+
+      [
+        "Format",
+        "Un chiffre + une lettre + un second chiffre, dans cet ordre. Le premier chiffre correspond à la Division ou au District de l'unité, la lettre à son type opérationnel, et le second chiffre à sa position parmi les autres unités du même secteur."
+      ],
+
+      ["35","Autoroute Freeway (totalité)"],
+      ["17","Los Santos [SUD]"],
+      ["18","Los Santos [NORD]"],
+      ["16","Secteur superviseur [NORD] et [SUD]"]
+
     ]
   },
+
+
   {
-    title: "Types d'unités",
-    codes: [
-      ["A", "Deux Agents en patrouille véhiculée (\"Adam\")"],
-      ["Air", "Aéronef (\"Air Unit\")"],
-      ["B", "Unité Bateau (\"Bravo\")"],
-      ["E", "Traffic Division (\"Edward\")"],
-      ["F3", "Foot Beat (Foot Patrol – Patrouille à pied)"],
-      ["K-9", "Patrouille avec un officier canin"],
-      ["K", "Gang and Narcotics Division, Gang Section (\"King\")"],
-      ["L", "Un Agent en patrouille véhiculée (\"Lincoln\"), aussi utilisé par les superviseurs"],
-      ["M", "Motorcycle Unit (\"Mary\")"],
-      ["C", "Cycle Unit"],
-      ["O", "Événement spécial ou unité non-traditionnel (\"Queen\")"],
-      ["SLO", "Senior Logistic Officer (SLO – SLO Lincoln) (SAM – SLO Adam)"],
-      ["S", "Sierra, Investigation Division"],
-      ["N", "Narcotics (\"Nora\")"],
-      ["W", "Detective ID (\"William\")"],
-      ["Y", "Gang and Narcotics Division, Narcotics Section (\"Young\")"],
+    id:"types",
+    label:"Types d'unités",
+    desc:"Correspondance entre les indicatifs radio et les types d'unités.",
+
+    codes:[
+
+      ["A","Deux Agents en patrouille véhiculée (\"Adam\")"],
+      ["Air","Aéronef (\"Air Unit\")"],
+      ["B","Unité Bateau (\"Bravo\")"],
+      ["E","Traffic Division (\"Edward\")"],
+      ["F3","Foot Beat (Foot Patrol – Patrouille à pied)"],
+      ["K-9","Patrouille avec un officier canin"],
+      ["K","Gang and Narcotics Division, Gang Section (\"King\")"],
+      ["L","Un Agent en patrouille véhiculée (\"Lincoln\"), aussi utilisé par les superviseurs"],
+      ["M","Motorcycle Unit (\"Mary\")"],
+      ["C","Cycle Unit"],
+      ["O","Événement spécial ou unité non-traditionnel (\"Queen\")"],
+      ["SLO","Senior Logistic Officer (SLO – SLO Lincoln) (SAM – SLO Adam)"],
+      ["S","Sierra, Investigation Division"],
+      ["N","Narcotics (\"Nora\")"],
+      ["W","Detective ID (\"William\")"],
+      ["Y","Gang and Narcotics Division, Narcotics Section (\"Young\")"]
+
     ]
   },
+
+
   {
-    title: "Alphabet phonétique",
-    codes: [
-      ["A", "Adam"],
-      ["B", "Boy"],
-      ["C", "Charles"],
-      ["D", "David"],
-      ["E", "Edward"],
-      ["F", "Frank"],
-      ["G", "George"],
-      ["H", "Henry"],
-      ["I", "Ida"],
-      ["J", "John"],
-      ["K", "King"],
-      ["L", "Lincoln"],
-      ["M", "Mary"],
-      ["N", "Nora"],
-      ["O", "Ocean"],
-      ["P", "Paul"],
-      ["Q", "Queen"],
-      ["R", "Robert"],
-      ["S", "Sam"],
-      ["T", "Tom"],
-      ["U", "Union"],
-      ["V", "Victor"],
-      ["W", "William"],
-      ["X", "X-Ray"],
-      ["Y", "Young"],
-      ["Z", "Zebra"],
+    id:"alphabet",
+    label:"Alphabet radio",
+    desc:"Alphabet phonétique utilisé pour épeler les informations à la radio.",
+
+    codes:[
+
+      ["A","Adam"],
+      ["B","Boy"],
+      ["C","Charles"],
+      ["D","David"],
+      ["E","Edward"],
+      ["F","Frank"],
+      ["G","George"],
+      ["H","Henry"],
+      ["I","Ida"],
+      ["J","John"],
+      ["K","King"],
+      ["L","Lincoln"],
+      ["M","Mary"],
+      ["N","Nora"],
+      ["O","Ocean"],
+      ["P","Paul"],
+      ["Q","Queen"],
+      ["R","Robert"],
+      ["S","Sam"],
+      ["T","Tom"],
+      ["U","Union"],
+      ["V","Victor"],
+      ["W","William"],
+      ["X","X-Ray"],
+      ["Y","Young"],
+      ["Z","Zebra"]
+
     ]
   }
+
 ];
 
-const urgentTitles = ["Urgences & priorités"];
 
-function render(filter=""){
-  const content = document.getElementById('content');
-  content.innerHTML = '';
-  const f = filter.trim().toLowerCase();
-  let totalVisible = 0;
 
-  categories.forEach(cat => {
-    const isUrgentCat = urgentTitles.includes(cat.title);
-    const matches = cat.codes.filter(([tag, desc]) =>
-      !f || tag.toLowerCase().includes(f) || desc.toLowerCase().includes(f)
-    );
-    if(matches.length === 0) return;
-    totalVisible += matches.length;
+/* ==========================================================
+   VARIABLES
+========================================================== */
 
-    const block = document.createElement('div');
-    block.className = 'cat-block';
-    block.innerHTML = `
-      <div class="cat-head">
-        <div class="cat-title">${cat.title}</div>
-        <div class="cat-count">${matches.length} code${matches.length>1?'s':''}</div>
-      </div>
-      <div class="code-grid">
-        ${matches.map(([tag, desc]) => `
-          <div class="code-card${isUrgentCat ? ' urgent' : ''}">
-            <div class="code-tag">${tag}</div>
-            <div class="code-desc">${desc}</div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-    content.appendChild(block);
+let currentCategory = "statuts";
+
+
+
+/* ==========================================================
+   NAVIGATION CATÉGORIES
+========================================================== */
+
+function renderCategories(){
+
+  const nav =
+    document.getElementById("categories");
+
+  nav.innerHTML = "";
+
+
+  categories.forEach(category => {
+
+    const button =
+      document.createElement("button");
+
+
+    button.textContent =
+      category.label;
+
+
+    if(category.id === currentCategory){
+
+      button.classList.add("active");
+
+    }
+
+
+    button.onclick = () => {
+
+      currentCategory =
+        category.id;
+
+      document.getElementById("search").value = "";
+
+      render();
+
+
+      window.scrollTo({
+
+        top:
+          document.querySelector("nav").offsetTop - 10,
+
+        behavior:"smooth"
+
+      });
+
+    };
+
+
+    nav.appendChild(button);
+
   });
 
-  document.getElementById('empty-msg').style.display = totalVisible === 0 ? 'block' : 'none';
 }
 
-document.getElementById('search').addEventListener('input', (e) => render(e.target.value));
+
+
+/* ==========================================================
+   AFFICHAGE
+========================================================== */
+
+function render(){
+
+  const category =
+    categories.find(
+      c => c.id === currentCategory
+    );
+
+
+  if(!category){
+    return;
+  }
+
+
+  document.getElementById("panel-title")
+    .textContent =
+      category.label;
+
+
+  document.getElementById("panel-desc")
+    .textContent =
+      category.desc;
+
+
+  document.getElementById("article-count")
+    .textContent =
+      `${String(category.codes.length).padStart(2,"0")} CODES`;
+
+
+  renderCodes(
+    category.codes,
+    category.urgent || false
+  );
+
+
+  renderCategories();
+
+}
+
+
+
+/* ==========================================================
+   AFFICHAGE DES CODES
+========================================================== */
+
+function renderCodes(codes, urgent = false){
+
+  const container =
+    document.getElementById("content");
+
+  const empty =
+    document.getElementById("empty-msg");
+
+
+  container.innerHTML = "";
+
+  empty.style.display = "none";
+
+
+  if(codes.length === 0){
+
+    empty.style.display = "block";
+
+    return;
+
+  }
+
+
+  const block =
+    document.createElement("div");
+
+  block.className =
+    "cat-block";
+
+
+  block.innerHTML = `
+
+    <div class="cat-head">
+
+      <div class="cat-title">
+        Référentiel
+      </div>
+
+      <div class="cat-count">
+        ${codes.length} CODE${codes.length > 1 ? "S" : ""}
+      </div>
+
+    </div>
+
+
+    <div class="code-grid">
+
+      ${codes.map(([tag,desc]) => `
+
+        <div class="code-card${urgent ? " urgent" : ""}">
+
+          <div class="code-tag">
+            ${tag}
+          </div>
+
+          <div class="code-desc">
+            ${desc}
+          </div>
+
+        </div>
+
+      `).join("")}
+
+    </div>
+
+  `;
+
+
+  container.appendChild(block);
+
+}
+
+
+
+/* ==========================================================
+   RECHERCHE
+========================================================== */
+
+document
+  .getElementById("search")
+  .addEventListener(
+    "input",
+    function(){
+
+      const query =
+        this.value
+          .toLowerCase()
+          .trim();
+
+
+      if(!query){
+
+        render();
+
+        return;
+
+      }
+
+
+      const results = [];
+
+
+      categories.forEach(category => {
+
+        category.codes.forEach(code => {
+
+          const tag =
+            code[0];
+
+          const desc =
+            code[1];
+
+
+          const searchable = (
+
+            category.label +
+            " " +
+            category.desc +
+            " " +
+            tag +
+            " " +
+            desc
+
+          ).toLowerCase();
+
+
+          if(searchable.includes(query)){
+
+            results.push({
+              code,
+              urgent:category.urgent || false
+            });
+
+          }
+
+        });
+
+      });
+
+
+      document.getElementById("panel-title")
+        .textContent =
+          "Résultats de recherche";
+
+
+      document.getElementById("panel-desc")
+        .textContent =
+          `Recherche globale : "${this.value}"`;
+
+
+      document.getElementById("article-count")
+        .textContent =
+          `${String(results.length).padStart(2,"0")} RÉSULTAT(S)`;
+
+
+      const container =
+        document.getElementById("content");
+
+
+      const empty =
+        document.getElementById("empty-msg");
+
+
+      container.innerHTML = "";
+
+
+      if(results.length === 0){
+
+        empty.style.display = "block";
+
+        return;
+
+      }
+
+
+      empty.style.display = "none";
+
+
+      const block =
+        document.createElement("div");
+
+      block.className =
+        "cat-block";
+
+
+      block.innerHTML = `
+
+        <div class="cat-head">
+
+          <div class="cat-title">
+            Résultats
+          </div>
+
+          <div class="cat-count">
+            ${results.length} CODE${results.length > 1 ? "S" : ""}
+          </div>
+
+        </div>
+
+
+        <div class="code-grid">
+
+          ${results.map(result => `
+
+            <div class="code-card${result.urgent ? " urgent" : ""}">
+
+              <div class="code-tag">
+                ${result.code[0]}
+              </div>
+
+              <div class="code-desc">
+                ${result.code[1]}
+              </div>
+
+            </div>
+
+          `).join("")}
+
+        </div>
+
+      `;
+
+
+      container.appendChild(block);
+
+    }
+  );
+
+
+
+/* ==========================================================
+   HORLOGE
+========================================================== */
+
+function updateClock(){
+
+  const d =
+    new Date();
+
+
+  const pad =
+    n =>
+      String(n).padStart(2,"0");
+
+
+  document.getElementById("clock")
+    .textContent =
+      `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+}
+
+
+updateClock();
+
+
+setInterval(
+  updateClock,
+  15000
+);
+
+
+
+/* ==========================================================
+   INITIALISATION
+========================================================== */
 
 render();
+
 </script>
 
+
 </body>
+
 </html>
