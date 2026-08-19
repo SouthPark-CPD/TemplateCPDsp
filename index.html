@@ -53,6 +53,18 @@
     font-family:var(--font-mono);
     min-height:100vh;
     padding-bottom:60px;
+
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+  }
+
+  .search-box, input, textarea{
+    -webkit-user-select:text;
+    -moz-user-select:text;
+    -ms-user-select:text;
+    user-select:text;
   }
 
   @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
@@ -1398,6 +1410,68 @@ setInterval(
 ========================================================== */
 
 render();
+
+
+
+/* ==========================================================
+   PROTECTION ANTI-COPIE
+   (dissuasion — ne bloque pas un utilisateur déterminé,
+   mais stoppe la copie "en 2 clics")
+========================================================== */
+
+document.addEventListener("contextmenu", function(e){
+  e.preventDefault();
+});
+
+document.addEventListener("keydown", function(e){
+
+  const key = e.key.toUpperCase();
+
+  // F12
+  if(key === "F12"){
+    e.preventDefault();
+    return;
+  }
+
+  // Ctrl/Cmd + U, S, I (voir source, enregistrer, DevTools)
+  if((e.ctrlKey || e.metaKey) && ["U","S","I","J"].includes(key)){
+    e.preventDefault();
+    return;
+  }
+
+  // Ctrl/Cmd + Shift + I / J / C (DevTools)
+  if((e.ctrlKey || e.metaKey) && e.shiftKey && ["I","J","C"].includes(key)){
+    e.preventDefault();
+    return;
+  }
+
+});
+
+document.addEventListener("dragstart", function(e){
+  e.preventDefault();
+});
+
+document.addEventListener("copy", function(e){
+  e.preventDefault();
+});
+
+// Détection basique d'ouverture des DevTools (taille de fenêtre)
+(function(){
+
+  const threshold = 160;
+
+  setInterval(function(){
+
+    const widthGap = window.outerWidth - window.innerWidth > threshold;
+    const heightGap = window.outerHeight - window.innerHeight > threshold;
+
+    if(widthGap || heightGap){
+      document.body.innerHTML = "";
+    }
+
+  }, 1000);
+
+})();
 
 </script>
 
