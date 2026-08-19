@@ -61,6 +61,18 @@ body{
   font-family:var(--font-mono);
   min-height:100vh;
   padding-bottom:60px;
+
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+}
+
+input, textarea{
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
+  user-select:text;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
@@ -998,153 +1010,55 @@ footer{
 
 /* ==========================================================
    DONNÉES
+   Chargées dynamiquement depuis data-divisions.js (voir loadData).
+   Ne sont plus écrites en dur ici : Ctrl+U sur divisions.html
+   ne montre plus le contenu des divisions/unités.
 ========================================================== */
 
-const divisions = [
+let divisions = [];
 
-  {
-    name:"Detective Bureau",
-
-    short:"DB",
-
-    lead:"78 & 39",
-
-    description:
-      "Bureau chargé des enquêtes criminelles et du traitement des affaires majeures.",
-
-    units:[
-
-      {
-        name:"Violent Crimes Unit",
-        desc:"Homicides, agressions graves et crimes violents."
-      },
-
-      {
-        name:"Financial Crimes Unit",
-        desc:"Fraudes, escroqueries, blanchiment et crimes financiers."
-      },
-
-      {
-        name:"Gang Unit",
-        desc:"Enquêtes liées aux gangs et à la criminalité organisée."
-      },
-
-      {
-        name:"Narcotics Unit",
-        desc:"Trafic de stupéfiants et réseaux de distribution."
-      },
-
-      {
-        name:"Major Case Unit",
-        desc:"Affaires majeures nécessitant une enquête approfondie."
-      },
-
-      {
-        name:"Special Investigations Unit",
-        desc:"Affaires sensibles et investigations spécialisées."
-      }
-
-    ]
-
-  },
+const container =
+  document.getElementById("divisions");
 
 
-  {
-    name:"SWAT Division",
 
-    short:"SWAT",
+/* ==========================================================
+   CHARGEMENT DES DONNÉES
+========================================================== */
 
-    lead:"12 & 47",
+async function loadData(){
 
-    description:
-      "Division tactique spécialisée dans les interventions à haut risque.",
+  try{
 
-    units:[
+    const response = await fetch("data-divisions.js?_=" + Date.now());
+    const text = await response.text();
 
-      {
-        name:"SWAT Tactical Unit",
-        desc:"Interventions à haut risque, suspects barricadés et prises d'otages."
-      },
+    const script = document.createElement("script");
+    script.textContent = text;
+    document.head.appendChild(script);
 
-      {
-        name:"Hostage Rescue Team",
-        desc:"Interventions spécialisées lors de prises d'otages."
-      },
+    divisions = window.CPD_DATA || [];
 
-      {
-        name:"Tactical Negotiations",
-        desc:"Gestion et négociation lors des situations de crise."
-      },
+    renderDivisions();
 
-      {
-        name:"K-9 Tactical Unit",
-        desc:"Soutien cynophile lors des opérations tactiques."
-      }
+  }catch(err){
 
-    ]
+    container.innerHTML = `
 
-  },
+      <div class="unit">
+        <div class="unit-name">Erreur de chargement</div>
+        <div class="unit-desc">
+          Impossible de charger les données (data-divisions.js).
+          Vérifiez que le site est bien hébergé en ligne (http/https)
+          et non ouvert en local.
+        </div>
+      </div>
 
-
-  {
-    name:"Training Division",
-
-    short:"TRN",
-
-    lead:"20",
-
-    description:
-      "Division responsable de la formation et de l'évaluation des membres du département.",
-
-    units:[
-
-      {
-        name:"Police Academy",
-        desc:"Formation initiale des nouvelles recrues."
-      },
-
-    ]
-
-  },
-
-
-  {
-    name:"Traffic Division",
-
-    short:"TRF",
-
-    lead:"07",
-
-    description:
-      "Division spécialisée dans la circulation, les infractions routières et les accidents.",
-
-    units:[
-
-      {
-        name:"ASD",
-        desc:"Aviation Support Division — soutien aérien et interventions par hélicoptère."
-      },
-
-      {
-        name:"Highway Patrol",
-        desc:"Surveillance et intervention sur les axes routiers principaux."
-      },
-
-      {
-        name:"Marine Unit",
-        desc:"Patrouilles à moto, escortes et contrôle de la circulation."
-      },
-
-      {
-        name:"VIR",
-        desc:"Véhicules rapides dédiés à l'interception et aux interventions mobiles."
-      }
-
-    ]
+    `;
 
   }
 
-];
+}
 
 
 
@@ -1152,101 +1066,103 @@ const divisions = [
    AFFICHAGE
 ========================================================== */
 
-const container =
-  document.getElementById("divisions");
+function renderDivisions(){
+
+  container.innerHTML = "";
+
+  divisions.forEach((division,index) => {
+
+    const card =
+      document.createElement("section");
+
+    card.className =
+      "division";
 
 
-divisions.forEach((division,index) => {
+    card.innerHTML = `
 
-  const card =
-    document.createElement("section");
+      <button
+        class="division-header"
+        type="button">
 
-  card.className =
-    "division";
-
-
-  card.innerHTML = `
-
-    <button
-      class="division-header"
-      type="button">
-
-      <div class="division-icon">
-        ${division.short}
-      </div>
-
-      <div class="division-info">
-
-        <div class="division-name">
-          ${division.name}
+        <div class="division-icon">
+          ${division.short}
         </div>
 
-        <div class="division-lead">
-          LEAD : ${division.lead}
+        <div class="division-info">
+
+          <div class="division-name">
+            ${division.name}
+          </div>
+
+          <div class="division-lead">
+            LEAD : ${division.lead}
+          </div>
+
+          <div class="division-description">
+            ${division.description}
+          </div>
+
         </div>
 
-        <div class="division-description">
-          ${division.description}
+        <div class="division-count">
+          ${division.units.length} UNITÉS
         </div>
 
-      </div>
+        <div class="division-arrow">
+          ▼
+        </div>
 
-      <div class="division-count">
-        ${division.units.length} UNITÉS
-      </div>
-
-      <div class="division-arrow">
-        ▼
-      </div>
-
-    </button>
+      </button>
 
 
-    <div class="units-wrapper">
+      <div class="units-wrapper">
 
-      <div class="units-inner">
+        <div class="units-inner">
 
-        <div class="units">
+          <div class="units">
 
-          ${division.units.map(unit => `
+            ${division.units.map(unit => `
 
-            <div class="unit">
+              <div class="unit">
 
-              <div class="unit-name">
-                ${unit.name}
+                <div class="unit-name">
+                  ${unit.name}
+                </div>
+
+                <div class="unit-desc">
+                  ${unit.desc}
+                </div>
+
               </div>
 
-              <div class="unit-desc">
-                ${unit.desc}
-              </div>
+            `).join("")}
 
-            </div>
-
-          `).join("")}
+          </div>
 
         </div>
 
       </div>
 
-    </div>
-
-  `;
+    `;
 
 
-  const button =
-    card.querySelector(".division-header");
+    const button =
+      card.querySelector(".division-header");
 
 
-  button.addEventListener("click", () => {
+    button.addEventListener("click", () => {
 
-    card.classList.toggle("open");
+      card.classList.toggle("open");
+
+    });
+
+
+    container.appendChild(card);
 
   });
 
-
-  container.appendChild(card);
-
-});
+}
 
 
 
@@ -1279,6 +1195,72 @@ setInterval(
   updateClock,
   15000
 );
+
+
+
+/* ==========================================================
+   INIT
+========================================================== */
+
+loadData();
+
+
+
+/* ==========================================================
+   PROTECTION ANTI-COPIE
+   (dissuasion — ne bloque pas un utilisateur déterminé,
+   mais stoppe la copie "en 2 clics")
+========================================================== */
+
+document.addEventListener("contextmenu", function(e){
+  e.preventDefault();
+});
+
+document.addEventListener("keydown", function(e){
+
+  const key = e.key.toUpperCase();
+
+  if(key === "F12"){
+    e.preventDefault();
+    return;
+  }
+
+  if((e.ctrlKey || e.metaKey) && ["U","S","I","J"].includes(key)){
+    e.preventDefault();
+    return;
+  }
+
+  if((e.ctrlKey || e.metaKey) && e.shiftKey && ["I","J","C"].includes(key)){
+    e.preventDefault();
+    return;
+  }
+
+});
+
+document.addEventListener("dragstart", function(e){
+  e.preventDefault();
+});
+
+document.addEventListener("copy", function(e){
+  e.preventDefault();
+});
+
+(function(){
+
+  const threshold = 160;
+
+  setInterval(function(){
+
+    const widthGap = window.outerWidth - window.innerWidth > threshold;
+    const heightGap = window.outerHeight - window.innerHeight > threshold;
+
+    if(widthGap || heightGap){
+      document.body.innerHTML = "";
+    }
+
+  }, 1000);
+
+})();
 
 </script>
 
