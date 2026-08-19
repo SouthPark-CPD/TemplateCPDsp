@@ -627,6 +627,32 @@
 
 
   /* =========================
+     MEMBRES (LIVE DISCORD)
+  ========================= */
+
+  .members-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+  }
+
+  .member-badge{
+    font-size:11px;
+    color:var(--text);
+    background:var(--bg-panel);
+    border:1px solid var(--steel-dim);
+    padding:5px 10px;
+    letter-spacing:0.3px;
+  }
+
+  .members-empty{
+    font-size:11px;
+    color:var(--text-dim);
+    font-style:italic;
+  }
+
+
+  /* =========================
      LEGENDE
   ========================= */
 
@@ -1164,6 +1190,18 @@ let chainOfCommand = [];
 let divisions = [];
 let gradeDetails = [];
 
+/* ==========================================================
+   MEMBRES DISCORD EN DIRECT
+   -> Interroge l'API exposée par le bot (webserver.py).
+   -> Remplace l'URL ci-dessous par celle de ton bot si elle
+      change un jour (onglet Domains sur bot-hosting.net).
+========================================================== */
+
+const BOT_API_URL = "https://gq9m0i599d.apps.bot-hosting.cloud/api/organigramme";
+
+let liveMembers = {};
+let liveMembersState = "loading"; // "loading" | "loaded" | "error"
+
 
 
 /* ==========================================================
@@ -1190,6 +1228,8 @@ async function loadData(){
     renderChain();
     renderGradeDetails();
 
+    loadMembers();
+
   }catch(err){
 
     document.getElementById("chain").innerHTML = `
@@ -1206,6 +1246,40 @@ async function loadData(){
     `;
 
   }
+
+}
+
+
+
+/* ==========================================================
+   CHARGEMENT DES MEMBRES (LIVE)
+========================================================== */
+
+async function loadMembers(){
+
+  try{
+
+    const response = await fetch(BOT_API_URL + "?_=" + Date.now());
+
+    if(!response.ok){
+      throw new Error("Réponse API invalide");
+    }
+
+    liveMembers = await response.json();
+    liveMembersState = "loaded";
+
+  }catch(err){
+
+    // Le bot peut être hors ligne ou l'URL peut avoir changé :
+    // on n'affiche pas d'erreur bloquante, juste un message
+    // discret. Le reste du site continue de fonctionner.
+    liveMembers = {};
+    liveMembersState = "error";
+
+  }
+
+  // On ré-affiche les grades pour intégrer les membres reçus.
+  renderGradeDetails();
 
 }
 
@@ -1432,6 +1506,17 @@ function renderGradeDetails(){
 
         </div>
 
+
+        <div class="section-block">
+
+          <div class="section-label gold">
+            👥 Membres actuels
+          </div>
+
+          ${renderMembersList(grade.title)}
+
+        </div>
+
       </div>
 
     `;
@@ -1439,6 +1524,41 @@ function renderGradeDetails(){
     container.appendChild(el);
 
   });
+
+}
+
+
+function renderMembersList(gradeTitle){
+
+  if(liveMembersState === "loading"){
+    return `<div class="members-empty">Chargement en cours…</div>`;
+  }
+
+  if(liveMembersState === "error"){
+    return `<div class="members-empty">Liste indisponible pour le moment.</div>`;
+  }
+
+  const members =
+    liveMembers[gradeTitle] || [];
+
+  if(members.length === 0){
+    return `<div class="members-empty">Aucun membre actuellement à ce grade.</div>`;
+  }
+
+  return `
+    <div class="members-list">
+      ${members.map(name => `<div class="member-badge">${escapeHtml(name)}</div>`).join("")}
+    </div>
+  `;
+
+}
+
+
+function escapeHtml(str){
+
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
 
 }
 
