@@ -53,6 +53,18 @@
     font-family:var(--font-mono);
     min-height:100vh;
     padding-bottom:60px;
+
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+  }
+
+  input, textarea{
+    -webkit-user-select:text;
+    -moz-user-select:text;
+    -ms-user-select:text;
+    user-select:text;
   }
 
   @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
@@ -869,131 +881,52 @@
 
 /* ==========================================================
    DONNÉES
-   -> Remplis "src" avec le lien de ta capture d'écran.
-   -> Laisse src:"" pour garder l'emplacement vide.
+   Chargées dynamiquement depuis data-tenues.js (voir loadData).
+   Ne sont plus écrites en dur ici : Ctrl+U sur tenues-vehicules.html
+   ne montre plus le contenu des tenues/véhicules par grade.
 ========================================================== */
 
-const grades = [
+let grades = [];
 
-  {
-    rank:"01",
-    title:"Rookie",
-    tenues:[
-      "Uniforme standard CPD (chemise bleue, badge visible)",
-      "Ceinturon réglementaire complet",
-      "Gilet pare-balles obligatoire",
-      "Casquette / béret CPD"
-    ],
-    note:"Aucune personnalisation de tenue autorisée à ce grade.",
-    tenueShots:[
-      { label:"Tenue Rookie — Vue face", src:"" },
-      { label:"Tenue Rookie — Vue dos", src:"" }
-    ],
-    vehicules:[
-      "Ford Crown Victoria (Patrouille)",
-      "Chevrolet Impala (Patrouille)"
-    ],
-    vehiculeNote:"Véhicules banalisés et interventions spéciales non autorisés.",
-    vehiculeShots:[
-      { label:"Crown Victoria — Livrée CPD", src:"" }
-    ]
-  },
 
-  {
-    rank:"02",
-    title:"Officer 1 à Office 3",
-    tenues:[
-      "Uniforme standard CPD",
-      "Gilet pare-balles obligatoire",
-      "Option : coupe-vent CPD par temps de pluie"
-    ],
-    note:"",
-    tenueShots:[
-      { label:"Tenue Officer 1 — Vue face", src:"" }
-    ],
-    vehicules:[
-      "Ford Crown Victoria (Patrouille)",
-      "Chevrolet Impala (Patrouille)",
-      "Dodge Charger (Patrouille)"
-    ],
-    vehiculeNote:"",
-    vehiculeShots:[
-      { label:"Dodge Charger — Livrée CPD", src:"" }
-    ]
-  },
 
-  {
-    rank:"03",
-    title:"SLO/FTO (Senior/Field Lead Officer)",
-    tenues:[
-      "Uniforme standard CPD ou tenue civile encadrée",
-      "Gilet pare-balles obligatoire en intervention",
-      "Insigne SLO visible"
-    ],
-    note:"Grade de transition vers l'encadrement — briefing formation requis avant changement de tenue.",
-    tenueShots:[
-      { label:"Tenue SLO — Vue face", src:"" },
-      { label:"Insigne SLO — Détail", src:"" }
-    ],
-    vehicules:[
-      "Ensemble du parc Officer",
-      "Véhicule banalisé",
-      "Véhicule de supervision"
-    ],
-    vehiculeNote:"",
-    vehiculeShots:[
-      { label:"Véhicule de supervision — Livrée", src:"" }
-    ]
-  },
+/* ==========================================================
+   CHARGEMENT DES DONNÉES
+========================================================== */
 
-  {
-    rank:"04",
-    title:"Sergeant",
-    tenues:[
-      "Uniforme d'encadrement CPD (galons Sergeant)",
-      "Gilet pare-balles obligatoire en intervention",
-      "Tenue civile encadrée autorisée hors patrouille"
-    ],
-    note:"",
-    tenueShots:[
-      { label:"Tenue Sergeant — Vue face", src:"" }
-    ],
-    vehicules:[
-      "Ensemble du parc Officer",
-      "Véhicule de supervision Sergeant",
-      "Véhicule banalisé"
-    ],
-    vehiculeNote:"",
-    vehiculeShots:[
-      { label:"Véhicule Sergeant — Livrée", src:"" }
-    ]
-  },
+async function loadData(){
 
-  {
-    rank:"05",
-    title:"Lieutenant",
-    tenues:[
-      "Uniforme d'encadrement CPD (galons Lieutenant)",
-      "Tenue civile encadrée autorisée",
-      "Accès tenue cérémonie sur événement officiel"
-    ],
-    note:"Grade de commandement — toute tenue non listée doit être validée par la hiérarchie.",
-    tenueShots:[
-      { label:"Tenue Lieutenant — Vue face", src:"" },
-      { label:"Tenue cérémonie — Exemple", src:"" }
-    ],
-    vehicules:[
-      "Ensemble du parc Sergeant",
-      "Véhicule de commandement",
-      "Véhicule banalisé"
-    ],
-    vehiculeNote:"",
-    vehiculeShots:[
-      { label:"Véhicule de commandement — Livrée", src:"" }
-    ]
+  try{
+
+    const response = await fetch("data-tenues.js?_=" + Date.now());
+    const text = await response.text();
+
+    const script = document.createElement("script");
+    script.textContent = text;
+    document.head.appendChild(script);
+
+    grades = window.CPD_DATA || [];
+
+    renderGrades();
+
+  }catch(err){
+
+    document.getElementById("grades").innerHTML = `
+
+      <div class="notice">
+        <div class="notice-title">Erreur de chargement</div>
+        <p>
+          Impossible de charger les données (data-tenues.js).
+          Vérifiez que le site est bien hébergé en ligne (http/https)
+          et non ouvert en local.
+        </p>
+      </div>
+
+    `;
+
   }
 
-];
+}
 
 
 
@@ -1162,7 +1095,65 @@ setInterval(updateClock, 15000);
    INIT
 ========================================================== */
 
-renderGrades();
+loadData();
+
+
+
+/* ==========================================================
+   PROTECTION ANTI-COPIE
+   (dissuasion — ne bloque pas un utilisateur déterminé,
+   mais stoppe la copie "en 2 clics")
+========================================================== */
+
+document.addEventListener("contextmenu", function(e){
+  e.preventDefault();
+});
+
+document.addEventListener("keydown", function(e){
+
+  const key = e.key.toUpperCase();
+
+  if(key === "F12"){
+    e.preventDefault();
+    return;
+  }
+
+  if((e.ctrlKey || e.metaKey) && ["U","S","I","J"].includes(key)){
+    e.preventDefault();
+    return;
+  }
+
+  if((e.ctrlKey || e.metaKey) && e.shiftKey && ["I","J","C"].includes(key)){
+    e.preventDefault();
+    return;
+  }
+
+});
+
+document.addEventListener("dragstart", function(e){
+  e.preventDefault();
+});
+
+document.addEventListener("copy", function(e){
+  e.preventDefault();
+});
+
+(function(){
+
+  const threshold = 160;
+
+  setInterval(function(){
+
+    const widthGap = window.outerWidth - window.innerWidth > threshold;
+    const heightGap = window.outerHeight - window.innerHeight > threshold;
+
+    if(widthGap || heightGap){
+      document.body.innerHTML = "";
+    }
+
+  }, 1000);
+
+})();
 
 </script>
 
