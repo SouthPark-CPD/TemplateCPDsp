@@ -60,7 +60,8 @@
     user-select:none;
   }
 
-  input, textarea{
+  input,
+  textarea{
     -webkit-user-select:text;
     -moz-user-select:text;
     -ms-user-select:text;
@@ -256,7 +257,7 @@
 
 
   /* =========================
-     CHAINE HIERARCHIQUE (PALIERS)
+     CHAINE HIERARCHIQUE
   ========================= */
 
   .chart-wrap{
@@ -627,28 +628,145 @@
 
 
   /* =========================
-     MEMBRES (LIVE DISCORD)
+     FICHES MEMBRES DISCORD
   ========================= */
 
-  .members-list{
-    display:flex;
-    flex-wrap:wrap;
-    gap:7px;
+  .members-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(290px, 1fr));
+    gap:10px;
   }
 
-  .member-badge{
-    font-size:11px;
-    color:var(--text);
-    background:var(--bg-panel);
+  .member-card{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    min-height:92px;
+    padding:12px;
+    background:
+      linear-gradient(
+        135deg,
+        rgba(74,111,165,0.07),
+        rgba(12,16,21,0.95)
+      );
+
     border:1px solid var(--steel-dim);
-    padding:5px 10px;
-    letter-spacing:0.3px;
+    border-left:3px solid var(--steel);
+
+    transition:
+      transform .15s,
+      border-color .15s,
+      background .15s,
+      box-shadow .15s;
+  }
+
+  .member-card:hover{
+    transform:translateY(-2px);
+    border-color:var(--steel);
+    box-shadow:0 6px 20px rgba(0,0,0,0.25);
+  }
+
+  .member-avatar{
+    width:62px;
+    height:62px;
+    flex:0 0 62px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid var(--steel-dim);
+    background:#11161d;
+  }
+
+  .member-avatar-placeholder{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--steel);
+    font-family:var(--font-display);
+    font-size:20px;
+    font-weight:600;
+  }
+
+  .member-info{
+    min-width:0;
+    flex:1;
+  }
+
+  .member-name{
+    font-family:var(--font-display);
+    font-size:15px;
+    letter-spacing:0.7px;
+    text-transform:uppercase;
+    color:var(--text);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .member-discord{
+    margin-top:3px;
+    font-size:10px;
+    color:var(--text-dim);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .member-meta{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-top:8px;
+  }
+
+  .member-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:3px 6px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.02);
+    font-size:9px;
+    letter-spacing:0.5px;
+    color:var(--text-dim);
+    text-transform:uppercase;
+  }
+
+  .member-chip.gold{
+    color:var(--gold);
+    border-color:var(--gold-dim);
+  }
+
+  .member-chip.green{
+    color:var(--green);
+    border-color:rgba(76,175,111,0.35);
+  }
+
+  .member-profile{
+    flex:0 0 auto;
+    width:30px;
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid var(--steel-dim);
+    color:var(--steel);
+    text-decoration:none;
+    font-size:13px;
+    transition:all .15s;
+  }
+
+  .member-profile:hover{
+    background:var(--steel);
+    border-color:var(--steel);
+    color:#0b0f14;
   }
 
   .members-empty{
     font-size:11px;
     color:var(--text-dim);
     font-style:italic;
+    padding:8px 0;
   }
 
 
@@ -799,6 +917,20 @@
       padding:0 16px 18px;
     }
 
+    .members-grid{
+      grid-template-columns:1fr;
+    }
+
+    .member-card{
+      min-height:86px;
+    }
+
+    .member-avatar{
+      width:54px;
+      height:54px;
+      flex-basis:54px;
+    }
+
   }
 
 </style>
@@ -808,10 +940,6 @@
 
 <body>
 
-
-<!-- ==========================================================
-     HEADER
-========================================================== -->
 
 <header>
 
@@ -841,14 +969,12 @@
 
           </defs>
 
-
           <path
             d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
             fill="none"
             stroke="var(--gold)"
             stroke-width="2.5"
             stroke-linejoin="round"/>
-
 
           <circle
             cx="100"
@@ -858,7 +984,6 @@
             stroke="var(--gold)"
             stroke-width="2"/>
 
-
           <circle
             cx="100"
             cy="100"
@@ -867,7 +992,6 @@
             stroke="var(--gold)"
             stroke-width="1"/>
 
-
           <circle
             cx="100"
             cy="100"
@@ -875,7 +999,6 @@
             fill="#0c1015"
             stroke="var(--gold)"
             stroke-width="1.5"/>
-
 
           <text
             font-family="Oswald, sans-serif"
@@ -895,7 +1018,6 @@
 
           </text>
 
-
           <text
             font-family="Oswald, sans-serif"
             font-size="16"
@@ -914,25 +1036,21 @@
 
           </text>
 
-
           <use
             href="#mini-star"
             transform="translate(27,100) scale(1.1)"
             fill="var(--gold)"/>
-
 
           <use
             href="#mini-star"
             transform="translate(173,100) scale(1.1)"
             fill="var(--gold)"/>
 
-
           <use
             href="#mini-star"
             transform="translate(100,88) scale(2.4)"
             fill="var(--gold)"
             opacity="0.9"/>
-
 
           <rect
             x="64"
@@ -941,7 +1059,6 @@
             height="17"
             rx="2"
             fill="var(--gold)"/>
-
 
           <text
             x="100"
@@ -959,7 +1076,6 @@
 
         </svg>
 
-
         <div>
 
           <div class="brand-title">
@@ -975,60 +1091,32 @@
       </div>
 
 
-      <!-- NAVIGATION PRINCIPALE -->
-
       <div class="header-actions">
 
-        <a
-          class="header-link"
-          href="index.html">
-
+        <a class="header-link" href="index.html">
           🗂 Procédures
-
         </a>
 
-
-        <a
-          class="header-link"
-          href="code.html">
-
+        <a class="header-link" href="code.html">
           📻 Guide radio
-
         </a>
 
-
-        <a
-          class="header-link"
-          href="reglement.html">
-
+        <a class="header-link" href="reglement.html">
           ⚖ Règlement
-
         </a>
 
-        <a
-          class="header-link"
-          href="tenues-vehicules.html">
-
+        <a class="header-link" href="tenues-vehicules.html">
           🎽 Tenues & Véhicules
-
         </a>
 
-        <a
-          class="header-link current"
-          href="organigramme.html">
-
+        <a class="header-link current" href="organigramme.html">
           🧭 Organigramme
-
         </a>
-		
-        <a
-          class="header-link"
-          href="divisions.html">
 
+        <a class="header-link" href="divisions.html">
           🏛 Divisions
-
         </a>
-		
+
         <a
           class="header-link gold"
           href="https://guidejuridiquesp.netlify.app/"
@@ -1044,34 +1132,22 @@
     </div>
 
 
-    <!-- STATUS -->
-
     <div class="status-line">
 
       <span>
-
         <span class="dot"></span>
-
         Système opérationnel
-
       </span>
 
-
       <span>
-
         DOCUMENT :
         <b>CPD-TPL-003</b>
-
       </span>
-
 
       <span>
-
         VERSION :
-        <b>1.1</b>
-
+        <b>1.2</b>
       </span>
-
 
       <span id="clock">
         --/--/---- --:--
@@ -1084,10 +1160,6 @@
 </header>
 
 
-
-<!-- ==========================================================
-     MAIN
-========================================================== -->
 
 <main>
 
@@ -1105,8 +1177,6 @@
 
     </div>
 
-
-    <!-- CHAINE HIERARCHIQUE -->
 
     <div class="chart-wrap">
 
@@ -1137,8 +1207,6 @@
   </div>
 
 
-  <!-- DETAIL PAR GRADE -->
-
   <div class="panel">
 
     <div class="panel-head">
@@ -1162,10 +1230,6 @@
 
 
 
-<!-- ==========================================================
-     FOOTER
-========================================================== -->
-
 <footer>
 
   CPD INTERNAL SYSTEM — ORGANIGRAMME —
@@ -1180,28 +1244,22 @@
 
 /* ==========================================================
    DONNÉES
-   Chargées dynamiquement depuis data-organigramme.js (voir loadData).
-   Ne sont plus écrites en dur ici : Ctrl+U sur organigramme.html
-   ne montre plus le contenu de la chaîne de commandement,
-   des divisions ni du détail des grades.
 ========================================================== */
 
 let chainOfCommand = [];
 let divisions = [];
 let gradeDetails = [];
 
+
 /* ==========================================================
-   MEMBRES DISCORD EN DIRECT
-   -> Interroge l'API exposée par le bot (webserver.py).
-   -> Remplace l'URL ci-dessous par celle de ton bot si elle
-      change un jour (onglet Domains sur bot-hosting.net).
+   API DISCORD
 ========================================================== */
 
-const BOT_API_URL = "https://gq9m0i599d.apps.bot-hosting.cloud/api/organigramme";
+const BOT_API_URL =
+  "https://gq9m0i599d.apps.bot-hosting.cloud/api/organigramme";
 
 let liveMembers = {};
-let liveMembersState = "loading"; // "loading" | "loaded" | "error"
-
+let liveMembersState = "loading";
 
 
 /* ==========================================================
@@ -1212,18 +1270,35 @@ async function loadData(){
 
   try{
 
-    const response = await fetch("data-organigramme.js?_=" + Date.now());
-    const text = await response.text();
+    const response =
+      await fetch("data-organigramme.js?_=" + Date.now());
 
-    const script = document.createElement("script");
-    script.textContent = text;
+    if(!response.ok){
+      throw new Error("Impossible de charger data-organigramme.js");
+    }
+
+    const text =
+      await response.text();
+
+    const script =
+      document.createElement("script");
+
+    script.textContent =
+      text;
+
     document.head.appendChild(script);
 
-    const data = window.CPD_DATA || {};
+    const data =
+      window.CPD_DATA || {};
 
-    chainOfCommand = data.chainOfCommand || [];
-    divisions = data.divisions || [];
-    gradeDetails = data.gradeDetails || [];
+    chainOfCommand =
+      data.chainOfCommand || [];
+
+    divisions =
+      data.divisions || [];
+
+    gradeDetails =
+      data.gradeDetails || [];
 
     renderChain();
     renderGradeDetails();
@@ -1232,15 +1307,22 @@ async function loadData(){
 
   }catch(err){
 
+    console.error(err);
+
     document.getElementById("chain").innerHTML = `
 
       <div class="notice">
-        <div class="notice-title">Erreur de chargement</div>
+
+        <div class="notice-title">
+          Erreur de chargement
+        </div>
+
         <p>
-          Impossible de charger les données (data-organigramme.js).
-          Vérifiez que le site est bien hébergé en ligne (http/https)
-          et non ouvert en local.
+          Impossible de charger les données
+          (data-organigramme.js).
+          Vérifiez que le site est correctement hébergé.
         </p>
+
       </div>
 
     `;
@@ -1250,43 +1332,54 @@ async function loadData(){
 }
 
 
-
 /* ==========================================================
-   CHARGEMENT DES MEMBRES (LIVE)
+   CHARGEMENT MEMBRES DISCORD
 ========================================================== */
 
 async function loadMembers(){
 
+  liveMembersState = "loading";
+
+  renderGradeDetails();
+
   try{
 
-    const response = await fetch(BOT_API_URL + "?_=" + Date.now());
+    const response =
+      await fetch(
+        BOT_API_URL + "?_=" + Date.now()
+      );
 
     if(!response.ok){
       throw new Error("Réponse API invalide");
     }
 
-    liveMembers = await response.json();
-    liveMembersState = "loaded";
+    liveMembers =
+      await response.json();
+
+    liveMembersState =
+      "loaded";
 
   }catch(err){
 
-    // Le bot peut être hors ligne ou l'URL peut avoir changé :
-    // on n'affiche pas d'erreur bloquante, juste un message
-    // discret. Le reste du site continue de fonctionner.
+    console.error(
+      "Erreur API Discord :",
+      err
+    );
+
     liveMembers = {};
-    liveMembersState = "error";
+
+    liveMembersState =
+      "error";
 
   }
 
-  // On ré-affiche les grades pour intégrer les membres reçus.
   renderGradeDetails();
 
 }
 
 
-
 /* ==========================================================
-   RENDU CHAINE
+   CHAINE HIERARCHIQUE
 ========================================================== */
 
 function renderChain(){
@@ -1296,63 +1389,78 @@ function renderChain(){
 
   container.innerHTML = "";
 
-  chainOfCommand.forEach((group, index) => {
+  chainOfCommand.forEach(
+    (group,index)=>{
 
-    if(index > 0){
+      if(index > 0){
 
-      const connector =
+        const connector =
+          document.createElement("div");
+
+        connector.className =
+          "chain-connector";
+
+        container.appendChild(
+          connector
+        );
+
+      }
+
+      const tierGroup =
         document.createElement("div");
 
-      connector.className =
-        "chain-connector";
+      tierGroup.className =
+        "tier-group";
 
-      container.appendChild(connector);
+      const nodesHtml =
+        group.ranks.map(
+          rank => `
 
-    }
+            <div class="chain-node ${escapeHtml(group.tier || "")}">
 
-    const tierGroup =
-      document.createElement("div");
+              <div class="chain-title">
+                ${escapeHtml(rank.title || "")}
+              </div>
 
-    tierGroup.className =
-      "tier-group";
+              ${
+                rank.sub
+                ?
+                `<div class="chain-sub">
+                  ${escapeHtml(rank.sub)}
+                </div>`
+                :
+                ""
+              }
 
-    const nodesHtml =
-      group.ranks.map(rank => `
+            </div>
 
-        <div class="chain-node ${group.tier}">
+          `
+        ).join("");
 
-          <div class="chain-title">
-            ${rank.title}
-          </div>
+      tierGroup.innerHTML = `
 
-          ${rank.sub ? `<div class="chain-sub">${rank.sub}</div>` : ""}
-
+        <div class="tier-label">
+          ${escapeHtml(group.label || "")}
         </div>
 
-      `).join("");
+        <div class="tier-row">
+          ${nodesHtml}
+        </div>
 
-    tierGroup.innerHTML = `
+      `;
 
-      <div class="tier-label">
-        ${group.label}
-      </div>
+      container.appendChild(
+        tierGroup
+      );
 
-      <div class="tier-row">
-        ${nodesHtml}
-      </div>
-
-    `;
-
-    container.appendChild(tierGroup);
-
-  });
+    }
+  );
 
 }
 
 
-
 /* ==========================================================
-   RENDU DIVISIONS
+   DIVISIONS
 ========================================================== */
 
 function renderDivisions(){
@@ -1360,66 +1468,87 @@ function renderDivisions(){
   const container =
     document.getElementById("divisions");
 
+  if(!container){
+    return;
+  }
+
   container.innerHTML = "";
 
-  divisions.forEach((division, index) => {
+  divisions.forEach(
+    (division,index)=>{
 
-    const card =
-      document.createElement("div");
+      const card =
+        document.createElement("div");
 
-    card.className =
-      "division-card";
+      card.className =
+        "division-card";
 
-    card.id =
-      `division-${index}`;
+      card.id =
+        `division-${index}`;
 
-    card.innerHTML = `
+      card.innerHTML = `
 
-      <div class="division-header" onclick="toggleDivision(${index})">
+        <div
+          class="division-header"
+          onclick="toggleDivision(${index})">
 
-        <div>
+          <div>
 
-          <div class="division-tag">
-            ${division.tag}
+            <div class="division-tag">
+              ${escapeHtml(division.tag || "")}
+            </div>
+
+            <div class="division-name">
+              ${escapeHtml(division.name || "")}
+            </div>
+
           </div>
 
-          <div class="division-name">
-            ${division.name}
+          <div class="division-caret">
+            ▸
           </div>
 
         </div>
 
-        <div class="division-caret">▸</div>
 
-      </div>
-
-
-      <div class="division-leads">
-        <b>LEAD :</b> ${division.leads}
-      </div>
+        <div class="division-leads">
+          <b>LEAD :</b>
+          ${escapeHtml(division.leads || "")}
+        </div>
 
 
-      <div class="division-desc">
-        ${division.desc}
-      </div>
+        <div class="division-desc">
+          ${escapeHtml(division.desc || "")}
+        </div>
 
 
-      <div class="division-units-count">
-        <b>${division.unitsCount}</b> UNITÉ${division.unitsCount > 1 ? "S" : ""}
-      </div>
+        <div class="division-units-count">
+          <b>${division.unitsCount || 0}</b>
+          UNITÉ${division.unitsCount > 1 ? "S" : ""}
+        </div>
 
 
-      <div class="division-units">
+        <div class="division-units">
 
-        ${division.unitSlots.map(u => `<div class="unit-slot">${u}</div>`).join("")}
+          ${
+            (division.unitSlots || [])
+            .map(
+              u =>
+                `<div class="unit-slot">
+                  ${escapeHtml(u)}
+                </div>`
+            )
+            .join("")
+          }
 
-      </div>
+        </div>
 
-    `;
+      `;
 
-    container.appendChild(card);
+      container.appendChild(card);
 
-  });
+    }
+  );
 
 }
 
@@ -1427,16 +1556,19 @@ function renderDivisions(){
 function toggleDivision(index){
 
   const el =
-    document.getElementById(`division-${index}`);
+    document.getElementById(
+      `division-${index}`
+    );
 
-  el.classList.toggle("open");
+  if(el){
+    el.classList.toggle("open");
+  }
 
 }
 
 
-
 /* ==========================================================
-   RENDU DETAIL PAR GRADE
+   DETAIL DES GRADES
 ========================================================== */
 
 function renderGradeDetails(){
@@ -1446,132 +1578,527 @@ function renderGradeDetails(){
 
   container.innerHTML = "";
 
-  gradeDetails.forEach((grade, index) => {
+  gradeDetails.forEach(
+    (grade,index)=>{
 
-    const el =
-      document.createElement("div");
+      const el =
+        document.createElement("div");
 
-    el.className = "grade";
-    el.id = `grade-${index}`;
+      el.className =
+        "grade";
 
-    el.innerHTML = `
+      el.id =
+        `grade-${index}`;
 
-      <div class="grade-header" onclick="toggleGrade(${index})">
+      const responsabilites =
+        Array.isArray(grade.responsabilites)
+        ? grade.responsabilites
+        : [];
 
-        <div class="grade-left">
+      const prerequis =
+        Array.isArray(grade.prerequis)
+        ? grade.prerequis
+        : [];
 
-          <div class="grade-rank">
-            GR. ${grade.rank}
+      el.innerHTML = `
+
+        <div
+          class="grade-header"
+          onclick="toggleGrade(${index})">
+
+          <div class="grade-left">
+
+            <div class="grade-rank">
+              GR. ${escapeHtml(
+                String(grade.rank || "")
+              )}
+            </div>
+
+            <div class="grade-title">
+              ${escapeHtml(
+                grade.title || ""
+              )}
+            </div>
+
           </div>
 
-          <div class="grade-title">
-            ${grade.title}
-          </div>
-
-        </div>
-
-        <div class="grade-caret">▸</div>
-
-      </div>
-
-
-      <div class="grade-content">
-
-        <div class="section-block">
-
-          <div class="section-label gold">
-            🛡 Responsabilités
-          </div>
-
-          <ul class="item-list">
-            ${grade.responsabilites.map(r => `<li>${r}</li>`).join("")}
-          </ul>
-
-        </div>
-
-
-        <div class="section-block">
-
-          <div class="section-label">
-            📋 Prérequis de promotion
-          </div>
-
-          <ul class="item-list">
-            ${grade.prerequis.map(p => `<li>${p}</li>`).join("")}
-          </ul>
-
-          <div class="item-note">
-            Temps de service minimum au grade précédent : <b>${grade.tempsService}</b>
+          <div class="grade-caret">
+            ▸
           </div>
 
         </div>
 
 
-        <div class="section-block">
+        <div class="grade-content">
 
-          <div class="section-label gold">
-            👥 Membres actuels
+
+          <div class="section-block">
+
+            <div class="section-label gold">
+              🛡 Responsabilités
+            </div>
+
+            <ul class="item-list">
+
+              ${
+                responsabilites
+                .map(
+                  r =>
+                    `<li>
+                      ${escapeHtml(r)}
+                    </li>`
+                )
+                .join("")
+              }
+
+            </ul>
+
           </div>
 
-          ${renderMembersList(grade.title)}
+
+          <div class="section-block">
+
+            <div class="section-label">
+              📋 Prérequis de promotion
+            </div>
+
+            <ul class="item-list">
+
+              ${
+                prerequis
+                .map(
+                  p =>
+                    `<li>
+                      ${escapeHtml(p)}
+                    </li>`
+                )
+                .join("")
+              }
+
+            </ul>
+
+            ${
+              grade.tempsService
+              ?
+              `
+              <div class="item-note">
+                Temps de service minimum au grade précédent :
+                <b>
+                  ${escapeHtml(
+                    grade.tempsService
+                  )}
+                </b>
+              </div>
+              `
+              :
+              ""
+            }
+
+          </div>
+
+
+          <div class="section-block">
+
+            <div class="section-label gold">
+              👥 Membres actuels
+            </div>
+
+            ${renderMembersList(
+              grade.title
+            )}
+
+          </div>
+
 
         </div>
 
-      </div>
+      `;
 
-    `;
+      container.appendChild(el);
 
-    container.appendChild(el);
-
-  });
+    }
+  );
 
 }
 
 
+/* ==========================================================
+   MEMBRES
+========================================================== */
+
 function renderMembersList(gradeTitle){
 
   if(liveMembersState === "loading"){
-    return `<div class="members-empty">Chargement en cours…</div>`;
+
+    return `
+      <div class="members-empty">
+        ⟳ Synchronisation avec Discord…
+      </div>
+    `;
+
   }
+
 
   if(liveMembersState === "error"){
-    return `<div class="members-empty">Liste indisponible pour le moment.</div>`;
+
+    return `
+      <div class="members-empty">
+        ⚠ Liste Discord indisponible pour le moment.
+      </div>
+    `;
+
   }
 
-  const members =
+
+  let members =
     liveMembers[gradeTitle] || [];
 
-  if(members.length === 0){
-    return `<div class="members-empty">Aucun membre actuellement à ce grade.</div>`;
+
+  if(!Array.isArray(members)){
+    members = [];
   }
 
+
+  if(members.length === 0){
+
+    return `
+      <div class="members-empty">
+        Aucun membre actuellement à ce grade.
+      </div>
+    `;
+
+  }
+
+
   return `
-    <div class="members-list">
-      ${members.map(name => `<div class="member-badge">${escapeHtml(name)}</div>`).join("")}
+
+    <div class="members-grid">
+
+      ${
+        members
+        .map(
+          member =>
+            renderMemberCard(member)
+        )
+        .join("")
+      }
+
     </div>
+
   `;
 
 }
 
 
-function escapeHtml(str){
+/* ==========================================================
+   CARTE MEMBRE
+========================================================== */
 
-  const div = document.createElement("div");
-  div.textContent = str;
+function renderMemberCard(member){
+
+  /*
+    Compatibilité avec l'ancienne API :
+
+    Ancien format :
+      "Pseudo"
+
+    Nouveau format :
+      {
+        id,
+        name,
+        display_name,
+        avatar,
+        matricule,
+        discord_url
+      }
+  */
+
+
+  if(typeof member === "string"){
+
+    member = {
+      name: member,
+      display_name: member,
+      avatar: "",
+      matricule: "",
+      id: "",
+      discord_url: ""
+    };
+
+  }
+
+
+  member =
+    member || {};
+
+
+  const displayName =
+    member.display_name ||
+    member.name ||
+    "Agent inconnu";
+
+
+  const username =
+    member.username ||
+    member.discord_username ||
+    member.name ||
+    "";
+
+
+  const matricule =
+    member.matricule ||
+    member.badge ||
+    member.badge_number ||
+    "—";
+
+
+  const discordId =
+    member.id ||
+    member.discord_id ||
+    "";
+
+
+  const avatar =
+    member.avatar ||
+    member.avatar_url ||
+    "";
+
+
+  const profileUrl =
+    member.discord_url ||
+    member.profile_url ||
+    "";
+
+
+  const initials =
+    getInitials(displayName);
+
+
+  const avatarHtml =
+    avatar
+    ?
+    `
+      <img
+        class="member-avatar"
+        src="${escapeAttribute(avatar)}"
+        alt="Avatar de ${escapeAttribute(displayName)}"
+        loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+      >
+
+      <div
+        class="member-avatar member-avatar-placeholder"
+        style="display:none;">
+
+        ${escapeHtml(initials)}
+
+      </div>
+    `
+    :
+    `
+      <div class="member-avatar member-avatar-placeholder">
+        ${escapeHtml(initials)}
+      </div>
+    `;
+
+
+  const profileButton =
+    profileUrl
+    ?
+    `
+      <a
+        class="member-profile"
+        href="${escapeAttribute(profileUrl)}"
+        target="_blank"
+        rel="noopener"
+        title="Ouvrir le profil Discord">
+
+        ↗
+
+      </a>
+    `
+    :
+    "";
+
+
+  return `
+
+    <div class="member-card">
+
+
+      ${avatarHtml}
+
+
+      <div class="member-info">
+
+
+        <div class="member-name"
+             title="${escapeAttribute(displayName)}">
+
+          ${escapeHtml(displayName)}
+
+        </div>
+
+
+        ${
+          username
+          ?
+          `
+          <div
+            class="member-discord"
+            title="${escapeAttribute(username)}">
+
+            @${escapeHtml(
+              removeAt(username)
+            )}
+
+          </div>
+          `
+          :
+          ""
+        }
+
+
+        <div class="member-meta">
+
+
+          <div class="member-chip gold">
+
+            🎫
+
+            ${
+              matricule !== "—"
+              ?
+              `MAT. ${escapeHtml(
+                String(matricule)
+              )}`
+              :
+              "MAT. —"
+            }
+
+          </div>
+
+
+          ${
+            discordId
+            ?
+            `
+            <div
+              class="member-chip"
+              title="ID Discord">
+
+              ID ${escapeHtml(
+                String(discordId)
+              )}
+
+            </div>
+            `
+            :
+            ""
+          }
+
+
+          <div class="member-chip green">
+
+            ● ACTIF
+
+          </div>
+
+
+        </div>
+
+
+      </div>
+
+
+      ${profileButton}
+
+
+    </div>
+
+  `;
+
+}
+
+
+/* ==========================================================
+   OUTILS
+========================================================== */
+
+function removeAt(value){
+
+  return String(value)
+    .replace(/^@/, "");
+
+}
+
+
+function getInitials(name){
+
+  const parts =
+    String(name)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if(parts.length === 0){
+    return "?";
+  }
+
+  if(parts.length === 1){
+    return parts[0]
+      .substring(0,2)
+      .toUpperCase();
+  }
+
+  return (
+    parts[0][0] +
+    parts[parts.length - 1][0]
+  ).toUpperCase();
+
+}
+
+
+function escapeHtml(value){
+
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    value == null
+    ? ""
+    : String(value);
+
   return div.innerHTML;
 
 }
 
 
-function toggleGrade(index){
+function escapeAttribute(value){
 
-  const el =
-    document.getElementById(`grade-${index}`);
-
-  el.classList.toggle("open");
+  return escapeHtml(value)
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
 }
 
+
+/* ==========================================================
+   TOGGLE GRADE
+========================================================== */
+
+function toggleGrade(index){
+
+  const el =
+    document.getElementById(
+      `grade-${index}`
+    );
+
+  if(el){
+    el.classList.toggle("open");
+  }
+
+}
 
 
 /* ==========================================================
@@ -1587,82 +2114,145 @@ function updateClock(){
     n =>
       String(n).padStart(2,"0");
 
-  document.getElementById("clock")
-    .textContent =
-      `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const clock =
+    document.getElementById("clock");
+
+  if(clock){
+
+    clock.textContent =
+      `${pad(d.getDate())}/` +
+      `${pad(d.getMonth()+1)}/` +
+      `${d.getFullYear()} ` +
+      `${pad(d.getHours())}:` +
+      `${pad(d.getMinutes())}`;
+
+  }
 
 }
 
 
 updateClock();
 
-setInterval(updateClock, 15000);
-
+setInterval(
+  updateClock,
+  15000
+);
 
 
 /* ==========================================================
-   INIT
+   INITIALISATION
 ========================================================== */
 
 loadData();
 
 
-
 /* ==========================================================
    PROTECTION ANTI-COPIE
-   (dissuasion — ne bloque pas un utilisateur déterminé,
-   mais stoppe la copie "en 2 clics")
 ========================================================== */
 
-document.addEventListener("contextmenu", function(e){
-  e.preventDefault();
-});
-
-document.addEventListener("keydown", function(e){
-
-  const key = e.key.toUpperCase();
-
-  if(key === "F12"){
+document.addEventListener(
+  "contextmenu",
+  function(e){
     e.preventDefault();
-    return;
   }
+);
 
-  if((e.ctrlKey || e.metaKey) && ["U","S","I","J"].includes(key)){
+
+document.addEventListener(
+  "keydown",
+  function(e){
+
+    const key =
+      e.key.toUpperCase();
+
+
+    if(key === "F12"){
+
+      e.preventDefault();
+
+      return;
+
+    }
+
+
+    if(
+      (e.ctrlKey || e.metaKey) &&
+      ["U","S","I","J"].includes(key)
+    ){
+
+      e.preventDefault();
+
+      return;
+
+    }
+
+
+    if(
+      (e.ctrlKey || e.metaKey) &&
+      e.shiftKey &&
+      ["I","J","C"].includes(key)
+    ){
+
+      e.preventDefault();
+
+      return;
+
+    }
+
+  }
+);
+
+
+document.addEventListener(
+  "dragstart",
+  function(e){
     e.preventDefault();
-    return;
   }
+);
 
-  if((e.ctrlKey || e.metaKey) && e.shiftKey && ["I","J","C"].includes(key)){
+
+document.addEventListener(
+  "copy",
+  function(e){
     e.preventDefault();
-    return;
   }
+);
 
-});
 
-document.addEventListener("dragstart", function(e){
-  e.preventDefault();
-});
-
-document.addEventListener("copy", function(e){
-  e.preventDefault();
-});
+/* ==========================================================
+   DÉTECTION DEVTOOLS
+========================================================== */
 
 (function(){
 
   const threshold = 160;
 
-  setInterval(function(){
+  setInterval(
+    function(){
 
-    const widthGap = window.outerWidth - window.innerWidth > threshold;
-    const heightGap = window.outerHeight - window.innerHeight > threshold;
+      const widthGap =
+        window.outerWidth -
+        window.innerWidth >
+        threshold;
 
-    if(widthGap || heightGap){
-      document.body.innerHTML = "";
-    }
+      const heightGap =
+        window.outerHeight -
+        window.innerHeight >
+        threshold;
 
-  }, 1000);
+
+      if(widthGap || heightGap){
+
+        document.body.innerHTML = "";
+
+      }
+
+    },
+    1000
+  );
 
 })();
+
 
 </script>
 
