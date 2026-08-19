@@ -971,83 +971,12 @@
 
 /* ==========================================================
    DONNÉES
+   Chargées dynamiquement depuis data.js (voir loadData ci-dessous).
+   Ne sont plus écrites en dur ici : Ctrl+U sur index.html ne
+   montre plus le contenu des Procédures.
 ========================================================== */
 
-const categories = [
-
-  {
-    id:"general",
-
-    label:"Général",
-
-    desc:"Procédures généraux utilisés dans le cadre des opérations du CPD.",
-
-    Procédures:[
-
-      {
-        number:"01",
-
-        title:"Compte rendu d'intervention",
-
-        type:"RAPPORT",
-
-        description:
-          "Modèle permettant de rédiger un compte rendu complet à la suite d'une intervention.",
-
-        file:"https://docs.google.com/document/d/1VBaDAKFhK0FdDfAd1N_dADx8E1kCqZ7LCeYmLatr5DA/edit?usp=sharing"
-
-      },
-
-
-      {
-        number:"02",
-
-        title:"Rapport d'incident",
-
-        type:"RAPPORT",
-
-        description:
-          "Procedure destiné à documenter un incident nécessitant un suivi administratif ou hiérarchique.",
-
-        file:"https://docs.google.com/document/d/1El4E35B-fStabW3TSJFoQIyvIJgCsr3G5vqPMZSLFRU/edit?usp=sharing"
-
-      },
-
-
-      {
-        number:"03",
-
-        title:"Rapport d'arrestation",
-
-        type:"RAPPORT",
-
-        description:
-          "Document permettant de formaliser les circonstances et les éléments liés à une arrestation.",
-
-        file:"https://docs.google.com/document/d/1hBOVnF6BPqUjMbSW8coOeCMs060MN-1-6Zc_uVnMOAE/edit?usp=sharing"
-
-      },
-
-
-      {
-        number:"04",
-
-        title:"Droit Miranda",
-
-        type:"Droit",
-
-        description:
-          "Procedure destiné à l'annonce des droits miranda",
-
-        file:"https://docs.google.com/document/d/1ohEObrjaYPbMRByq0nK7I8iS87Q_jDMFbNGEzmt3I_o/edit?usp=sharing"
-
-      }
-
-    ]
-
-  }
-
-];
+let categories = [];
 
 
 
@@ -1056,6 +985,46 @@ const categories = [
 ========================================================== */
 
 let currentCategory = "general";
+
+
+
+/* ==========================================================
+   CHARGEMENT DES DONNÉES
+========================================================== */
+
+async function loadData(){
+
+  try{
+
+    const response = await fetch("data.js?_=" + Date.now());
+    const text = await response.text();
+
+    // data.js définit CPD_DATA dans son propre scope,
+    // on l'exécute et on récupère la variable.
+    const script = document.createElement("script");
+    script.textContent = text;
+    document.head.appendChild(script);
+
+    categories = window.CPD_DATA || [];
+
+    render();
+
+  }catch(err){
+
+    document.getElementById("Procédures").innerHTML = `
+
+      <div class="notice">
+        <div class="notice-title">Erreur de chargement</div>
+        Impossible de charger les données (data.js). Vérifiez que le
+        site est bien hébergé en ligne (http/https) et non ouvert
+        en local.
+      </div>
+
+    `;
+
+  }
+
+}
 
 
 
@@ -1409,7 +1378,7 @@ setInterval(
    INITIALISATION
 ========================================================== */
 
-render();
+loadData();
 
 
 
