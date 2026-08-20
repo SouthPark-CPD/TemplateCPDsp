@@ -841,7 +841,7 @@
       <span>
 
         VERSION :
-        <b>1.0</b>
+        <b>1.1</b>
 
       </span>
 
@@ -976,6 +976,57 @@ async function loadData(){
 
 
 /* ==========================================================
+   NORMALISATION DES LIENS D'IMAGES
+   Convertit automatiquement certains liens "de page" en liens
+   directs quand c'est possible (Imgur notamment). Un lien
+   d'album Imgur (imgur.com/a/XXXX) ou un code d'embed ne
+   pointent PAS vers une image et ne peuvent pas être devinés
+   automatiquement : il faut le lien direct de chaque image
+   (i.imgur.com/xxxx.jpg), récupéré via clic droit > "Copier
+   l'adresse de l'image" sur l'image elle-même.
+========================================================== */
+
+function normalizeImageSrc(rawSrc){
+
+  if(!rawSrc){
+    return "";
+  }
+
+  let src = String(rawSrc).trim();
+
+  // Si jamais un bout de code d'embed a été collé par erreur,
+  // on l'ignore plutôt que de casser l'affichage.
+  if(src.startsWith("<")){
+    console.warn(
+      "Un code d'intégration (embed) a été collé au lieu d'un lien direct :",
+      src
+    );
+    return "";
+  }
+
+  // Imgur : lien de page unique (imgur.com/abc1234) -> lien direct
+  const imgurPage = src.match(/^https?:\/\/(www\.)?imgur\.com\/([a-zA-Z0-9]{5,7})\/?$/);
+  if(imgurPage){
+    return `https://i.imgur.com/${imgurPage[2]}.jpg`;
+  }
+
+  // Imgur : lien d'album (imgur.com/a/XXXX) -> pas convertible automatiquement
+  if(/^https?:\/\/(www\.)?imgur\.com\/a\//.test(src)){
+    console.warn(
+      "Lien d'album Imgur détecté, impossible d'extraire une image directe :",
+      src,
+      "-> ouvre l'album et copie l'adresse de l'image individuelle (i.imgur.com/...)"
+    );
+    return "";
+  }
+
+  return src;
+
+}
+
+
+
+/* ==========================================================
    RENDU
 ========================================================== */
 
@@ -994,7 +1045,7 @@ function shotGrid(shots, extraClass){
 
     const src =
       shot && typeof shot.src === "string"
-      ? shot.src.trim()
+      ? normalizeImageSrc(shot.src)
       : "";
 
     if(src){
@@ -1050,8 +1101,22 @@ function handleShotError(img){
     return;
   }
 
+  console.warn("Échec de chargement de l'image :", img.src);
+
   img.style.display = "none";
   slot.classList.add("image-error");
+
+}
+
+
+function escapeHtml(str){
+
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
 }
 
