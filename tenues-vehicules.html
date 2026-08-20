@@ -430,6 +430,29 @@
     display:block;
   }
 
+  .shot-slot.empty{
+    border-style:dashed;
+  }
+
+  .shot-slot.image-error{
+    border-color:var(--red);
+  }
+
+  .shot-error-label{
+    display:none;
+    color:var(--red);
+  }
+
+  .shot-slot.image-error .shot-error-label{
+    display:block;
+    position:absolute;
+    left:0;
+    right:0;
+    top:50%;
+    transform:translateY(-50%);
+    background:rgba(12,16,21,.88);
+  }
+
   .shot-slot-label{
     font-size:10px;
     letter-spacing:1px;
@@ -898,18 +921,39 @@ async function loadData(){
 
   try{
 
-    const response = await fetch("data-tenues.js?_=" + Date.now());
-    const text = await response.text();
+    // On charge directement le fichier JS comme un vrai script.
+    // C'est plus fiable que de récupérer le texte puis de l'injecter.
+    window.CPD_DATA = undefined;
 
-    const script = document.createElement("script");
-    script.textContent = text;
-    document.head.appendChild(script);
+    await new Promise((resolve, reject) => {
 
-    grades = window.CPD_DATA || [];
+      const script = document.createElement("script");
+
+      script.src = "data-tenues.js?_=" + Date.now();
+      script.async = true;
+
+      script.onload = () => resolve();
+      script.onerror = () => reject(
+        new Error("Impossible de charger data-tenues.js")
+      );
+
+      document.head.appendChild(script);
+
+    });
+
+    if(!Array.isArray(window.CPD_DATA)){
+      throw new Error(
+        "window.CPD_DATA est absent ou invalide dans data-tenues.js"
+      );
+    }
+
+    grades = window.CPD_DATA;
 
     renderGrades();
 
   }catch(err){
+
+    console.error("Erreur chargement tenues :", err);
 
     document.getElementById("grades").innerHTML = `
 
@@ -917,8 +961,9 @@ async function loadData(){
         <div class="notice-title">Erreur de chargement</div>
         <p>
           Impossible de charger les données (data-tenues.js).
-          Vérifiez que le site est bien hébergé en ligne (http/https)
-          et non ouvert en local.
+        </p>
+        <p style="margin-top:8px;">
+          ${escapeHtml(err.message || String(err))}
         </p>
       </div>
 
@@ -936,27 +981,51 @@ async function loadData(){
 
 function shotGrid(shots, extraClass){
 
-  if(!shots || shots.length === 0){
+  if(!Array.isArray(shots) || shots.length === 0){
     return "";
   }
 
-  const slots = shots.map(shot => {
+  const slots = shots.map((shot, index) => {
 
-    if(shot.src){
+    const label =
+      shot && shot.label
+      ? String(shot.label)
+      : `Capture ${index + 1}`;
+
+    const src =
+      shot && typeof shot.src === "string"
+      ? shot.src.trim()
+      : "";
+
+    if(src){
 
       return `
         <div class="shot-slot">
-          <img src="${shot.src}" alt="${shot.label}">
+
+          <img
+            src="${escapeHtml(src)}"
+            alt="${escapeHtml(label)}"
+            title="${escapeHtml(label)}"
+            loading="eager"
+            decoding="async"
+            onerror="handleShotError(this)"
+          >
+
+          <div class="shot-slot-label shot-error-label">
+            Image indisponible
+            <b>${escapeHtml(label)}</b>
+          </div>
+
         </div>
       `;
 
     }
 
     return `
-      <div class="shot-slot">
+      <div class="shot-slot empty">
         <div class="shot-slot-label">
           Emplacement capture
-          <b>${shot.label}</b>
+          <b>${escapeHtml(label)}</b>
         </div>
       </div>
     `;
@@ -964,10 +1033,24 @@ function shotGrid(shots, extraClass){
   }).join("");
 
   return `
-    <div class="shot-grid ${extraClass || ""}">
+    <div class="shot-grid ${escapeHtml(extraClass || "")}">
       ${slots}
     </div>
   `;
+
+}
+
+
+function handleShotError(img){
+
+  const slot = img.closest(".shot-slot");
+
+  if(!slot){
+    return;
+  }
+
+  img.style.display = "none";
+  slot.classList.add("image-error");
 
 }
 
