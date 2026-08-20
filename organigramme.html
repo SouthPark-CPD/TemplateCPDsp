@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -11,14 +12,18 @@
 >
 
 <title>CPD // Organigramme</title>
-<link rel="icon" type="image/png" href="Seal_of_the_Chicago_Police_Department.png">
+
+<link
+  rel="icon"
+  type="image/png"
+  href="Seal_of_the_Chicago_Police_Department.png"
+>
+
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
-
 :root{
-
   --bg:#0b0f14;
   --bg-panel:#11161d;
   --bg-panel-2:#151b23;
@@ -41,45 +46,34 @@
 
   --font-display:'Oswald','Arial Narrow',sans-serif;
   --font-mono:'IBM Plex Mono','Consolas',monospace;
-
 }
-
 
 *{
   box-sizing:border-box;
 }
 
-
 html{
   scroll-behavior:smooth;
 }
 
-
 html,
 body{
-
   margin:0;
   padding:0;
-
 }
 
-
 body{
-
   background:
-
     radial-gradient(
       circle at 15% 0%,
       rgba(74,111,165,0.10),
       transparent 40%
     ),
-
     radial-gradient(
       circle at 100% 100%,
       rgba(201,162,39,0.06),
       transparent 45%
     ),
-
     var(--bg);
 
   color:var(--text);
@@ -92,16 +86,12 @@ body{
 
   -webkit-user-select:none;
   user-select:none;
-
 }
-
 
 input,
 textarea{
-
   -webkit-user-select:text;
   user-select:text;
-
 }
 
 
@@ -110,7 +100,6 @@ textarea{
 ========================================= */
 
 header{
-
   position:relative;
 
   border-bottom:1px solid var(--line);
@@ -125,12 +114,9 @@ header{
       rgba(74,111,165,0.06),
       transparent
     );
-
 }
 
-
 header::before{
-
   content:"";
 
   position:absolute;
@@ -138,7 +124,6 @@ header::before{
   inset:0;
 
   background-image:
-
     repeating-linear-gradient(
       0deg,
       rgba(255,255,255,0.015) 0px,
@@ -148,23 +133,17 @@ header::before{
     );
 
   pointer-events:none;
-
 }
 
-
 .header-inner{
-
   position:relative;
 
   max-width:1200px;
 
   margin:0 auto;
-
 }
 
-
 .badge-row{
-
   display:flex;
 
   align-items:center;
@@ -174,33 +153,17 @@ header::before{
   gap:20px;
 
   flex-wrap:wrap;
-
 }
 
-
 .badge-left{
-
   display:flex;
 
   align-items:center;
 
   gap:18px;
-
 }
-
-
-.star{
-
-  width:60px;
-  height:60px;
-
-  flex:0 0 auto;
-
-}
-
 
 .brand-title{
-
   font-family:var(--font-display);
 
   font-size:25px;
@@ -212,12 +175,9 @@ header::before{
   font-weight:600;
 
   color:var(--text);
-
 }
 
-
 .brand-sub{
-
   font-size:11px;
 
   letter-spacing:3px;
@@ -227,23 +187,17 @@ header::before{
   text-transform:uppercase;
 
   margin-top:4px;
-
 }
 
-
 .header-actions{
-
   display:flex;
 
   gap:8px;
 
   flex-wrap:wrap;
-
 }
 
-
 .header-link{
-
   font-family:var(--font-mono);
 
   font-size:11.5px;
@@ -265,39 +219,27 @@ header::before{
   white-space:nowrap;
 
   transition:all .15s;
-
 }
 
-
 .header-link:hover{
-
   background:var(--steel);
 
   color:#0b0f14;
-
 }
 
-
 .header-link.gold{
-
   border-color:var(--gold);
 
   color:var(--gold);
-
 }
 
-
 .header-link.gold:hover{
-
   background:var(--gold);
 
   color:#0b0f14;
-
 }
 
-
 .header-link.current{
-
   background:var(--gold);
 
   color:#0b0f14;
@@ -307,12 +249,9 @@ header::before{
   pointer-events:none;
 
   font-weight:600;
-
 }
 
-
 .status-line{
-
   margin-top:16px;
 
   font-size:11px;
@@ -326,21 +265,14 @@ header::before{
   gap:22px;
 
   flex-wrap:wrap;
-
 }
-
 
 .status-line span b{
-
   color:var(--amber);
-
 }
 
-
 .dot{
-
   width:6px;
-
   height:6px;
 
   border-radius:50%;
@@ -352,7 +284,6 @@ header::before{
   margin-right:6px;
 
   box-shadow:0 0 6px var(--green);
-
 }
 
 
@@ -361,18 +292,14 @@ header::before{
 ========================================= */
 
 main{
-
   max-width:1200px;
 
   margin:0 auto;
 
   padding:0 32px;
-
 }
 
-
 .panel{
-
   background:var(--bg-panel-2);
 
   border:1px solid var(--steel-dim);
@@ -380,21 +307,15 @@ main{
   border-top:2px solid var(--gold);
 
   margin-top:24px;
-
 }
 
-
 .panel-head{
-
   padding:28px;
 
   border-bottom:1px solid var(--line);
-
 }
 
-
 .panel-title{
-
   font-family:var(--font-display);
 
   font-size:22px;
@@ -402,12 +323,9 @@ main{
   letter-spacing:1.5px;
 
   text-transform:uppercase;
-
 }
 
-
 .panel-desc{
-
   font-size:12px;
 
   color:var(--text-dim);
@@ -415,7 +333,6 @@ main{
   margin-top:7px;
 
   line-height:1.6;
-
 }
 
 
@@ -424,14 +341,10 @@ main{
 ========================================= */
 
 .chart-wrap{
-
   padding:32px 20px 24px;
-
 }
 
-
 .chain{
-
   display:flex;
 
   flex-direction:column;
@@ -439,19 +352,13 @@ main{
   align-items:center;
 
   width:100%;
-
 }
-
 
 .tier-group{
-
   width:100%;
-
 }
 
-
 .tier-label{
-
   text-align:center;
 
   font-size:9.5px;
@@ -463,12 +370,9 @@ main{
   color:var(--text-dim);
 
   margin-bottom:10px;
-
 }
 
-
 .tier-row{
-
   display:flex;
 
   justify-content:center;
@@ -478,12 +382,9 @@ main{
   gap:10px;
 
   flex-wrap:wrap;
-
 }
 
-
 .chain-node{
-
   flex:1 1 150px;
 
   max-width:220px;
@@ -505,23 +406,17 @@ main{
   text-align:center;
 
   transition:.15s;
-
 }
 
-
 .chain-node:hover{
-
   border-color:var(--steel);
 
   background:#0e141b;
 
   transform:translateY(-2px);
-
 }
 
-
 .chain-node.tier-exec{
-
   border-top-color:var(--gold);
 
   background:
@@ -530,35 +425,23 @@ main{
       rgba(201,162,39,0.07),
       transparent
     );
-
 }
-
 
 .chain-node.tier-command{
-
   border-top-color:var(--gold-dim);
-
 }
-
 
 .chain-node.tier-super{
-
   border-top-color:var(--steel);
-
 }
 
-
 .chain-node.tier-base{
-
   border-top-color:var(--steel-dim);
 
   opacity:.92;
-
 }
 
-
 .chain-title{
-
   font-family:var(--font-display);
 
   font-size:13px;
@@ -566,21 +449,15 @@ main{
   letter-spacing:.6px;
 
   text-transform:uppercase;
-
 }
 
-
 .tier-exec .chain-title{
-
   font-size:15px;
 
   color:var(--gold);
-
 }
 
-
 .chain-sub{
-
   font-size:9.5px;
 
   color:var(--text-dim);
@@ -588,12 +465,9 @@ main{
   margin-top:5px;
 
   line-height:1.4;
-
 }
 
-
 .chain-connector{
-
   width:1px;
 
   height:22px;
@@ -601,7 +475,6 @@ main{
   background:var(--steel-dim);
 
   margin:4px auto;
-
 }
 
 
@@ -610,14 +483,10 @@ main{
 ========================================= */
 
 .grades{
-
   padding:12px 28px 28px;
-
 }
 
-
 .grade{
-
   border:1px solid var(--line);
 
   background:var(--bg-dark);
@@ -625,19 +494,13 @@ main{
   margin-top:14px;
 
   transition:border-color .15s;
-
 }
-
 
 .grade.open{
-
   border-color:var(--steel-dim);
-
 }
 
-
 .grade-header{
-
   display:flex;
 
   justify-content:space-between;
@@ -653,37 +516,25 @@ main{
   background:rgba(74,111,165,.04);
 
   cursor:pointer;
-
 }
-
 
 .grade.open .grade-header{
-
   border-bottom-color:var(--line);
-
 }
-
 
 .grade-header:hover{
-
   background:rgba(74,111,165,.08);
-
 }
 
-
 .grade-left{
-
   display:flex;
 
   align-items:center;
 
   gap:14px;
-
 }
 
-
 .grade-rank{
-
   color:var(--gold);
 
   font-size:11px;
@@ -691,12 +542,9 @@ main{
   letter-spacing:1px;
 
   min-width:28px;
-
 }
 
-
 .grade-title{
-
   font-family:var(--font-display);
 
   font-size:16px;
@@ -704,50 +552,34 @@ main{
   letter-spacing:1px;
 
   text-transform:uppercase;
-
 }
 
-
 .grade-reports{
-
   font-size:10px;
 
   color:var(--text-dim);
-
 }
 
-
 .grade-caret{
-
   color:var(--text-dim);
 
   transition:.2s;
-
 }
 
-
 .grade.open .grade-caret{
-
   transform:rotate(90deg);
 
   color:var(--gold);
-
 }
 
-
 .grade-content{
-
   display:none;
 
   padding:22px 20px 26px;
-
 }
 
-
 .grade.open .grade-content{
-
   display:block;
-
 }
 
 
@@ -756,7 +588,6 @@ main{
 ========================================= */
 
 .section-label{
-
   font-family:var(--font-display);
 
   font-size:12.5px;
@@ -772,26 +603,21 @@ main{
   padding-bottom:8px;
 
   border-bottom:1px solid var(--line);
-
 }
-
 
 .section-label.gold{
-
   color:var(--gold);
-
 }
-
 
 .section-block{
-
   margin-bottom:22px;
-
 }
 
+.section-block:last-child{
+  margin-bottom:0;
+}
 
 .item-list{
-
   list-style:none;
 
   margin:0;
@@ -801,23 +627,17 @@ main{
   font-size:12px;
 
   line-height:1.75;
-
 }
 
-
 .item-list li{
-
   position:relative;
 
   padding-left:16px;
 
   margin-bottom:6px;
-
 }
 
-
 .item-list li::before{
-
   content:"›";
 
   position:absolute;
@@ -825,27 +645,24 @@ main{
   left:0;
 
   color:var(--amber);
-
 }
 
-
 .item-note{
-
   font-size:11px;
 
   color:var(--text-dim);
 
-  margin-top:4px;
+  margin-top:6px;
 
+  line-height:1.6;
 }
 
 
 /* =========================================
-   CARTES MEMBRES DISCORD
+   MEMBRES DISCORD
 ========================================= */
 
 .members-grid{
-
   display:grid;
 
   grid-template-columns:
@@ -855,12 +672,9 @@ main{
     );
 
   gap:10px;
-
 }
 
-
 .member-card{
-
   display:flex;
 
   align-items:center;
@@ -870,7 +684,6 @@ main{
   padding:12px;
 
   background:
-
     linear-gradient(
       135deg,
       rgba(74,111,165,.07),
@@ -887,29 +700,22 @@ main{
     transform .15s,
     border-color .15s,
     background .15s;
-
 }
 
-
 .member-card:hover{
-
   transform:translateY(-2px);
 
   border-color:var(--gold);
 
   background:
-
     linear-gradient(
       135deg,
       rgba(201,162,39,.09),
       rgba(12,16,21,.98)
     );
-
 }
 
-
 .member-avatar{
-
   width:54px;
 
   height:54px;
@@ -923,28 +729,19 @@ main{
   border:2px solid var(--steel-dim);
 
   background:#11161d;
-
 }
-
 
 .member-card:hover .member-avatar{
-
   border-color:var(--gold);
-
 }
 
-
 .member-info{
-
   min-width:0;
 
   flex:1;
-
 }
 
-
 .member-name{
-
   font-family:var(--font-display);
 
   font-size:15px;
@@ -958,12 +755,9 @@ main{
   text-overflow:ellipsis;
 
   text-transform:uppercase;
-
 }
 
-
 .member-username{
-
   font-size:9.5px;
 
   color:var(--text-dim);
@@ -975,12 +769,9 @@ main{
   text-overflow:ellipsis;
 
   white-space:nowrap;
-
 }
 
-
 .member-meta{
-
   display:flex;
 
   align-items:center;
@@ -990,12 +781,9 @@ main{
   margin-top:7px;
 
   flex-wrap:wrap;
-
 }
 
-
 .member-matricule{
-
   font-size:10px;
 
   color:var(--gold);
@@ -1005,29 +793,48 @@ main{
   padding:3px 6px;
 
   letter-spacing:.7px;
-
 }
 
-
 .member-discord{
-
   font-size:9px;
 
   color:var(--steel);
 
   letter-spacing:.4px;
-
 }
 
+.member-activity{
+  width:100%;
+
+  font-size:9.5px;
+
+  color:var(--text-dim);
+
+  margin-top:6px;
+
+  letter-spacing:.2px;
+
+  line-height:1.5;
+}
+
+.member-activity.old{
+  color:var(--red);
+
+  font-weight:600;
+}
+
+.member-activity.unknown{
+  color:var(--text-dim);
+}
 
 .members-empty{
-
   font-size:11px;
 
   color:var(--text-dim);
 
   font-style:italic;
 
+  padding:6px 0;
 }
 
 
@@ -1036,7 +843,6 @@ main{
 ========================================= */
 
 .notice{
-
   border-left:3px solid var(--gold);
 
   background:rgba(201,162,39,.05);
@@ -1044,12 +850,9 @@ main{
   padding:14px 16px;
 
   margin:18px 32px 0;
-
 }
 
-
 .notice-title{
-
   color:var(--gold);
 
   font-family:var(--font-display);
@@ -1061,12 +864,9 @@ main{
   font-size:12px;
 
   margin-bottom:5px;
-
 }
 
-
 .notice p{
-
   font-size:11.5px;
 
   color:var(--text-dim);
@@ -1074,7 +874,6 @@ main{
   line-height:1.6;
 
   margin:0;
-
 }
 
 
@@ -1083,7 +882,6 @@ main{
 ========================================= */
 
 footer{
-
   max-width:1200px;
 
   margin:0 auto;
@@ -1097,7 +895,6 @@ footer{
   letter-spacing:1px;
 
   text-align:center;
-
 }
 
 
@@ -1129,6 +926,7 @@ footer{
 
   .header-link{
     flex:1;
+
     text-align:center;
   }
 
@@ -1162,6 +960,10 @@ footer{
 <body>
 
 
+<!-- ==========================================================
+     HEADER
+========================================================== -->
+
 <header>
 
   <div class="header-inner">
@@ -1189,37 +991,43 @@ footer{
 
         <a
           class="header-link"
-          href="index.html">
+          href="index.html"
+        >
           🗂 Procédures
         </a>
 
         <a
           class="header-link"
-          href="code.html">
+          href="code.html"
+        >
           📻 Guide radio
         </a>
 
         <a
           class="header-link"
-          href="reglement.html">
+          href="reglement.html"
+        >
           ⚖ Règlement
         </a>
 
         <a
           class="header-link"
-          href="tenues-vehicules.html">
+          href="tenues-vehicules.html"
+        >
           🎽 Tenues & Véhicules
         </a>
 
         <a
           class="header-link current"
-          href="organigramme.html">
+          href="organigramme.html"
+        >
           🧭 Organigramme
         </a>
 
         <a
           class="header-link"
-          href="divisions.html">
+          href="divisions.html"
+        >
           🏛 Divisions
         </a>
 
@@ -1227,7 +1035,8 @@ footer{
           class="header-link gold"
           href="https://guidejuridiquesp.netlify.app/"
           target="_blank"
-          rel="noopener">
+          rel="noopener"
+        >
           📖 Guide juridique ↗
         </a>
 
@@ -1264,8 +1073,16 @@ footer{
 </header>
 
 
+<!-- ==========================================================
+     MAIN
+========================================================== -->
+
 <main>
 
+
+  <!-- ========================================================
+       CHAINE DE COMMANDEMENT
+  ========================================================= -->
 
   <div class="panel">
 
@@ -1286,14 +1103,17 @@ footer{
 
       <div
         class="chain"
-        id="chain">
-      </div>
+        id="chain"
+      ></div>
 
     </div>
 
-
   </div>
 
+
+  <!-- ========================================================
+       DETAIL DES GRADES
+  ========================================================= -->
 
   <div class="panel">
 
@@ -1312,8 +1132,8 @@ footer{
 
     <div
       class="grades"
-      id="grades">
-    </div>
+      id="grades"
+    ></div>
 
   </div>
 
@@ -1371,24 +1191,38 @@ async function loadData(){
         Date.now()
       );
 
+    if(!response.ok){
+
+      throw new Error(
+        "Impossible de charger data-organigramme.js"
+      );
+
+    }
+
     const text =
       await response.text();
 
     const script =
       document.createElement("script");
 
-    script.textContent = text;
+    script.textContent =
+      text;
 
-    document.head.appendChild(script);
+    document.head.appendChild(
+      script
+    );
 
     const data =
       window.CPD_DATA || {};
 
+
     chainOfCommand =
       data.chainOfCommand || [];
 
+
     divisions =
       data.divisions || [];
+
 
     gradeDetails =
       data.gradeDetails || [];
@@ -1398,13 +1232,20 @@ async function loadData(){
 
     renderGradeDetails();
 
-    loadMembers();
+    await loadMembers();
 
   }
 
   catch(err){
 
-    document.getElementById("chain").innerHTML = `
+    console.error(
+      "Erreur chargement données :",
+      err
+    );
+
+    document.getElementById(
+      "chain"
+    ).innerHTML = `
 
       <div class="notice">
 
@@ -1413,9 +1254,28 @@ async function loadData(){
         </div>
 
         <p>
-          Impossible de charger les données.
-          Vérifiez que le fichier
-          data-organigramme.js est disponible.
+          Impossible de charger les données de l'organigramme.
+        </p>
+
+      </div>
+
+    `;
+
+
+    document.getElementById(
+      "grades"
+    ).innerHTML = `
+
+      <div class="notice">
+
+        <div class="notice-title">
+          Grades indisponibles
+        </div>
+
+        <p>
+          Le fichier
+          data-organigramme.js
+          n'a pas pu être chargé.
         </p>
 
       </div>
@@ -1467,7 +1327,8 @@ async function loadMembers(){
       err
     );
 
-    liveMembers = {};
+    liveMembers =
+      {};
 
     liveMembersState =
       "error";
@@ -1475,6 +1336,10 @@ async function loadMembers(){
   }
 
 
+  /*
+    Même si l'API Discord est indisponible,
+    les grades restent affichés.
+  */
   renderGradeDetails();
 
 }
@@ -1487,7 +1352,9 @@ async function loadMembers(){
 function renderChain(){
 
   const container =
-    document.getElementById("chain");
+    document.getElementById(
+      "chain"
+    );
 
   container.innerHTML = "";
 
@@ -1498,7 +1365,9 @@ function renderChain(){
       if(index > 0){
 
         const connector =
-          document.createElement("div");
+          document.createElement(
+            "div"
+          );
 
         connector.className =
           "chain-connector";
@@ -1511,30 +1380,41 @@ function renderChain(){
 
 
       const tierGroup =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       tierGroup.className =
         "tier-group";
 
 
       const nodesHtml =
-        group.ranks.map(
+        group.ranks
+        .map(
           rank => `
 
             <div
-              class="chain-node ${group.tier}"
+              class="chain-node ${escapeHtml(
+                group.tier || ""
+              )}"
             >
 
               <div class="chain-title">
-                ${escapeHtml(rank.title)}
+                ${escapeHtml(
+                  rank.title
+                )}
               </div>
 
               ${
                 rank.sub
                 ?
-                `<div class="chain-sub">
-                  ${escapeHtml(rank.sub)}
-                </div>`
+                `
+                <div class="chain-sub">
+                  ${escapeHtml(
+                    rank.sub
+                  )}
+                </div>
+                `
                 :
                 ""
               }
@@ -1542,13 +1422,16 @@ function renderChain(){
             </div>
 
           `
-        ).join("");
+        )
+        .join("");
 
 
       tierGroup.innerHTML = `
 
         <div class="tier-label">
-          ${escapeHtml(group.label)}
+          ${escapeHtml(
+            group.label
+          )}
         </div>
 
         <div class="tier-row">
@@ -1575,16 +1458,50 @@ function renderChain(){
 function renderGradeDetails(){
 
   const container =
-    document.getElementById("grades");
+    document.getElementById(
+      "grades"
+    );
+
+  if(!container){
+    return;
+  }
 
   container.innerHTML = "";
+
+
+  if(!Array.isArray(
+    gradeDetails
+  ) || gradeDetails.length === 0){
+
+    container.innerHTML = `
+
+      <div class="notice">
+
+        <div class="notice-title">
+          Aucun grade disponible
+        </div>
+
+        <p>
+          Aucun détail de grade n'a été trouvé
+          dans data-organigramme.js.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
 
 
   gradeDetails.forEach(
     (grade,index) => {
 
       const el =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       el.className =
         "grade";
@@ -1603,14 +1520,17 @@ function renderGradeDetails(){
           <div class="grade-left">
 
             <div class="grade-rank">
-              GR. ${escapeHtml(
-                String(grade.rank)
+              GR.
+              ${escapeHtml(
+                String(
+                  grade.rank || "—"
+                )
               )}
             </div>
 
             <div class="grade-title">
               ${escapeHtml(
-                grade.title
+                grade.title || "Grade"
               )}
             </div>
 
@@ -1627,6 +1547,8 @@ function renderGradeDetails(){
         <div class="grade-content">
 
 
+          <!-- RESPONSABILITES -->
+
           <div class="section-block">
 
             <div class="section-label gold">
@@ -1636,11 +1558,16 @@ function renderGradeDetails(){
             <ul class="item-list">
 
               ${
-                (grade.responsabilites || [])
+                (
+                  grade.responsabilites ||
+                  []
+                )
                 .map(
-                  r => `
+                  responsibility => `
                     <li>
-                      ${escapeHtml(r)}
+                      ${escapeHtml(
+                        responsibility
+                      )}
                     </li>
                   `
                 )
@@ -1652,6 +1579,8 @@ function renderGradeDetails(){
           </div>
 
 
+          <!-- PREREQUIS -->
+
           <div class="section-block">
 
             <div class="section-label">
@@ -1661,11 +1590,16 @@ function renderGradeDetails(){
             <ul class="item-list">
 
               ${
-                (grade.prerequis || [])
+                (
+                  grade.prerequis ||
+                  []
+                )
                 .map(
-                  p => `
+                  prerequisite => `
                     <li>
-                      ${escapeHtml(p)}
+                      ${escapeHtml(
+                        prerequisite
+                      )}
                     </li>
                   `
                 )
@@ -1689,6 +1623,8 @@ function renderGradeDetails(){
           </div>
 
 
+          <!-- MEMBRES -->
+
           <div class="section-block">
 
             <div class="section-label gold">
@@ -1708,10 +1644,176 @@ function renderGradeDetails(){
       `;
 
 
-      container.appendChild(el);
+      container.appendChild(
+        el
+      );
 
     }
   );
+
+}
+
+
+/* =========================================
+   CONVERSION DATE ACTIVITE
+========================================= */
+
+function parseActivityDate(
+  value
+){
+
+  if(!value){
+
+    return null;
+
+  }
+
+
+  const match =
+    value.match(
+      /^(\d{2})\/(\d{2})\/(\d{4}) à (\d{2}):(\d{2})$/
+    );
+
+
+  if(!match){
+
+    return null;
+
+  }
+
+
+  const day =
+    Number(
+      match[1]
+    );
+
+
+  const month =
+    Number(
+      match[2]
+    ) - 1;
+
+
+  const year =
+    Number(
+      match[3]
+    );
+
+
+  const hours =
+    Number(
+      match[4]
+    );
+
+
+  const minutes =
+    Number(
+      match[5]
+    );
+
+
+  return new Date(
+    year,
+    month,
+    day,
+    hours,
+    minutes
+  );
+
+}
+
+
+/* =========================================
+   STATUT ACTIVITE
+========================================= */
+
+function getActivityStatus(
+  activity
+){
+
+  if(!activity){
+
+    return {
+
+      className:
+        "member-activity unknown",
+
+      text:
+        "DERNIÈRE ACTIVITÉ : INCONNUE"
+
+    };
+
+  }
+
+
+  const date =
+    parseActivityDate(
+      activity
+    );
+
+
+  if(!date){
+
+    return {
+
+      className:
+        "member-activity unknown",
+
+      text:
+        "DERNIÈRE ACTIVITÉ : " +
+        activity
+
+    };
+
+  }
+
+
+  const now =
+    new Date();
+
+
+  const difference =
+    now.getTime() -
+    date.getTime();
+
+
+  const thirtyDays =
+    30 *
+    24 *
+    60 *
+    60 *
+    1000;
+
+
+  if(
+    difference >=
+    thirtyDays
+  ){
+
+    return {
+
+      className:
+        "member-activity old",
+
+      text:
+        "DERNIÈRE ACTIVITÉ : " +
+        activity
+
+    };
+
+  }
+
+
+  return {
+
+    className:
+      "member-activity",
+
+    text:
+      "DERNIÈRE ACTIVITÉ : " +
+      activity
+
+  };
 
 }
 
@@ -1730,9 +1832,11 @@ function renderMembersList(
   ){
 
     return `
+
       <div class="members-empty">
         Chargement des membres Discord…
       </div>
+
     `;
 
   }
@@ -1744,16 +1848,20 @@ function renderMembersList(
   ){
 
     return `
+
       <div class="members-empty">
         Liste des membres indisponible.
       </div>
+
     `;
 
   }
 
 
   const members =
-    liveMembers[gradeTitle] || [];
+    liveMembers[
+      gradeTitle
+    ] || [];
 
 
   if(
@@ -1761,9 +1869,11 @@ function renderMembersList(
   ){
 
     return `
+
       <div class="members-empty">
         Aucun membre actuellement à ce grade.
       </div>
+
     `;
 
   }
@@ -1788,6 +1898,12 @@ function renderMembersList(
               `https://discord.com/users/${member.id}`;
 
 
+            const activity =
+              getActivityStatus(
+                member.last_activity
+              );
+
+
             return `
 
               <a
@@ -1799,7 +1915,6 @@ function renderMembersList(
                 rel="noopener noreferrer"
                 title="Ouvrir le profil Discord"
               >
-
 
                 <img
                   class="member-avatar"
@@ -1813,15 +1928,12 @@ function renderMembersList(
 
                 <div class="member-info">
 
-
                   <div class="member-name">
-
                     ${escapeHtml(
                       member.name ||
                       member.username ||
                       "Inconnu"
                     )}
-
                   </div>
 
 
@@ -1830,11 +1942,9 @@ function renderMembersList(
                     ?
                     `
                     <div class="member-username">
-
                       @${escapeHtml(
                         member.username
                       )}
-
                     </div>
                     `
                     :
@@ -1844,34 +1954,35 @@ function renderMembersList(
 
                   <div class="member-meta">
 
-
                     <span
                       class="member-matricule"
                     >
-
                       MAT.
                       ${escapeHtml(
                         member.matricule ||
                         "N/A"
                       )}
-
                     </span>
-
 
                     <span
                       class="member-discord"
                     >
-
                       ↗ PROFIL DISCORD
-
                     </span>
-
 
                   </div>
 
 
-                </div>
+                  <div
+                    class="${activity.className}"
+                  >
+                    ${escapeHtml(
+                      activity.text
+                    )}
+                  </div>
 
+
+                </div>
 
               </a>
 
@@ -1893,12 +2004,15 @@ function renderMembersList(
    TOGGLE GRADE
 ========================================= */
 
-function toggleGrade(index){
+function toggleGrade(
+  index
+){
 
   const el =
     document.getElementById(
       `grade-${index}`
     );
+
 
   if(el){
 
@@ -1915,17 +2029,21 @@ function toggleGrade(index){
    ESCAPE HTML
 ========================================= */
 
-function escapeHtml(value){
+function escapeHtml(
+  value
+){
 
   const div =
     document.createElement(
       "div"
     );
 
+
   div.textContent =
     value == null
     ? ""
     : String(value);
+
 
   return div.innerHTML;
 
@@ -1944,7 +2062,9 @@ function updateClock(){
 
   const pad =
     n =>
-      String(n).padStart(
+      String(
+        n
+      ).padStart(
         2,
         "0"
       );
@@ -2019,7 +2139,9 @@ document.addEventListener(
 
     if(
       (e.ctrlKey || e.metaKey) &&
-      ["U","S","I","J"].includes(key)
+      ["U","S","I","J"].includes(
+        key
+      )
     ){
 
       e.preventDefault();
@@ -2030,7 +2152,9 @@ document.addEventListener(
     if(
       (e.ctrlKey || e.metaKey) &&
       e.shiftKey &&
-      ["I","J","C"].includes(key)
+      ["I","J","C"].includes(
+        key
+      )
     ){
 
       e.preventDefault();
@@ -2066,3 +2190,4 @@ document.addEventListener(
 </body>
 
 </html>
+```
