@@ -19,8 +19,8 @@ window.CPD_DATA = [
     ],
     note:"Aucune personnalisation de tenue autorisée à ce grade.",
     tenueShots:[
-      { label:"Tenue Rookie — Vue face", src:"" },
-      { label:"Tenue Rookie — Vue dos", src:"" }
+      { label:"Tenue Rookie — Vue face", src:"https://media.discordapp.net/attachments/1243266130508910751/1540068146470191244/image.png?ex=6a889bbb&is=6a874a3b&hm=ceca71ab617cc8bbf92951e5dfc749940998a0bc5e85866692cc76f270692a75&=&format=webp&quality=lossless" },
+      { label:"Tenue Rookie — Vue dos", src:"https://media.discordapp.net/attachments/1243266130508910751/1540068192313942016/image.png?ex=6a889bc6&is=6a874a46&hm=3e469f7092b2002cfd248fcef23616297d14e7c2a2895307349768ece51ba0c7&=&format=webp&quality=lossless" }
     ],
     vehicules:[
       "Ford Crown Victoria (Patrouille)",
@@ -42,7 +42,7 @@ window.CPD_DATA = [
     ],
     note:"",
     tenueShots:[
-      { label:"Tenue Officer 1 — Vue face", src:"" }
+      { label:"Tenue Officer 1 — Vue face", src:"https://media.discordapp.net/attachments/1243266130508910751/1540068544560103574/image.png?ex=6a889c1a&is=6a874a9a&hm=610e9dcd2eaf9cacc4a0390500a15cd52bf435974091ea6d98e0186ae8f52857&=&format=webp&quality=lossless" }
     ],
     vehicules:[
       "Ford Crown Victoria (Patrouille)",
