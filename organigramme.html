@@ -11,13 +11,7 @@
 >
 
 <title>CPD // Organigramme</title>
-
-<link
-  rel="icon"
-  type="image/png"
-  href="Seal_of_the_Chicago_Police_Department.png"
->
-
+<link rel="icon" type="image/png" href="Seal_of_the_Chicago_Police_Department.png">
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
@@ -191,6 +185,16 @@ header::before{
   align-items:center;
 
   gap:18px;
+
+}
+
+
+.star{
+
+  width:60px;
+  height:60px;
+
+  flex:0 0 auto;
 
 }
 
@@ -1016,37 +1020,13 @@ main{
 }
 
 
-/* =========================================
-   DERNIERE ACTIVITE
-========================================= */
+.members-empty{
 
-.member-activity{
-
-  width:100%;
-
-  font-size:9.5px;
+  font-size:11px;
 
   color:var(--text-dim);
 
-  margin-top:6px;
-
-  letter-spacing:.2px;
-
-}
-
-
-.member-activity.old{
-
-  color:var(--red);
-
-  font-weight:600;
-
-}
-
-
-.member-activity.unknown{
-
-  color:var(--text-dim);
+  font-style:italic;
 
 }
 
@@ -1311,6 +1291,7 @@ footer{
 
     </div>
 
+
   </div>
 
 
@@ -1422,11 +1403,6 @@ async function loadData(){
   }
 
   catch(err){
-
-    console.error(
-      "Erreur chargement données :",
-      err
-    );
 
     document.getElementById("chain").innerHTML = `
 
@@ -1546,7 +1522,7 @@ function renderChain(){
           rank => `
 
             <div
-              class="chain-node ${escapeHtml(group.tier || "")}"
+              class="chain-node ${group.tier}"
             >
 
               <div class="chain-title">
@@ -1741,148 +1717,6 @@ function renderGradeDetails(){
 
 
 /* =========================================
-   CONVERSION DATE ACTIVITE
-========================================= */
-
-function parseActivityDate(value){
-
-  if(!value){
-
-    return null;
-
-  }
-
-
-  const match =
-    value.match(
-      /^(\d{2})\/(\d{2})\/(\d{4}) à (\d{2}):(\d{2})$/
-    );
-
-
-  if(!match){
-
-    return null;
-
-  }
-
-
-  const day =
-    Number(match[1]);
-
-  const month =
-    Number(match[2]) - 1;
-
-  const year =
-    Number(match[3]);
-
-  const hours =
-    Number(match[4]);
-
-  const minutes =
-    Number(match[5]);
-
-
-  return new Date(
-    year,
-    month,
-    day,
-    hours,
-    minutes
-  );
-
-}
-
-
-/* =========================================
-   STATUT ACTIVITE
-========================================= */
-
-function getActivityStatus(
-  activity
-){
-
-  if(!activity){
-
-    return {
-      className:
-        "member-activity unknown",
-
-      text:
-        "DERNIÈRE ACTIVITÉ : INCONNUE"
-
-    };
-
-  }
-
-
-  const date =
-    parseActivityDate(activity);
-
-
-  if(!date){
-
-    return {
-      className:
-        "member-activity unknown",
-
-      text:
-        "DERNIÈRE ACTIVITÉ : " +
-        activity
-
-    };
-
-  }
-
-
-  const now =
-    new Date();
-
-
-  const difference =
-    now.getTime() -
-    date.getTime();
-
-
-  const thirtyDays =
-    30 *
-    24 *
-    60 *
-    60 *
-    1000;
-
-
-  if(
-    difference >=
-    thirtyDays
-  ){
-
-    return {
-      className:
-        "member-activity old",
-
-      text:
-        "DERNIÈRE ACTIVITÉ : " +
-        activity
-
-    };
-
-  }
-
-
-  return {
-    className:
-      "member-activity",
-
-    text:
-      "DERNIÈRE ACTIVITÉ : " +
-      activity
-
-  };
-
-}
-
-
-/* =========================================
    CARTES MEMBRES
 ========================================= */
 
@@ -1952,12 +1786,6 @@ function renderMembersList(
             const discordUrl =
               member.discord_url ||
               `https://discord.com/users/${member.id}`;
-
-
-            const activity =
-              getActivityStatus(
-                member.last_activity
-              );
 
 
             return `
@@ -2039,17 +1867,6 @@ function renderMembersList(
                     </span>
 
 
-                    <div
-                      class="${activity.className}"
-                    >
-
-                      ${escapeHtml(
-                        activity.text
-                      )}
-
-                    </div>
-
-
                   </div>
 
 
@@ -2083,7 +1900,6 @@ function toggleGrade(index){
       `grade-${index}`
     );
 
-
   if(el){
 
     el.classList.toggle(
@@ -2106,12 +1922,10 @@ function escapeHtml(value){
       "div"
     );
 
-
   div.textContent =
     value == null
     ? ""
     : String(value);
-
 
   return div.innerHTML;
 
