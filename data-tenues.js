@@ -2,12 +2,11 @@
    DONNÉES — Tenues & Véhicules CPD
    Fichier chargé dynamiquement par tenues-vehicules.html via fetch().
    Ce fichier n'apparaît PAS dans le "Ctrl+U" de tenues-vehicules.html.
-   -> Remplis "src" avec le lien de ta capture d'écran.
+   -> Remplis "src" avec le lien DIRECT de ta capture d'écran
+      (ex: https://i.imgur.com/xxxxxxx.jpg, https://files.catbox.moe/xxxxxx.png)
    -> Laisse src:"" pour garder l'emplacement vide.
 ========================================================== */
-
 window.CPD_DATA = [
-
   {
     rank:"01",
     title:"Rookie",
@@ -20,7 +19,7 @@ window.CPD_DATA = [
     note:"Aucune personnalisation de tenue autorisée à ce grade.",
     tenueShots:[
       { label:"Tenue Rookie — Vue face", src:"https://i.imgur.com/cpPQDW2.png" },
-      { label:"Tenue Rookie — Vue dos", src:"https://i.imgur.com/cpPQDW2.png" }
+      { label:"Tenue Rookie — Vue dos", src:"" }
     ],
     vehicules:[
       "Ford Crown Victoria (Patrouille)",
@@ -31,7 +30,6 @@ window.CPD_DATA = [
       { label:"Crown Victoria — Livrée CPD", src:"" }
     ]
   },
-
   {
     rank:"02",
     title:"Officer 1 à Office 3",
@@ -54,7 +52,6 @@ window.CPD_DATA = [
       { label:"Dodge Charger — Livrée CPD", src:"" }
     ]
   },
-
   {
     rank:"03",
     title:"SLO/FTO (Senior/Field Lead Officer)",
@@ -65,8 +62,8 @@ window.CPD_DATA = [
     ],
     note:"Grade de transition vers l'encadrement — briefing formation requis avant changement de tenue.",
     tenueShots:[
-      { label:"Tenue SLO — Vue face", src:"https://files.catbox.moe/on9g7n.png" },
-      { label:"Insigne SLO — Détail", src:"https://files.catbox.moe/on9g7n.png" }
+      { label:"Tenue SLO — Vue face", src:"" },
+      { label:"Insigne SLO — Détail", src:"" }
     ],
     vehicules:[
       "Ensemble du parc Officer",
@@ -78,7 +75,6 @@ window.CPD_DATA = [
       { label:"Véhicule de supervision — Livrée", src:"" }
     ]
   },
-
   {
     rank:"04",
     title:"Sergeant",
@@ -101,7 +97,6 @@ window.CPD_DATA = [
       { label:"Véhicule Sergeant — Livrée", src:"" }
     ]
   },
-
   {
     rank:"05",
     title:"Lieutenant",
@@ -125,5 +120,4 @@ window.CPD_DATA = [
       { label:"Véhicule de commandement — Livrée", src:"" }
     ]
   }
-
 ];
