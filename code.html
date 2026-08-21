@@ -1654,21 +1654,6 @@ document.addEventListener("copy", function(e){
   e.preventDefault();
 });
 
-(function(){
-
-  const threshold = 160;
-
-  setInterval(function(){
-
-    const widthGap = window.outerWidth - window.innerWidth > threshold;
-    const heightGap = window.outerHeight - window.innerHeight > threshold;
-
-    if(widthGap || heightGap){
-      document.body.innerHTML = "";
-    }
-
-  }, 1000);
-
 })();
 
 </script>
