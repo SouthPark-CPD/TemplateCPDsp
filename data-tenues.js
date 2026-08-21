@@ -18,8 +18,8 @@ window.CPD_DATA = [
     ],
     note:"Aucune personnalisation de tenue autorisée à ce grade.",
     tenueShots:[
-      { label:"Tenue Rookie — Vue face", src:"https://i.imgur.com/cpPQDW2.png" },
-      { label:"Tenue Rookie — Vue dos", src:"" }
+      { label:"Tenue Rookie — Vue face", src:"images/tenueoffi3.png"" },
+      { label:"Tenue Rookie — Vue dos", src:"images/tenueoffi3.png" }
     ],
     vehicules:[
       "Ford Crown Victoria (Patrouille)",
@@ -40,7 +40,7 @@ window.CPD_DATA = [
     ],
     note:"",
     tenueShots:[
-      { label:"Tenue Officer 1 — Vue face", src:"https://i.imgur.com/cpPQDW2.png" }
+      { label:"Tenue Officer 1 — Vue face", src:"images/tenueoffi3.png" }
     ],
     vehicules:[
       "Ford Crown Victoria (Patrouille)",
