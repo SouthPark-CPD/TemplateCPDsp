@@ -1424,24 +1424,6 @@ document.addEventListener("copy", function(e){
   e.preventDefault();
 });
 
-// Détection basique d'ouverture des DevTools (taille de fenêtre)
-(function(){
-
-  const threshold = 160;
-
-  setInterval(function(){
-
-    const widthGap = window.outerWidth - window.innerWidth > threshold;
-    const heightGap = window.outerHeight - window.innerHeight > threshold;
-
-    if(widthGap || heightGap){
-      document.body.innerHTML = "";
-    }
-
-  }, 1000);
-
-})();
-
 </script>
 
 
