@@ -1413,76 +1413,50 @@ function loadData(){
    GRILLE DES IMAGES
 ========================================================== */
 
-function shotGrid(
-  shots,
-  extraClass
-){
-
-  if(
-    !Array.isArray(shots) ||
-    shots.length === 0
-  ){
-
+function shotGrid(shots, extraClass) {
+  if (!Array.isArray(shots) || shots.length === 0) {
     return "";
-
   }
 
-
   return `
+    <div class="shot-grid ${escapeHtml(extraClass || "")}">
+      ${shots.map((shot, index) => {
+        const label = shot && shot.label ? String(shot.label) : `Capture ${index + 1}`;
+        const src = shot && typeof shot.src === "string" ? shot.src.trim() : "";
 
-    <div class="shot-grid ${escapeHtml(
-      extraClass || ""
-    )}">
-
-      ${shots.map(
-        (shot,index) => {
-
-          const label =
-            shot &&
-            shot.label
-
-              ? String(
-                  shot.label
-                )
-
-              : `Capture ${index + 1}`;
-
-
-          const src =
-            shot &&
-            typeof shot.src === "string"
-
-              ? shot.src.trim()
-
-              : "";
-
-
-          /*
-           * Aucun lien.
-           */
-          if(!src){
-
-            return `
-
-              <div class="shot-slot empty">
-
-                <div class="shot-slot-label">
-
-                  Emplacement capture
-
-                  <b>
-                    ${escapeHtml(
-                      label
-                    )}
-                  </b>
-
-                </div>
-
+        if (!src) {
+          return `
+            <div class="shot-slot empty">
+              <div class="shot-slot-label">
+                Emplacement capture
+                <b>${escapeHtml(label)}</b>
               </div>
+            </div>
+          `;
+        }
 
-            `;
-
-          }
+        return `
+          <div class="shot-slot">
+            <img
+              src="${escapeHtml(src)}"
+              alt="${escapeHtml(label)}"
+              title="${escapeHtml(label)}"
+              loading="lazy"
+              decoding="async"
+              onclick="openLightbox(this)"
+              onload="imageLoaded(this)"
+              onerror="imageError(this)"
+            >
+            <div class="shot-slot-label shot-error-label">
+              Image indisponible
+              <b>${escapeHtml(label)}</b>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
 
 
           /*
