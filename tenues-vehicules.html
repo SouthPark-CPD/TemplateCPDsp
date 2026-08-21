@@ -8,570 +8,648 @@
 
 <title>CPD // Tenues & Véhicules</title>
 <link rel="icon" type="image/png" href="Seal_of_the_Chicago_Police_Department.png">
+
 <style>
 
-  :root{
-    --bg:#0b0f14;
-    --bg-panel:#11161d;
-    --bg-panel-2:#151b23;
-    --bg-dark:#0c1015;
-    --line:#232b35;
-    --steel:#4a6fa5;
-    --steel-dim:#2c3d54;
-    --gold:#c9a227;
-    --gold-dim:#725d16;
-    --text:#dfe4e8;
-    --text-dim:#7c8894;
-    --amber:#e0a13a;
-    --red:#c94b4b;
-    --green:#4caf6f;
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
-    --font-display:'Oswald','Arial Narrow',sans-serif;
-    --font-mono:'IBM Plex Mono','Consolas',monospace;
-  }
+:root{
+  --bg:#0b0f14;
+  --bg-panel:#11161d;
+  --bg-panel-2:#151b23;
+  --bg-dark:#0c1015;
+  --line:#232b35;
+  --steel:#4a6fa5;
+  --steel-dim:#2c3d54;
+  --gold:#c9a227;
+  --gold-dim:#725d16;
+  --text:#dfe4e8;
+  --text-dim:#7c8894;
+  --amber:#e0a13a;
+  --red:#c94b4b;
+  --green:#4caf6f;
 
-  *{
-    box-sizing:border-box;
-  }
+  --font-display:'Oswald','Arial Narrow',sans-serif;
+  --font-mono:'IBM Plex Mono','Consolas',monospace;
+}
 
-  html{
-    scroll-behavior:smooth;
-  }
+*{
+  box-sizing:border-box;
+}
 
-  html,body{
-    margin:0;
-    padding:0;
-  }
+html{
+  scroll-behavior:smooth;
+}
 
-  body{
-    background:
-      radial-gradient(circle at 15% 0%, rgba(74,111,165,0.10), transparent 40%),
-      radial-gradient(circle at 100% 100%, rgba(201,162,39,0.06), transparent 45%),
-      var(--bg);
+html,
+body{
+  margin:0;
+  padding:0;
+}
 
-    color:var(--text);
-    font-family:var(--font-mono);
-    min-height:100vh;
-    padding-bottom:60px;
+body{
+  background:
+    radial-gradient(circle at 15% 0%, rgba(74,111,165,0.10), transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(201,162,39,0.06), transparent 45%),
+    var(--bg);
 
-    -webkit-user-select:none;
-    -moz-user-select:none;
-    -ms-user-select:none;
-    user-select:none;
-  }
+  color:var(--text);
+  font-family:var(--font-mono);
+  min-height:100vh;
+  padding-bottom:60px;
 
-  input, textarea{
-    -webkit-user-select:text;
-    -moz-user-select:text;
-    -ms-user-select:text;
-    user-select:text;
-  }
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+}
 
-  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+input,
+textarea{
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
+  user-select:text;
+}
 
 
-  /* =========================
-     HEADER
-  ========================= */
+/* ==========================================================
+   HEADER
+========================================================== */
+
+header{
+  position:relative;
+  border-bottom:1px solid var(--line);
+  padding:28px 32px 22px;
+  overflow:hidden;
+  background:linear-gradient(
+    180deg,
+    rgba(74,111,165,0.06),
+    transparent
+  );
+}
+
+header::before{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.015) 0px,
+      rgba(255,255,255,0.015) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+
+  pointer-events:none;
+}
+
+.header-inner{
+  position:relative;
+  max-width:1100px;
+  margin:0 auto;
+}
+
+.badge-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.badge-left{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+
+.star{
+  width:60px;
+  height:60px;
+  flex:0 0 auto;
+}
+
+.brand-title{
+  font-family:var(--font-display);
+  font-size:25px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  font-weight:600;
+  color:var(--text);
+  line-height:1.1;
+}
+
+.brand-sub{
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--steel);
+  text-transform:uppercase;
+  margin-top:4px;
+}
+
+.header-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.header-link{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:10px 16px;
+  border:1px solid var(--steel);
+  background:transparent;
+  color:var(--steel);
+  text-decoration:none;
+  white-space:nowrap;
+  transition:all .15s;
+  cursor:pointer;
+}
+
+.header-link:hover{
+  background:var(--steel);
+  color:#0b0f14;
+}
+
+.header-link.gold{
+  border-color:var(--gold);
+  color:var(--gold);
+}
+
+.header-link.gold:hover{
+  background:var(--gold);
+  color:#0b0f14;
+}
+
+.header-link.current{
+  background:var(--gold);
+  color:#0b0f14;
+  border-color:var(--gold);
+  pointer-events:none;
+  font-weight:600;
+}
+
+.status-line{
+  margin-top:16px;
+  font-size:11px;
+  color:var(--text-dim);
+  letter-spacing:1px;
+  display:flex;
+  gap:22px;
+  flex-wrap:wrap;
+}
+
+.status-line span b{
+  color:var(--amber);
+  font-weight:600;
+}
+
+.dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--green);
+  display:inline-block;
+  margin-right:6px;
+  box-shadow:0 0 6px var(--green);
+}
+
+
+/* ==========================================================
+   MAIN
+========================================================== */
+
+main{
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 32px;
+}
+
+.panel{
+  background:var(--bg-panel-2);
+  border:1px solid var(--steel-dim);
+  border-top:2px solid var(--gold);
+  margin-top:24px;
+}
+
+.panel-head{
+  padding:28px;
+  border-bottom:1px solid var(--line);
+}
+
+.panel-title{
+  font-family:var(--font-display);
+  font-size:22px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--text);
+}
+
+.panel-desc{
+  font-size:12px;
+  color:var(--text-dim);
+  margin-top:7px;
+  line-height:1.6;
+}
+
+
+/* ==========================================================
+   GRADES
+========================================================== */
+
+.grades{
+  padding:12px 28px 28px;
+}
+
+.grade{
+  border:1px solid var(--line);
+  background:var(--bg-dark);
+  margin-top:14px;
+  transition:border-color .15s, background .15s;
+}
+
+.grade.open{
+  border-color:var(--steel-dim);
+}
+
+.grade-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  padding:16px 18px;
+  border-bottom:1px solid transparent;
+  background:rgba(74,111,165,0.04);
+  cursor:pointer;
+  user-select:none;
+}
+
+.grade.open .grade-header{
+  border-bottom-color:var(--line);
+}
+
+.grade-header:hover{
+  background:rgba(74,111,165,0.08);
+}
+
+.grade-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.grade-rank{
+  color:var(--gold);
+  font-size:11px;
+  letter-spacing:1px;
+  min-width:28px;
+}
+
+.grade-title{
+  font-family:var(--font-display);
+  font-size:16px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--text);
+}
+
+.grade-caret{
+  color:var(--text-dim);
+  font-size:12px;
+  transition:transform .2s;
+}
+
+.grade.open .grade-caret{
+  transform:rotate(90deg);
+  color:var(--gold);
+}
+
+.grade-content{
+  display:none;
+  padding:22px 20px 26px;
+}
+
+.grade.open .grade-content{
+  display:block;
+}
+
+.section-label{
+  font-family:var(--font-display);
+  font-size:12.5px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--steel);
+  margin-bottom:12px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--line);
+}
+
+.section-label.gold{
+  color:var(--gold);
+}
+
+.section-block{
+  margin-bottom:26px;
+}
+
+.section-block:last-child{
+  margin-bottom:0;
+}
+
+
+/* ==========================================================
+   LISTES
+========================================================== */
+
+.item-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+  font-size:12px;
+  line-height:1.7;
+  color:var(--text);
+}
+
+.item-list li{
+  position:relative;
+  padding-left:16px;
+  margin-bottom:6px;
+}
+
+.item-list li::before{
+  content:"›";
+  position:absolute;
+  left:0;
+  color:var(--amber);
+}
+
+.item-note{
+  font-size:11px;
+  color:var(--text-dim);
+  margin-top:4px;
+  line-height:1.6;
+}
+
+
+/* ==========================================================
+   IMAGES
+========================================================== */
+
+.shot-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+  gap:12px;
+  margin-top:14px;
+}
+
+.shot-slot{
+  position:relative;
+  aspect-ratio:9/16;
+  min-height:180px;
+  border:1px solid var(--steel-dim);
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(74,111,165,0.04) 0px,
+      rgba(74,111,165,0.04) 8px,
+      transparent 8px,
+      transparent 16px
+    ),
+    var(--bg-panel);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.shot-slot img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  position:absolute;
+  inset:0;
+  z-index:2;
+  background:#0c1015;
+}
+
+.shot-slot.empty{
+  border-style:dashed;
+}
+
+.shot-slot.image-error{
+  border-color:var(--red);
+}
+
+.shot-slot.image-error::before{
+  content:"⚠";
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:30px;
+  color:var(--red);
+  opacity:.8;
+}
+
+.shot-error-label{
+  display:none;
+}
+
+.shot-slot.image-error .shot-error-label{
+  display:block;
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  top:auto;
+  transform:none;
+  background:rgba(12,16,21,.94);
+  padding:10px;
+  z-index:5;
+}
+
+.shot-slot-label{
+  font-size:10px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  text-align:center;
+  padding:8px;
+}
+
+.shot-slot-label b{
+  display:block;
+  color:var(--steel);
+  font-size:9px;
+  letter-spacing:1.5px;
+  margin-top:6px;
+}
+
+.shot-grid.vehicules .shot-slot{
+  aspect-ratio:16/10;
+}
+
+
+/* ==========================================================
+   NOTICE
+========================================================== */
+
+.notice{
+  border-left:3px solid var(--gold);
+  background:rgba(201,162,39,0.05);
+  padding:14px 16px;
+  margin:18px 32px 0;
+}
+
+.notice-title{
+  color:var(--gold);
+  font-family:var(--font-display);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  font-size:12px;
+  margin-bottom:5px;
+}
+
+.notice p{
+  font-size:11.5px;
+  color:var(--text-dim);
+  line-height:1.6;
+  margin:0;
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+footer{
+  max-width:1100px;
+  margin:0 auto;
+  padding:20px 32px 0;
+  font-size:10.5px;
+  color:var(--text-dim);
+  letter-spacing:1px;
+  text-align:center;
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media(max-width:700px){
 
   header{
-    position:relative;
-    border-bottom:1px solid var(--line);
-    padding:28px 32px 22px;
-    overflow:hidden;
-    background:linear-gradient(
-      180deg,
-      rgba(74,111,165,0.06),
-      transparent
-    );
+    padding:20px;
   }
 
-  header::before{
-    content:"";
-    position:absolute;
-    inset:0;
-
-    background-image:
-      repeating-linear-gradient(
-        0deg,
-        rgba(255,255,255,0.015) 0px,
-        rgba(255,255,255,0.015) 1px,
-        transparent 1px,
-        transparent 3px
-      );
-
-    pointer-events:none;
-  }
-
-  .header-inner{
-    position:relative;
-    max-width:1100px;
-    margin:0 auto;
-  }
-
-  .badge-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:20px;
-    flex-wrap:wrap;
-  }
-
-  .badge-left{
-    display:flex;
-    align-items:center;
-    gap:18px;
-  }
-
-  .star{
-    width:60px;
-    height:60px;
-    flex:0 0 auto;
+  main{
+    padding:0 16px;
   }
 
   .brand-title{
-    font-family:var(--font-display);
-    font-size:25px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    font-weight:600;
-    color:var(--text);
-    line-height:1.1;
+    font-size:19px;
   }
 
   .brand-sub{
-    font-size:11px;
-    letter-spacing:3px;
-    color:var(--steel);
-    text-transform:uppercase;
-    margin-top:4px;
+    font-size:9px;
+    letter-spacing:2px;
   }
 
   .header-actions{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
+    width:100%;
   }
 
   .header-link{
-    font-family:var(--font-mono);
-    font-size:11.5px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    padding:10px 16px;
-    border:1px solid var(--steel);
-    background:transparent;
-    color:var(--steel);
-    text-decoration:none;
-    white-space:nowrap;
-    transition:all .15s;
-    cursor:pointer;
-  }
-
-  .header-link:hover{
-    background:var(--steel);
-    color:#0b0f14;
-  }
-
-  .header-link.gold{
-    border-color:var(--gold);
-    color:var(--gold);
-  }
-
-  .header-link.gold:hover{
-    background:var(--gold);
-    color:#0b0f14;
-  }
-
-  .header-link.current{
-    background:var(--gold);
-    color:#0b0f14;
-    border-color:var(--gold);
-    pointer-events:none;
-    font-weight:600;
-  }
-
-  .status-line{
-    margin-top:16px;
-    font-size:11px;
-    color:var(--text-dim);
-    letter-spacing:1px;
-    display:flex;
-    gap:22px;
-    flex-wrap:wrap;
-  }
-
-  .status-line span b{
-    color:var(--amber);
-    font-weight:600;
-  }
-
-  .dot{
-    width:6px;
-    height:6px;
-    border-radius:50%;
-    background:var(--green);
-    display:inline-block;
-    margin-right:6px;
-    box-shadow:0 0 6px var(--green);
-  }
-
-
-  /* =========================
-     MAIN
-  ========================= */
-
-  main{
-    max-width:1100px;
-    margin:0 auto;
-    padding:0 32px;
-  }
-
-  .panel{
-    background:var(--bg-panel-2);
-    border:1px solid var(--steel-dim);
-    border-top:2px solid var(--gold);
-    margin-top:24px;
+    flex:1;
+    text-align:center;
   }
 
   .panel-head{
-    padding:28px;
-    border-bottom:1px solid var(--line);
+    padding:20px;
   }
-
-  .panel-title{
-    font-family:var(--font-display);
-    font-size:22px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    color:var(--text);
-  }
-
-  .panel-desc{
-    font-size:12px;
-    color:var(--text-dim);
-    margin-top:7px;
-    line-height:1.6;
-  }
-
-
-  /* =========================
-     GRADES (ACCORDÉON)
-  ========================= */
 
   .grades{
-    padding:12px 28px 28px;
-  }
-
-  .grade{
-    border:1px solid var(--line);
-    background:var(--bg-dark);
-    margin-top:14px;
-    transition:border-color .15s, background .15s;
-  }
-
-  .grade.open{
-    border-color:var(--steel-dim);
-  }
-
-  .grade-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    padding:16px 18px;
-    border-bottom:1px solid transparent;
-    background:rgba(74,111,165,0.04);
-    cursor:pointer;
-    user-select:none;
-  }
-
-  .grade.open .grade-header{
-    border-bottom-color:var(--line);
-  }
-
-  .grade-header:hover{
-    background:rgba(74,111,165,0.08);
-  }
-
-  .grade-left{
-    display:flex;
-    align-items:center;
-    gap:14px;
-  }
-
-  .grade-rank{
-    color:var(--gold);
-    font-size:11px;
-    letter-spacing:1px;
-    min-width:28px;
-  }
-
-  .grade-title{
-    font-family:var(--font-display);
-    font-size:16px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:var(--text);
-  }
-
-  .grade-caret{
-    color:var(--text-dim);
-    font-size:12px;
-    transition:transform .2s;
-  }
-
-  .grade.open .grade-caret{
-    transform:rotate(90deg);
-    color:var(--gold);
+    padding:10px 14px 20px;
   }
 
   .grade-content{
-    display:none;
-    padding:22px 20px 26px;
+    padding:18px 14px 20px;
   }
-
-  .grade.open .grade-content{
-    display:block;
-  }
-
-  .section-label{
-    font-family:var(--font-display);
-    font-size:12.5px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color:var(--steel);
-    margin-bottom:12px;
-    padding-bottom:8px;
-    border-bottom:1px solid var(--line);
-  }
-
-  .section-label.gold{
-    color:var(--gold);
-  }
-
-  .section-block{
-    margin-bottom:26px;
-  }
-
-  .section-block:last-child{
-    margin-bottom:0;
-  }
-
-
-  /* =========================
-     LISTES TENUES / VEHICULES
-  ========================= */
-
-  .item-list{
-    list-style:none;
-    margin:0;
-    padding:0;
-    font-size:12px;
-    line-height:1.7;
-    color:var(--text);
-  }
-
-  .item-list li{
-    position:relative;
-    padding-left:16px;
-    margin-bottom:6px;
-  }
-
-  .item-list li::before{
-    content:"›";
-    position:absolute;
-    left:0;
-    color:var(--amber);
-  }
-
-  .item-note{
-    font-size:11px;
-    color:var(--text-dim);
-    margin-top:4px;
-    line-height:1.6;
-  }
-
-
-  /* =========================
-     GRID SCREENSHOTS
-  ========================= */
-
-  .shot-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
-    gap:12px;
-    margin-top:14px;
-  }
-
-  .shot-slot{
-    aspect-ratio:9/16;
-    border:1px dashed var(--steel-dim);
-    background:
-      repeating-linear-gradient(
-        45deg,
-        rgba(74,111,165,0.04) 0px,
-        rgba(74,111,165,0.04) 8px,
-        transparent 8px,
-        transparent 16px
-      ),
-      var(--bg-panel);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    position:relative;
-  }
-
-  .shot-slot img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-  }
-
-  .shot-slot.empty{
-    border-style:dashed;
-  }
-
-  .shot-slot.image-error{
-    border-color:var(--red);
-  }
-
-  .shot-error-label{
-    display:none;
-    color:var(--red);
-  }
-
-  .shot-slot.image-error .shot-error-label{
-    display:block;
-    position:absolute;
-    left:0;
-    right:0;
-    top:50%;
-    transform:translateY(-50%);
-    background:rgba(12,16,21,.88);
-  }
-
-  .shot-slot-label{
-    font-size:10px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:var(--text-dim);
-    text-align:center;
-    padding:8px;
-  }
-
-  .shot-slot-label b{
-    display:block;
-    color:var(--steel);
-    font-size:9px;
-    letter-spacing:1.5px;
-    margin-top:6px;
-  }
-
-  /* Zone vehicules : ratio plus large */
-  .shot-grid.vehicules .shot-slot{
-    aspect-ratio:16/10;
-  }
-
-
-  /* =========================
-     NOTICE
-  ========================= */
 
   .notice{
-    border-left:3px solid var(--gold);
-    background:rgba(201,162,39,0.05);
-    padding:14px 16px;
-    margin:18px 32px 0;
+    margin:18px 16px 0;
   }
 
-  .notice-title{
-    color:var(--gold);
-    font-family:var(--font-display);
-    letter-spacing:1px;
-    text-transform:uppercase;
-    font-size:12px;
-    margin-bottom:5px;
+  .shot-grid{
+    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
   }
 
-  .notice p{
-    font-size:11.5px;
-    color:var(--text-dim);
-    line-height:1.6;
-    margin:0;
-  }
+}
 
 
-  /* =========================
-     FOOTER
-  ========================= */
+/* ==========================================================
+   IMAGE LIGHTBOX
+========================================================== */
 
-  footer{
-    max-width:1100px;
-    margin:0 auto;
-    padding:20px 32px 0;
-    font-size:10.5px;
-    color:var(--text-dim);
-    letter-spacing:1px;
-    text-align:center;
-  }
+.image-lightbox{
+  position:fixed;
+  inset:0;
+  z-index:99999;
 
+  background:rgba(0,0,0,.92);
 
-  /* =========================
-     MOBILE
-  ========================= */
+  display:none;
+  align-items:center;
+  justify-content:center;
 
-  @media(max-width:700px){
+  padding:30px;
 
-    header{
-      padding:20px;
-    }
+  cursor:zoom-out;
+}
 
-    main{
-      padding:0 16px;
-    }
+.image-lightbox.active{
+  display:flex;
+}
 
-    .brand-title{
-      font-size:19px;
-    }
+.image-lightbox img{
+  max-width:95vw;
+  max-height:95vh;
 
-    .brand-sub{
-      font-size:9px;
-      letter-spacing:2px;
-    }
+  width:auto;
+  height:auto;
 
-    .header-actions{
-      width:100%;
-    }
+  object-fit:contain;
 
-    .header-link{
-      flex:1;
-      text-align:center;
-    }
+  border:1px solid var(--gold);
 
-    .panel-head{
-      padding:20px;
-    }
+  box-shadow:
+    0 0 50px rgba(0,0,0,.8);
+}
 
-    .grades{
-      padding:10px 14px 20px;
-    }
+.image-lightbox-close{
+  position:absolute;
+  top:20px;
+  right:25px;
 
-    .grade-content{
-      padding:18px 14px 20px;
-    }
+  color:var(--gold);
 
-    .notice{
-      margin:18px 16px 0;
-    }
+  font-family:var(--font-mono);
+  font-size:28px;
 
-    .shot-grid{
-      grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
-    }
+  cursor:pointer;
+}
 
-  }
+.shot-slot img{
+  cursor:zoom-in;
+}
 
 </style>
 
@@ -613,14 +691,12 @@
 
           </defs>
 
-
           <path
             d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
             fill="none"
             stroke="var(--gold)"
             stroke-width="2.5"
             stroke-linejoin="round"/>
-
 
           <circle
             cx="100"
@@ -630,7 +706,6 @@
             stroke="var(--gold)"
             stroke-width="2"/>
 
-
           <circle
             cx="100"
             cy="100"
@@ -639,7 +714,6 @@
             stroke="var(--gold)"
             stroke-width="1"/>
 
-
           <circle
             cx="100"
             cy="100"
@@ -647,7 +721,6 @@
             fill="#0c1015"
             stroke="var(--gold)"
             stroke-width="1.5"/>
-
 
           <text
             font-family="Oswald, sans-serif"
@@ -667,7 +740,6 @@
 
           </text>
 
-
           <text
             font-family="Oswald, sans-serif"
             font-size="16"
@@ -686,25 +758,21 @@
 
           </text>
 
-
           <use
             href="#mini-star"
             transform="translate(27,100) scale(1.1)"
             fill="var(--gold)"/>
-
 
           <use
             href="#mini-star"
             transform="translate(173,100) scale(1.1)"
             fill="var(--gold)"/>
 
-
           <use
             href="#mini-star"
             transform="translate(100,88) scale(2.4)"
             fill="var(--gold)"
             opacity="0.9"/>
-
 
           <rect
             x="64"
@@ -713,7 +781,6 @@
             height="17"
             rx="2"
             fill="var(--gold)"/>
-
 
           <text
             x="100"
@@ -747,61 +814,32 @@
       </div>
 
 
-      <!-- NAVIGATION PRINCIPALE -->
-
       <div class="header-actions">
 
-        <a
-          class="header-link"
-          href="index.html">
-
+        <a class="header-link" href="index.html">
           🗂 Procédures
-
         </a>
 
-
-        <a
-          class="header-link"
-          href="code.html">
-
+        <a class="header-link" href="code.html">
           📻 Guide radio
-
         </a>
 
-
-        <a
-          class="header-link"
-          href="reglement.html">
-
+        <a class="header-link" href="reglement.html">
           ⚖ Règlement
-
         </a>
 
-
-        <a
-          class="header-link current"
-          href="tenues-vehicules.html">
-
+        <a class="header-link current" href="tenues-vehicules.html">
           🎽 Tenues & Véhicules
-
         </a>
-		
-        <a
-          class="header-link"
-          href="organigramme.html">
 
+        <a class="header-link" href="organigramme.html">
           🧭 Organigramme
-
-        </a>		
-		
-        <a
-          class="header-link"
-          href="division.html">
-
-          🏛 Divisions
-
         </a>
-		
+
+        <a class="header-link" href="division.html">
+          🏛 Divisions
+        </a>
+
         <a
           class="header-link gold"
           href="https://guidejuridiquesp.netlify.app/"
@@ -817,34 +855,22 @@
     </div>
 
 
-    <!-- STATUS -->
-
     <div class="status-line">
 
       <span>
-
         <span class="dot"></span>
-
         Système opérationnel
-
       </span>
 
-
       <span>
-
         DOCUMENT :
         <b>CPD-TPL-002</b>
-
       </span>
-
 
       <span>
-
         VERSION :
-        <b>1.1</b>
-
+        <b>2.0</b>
       </span>
-
 
       <span id="clock">
         --/--/---- --:--
@@ -855,7 +881,6 @@
   </div>
 
 </header>
-
 
 
 <!-- ==========================================================
@@ -878,17 +903,12 @@
 
     </div>
 
-
     <div class="grades" id="grades"></div>
 
   </div>
+
 </main>
 
-
-
-<!-- ==========================================================
-     FOOTER
-========================================================== -->
 
 <footer>
 
@@ -898,73 +918,152 @@
 </footer>
 
 
+<!-- ==========================================================
+     LIGHTBOX
+========================================================== -->
+
+<div
+  class="image-lightbox"
+  id="imageLightbox"
+  onclick="closeLightbox(event)">
+
+  <div
+    class="image-lightbox-close"
+    onclick="closeLightbox(event)">
+
+    ×
+
+  </div>
+
+  <img
+    id="lightboxImage"
+    src=""
+    alt="">
+
+</div>
+
 
 <script>
 
 
 /* ==========================================================
    DONNÉES
-   Chargées dynamiquement depuis data-tenues.js (voir loadData).
-   Ne sont plus écrites en dur ici : Ctrl+U sur tenues-vehicules.html
-   ne montre plus le contenu des tenues/véhicules par grade.
 ========================================================== */
 
 let grades = [];
 
 
-
 /* ==========================================================
-   CHARGEMENT DES DONNÉES
+   CHARGEMENT DATA-TENUES.JS
 ========================================================== */
 
 async function loadData(){
 
   try{
 
-    // On charge directement le fichier JS comme un vrai script.
-    // C'est plus fiable que de récupérer le texte puis de l'injecter.
     window.CPD_DATA = undefined;
+
+    /*
+     * Suppression d'une éventuelle ancienne version
+     */
+    const oldScript =
+      document.querySelector(
+        'script[data-cpd-data]'
+      );
+
+    if(oldScript){
+      oldScript.remove();
+    }
+
 
     await new Promise((resolve, reject) => {
 
-      const script = document.createElement("script");
+      const script =
+        document.createElement("script");
 
-      script.src = "data-tenues.js?_=" + Date.now();
-      script.async = true;
+      script.src =
+        "data-tenues.js?v=" +
+        Date.now();
 
-      script.onload = () => resolve();
-      script.onerror = () => reject(
-        new Error("Impossible de charger data-tenues.js")
-      );
+      script.async = false;
+
+      script.dataset.cpdData = "true";
+
+
+      script.onload = () => {
+
+        console.log(
+          "data-tenues.js chargé avec succès"
+        );
+
+        resolve();
+
+      };
+
+
+      script.onerror = () => {
+
+        reject(
+          new Error(
+            "Impossible de charger data-tenues.js"
+          )
+        );
+
+      };
+
 
       document.head.appendChild(script);
 
     });
 
+
     if(!Array.isArray(window.CPD_DATA)){
+
       throw new Error(
-        "window.CPD_DATA est absent ou invalide dans data-tenues.js"
+        "window.CPD_DATA est absent ou invalide."
       );
+
     }
 
-    grades = window.CPD_DATA;
+
+    grades =
+      window.CPD_DATA;
+
+
+    console.log(
+      "Données CPD chargées :",
+      grades
+    );
+
 
     renderGrades();
 
+
   }catch(err){
 
-    console.error("Erreur chargement tenues :", err);
+    console.error(
+      "Erreur chargement tenues :",
+      err
+    );
+
 
     document.getElementById("grades").innerHTML = `
 
       <div class="notice">
-        <div class="notice-title">Erreur de chargement</div>
+
+        <div class="notice-title">
+          Erreur de chargement
+        </div>
+
         <p>
-          Impossible de charger les données (data-tenues.js).
+          Impossible de charger les données
+          <b>data-tenues.js</b>.
         </p>
+
         <p style="margin-top:8px;">
           ${escapeHtml(err.message || String(err))}
         </p>
+
       </div>
 
     `;
@@ -974,16 +1073,8 @@ async function loadData(){
 }
 
 
-
 /* ==========================================================
-   NORMALISATION DES LIENS D'IMAGES
-   Convertit automatiquement certains liens "de page" en liens
-   directs quand c'est possible (Imgur notamment). Un lien
-   d'album Imgur (imgur.com/a/XXXX) ou un code d'embed ne
-   pointent PAS vers une image et ne peuvent pas être devinés
-   automatiquement : il faut le lien direct de chaque image
-   (i.imgur.com/xxxx.jpg), récupéré via clic droit > "Copier
-   l'adresse de l'image" sur l'image elle-même.
+   NORMALISATION URL
 ========================================================== */
 
 function normalizeImageSrc(rawSrc){
@@ -992,242 +1083,847 @@ function normalizeImageSrc(rawSrc){
     return "";
   }
 
-  let src = String(rawSrc).trim();
+  let src =
+    String(rawSrc).trim();
 
-  // Si jamais un bout de code d'embed a été collé par erreur,
-  // on l'ignore plutôt que de casser l'affichage.
-  if(src.startsWith("<")){
-    console.warn(
-      "Un code d'intégration (embed) a été collé au lieu d'un lien direct :",
-      src
+  src =
+    src.replace(
+      /^["']|["']$/g,
+      ""
     );
-    return "";
-  }
-
-  // Imgur : lien de page unique (imgur.com/abc1234) -> lien direct
-  const imgurPage = src.match(/^https?:\/\/(www\.)?imgur\.com\/([a-zA-Z0-9]{5,7})\/?$/);
-  if(imgurPage){
-    return `https://i.imgur.com/${imgurPage[2]}.jpg`;
-  }
-
-  // Imgur : lien d'album (imgur.com/a/XXXX) -> pas convertible automatiquement
-  if(/^https?:\/\/(www\.)?imgur\.com\/a\//.test(src)){
-    console.warn(
-      "Lien d'album Imgur détecté, impossible d'extraire une image directe :",
-      src,
-      "-> ouvre l'album et copie l'adresse de l'image individuelle (i.imgur.com/...)"
-    );
-    return "";
-  }
 
   return src;
 
 }
 
 
-
 /* ==========================================================
-   RENDU
+   GÉNÉRATION DES URLS ALTERNATIVES
 ========================================================== */
 
-function shotGrid(shots, extraClass){
+function getImageCandidates(src){
 
-  if(!Array.isArray(shots) || shots.length === 0){
-    return "";
+  if(!src){
+    return [];
   }
 
-  const slots = shots.map((shot, index) => {
 
-    const label =
-      shot && shot.label
-      ? String(shot.label)
-      : `Capture ${index + 1}`;
+  const candidates = [];
 
-    const src =
-      shot && typeof shot.src === "string"
-      ? normalizeImageSrc(shot.src)
-      : "";
 
-    if(src){
+  /*
+   * URL originale
+   */
+  candidates.push(src);
 
-      return `
-        <div class="shot-slot">
 
-          <img
-            src="https://wsrv.nl/?url=${encodeURIComponent(src)}"
-            data-original-src="${escapeHtml(src)}"
-            alt="${escapeHtml(label)}"
-            title="${escapeHtml(label)}"
-            loading="eager"
-            decoding="async"
-            referrerpolicy="no-referrer"
-            onerror="handleShotError(this)"
-          >
+  try{
 
-          <div class="shot-slot-label shot-error-label">
-            Image indisponible
-            <b>${escapeHtml(label)}</b>
-          </div>
+    const url =
+      new URL(src);
 
-        </div>
-      `;
+
+    /*
+     * IMGUR
+     */
+    if(
+      url.hostname === "imgur.com" ||
+      url.hostname === "www.imgur.com"
+    ){
+
+      const parts =
+        url.pathname
+          .replace(/^\/+/, "")
+          .split("/");
+
+
+      /*
+       * On ne tente que les liens simples.
+       */
+      if(
+        parts.length === 1 &&
+        parts[0]
+      ){
+
+        const id =
+          parts[0];
+
+
+        candidates.push(
+          `https://i.imgur.com/${id}.png`
+        );
+
+        candidates.push(
+          `https://i.imgur.com/${id}.jpg`
+        );
+
+        candidates.push(
+          `https://i.imgur.com/${id}.jpeg`
+        );
+
+        candidates.push(
+          `https://i.imgur.com/${id}.webp`
+        );
+
+      }
 
     }
 
-    return `
-      <div class="shot-slot empty">
-        <div class="shot-slot-label">
-          Emplacement capture
-          <b>${escapeHtml(label)}</b>
-        </div>
-      </div>
-    `;
 
-  }).join("");
+    /*
+     * I.IMGUR.COM
+     */
+    if(
+      url.hostname === "i.imgur.com"
+    ){
+
+      const filename =
+        url.pathname
+          .split("/")
+          .pop();
+
+
+      if(filename){
+
+        const id =
+          filename.replace(
+            /\.[^.]+$/,
+            ""
+          );
+
+
+        candidates.push(
+          `https://i.imgur.com/${id}.png`
+        );
+
+        candidates.push(
+          `https://i.imgur.com/${id}.jpg`
+        );
+
+        candidates.push(
+          `https://i.imgur.com/${id}.jpeg`
+        );
+
+        candidates.push(
+          `https://i.imgur.com/${id}.webp`
+        );
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "URL image invalide :",
+      src
+    );
+
+  }
+
+
+  /*
+   * Proxy en dernier recours.
+   */
+  candidates.push(
+    "https://wsrv.nl/?url=" +
+    encodeURIComponent(src)
+  );
+
+
+  /*
+   * Supprime les doublons.
+   */
+  return [
+    ...new Set(candidates)
+  ];
+
+}
+
+
+/* ==========================================================
+   GRILLE IMAGES
+========================================================== */
+
+function shotGrid(
+  shots,
+  extraClass
+){
+
+  if(
+    !Array.isArray(shots) ||
+    shots.length === 0
+  ){
+
+    return "";
+
+  }
+
+
+  const slots =
+    shots.map(
+      (shot, index) => {
+
+        const label =
+          shot &&
+          shot.label
+
+            ? String(shot.label)
+
+            : `Capture ${index + 1}`;
+
+
+        const src =
+          shot &&
+          typeof shot.src === "string"
+
+            ? normalizeImageSrc(
+                shot.src
+              )
+
+            : "";
+
+
+        if(!src){
+
+          return `
+
+            <div class="shot-slot empty">
+
+              <div class="shot-slot-label">
+
+                Image non configurée
+
+                <b>
+                  ${escapeHtml(label)}
+                </b>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+
+
+        const candidates =
+          getImageCandidates(src);
+
+
+        return `
+
+          <div
+            class="shot-slot"
+            data-image-index="0"
+          >
+
+            <img
+
+              src="${escapeHtml(
+                candidates[0]
+              )}"
+
+              data-candidates="${escapeHtml(
+                JSON.stringify(candidates)
+              )}"
+
+              data-image-index="0"
+
+              data-original-src="${escapeHtml(
+                src
+              )}"
+
+              alt="${escapeHtml(
+                label
+              )}"
+
+              title="${escapeHtml(
+                label
+              )}"
+
+              loading="lazy"
+
+              decoding="async"
+
+              referrerpolicy="no-referrer"
+
+              onload="handleShotLoad(this)"
+
+              onerror="handleShotError(this)"
+
+              onclick="openLightbox(this)"
+
+            >
+
+
+            <div
+              class="shot-slot-label shot-error-label"
+            >
+
+              Image indisponible
+
+              <b>
+                ${escapeHtml(label)}
+              </b>
+
+            </div>
+
+          </div>
+
+        `;
+
+      }
+    )
+    .join("");
+
 
   return `
-    <div class="shot-grid ${escapeHtml(extraClass || "")}">
+
+    <div
+      class="shot-grid ${escapeHtml(
+        extraClass || ""
+      )}"
+    >
+
       ${slots}
+
     </div>
+
   `;
 
 }
 
 
-function handleShotError(img){
+/* ==========================================================
+   IMAGE OK
+========================================================== */
 
-  const slot = img.closest(".shot-slot");
+function handleShotLoad(img){
+
+  const slot =
+    img.closest(
+      ".shot-slot"
+    );
+
 
   if(!slot){
     return;
   }
 
-  const originalSrc =
-    img.getAttribute("data-original-src");
 
-  if(
-    originalSrc &&
-    !img.dataset.directAttempt
-  ){
-    img.dataset.directAttempt = "1";
-    img.src = originalSrc;
+  slot.classList.remove(
+    "image-error"
+  );
+
+
+  img.style.display =
+    "block";
+
+
+  console.log(
+    "Image chargée :",
+    img.src
+  );
+
+}
+
+
+/* ==========================================================
+   FALLBACK IMAGE
+========================================================== */
+
+function handleShotError(img){
+
+  const slot =
+    img.closest(
+      ".shot-slot"
+    );
+
+
+  if(!slot){
     return;
   }
 
-  console.warn(
-    "Échec de chargement de l'image :",
-    originalSrc || img.src
+
+  let candidates = [];
+
+
+  try{
+
+    candidates =
+      JSON.parse(
+        img.getAttribute(
+          "data-candidates"
+        ) || "[]"
+      );
+
+  }catch(error){
+
+    console.error(
+      "Impossible de lire les candidates image",
+      error
+    );
+
+  }
+
+
+  let index =
+    Number(
+      img.getAttribute(
+        "data-image-index"
+      ) || "0"
+    );
+
+
+  index++;
+
+
+  /*
+   * Essaye l'URL suivante.
+   */
+  if(
+    index <
+    candidates.length
+  ){
+
+    console.warn(
+      "Image échouée, tentative suivante :",
+      candidates[index]
+    );
+
+
+    img.setAttribute(
+      "data-image-index",
+      String(index)
+    );
+
+
+    img.src =
+      candidates[index];
+
+
+    return;
+
+  }
+
+
+  /*
+   * Plus aucune tentative.
+   */
+  console.error(
+    "ÉCHEC IMAGE :",
+    img.getAttribute(
+      "data-original-src"
+    )
   );
 
-  img.style.display = "none";
-  slot.classList.add("image-error");
+
+  img.style.display =
+    "none";
+
+
+  slot.classList.add(
+    "image-error"
+  );
 
 }
 
 
-function escapeHtml(str){
-
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-
-}
-
+/* ==========================================================
+   RENDU DES GRADES
+========================================================== */
 
 function renderGrades(){
 
   const container =
-    document.getElementById("grades");
+    document.getElementById(
+      "grades"
+    );
 
-  container.innerHTML = "";
 
-  grades.forEach((grade, index) => {
+  container.innerHTML =
+    "";
 
-    const el =
-      document.createElement("div");
 
-    el.className = "grade";
-    el.id = `grade-${index}`;
+  if(
+    !Array.isArray(grades) ||
+    grades.length === 0
+  ){
 
-    el.innerHTML = `
+    container.innerHTML = `
 
-      <div class="grade-header" onclick="toggleGrade(${index})">
+      <div class="notice">
 
-        <div class="grade-left">
-
-          <div class="grade-rank">
-            GR. ${grade.rank}
-          </div>
-
-          <div class="grade-title">
-            ${grade.title}
-          </div>
-
+        <div class="notice-title">
+          Aucun grade
         </div>
 
-        <div class="grade-caret">▸</div>
-
-      </div>
-
-
-      <div class="grade-content">
-
-        <div class="section-block">
-
-          <div class="section-label gold">
-            🎽 Tenues réglementaires
-          </div>
-
-          <ul class="item-list">
-            ${grade.tenues.map(t => `<li>${t}</li>`).join("")}
-          </ul>
-
-          ${grade.note ? `<div class="item-note">${grade.note}</div>` : ""}
-
-          ${shotGrid(grade.tenueShots, "")}
-
-        </div>
-
-
-        <div class="section-block">
-
-          <div class="section-label">
-            🚓 Véhicules autorisés
-          </div>
-
-          <ul class="item-list">
-            ${grade.vehicules.map(v => `<li>${v}</li>`).join("")}
-          </ul>
-
-          ${grade.vehiculeNote ? `<div class="item-note">${grade.vehiculeNote}</div>` : ""}
-
-          ${shotGrid(grade.vehiculeShots, "vehicules")}
-
-        </div>
+        <p>
+          Aucun grade n'a été trouvé dans
+          data-tenues.js.
+        </p>
 
       </div>
 
     `;
 
-    container.appendChild(el);
+    return;
 
-  });
+  }
+
+
+  grades.forEach(
+    (grade, index) => {
+
+      const el =
+        document.createElement(
+          "div"
+        );
+
+
+      el.className =
+        "grade";
+
+
+      el.id =
+        `grade-${index}`;
+
+
+      const tenues =
+        Array.isArray(
+          grade.tenues
+        )
+          ? grade.tenues
+          : [];
+
+
+      const vehicules =
+        Array.isArray(
+          grade.vehicules
+        )
+          ? grade.vehicules
+          : [];
+
+
+      const tenueShots =
+        Array.isArray(
+          grade.tenueShots
+        )
+          ? grade.tenueShots
+          : [];
+
+
+      const vehiculeShots =
+        Array.isArray(
+          grade.vehiculeShots
+        )
+          ? grade.vehiculeShots
+          : [];
+
+
+      el.innerHTML = `
+
+        <div
+          class="grade-header"
+          onclick="toggleGrade(${index})"
+        >
+
+          <div class="grade-left">
+
+            <div class="grade-rank">
+              GR. ${escapeHtml(
+                grade.rank ?? ""
+              )}
+            </div>
+
+            <div class="grade-title">
+              ${escapeHtml(
+                grade.title ?? ""
+              )}
+            </div>
+
+          </div>
+
+          <div class="grade-caret">
+            ▸
+          </div>
+
+        </div>
+
+
+        <div class="grade-content">
+
+
+          <div class="section-block">
+
+            <div class="section-label gold">
+              🎽 Tenues réglementaires
+            </div>
+
+
+            <ul class="item-list">
+
+              ${
+                tenues.length
+
+                  ? tenues
+                      .map(
+                        t =>
+                          `<li>${escapeHtml(t)}</li>`
+                      )
+                      .join("")
+
+                  : `
+                    <li>
+                      Aucune tenue renseignée.
+                    </li>
+                  `
+              }
+
+            </ul>
+
+
+            ${
+              grade.note
+
+                ? `
+                  <div class="item-note">
+                    ${escapeHtml(
+                      grade.note
+                    )}
+                  </div>
+                `
+
+                : ""
+            }
+
+
+            ${shotGrid(
+              tenueShots,
+              ""
+            )}
+
+          </div>
+
+
+          <div class="section-block">
+
+            <div class="section-label">
+              🚓 Véhicules autorisés
+            </div>
+
+
+            <ul class="item-list">
+
+              ${
+                vehicules.length
+
+                  ? vehicules
+                      .map(
+                        v =>
+                          `<li>${escapeHtml(v)}</li>`
+                      )
+                      .join("")
+
+                  : `
+                    <li>
+                      Aucun véhicule renseigné.
+                    </li>
+                  `
+              }
+
+            </ul>
+
+
+            ${
+              grade.vehiculeNote
+
+                ? `
+                  <div class="item-note">
+                    ${escapeHtml(
+                      grade.vehiculeNote
+                    )}
+                  </div>
+                `
+
+                : ""
+            }
+
+
+            ${shotGrid(
+              vehiculeShots,
+              "vehicules"
+            )}
+
+          </div>
+
+
+        </div>
+
+      `;
+
+
+      container.appendChild(
+        el
+      );
+
+    }
+  );
 
 }
 
+
+/* ==========================================================
+   ACCORDÉON
+========================================================== */
 
 function toggleGrade(index){
 
   const el =
-    document.getElementById(`grade-${index}`);
+    document.getElementById(
+      `grade-${index}`
+    );
 
-  el.classList.toggle("open");
+
+  if(!el){
+    return;
+  }
+
+
+  el.classList.toggle(
+    "open"
+  );
 
 }
 
+
+/* ==========================================================
+   LIGHTBOX
+========================================================== */
+
+function openLightbox(img){
+
+  if(
+    !img ||
+    !img.src
+  ){
+    return;
+  }
+
+
+  const lightbox =
+    document.getElementById(
+      "imageLightbox"
+    );
+
+
+  const lightboxImage =
+    document.getElementById(
+      "lightboxImage"
+    );
+
+
+  lightboxImage.src =
+    img.src;
+
+
+  lightboxImage.alt =
+    img.alt || "";
+
+
+  lightbox.classList.add(
+    "active"
+  );
+
+}
+
+
+function closeLightbox(event){
+
+  if(
+    event &&
+    event.target &&
+    event.target.id ===
+      "lightboxImage"
+  ){
+
+    return;
+
+  }
+
+
+  document
+    .getElementById(
+      "imageLightbox"
+    )
+    .classList.remove(
+      "active"
+    );
+
+}
+
+
+/* ==========================================================
+   ESC POUR FERMER L'IMAGE
+========================================================== */
+
+document.addEventListener(
+  "keydown",
+  function(e){
+
+    if(
+      e.key === "Escape"
+    ){
+
+      document
+        .getElementById(
+          "imageLightbox"
+        )
+        .classList.remove(
+          "active"
+        );
+
+    }
+
+  }
+);
+
+
+/* ==========================================================
+   ESCAPE HTML
+========================================================== */
+
+function escapeHtml(str){
+
+  return String(str)
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#39;"
+    );
+
+}
 
 
 /* ==========================================================
@@ -1239,73 +1935,132 @@ function updateClock(){
   const d =
     new Date();
 
+
   const pad =
     n =>
-      String(n).padStart(2,"0");
+      String(n)
+        .padStart(
+          2,
+          "0"
+        );
 
-  document.getElementById("clock")
+
+  document
+    .getElementById(
+      "clock"
+    )
     .textContent =
-      `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+      `${pad(d.getDate())}/` +
+      `${pad(d.getMonth()+1)}/` +
+      `${d.getFullYear()} ` +
+      `${pad(d.getHours())}:` +
+      `${pad(d.getMinutes())}`;
 
 }
 
 
 updateClock();
 
-setInterval(updateClock, 15000);
-
+setInterval(
+  updateClock,
+  15000
+);
 
 
 /* ==========================================================
-   INIT
+   INITIALISATION
 ========================================================== */
 
 loadData();
 
 
-
 /* ==========================================================
    PROTECTION ANTI-COPIE
-   (dissuasion — ne bloque pas un utilisateur déterminé,
-   mais stoppe la copie "en 2 clics")
 ========================================================== */
 
-document.addEventListener("contextmenu", function(e){
-  e.preventDefault();
-});
+document.addEventListener(
+  "contextmenu",
+  function(e){
 
-document.addEventListener("keydown", function(e){
-
-  const key = e.key.toUpperCase();
-
-  if(key === "F12"){
     e.preventDefault();
-    return;
-  }
 
-  if((e.ctrlKey || e.metaKey) && ["U","S","I","J"].includes(key)){
+  }
+);
+
+
+document.addEventListener(
+  "keydown",
+  function(e){
+
+    const key =
+      e.key.toUpperCase();
+
+
+    if(key === "F12"){
+
+      e.preventDefault();
+
+      return;
+
+    }
+
+
+    if(
+      (e.ctrlKey || e.metaKey) &&
+      [
+        "U",
+        "S",
+        "I",
+        "J"
+      ].includes(key)
+    ){
+
+      e.preventDefault();
+
+      return;
+
+    }
+
+
+    if(
+      (e.ctrlKey || e.metaKey) &&
+      e.shiftKey &&
+      [
+        "I",
+        "J",
+        "C"
+      ].includes(key)
+    ){
+
+      e.preventDefault();
+
+    }
+
+  }
+);
+
+
+document.addEventListener(
+  "dragstart",
+  function(e){
+
     e.preventDefault();
-    return;
-  }
 
-  if((e.ctrlKey || e.metaKey) && e.shiftKey && ["I","J","C"].includes(key)){
+  }
+);
+
+
+document.addEventListener(
+  "copy",
+  function(e){
+
     e.preventDefault();
-    return;
+
   }
-
-});
-
-document.addEventListener("dragstart", function(e){
-  e.preventDefault();
-});
-
-document.addEventListener("copy", function(e){
-  e.preventDefault();
-});
+);
 
 </script>
 
-
 </body>
-
 </html>
