@@ -18,7 +18,7 @@ window.CPD_DATA = [
     ],
     note:"Aucune personnalisation de tenue autorisée à ce grade.",
     tenueShots:[
-      { label:"Tenue Rookie — Vue face", src:"images/tenueoffi3.png"" },
+      { label:"Tenue Rookie — Vue face", src:"images/tenueoffi3.png" },
       { label:"Tenue Rookie — Vue dos", src:"images/tenueoffi3.png" }
     ],
     vehicules:[
