@@ -7,11 +7,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>CPD // Tenues & Véhicules</title>
+
 <link rel="icon" type="image/png" href="Seal_of_the_Chicago_Police_Department.png">
 
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
 
 :root{
   --bg:#0b0f14;
@@ -33,13 +35,16 @@
   --font-mono:'IBM Plex Mono','Consolas',monospace;
 }
 
+
 *{
   box-sizing:border-box;
 }
 
+
 html{
   scroll-behavior:smooth;
 }
+
 
 html,
 body{
@@ -47,15 +52,27 @@ body{
   padding:0;
 }
 
+
 body{
   background:
-    radial-gradient(circle at 15% 0%, rgba(74,111,165,0.10), transparent 40%),
-    radial-gradient(circle at 100% 100%, rgba(201,162,39,0.06), transparent 45%),
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(74,111,165,0.10),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(201,162,39,0.06),
+      transparent 45%
+    ),
     var(--bg);
 
   color:var(--text);
+
   font-family:var(--font-mono);
+
   min-height:100vh;
+
   padding-bottom:60px;
 
   -webkit-user-select:none;
@@ -63,6 +80,7 @@ body{
   -ms-user-select:none;
   user-select:none;
 }
+
 
 input,
 textarea{
@@ -79,19 +97,27 @@ textarea{
 
 header{
   position:relative;
+
   border-bottom:1px solid var(--line);
+
   padding:28px 32px 22px;
+
   overflow:hidden;
-  background:linear-gradient(
-    180deg,
-    rgba(74,111,165,0.06),
-    transparent
-  );
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(74,111,165,0.06),
+      transparent
+    );
 }
+
 
 header::before{
   content:"";
+
   position:absolute;
+
   inset:0;
 
   background-image:
@@ -106,116 +132,183 @@ header::before{
   pointer-events:none;
 }
 
+
 .header-inner{
   position:relative;
+
   max-width:1100px;
+
   margin:0 auto;
 }
 
+
 .badge-row{
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   gap:20px;
+
   flex-wrap:wrap;
 }
 
+
 .badge-left{
   display:flex;
+
   align-items:center;
+
   gap:18px;
 }
+
 
 .star{
   width:60px;
   height:60px;
+
   flex:0 0 auto;
 }
 
+
 .brand-title{
   font-family:var(--font-display);
+
   font-size:25px;
+
   letter-spacing:2px;
+
   text-transform:uppercase;
+
   font-weight:600;
+
   color:var(--text);
+
   line-height:1.1;
 }
 
+
 .brand-sub{
   font-size:11px;
+
   letter-spacing:3px;
+
   color:var(--steel);
+
   text-transform:uppercase;
+
   margin-top:4px;
 }
 
+
 .header-actions{
   display:flex;
+
   gap:8px;
+
   flex-wrap:wrap;
 }
+
 
 .header-link{
   font-family:var(--font-mono);
+
   font-size:11.5px;
+
   letter-spacing:1px;
+
   text-transform:uppercase;
+
   padding:10px 16px;
+
   border:1px solid var(--steel);
+
   background:transparent;
+
   color:var(--steel);
+
   text-decoration:none;
+
   white-space:nowrap;
+
   transition:all .15s;
+
   cursor:pointer;
 }
 
+
 .header-link:hover{
   background:var(--steel);
+
   color:#0b0f14;
 }
+
 
 .header-link.gold{
   border-color:var(--gold);
+
   color:var(--gold);
 }
 
+
 .header-link.gold:hover{
   background:var(--gold);
+
   color:#0b0f14;
 }
+
 
 .header-link.current{
   background:var(--gold);
+
   color:#0b0f14;
+
   border-color:var(--gold);
+
   pointer-events:none;
+
   font-weight:600;
 }
+
 
 .status-line{
   margin-top:16px;
+
   font-size:11px;
+
   color:var(--text-dim);
+
   letter-spacing:1px;
+
   display:flex;
+
   gap:22px;
+
   flex-wrap:wrap;
 }
 
+
 .status-line span b{
   color:var(--amber);
+
   font-weight:600;
 }
 
+
 .dot{
   width:6px;
+
   height:6px;
+
   border-radius:50%;
+
   background:var(--green);
+
   display:inline-block;
+
   margin-right:6px;
+
   box-shadow:0 0 6px var(--green);
 }
 
@@ -226,34 +319,51 @@ header::before{
 
 main{
   max-width:1100px;
+
   margin:0 auto;
+
   padding:0 32px;
 }
 
+
 .panel{
   background:var(--bg-panel-2);
+
   border:1px solid var(--steel-dim);
+
   border-top:2px solid var(--gold);
+
   margin-top:24px;
 }
 
+
 .panel-head{
   padding:28px;
+
   border-bottom:1px solid var(--line);
 }
 
+
 .panel-title{
   font-family:var(--font-display);
+
   font-size:22px;
+
   letter-spacing:1.5px;
+
   text-transform:uppercase;
+
   color:var(--text);
 }
 
+
 .panel-desc{
   font-size:12px;
+
   color:var(--text-dim);
+
   margin-top:7px;
+
   line-height:1.6;
 }
 
@@ -266,96 +376,149 @@ main{
   padding:12px 28px 28px;
 }
 
+
 .grade{
   border:1px solid var(--line);
+
   background:var(--bg-dark);
+
   margin-top:14px;
-  transition:border-color .15s, background .15s;
+
+  transition:
+    border-color .15s,
+    background .15s;
 }
+
 
 .grade.open{
   border-color:var(--steel-dim);
 }
 
+
 .grade-header{
   display:flex;
+
   justify-content:space-between;
+
   align-items:center;
+
   gap:15px;
+
   padding:16px 18px;
+
   border-bottom:1px solid transparent;
+
   background:rgba(74,111,165,0.04);
+
   cursor:pointer;
+
   user-select:none;
 }
+
 
 .grade.open .grade-header{
   border-bottom-color:var(--line);
 }
 
+
 .grade-header:hover{
   background:rgba(74,111,165,0.08);
 }
 
+
 .grade-left{
   display:flex;
+
   align-items:center;
+
   gap:14px;
 }
 
+
 .grade-rank{
   color:var(--gold);
+
   font-size:11px;
+
   letter-spacing:1px;
+
   min-width:28px;
 }
 
+
 .grade-title{
   font-family:var(--font-display);
+
   font-size:16px;
+
   letter-spacing:1px;
+
   text-transform:uppercase;
+
   color:var(--text);
 }
 
+
 .grade-caret{
   color:var(--text-dim);
+
   font-size:12px;
+
   transition:transform .2s;
 }
 
+
 .grade.open .grade-caret{
   transform:rotate(90deg);
+
   color:var(--gold);
 }
 
+
 .grade-content{
   display:none;
+
   padding:22px 20px 26px;
 }
+
 
 .grade.open .grade-content{
   display:block;
 }
 
+
+/* ==========================================================
+   SECTIONS
+========================================================== */
+
 .section-label{
   font-family:var(--font-display);
+
   font-size:12.5px;
+
   letter-spacing:2px;
+
   text-transform:uppercase;
+
   color:var(--steel);
+
   margin-bottom:12px;
+
   padding-bottom:8px;
+
   border-bottom:1px solid var(--line);
 }
+
 
 .section-label.gold{
   color:var(--gold);
 }
 
+
 .section-block{
   margin-bottom:26px;
 }
+
 
 .section-block:last-child{
   margin-bottom:0;
@@ -368,30 +531,46 @@ main{
 
 .item-list{
   list-style:none;
+
   margin:0;
+
   padding:0;
+
   font-size:12px;
+
   line-height:1.7;
+
   color:var(--text);
 }
 
+
 .item-list li{
   position:relative;
+
   padding-left:16px;
+
   margin-bottom:6px;
 }
 
+
 .item-list li::before{
   content:"›";
+
   position:absolute;
+
   left:0;
+
   color:var(--amber);
 }
 
+
 .item-note{
   font-size:11px;
+
   color:var(--text-dim);
+
   margin-top:4px;
+
   line-height:1.6;
 }
 
@@ -402,16 +581,28 @@ main{
 
 .shot-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(180px,1fr)
+    );
+
   gap:12px;
+
   margin-top:14px;
 }
 
+
 .shot-slot{
   position:relative;
+
   aspect-ratio:9/16;
+
   min-height:180px;
+
   border:1px solid var(--steel-dim);
+
   background:
     repeating-linear-gradient(
       45deg,
@@ -423,77 +614,192 @@ main{
     var(--bg-panel);
 
   display:flex;
+
   align-items:center;
+
   justify-content:center;
+
   overflow:hidden;
 }
 
+
 .shot-slot img{
   width:100%;
+
   height:100%;
+
   object-fit:cover;
+
   display:block;
+
   position:absolute;
+
   inset:0;
+
   z-index:2;
+
   background:#0c1015;
+
+  cursor:zoom-in;
 }
+
 
 .shot-slot.empty{
   border-style:dashed;
 }
 
+
 .shot-slot.image-error{
   border-color:var(--red);
 }
 
+
 .shot-slot.image-error::before{
   content:"⚠";
+
   position:absolute;
+
   top:50%;
+
   left:50%;
-  transform:translate(-50%,-50%);
+
+  transform:
+    translate(
+      -50%,
+      -50%
+    );
+
   font-size:30px;
+
   color:var(--red);
+
   opacity:.8;
 }
+
+
+.shot-slot-label{
+  font-size:10px;
+
+  letter-spacing:1px;
+
+  text-transform:uppercase;
+
+  color:var(--text-dim);
+
+  text-align:center;
+
+  padding:8px;
+}
+
+
+.shot-slot-label b{
+  display:block;
+
+  color:var(--steel);
+
+  font-size:9px;
+
+  letter-spacing:1.5px;
+
+  margin-top:6px;
+}
+
 
 .shot-error-label{
   display:none;
 }
 
+
 .shot-slot.image-error .shot-error-label{
   display:block;
+
   position:absolute;
+
   left:0;
+
   right:0;
+
   bottom:0;
+
   top:auto;
-  transform:none;
-  background:rgba(12,16,21,.94);
+
+  background:rgba(12,16,21,.95);
+
   padding:10px;
+
   z-index:5;
 }
 
-.shot-slot-label{
-  font-size:10px;
-  letter-spacing:1px;
-  text-transform:uppercase;
-  color:var(--text-dim);
-  text-align:center;
-  padding:8px;
-}
-
-.shot-slot-label b{
-  display:block;
-  color:var(--steel);
-  font-size:9px;
-  letter-spacing:1.5px;
-  margin-top:6px;
-}
 
 .shot-grid.vehicules .shot-slot{
   aspect-ratio:16/10;
+}
+
+
+/* ==========================================================
+   LIGHTBOX
+========================================================== */
+
+.image-lightbox{
+  position:fixed;
+
+  inset:0;
+
+  z-index:99999;
+
+  background:rgba(0,0,0,.94);
+
+  display:none;
+
+  align-items:center;
+
+  justify-content:center;
+
+  padding:30px;
+
+  cursor:zoom-out;
+}
+
+
+.image-lightbox.active{
+  display:flex;
+}
+
+
+.image-lightbox img{
+  max-width:95vw;
+
+  max-height:95vh;
+
+  width:auto;
+
+  height:auto;
+
+  object-fit:contain;
+
+  border:1px solid var(--gold);
+
+  box-shadow:
+    0 0 50px rgba(0,0,0,.8);
+
+  cursor:default;
+}
+
+
+.image-lightbox-close{
+  position:absolute;
+
+  top:18px;
+
+  right:25px;
+
+  color:var(--gold);
+
+  font-size:34px;
+
+  cursor:pointer;
+
+  z-index:2;
 }
 
 
@@ -503,24 +809,37 @@ main{
 
 .notice{
   border-left:3px solid var(--gold);
+
   background:rgba(201,162,39,0.05);
+
   padding:14px 16px;
+
   margin:18px 32px 0;
 }
 
+
 .notice-title{
   color:var(--gold);
+
   font-family:var(--font-display);
+
   letter-spacing:1px;
+
   text-transform:uppercase;
+
   font-size:12px;
+
   margin-bottom:5px;
 }
 
+
 .notice p{
   font-size:11.5px;
+
   color:var(--text-dim);
+
   line-height:1.6;
+
   margin:0;
 }
 
@@ -531,11 +850,17 @@ main{
 
 footer{
   max-width:1100px;
+
   margin:0 auto;
+
   padding:20px 32px 0;
+
   font-size:10.5px;
+
   color:var(--text-dim);
+
   letter-spacing:1px;
+
   text-align:center;
 }
 
@@ -550,105 +875,64 @@ footer{
     padding:20px;
   }
 
+
   main{
     padding:0 16px;
   }
+
 
   .brand-title{
     font-size:19px;
   }
 
+
   .brand-sub{
     font-size:9px;
+
     letter-spacing:2px;
   }
+
 
   .header-actions{
     width:100%;
   }
 
+
   .header-link{
     flex:1;
+
     text-align:center;
   }
+
 
   .panel-head{
     padding:20px;
   }
 
+
   .grades{
     padding:10px 14px 20px;
   }
+
 
   .grade-content{
     padding:18px 14px 20px;
   }
 
+
   .notice{
     margin:18px 16px 0;
   }
 
+
   .shot-grid{
-    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns:
+      repeat(
+        auto-fill,
+        minmax(140px,1fr)
+      );
   }
 
-}
-
-
-/* ==========================================================
-   IMAGE LIGHTBOX
-========================================================== */
-
-.image-lightbox{
-  position:fixed;
-  inset:0;
-  z-index:99999;
-
-  background:rgba(0,0,0,.92);
-
-  display:none;
-  align-items:center;
-  justify-content:center;
-
-  padding:30px;
-
-  cursor:zoom-out;
-}
-
-.image-lightbox.active{
-  display:flex;
-}
-
-.image-lightbox img{
-  max-width:95vw;
-  max-height:95vh;
-
-  width:auto;
-  height:auto;
-
-  object-fit:contain;
-
-  border:1px solid var(--gold);
-
-  box-shadow:
-    0 0 50px rgba(0,0,0,.8);
-}
-
-.image-lightbox-close{
-  position:absolute;
-  top:20px;
-  right:25px;
-
-  color:var(--gold);
-
-  font-family:var(--font-mono);
-  font-size:28px;
-
-  cursor:pointer;
-}
-
-.shot-slot img{
-  cursor:zoom-in;
 }
 
 </style>
@@ -671,32 +955,40 @@ footer{
 
       <div class="badge-left">
 
-        <svg class="star"
-             viewBox="0 0 200 200"
-             xmlns="http://www.w3.org/2000/svg">
+        <svg
+          class="star"
+          viewBox="0 0 200 200"
+          xmlns="http://www.w3.org/2000/svg"
+        >
 
           <defs>
 
             <path
               id="arc-top"
-              d="M 34 100 A 66 66 0 0 1 166 100"/>
+              d="M 34 100 A 66 66 0 0 1 166 100"
+            />
 
             <path
               id="arc-bottom"
-              d="M 47 128 A 60 60 0 0 0 153 128"/>
+              d="M 47 128 A 60 60 0 0 0 153 128"
+            />
 
             <path
               id="mini-star"
-              d="M0,-7 L1.76,-2.43 L6.66,-2.16 L2.85,0.93 L4.12,5.66 L0,3 L-4.12,5.66 L-2.85,0.93 L-6.66,-2.16 L-1.76,-2.43 Z"/>
+              d="M0,-7 L1.76,-2.43 L6.66,-2.16 L2.85,0.93 L4.12,5.66 L0,3 L-4.12,5.66 L-2.85,0.93 L-6.66,-2.16 L-1.76,-2.43 Z"
+            />
 
           </defs>
+
 
           <path
             d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
             fill="none"
             stroke="var(--gold)"
             stroke-width="2.5"
-            stroke-linejoin="round"/>
+            stroke-linejoin="round"
+          />
+
 
           <circle
             cx="100"
@@ -704,7 +996,9 @@ footer{
             r="78"
             fill="#151b23"
             stroke="var(--gold)"
-            stroke-width="2"/>
+            stroke-width="2"
+          />
+
 
           <circle
             cx="100"
@@ -712,7 +1006,9 @@ footer{
             r="74"
             fill="none"
             stroke="var(--gold)"
-            stroke-width="1"/>
+            stroke-width="1"
+          />
+
 
           <circle
             cx="100"
@@ -720,59 +1016,69 @@ footer{
             r="55"
             fill="#0c1015"
             stroke="var(--gold)"
-            stroke-width="1.5"/>
+            stroke-width="1.5"
+          />
+
 
           <text
             font-family="Oswald, sans-serif"
             font-size="16"
             font-weight="700"
             letter-spacing="2"
-            fill="var(--gold)">
+            fill="var(--gold)"
+          >
 
             <textPath
               href="#arc-top"
               startOffset="50%"
-              text-anchor="middle">
-
+              text-anchor="middle"
+            >
               CHICAGO
-
             </textPath>
 
           </text>
+
 
           <text
             font-family="Oswald, sans-serif"
             font-size="16"
             font-weight="700"
             letter-spacing="2"
-            fill="var(--gold)">
+            fill="var(--gold)"
+          >
 
             <textPath
               href="#arc-bottom"
               startOffset="50%"
-              text-anchor="middle">
-
+              text-anchor="middle"
+            >
               POLICE
-
             </textPath>
 
           </text>
 
+
           <use
             href="#mini-star"
             transform="translate(27,100) scale(1.1)"
-            fill="var(--gold)"/>
+            fill="var(--gold)"
+          />
+
 
           <use
             href="#mini-star"
             transform="translate(173,100) scale(1.1)"
-            fill="var(--gold)"/>
+            fill="var(--gold)"
+          />
+
 
           <use
             href="#mini-star"
             transform="translate(100,88) scale(2.4)"
             fill="var(--gold)"
-            opacity="0.9"/>
+            opacity="0.9"
+          />
+
 
           <rect
             x="64"
@@ -780,7 +1086,9 @@ footer{
             width="72"
             height="17"
             rx="2"
-            fill="var(--gold)"/>
+            fill="var(--gold)"
+          />
+
 
           <text
             x="100"
@@ -790,10 +1098,9 @@ footer{
             font-weight="700"
             letter-spacing="0.5"
             text-anchor="middle"
-            fill="#0c1015">
-
+            fill="#0c1015"
+          >
             URBS IN HORTO
-
           </text>
 
         </svg>
@@ -816,38 +1123,61 @@ footer{
 
       <div class="header-actions">
 
-        <a class="header-link" href="index.html">
+        <a
+          class="header-link"
+          href="index.html"
+        >
           🗂 Procédures
         </a>
 
-        <a class="header-link" href="code.html">
+
+        <a
+          class="header-link"
+          href="code.html"
+        >
           📻 Guide radio
         </a>
 
-        <a class="header-link" href="reglement.html">
+
+        <a
+          class="header-link"
+          href="reglement.html"
+        >
           ⚖ Règlement
         </a>
 
-        <a class="header-link current" href="tenues-vehicules.html">
+
+        <a
+          class="header-link current"
+          href="tenues-vehicules.html"
+        >
           🎽 Tenues & Véhicules
         </a>
 
-        <a class="header-link" href="organigramme.html">
+
+        <a
+          class="header-link"
+          href="organigramme.html"
+        >
           🧭 Organigramme
         </a>
 
-        <a class="header-link" href="division.html">
+
+        <a
+          class="header-link"
+          href="division.html"
+        >
           🏛 Divisions
         </a>
+
 
         <a
           class="header-link gold"
           href="https://guidejuridiquesp.netlify.app/"
           target="_blank"
-          rel="noopener">
-
+          rel="noopener"
+        >
           📖 Guide juridique ↗
-
         </a>
 
       </div>
@@ -858,19 +1188,35 @@ footer{
     <div class="status-line">
 
       <span>
+
         <span class="dot"></span>
+
         Système opérationnel
+
       </span>
 
+
       <span>
+
         DOCUMENT :
-        <b>CPD-TPL-002</b>
+
+        <b>
+          CPD-TPL-002
+        </b>
+
       </span>
 
+
       <span>
+
         VERSION :
-        <b>2.0</b>
+
+        <b>
+          2.1
+        </b>
+
       </span>
+
 
       <span id="clock">
         --/--/---- --:--
@@ -903,16 +1249,25 @@ footer{
 
     </div>
 
-    <div class="grades" id="grades"></div>
+
+    <div
+      class="grades"
+      id="grades"
+    ></div>
 
   </div>
 
 </main>
 
 
+<!-- ==========================================================
+     FOOTER
+========================================================== -->
+
 <footer>
 
   CPD INTERNAL SYSTEM — TENUES & VÉHICULES —
+
   USAGE INTERNE UNIQUEMENT — NE PAS DIFFUSER
 
 </footer>
@@ -925,20 +1280,23 @@ footer{
 <div
   class="image-lightbox"
   id="imageLightbox"
-  onclick="closeLightbox(event)">
+  onclick="closeLightbox(event)"
+>
 
   <div
     class="image-lightbox-close"
-    onclick="closeLightbox(event)">
-
+    onclick="closeLightbox(event)"
+  >
     ×
-
   </div>
+
 
   <img
     id="lightboxImage"
     src=""
-    alt="">
+    alt=""
+    onclick="event.stopPropagation()"
+  >
 
 </div>
 
@@ -957,292 +1315,94 @@ let grades = [];
    CHARGEMENT DATA-TENUES.JS
 ========================================================== */
 
-async function loadData(){
+function loadData(){
 
-  try{
+  return new Promise(
+    (resolve, reject) => {
 
-    window.CPD_DATA = undefined;
+      /*
+       * On s'assure que l'ancienne donnée
+       * ne reste pas en mémoire.
+       */
+      window.CPD_DATA = undefined;
 
-    /*
-     * Suppression d'une éventuelle ancienne version
-     */
-    const oldScript =
-      document.querySelector(
-        'script[data-cpd-data]'
-      );
-
-    if(oldScript){
-      oldScript.remove();
-    }
-
-
-    await new Promise((resolve, reject) => {
 
       const script =
         document.createElement("script");
+
 
       script.src =
         "data-tenues.js?v=" +
         Date.now();
 
+
       script.async = false;
 
-      script.dataset.cpdData = "true";
 
+      script.onload =
+        function(){
 
-      script.onload = () => {
-
-        console.log(
-          "data-tenues.js chargé avec succès"
-        );
-
-        resolve();
-
-      };
-
-
-      script.onerror = () => {
-
-        reject(
-          new Error(
-            "Impossible de charger data-tenues.js"
-          )
-        );
-
-      };
-
-
-      document.head.appendChild(script);
-
-    });
-
-
-    if(!Array.isArray(window.CPD_DATA)){
-
-      throw new Error(
-        "window.CPD_DATA est absent ou invalide."
-      );
-
-    }
-
-
-    grades =
-      window.CPD_DATA;
-
-
-    console.log(
-      "Données CPD chargées :",
-      grades
-    );
-
-
-    renderGrades();
-
-
-  }catch(err){
-
-    console.error(
-      "Erreur chargement tenues :",
-      err
-    );
-
-
-    document.getElementById("grades").innerHTML = `
-
-      <div class="notice">
-
-        <div class="notice-title">
-          Erreur de chargement
-        </div>
-
-        <p>
-          Impossible de charger les données
-          <b>data-tenues.js</b>.
-        </p>
-
-        <p style="margin-top:8px;">
-          ${escapeHtml(err.message || String(err))}
-        </p>
-
-      </div>
-
-    `;
-
-  }
-
-}
-
-
-/* ==========================================================
-   NORMALISATION URL
-========================================================== */
-
-function normalizeImageSrc(rawSrc){
-
-  if(!rawSrc){
-    return "";
-  }
-
-  let src =
-    String(rawSrc).trim();
-
-  src =
-    src.replace(
-      /^["']|["']$/g,
-      ""
-    );
-
-  return src;
-
-}
-
-
-/* ==========================================================
-   GÉNÉRATION DES URLS ALTERNATIVES
-========================================================== */
-
-function getImageCandidates(src){
-
-  if(!src){
-    return [];
-  }
-
-
-  const candidates = [];
-
-
-  /*
-   * URL originale
-   */
-  candidates.push(src);
-
-
-  try{
-
-    const url =
-      new URL(src);
-
-
-    /*
-     * IMGUR
-     */
-    if(
-      url.hostname === "imgur.com" ||
-      url.hostname === "www.imgur.com"
-    ){
-
-      const parts =
-        url.pathname
-          .replace(/^\/+/, "")
-          .split("/");
-
-
-      /*
-       * On ne tente que les liens simples.
-       */
-      if(
-        parts.length === 1 &&
-        parts[0]
-      ){
-
-        const id =
-          parts[0];
-
-
-        candidates.push(
-          `https://i.imgur.com/${id}.png`
-        );
-
-        candidates.push(
-          `https://i.imgur.com/${id}.jpg`
-        );
-
-        candidates.push(
-          `https://i.imgur.com/${id}.jpeg`
-        );
-
-        candidates.push(
-          `https://i.imgur.com/${id}.webp`
-        );
-
-      }
-
-    }
-
-
-    /*
-     * I.IMGUR.COM
-     */
-    if(
-      url.hostname === "i.imgur.com"
-    ){
-
-      const filename =
-        url.pathname
-          .split("/")
-          .pop();
-
-
-      if(filename){
-
-        const id =
-          filename.replace(
-            /\.[^.]+$/,
-            ""
+          console.log(
+            "CPD — data-tenues.js chargé."
           );
 
 
-        candidates.push(
-          `https://i.imgur.com/${id}.png`
-        );
+          if(
+            !Array.isArray(
+              window.CPD_DATA
+            )
+          ){
 
-        candidates.push(
-          `https://i.imgur.com/${id}.jpg`
-        );
+            reject(
+              new Error(
+                "window.CPD_DATA n'est pas un tableau."
+              )
+            );
 
-        candidates.push(
-          `https://i.imgur.com/${id}.jpeg`
-        );
+            return;
 
-        candidates.push(
-          `https://i.imgur.com/${id}.webp`
-        );
+          }
 
-      }
+
+          grades =
+            window.CPD_DATA;
+
+
+          console.log(
+            "CPD_DATA :",
+            grades
+          );
+
+
+          resolve();
+
+        };
+
+
+      script.onerror =
+        function(){
+
+          reject(
+            new Error(
+              "Impossible de charger data-tenues.js."
+            )
+          );
+
+        };
+
+
+      document.head.appendChild(
+        script
+      );
 
     }
-
-  }catch(error){
-
-    console.warn(
-      "URL image invalide :",
-      src
-    );
-
-  }
-
-
-  /*
-   * Proxy en dernier recours.
-   */
-  candidates.push(
-    "https://wsrv.nl/?url=" +
-    encodeURIComponent(src)
   );
-
-
-  /*
-   * Supprime les doublons.
-   */
-  return [
-    ...new Set(candidates)
-  ];
 
 }
 
 
 /* ==========================================================
-   GRILLE IMAGES
+   GRILLE DES IMAGES
 ========================================================== */
 
 function shotGrid(
@@ -1260,39 +1420,102 @@ function shotGrid(
   }
 
 
-  const slots =
-    shots.map(
-      (shot, index) => {
+  return `
 
-        const label =
-          shot &&
-          shot.label
+    <div class="shot-grid ${escapeHtml(
+      extraClass || ""
+    )}">
 
-            ? String(shot.label)
+      ${shots.map(
+        (shot,index) => {
 
-            : `Capture ${index + 1}`;
+          const label =
+            shot &&
+            shot.label
 
+              ? String(
+                  shot.label
+                )
 
-        const src =
-          shot &&
-          typeof shot.src === "string"
-
-            ? normalizeImageSrc(
-                shot.src
-              )
-
-            : "";
+              : `Capture ${index + 1}`;
 
 
-        if(!src){
+          const src =
+            shot &&
+            typeof shot.src === "string"
 
+              ? shot.src.trim()
+
+              : "";
+
+
+          /*
+           * Aucun lien.
+           */
+          if(!src){
+
+            return `
+
+              <div class="shot-slot empty">
+
+                <div class="shot-slot-label">
+
+                  Emplacement capture
+
+                  <b>
+                    ${escapeHtml(
+                      label
+                    )}
+                  </b>
+
+                </div>
+
+              </div>
+
+            `;
+
+          }
+
+
+          /*
+           * Image avec URL DIRECTE.
+           *
+           * Aucun proxy.
+           * Aucun traitement.
+           * Aucun wsrv.
+           */
           return `
 
-            <div class="shot-slot empty">
+            <div
+              class="shot-slot"
+            >
 
-              <div class="shot-slot-label">
+              <img
+                src="${escapeHtml(src)}"
 
-                Image non configurée
+                alt="${escapeHtml(label)}"
+
+                title="${escapeHtml(label)}"
+
+                loading="lazy"
+
+                decoding="async"
+
+                referrerpolicy="no-referrer"
+
+                onclick="openLightbox(this)"
+
+                onload="imageLoaded(this)"
+
+                onerror="imageError(this)"
+              >
+
+
+              <div
+                class="shot-slot-label shot-error-label"
+              >
+
+                Image indisponible
 
                 <b>
                   ${escapeHtml(label)}
@@ -1305,88 +1528,7 @@ function shotGrid(
           `;
 
         }
-
-
-        const candidates =
-          getImageCandidates(src);
-
-
-        return `
-
-          <div
-            class="shot-slot"
-            data-image-index="0"
-          >
-
-            <img
-
-              src="${escapeHtml(
-                candidates[0]
-              )}"
-
-              data-candidates="${escapeHtml(
-                JSON.stringify(candidates)
-              )}"
-
-              data-image-index="0"
-
-              data-original-src="${escapeHtml(
-                src
-              )}"
-
-              alt="${escapeHtml(
-                label
-              )}"
-
-              title="${escapeHtml(
-                label
-              )}"
-
-              loading="lazy"
-
-              decoding="async"
-
-              referrerpolicy="no-referrer"
-
-              onload="handleShotLoad(this)"
-
-              onerror="handleShotError(this)"
-
-              onclick="openLightbox(this)"
-
-            >
-
-
-            <div
-              class="shot-slot-label shot-error-label"
-            >
-
-              Image indisponible
-
-              <b>
-                ${escapeHtml(label)}
-              </b>
-
-            </div>
-
-          </div>
-
-        `;
-
-      }
-    )
-    .join("");
-
-
-  return `
-
-    <div
-      class="shot-grid ${escapeHtml(
-        extraClass || ""
-      )}"
-    >
-
-      ${slots}
+      ).join("")}
 
     </div>
 
@@ -1396,10 +1538,10 @@ function shotGrid(
 
 
 /* ==========================================================
-   IMAGE OK
+   IMAGE CHARGÉE
 ========================================================== */
 
-function handleShotLoad(img){
+function imageLoaded(img){
 
   const slot =
     img.closest(
@@ -1417,12 +1559,8 @@ function handleShotLoad(img){
   );
 
 
-  img.style.display =
-    "block";
-
-
   console.log(
-    "Image chargée :",
+    "Image CPD chargée :",
     img.src
   );
 
@@ -1430,10 +1568,10 @@ function handleShotLoad(img){
 
 
 /* ==========================================================
-   FALLBACK IMAGE
+   ERREUR IMAGE
 ========================================================== */
 
-function handleShotError(img){
+function imageError(img){
 
   const slot =
     img.closest(
@@ -1446,76 +1584,9 @@ function handleShotError(img){
   }
 
 
-  let candidates = [];
-
-
-  try{
-
-    candidates =
-      JSON.parse(
-        img.getAttribute(
-          "data-candidates"
-        ) || "[]"
-      );
-
-  }catch(error){
-
-    console.error(
-      "Impossible de lire les candidates image",
-      error
-    );
-
-  }
-
-
-  let index =
-    Number(
-      img.getAttribute(
-        "data-image-index"
-      ) || "0"
-    );
-
-
-  index++;
-
-
-  /*
-   * Essaye l'URL suivante.
-   */
-  if(
-    index <
-    candidates.length
-  ){
-
-    console.warn(
-      "Image échouée, tentative suivante :",
-      candidates[index]
-    );
-
-
-    img.setAttribute(
-      "data-image-index",
-      String(index)
-    );
-
-
-    img.src =
-      candidates[index];
-
-
-    return;
-
-  }
-
-
-  /*
-   * Plus aucune tentative.
-   */
   console.error(
-    "ÉCHEC IMAGE :",
-    img.getAttribute(
-      "data-original-src"
-    )
+    "Impossible de charger l'image :",
+    img.src
   );
 
 
@@ -1546,47 +1617,20 @@ function renderGrades(){
     "";
 
 
-  if(
-    !Array.isArray(grades) ||
-    grades.length === 0
-  ){
-
-    container.innerHTML = `
-
-      <div class="notice">
-
-        <div class="notice-title">
-          Aucun grade
-        </div>
-
-        <p>
-          Aucun grade n'a été trouvé dans
-          data-tenues.js.
-        </p>
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
   grades.forEach(
-    (grade, index) => {
+    (grade,index) => {
 
-      const el =
+      const element =
         document.createElement(
           "div"
         );
 
 
-      el.className =
+      element.className =
         "grade";
 
 
-      el.id =
+      element.id =
         `grade-${index}`;
 
 
@@ -1622,7 +1666,7 @@ function renderGrades(){
           : [];
 
 
-      el.innerHTML = `
+      element.innerHTML = `
 
         <div
           class="grade-header"
@@ -1632,18 +1676,25 @@ function renderGrades(){
           <div class="grade-left">
 
             <div class="grade-rank">
-              GR. ${escapeHtml(
-                grade.rank ?? ""
+
+              GR.
+              ${escapeHtml(
+                grade.rank || ""
               )}
+
             </div>
 
+
             <div class="grade-title">
+
               ${escapeHtml(
-                grade.title ?? ""
+                grade.title || ""
               )}
+
             </div>
 
           </div>
+
 
           <div class="grade-caret">
             ▸
@@ -1655,6 +1706,8 @@ function renderGrades(){
         <div class="grade-content">
 
 
+          <!-- TENUES -->
+
           <div class="section-block">
 
             <div class="section-label gold">
@@ -1665,20 +1718,25 @@ function renderGrades(){
             <ul class="item-list">
 
               ${
-                tenues.length
+                tenues.length > 0
 
                   ? tenues
                       .map(
-                        t =>
-                          `<li>${escapeHtml(t)}</li>`
+                        tenue => `
+                          <li>
+                            ${escapeHtml(
+                              tenue
+                            )}
+                          </li>
+                        `
                       )
                       .join("")
 
                   : `
-                    <li>
-                      Aucune tenue renseignée.
-                    </li>
-                  `
+                      <li>
+                        Aucune tenue renseignée.
+                      </li>
+                    `
               }
 
             </ul>
@@ -1688,12 +1746,12 @@ function renderGrades(){
               grade.note
 
                 ? `
-                  <div class="item-note">
-                    ${escapeHtml(
-                      grade.note
-                    )}
-                  </div>
-                `
+                    <div class="item-note">
+                      ${escapeHtml(
+                        grade.note
+                      )}
+                    </div>
+                  `
 
                 : ""
             }
@@ -1707,6 +1765,8 @@ function renderGrades(){
           </div>
 
 
+          <!-- VEHICULES -->
+
           <div class="section-block">
 
             <div class="section-label">
@@ -1717,20 +1777,25 @@ function renderGrades(){
             <ul class="item-list">
 
               ${
-                vehicules.length
+                vehicules.length > 0
 
                   ? vehicules
                       .map(
-                        v =>
-                          `<li>${escapeHtml(v)}</li>`
+                        vehicule => `
+                          <li>
+                            ${escapeHtml(
+                              vehicule
+                            )}
+                          </li>
+                        `
                       )
                       .join("")
 
                   : `
-                    <li>
-                      Aucun véhicule renseigné.
-                    </li>
-                  `
+                      <li>
+                        Aucun véhicule renseigné.
+                      </li>
+                    `
               }
 
             </ul>
@@ -1740,12 +1805,12 @@ function renderGrades(){
               grade.vehiculeNote
 
                 ? `
-                  <div class="item-note">
-                    ${escapeHtml(
-                      grade.vehiculeNote
-                    )}
-                  </div>
-                `
+                    <div class="item-note">
+                      ${escapeHtml(
+                        grade.vehiculeNote
+                      )}
+                    </div>
+                  `
 
                 : ""
             }
@@ -1765,7 +1830,7 @@ function renderGrades(){
 
 
       container.appendChild(
-        el
+        element
       );
 
     }
@@ -1780,18 +1845,18 @@ function renderGrades(){
 
 function toggleGrade(index){
 
-  const el =
+  const element =
     document.getElementById(
       `grade-${index}`
     );
 
 
-  if(!el){
+  if(!element){
     return;
   }
 
 
-  el.classList.toggle(
+  element.classList.toggle(
     "open"
   );
 
@@ -1864,16 +1929,12 @@ function closeLightbox(event){
 }
 
 
-/* ==========================================================
-   ESC POUR FERMER L'IMAGE
-========================================================== */
-
 document.addEventListener(
   "keydown",
-  function(e){
+  function(event){
 
     if(
-      e.key === "Escape"
+      event.key === "Escape"
     ){
 
       document
@@ -1894,9 +1955,9 @@ document.addEventListener(
    ESCAPE HTML
 ========================================================== */
 
-function escapeHtml(str){
+function escapeHtml(value){
 
-  return String(str)
+  return String(value)
 
     .replace(
       /&/g,
@@ -1932,13 +1993,13 @@ function escapeHtml(str){
 
 function updateClock(){
 
-  const d =
+  const date =
     new Date();
 
 
   const pad =
-    n =>
-      String(n)
+    number =>
+      String(number)
         .padStart(
           2,
           "0"
@@ -1951,16 +2012,17 @@ function updateClock(){
     )
     .textContent =
 
-      `${pad(d.getDate())}/` +
-      `${pad(d.getMonth()+1)}/` +
-      `${d.getFullYear()} ` +
-      `${pad(d.getHours())}:` +
-      `${pad(d.getMinutes())}`;
+      `${pad(date.getDate())}/` +
+      `${pad(date.getMonth() + 1)}/` +
+      `${date.getFullYear()} ` +
+      `${pad(date.getHours())}:` +
+      `${pad(date.getMinutes())}`;
 
 }
 
 
 updateClock();
+
 
 setInterval(
   updateClock,
@@ -1972,7 +2034,51 @@ setInterval(
    INITIALISATION
 ========================================================== */
 
-loadData();
+loadData()
+
+  .then(
+    function(){
+
+      console.log(
+        "CPD — Données prêtes."
+      );
+
+      renderGrades();
+
+    }
+  )
+
+  .catch(
+    function(error){
+
+      console.error(
+        "CPD — Erreur :",
+        error
+      );
+
+
+      document.getElementById(
+        "grades"
+      ).innerHTML = `
+
+        <div class="notice">
+
+          <div class="notice-title">
+            Erreur de chargement
+          </div>
+
+          <p>
+            ${escapeHtml(
+              error.message
+            )}
+          </p>
+
+        </div>
+
+      `;
+
+    }
+  );
 
 
 /* ==========================================================
@@ -1981,9 +2087,9 @@ loadData();
 
 document.addEventListener(
   "contextmenu",
-  function(e){
+  function(event){
 
-    e.preventDefault();
+    event.preventDefault();
 
   }
 );
@@ -1991,15 +2097,17 @@ document.addEventListener(
 
 document.addEventListener(
   "keydown",
-  function(e){
+  function(event){
 
     const key =
-      e.key.toUpperCase();
+      event.key.toUpperCase();
 
 
-    if(key === "F12"){
+    if(
+      key === "F12"
+    ){
 
-      e.preventDefault();
+      event.preventDefault();
 
       return;
 
@@ -2007,7 +2115,7 @@ document.addEventListener(
 
 
     if(
-      (e.ctrlKey || e.metaKey) &&
+      (event.ctrlKey || event.metaKey) &&
       [
         "U",
         "S",
@@ -2016,7 +2124,7 @@ document.addEventListener(
       ].includes(key)
     ){
 
-      e.preventDefault();
+      event.preventDefault();
 
       return;
 
@@ -2024,8 +2132,8 @@ document.addEventListener(
 
 
     if(
-      (e.ctrlKey || e.metaKey) &&
-      e.shiftKey &&
+      (event.ctrlKey || event.metaKey) &&
+      event.shiftKey &&
       [
         "I",
         "J",
@@ -2033,7 +2141,7 @@ document.addEventListener(
       ].includes(key)
     ){
 
-      e.preventDefault();
+      event.preventDefault();
 
     }
 
@@ -2043,9 +2151,9 @@ document.addEventListener(
 
 document.addEventListener(
   "dragstart",
-  function(e){
+  function(event){
 
-    e.preventDefault();
+    event.preventDefault();
 
   }
 );
@@ -2053,9 +2161,9 @@ document.addEventListener(
 
 document.addEventListener(
   "copy",
-  function(e){
+  function(event){
 
-    e.preventDefault();
+    event.preventDefault();
 
   }
 );
@@ -2063,4 +2171,5 @@ document.addEventListener(
 </script>
 
 </body>
+
 </html>
