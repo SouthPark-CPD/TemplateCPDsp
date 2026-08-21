@@ -1054,7 +1054,8 @@ function shotGrid(shots, extraClass){
         <div class="shot-slot">
 
           <img
-            src="${escapeHtml(src)}"
+            src="https://wsrv.nl/?url=${encodeURIComponent(src)}"
+            data-original-src="${escapeHtml(src)}"
             alt="${escapeHtml(label)}"
             title="${escapeHtml(label)}"
             loading="eager"
@@ -1101,7 +1102,22 @@ function handleShotError(img){
     return;
   }
 
-  console.warn("Échec de chargement de l'image :", img.src);
+  const originalSrc =
+    img.getAttribute("data-original-src");
+
+  if(
+    originalSrc &&
+    !img.dataset.directAttempt
+  ){
+    img.dataset.directAttempt = "1";
+    img.src = originalSrc;
+    return;
+  }
+
+  console.warn(
+    "Échec de chargement de l'image :",
+    originalSrc || img.src
+  );
 
   img.style.display = "none";
   slot.classList.add("image-error");
