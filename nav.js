@@ -1,34 +1,29 @@
 /* ==========================================================
    CPD — NAV.JS
-   Génère le header (badge, titre, liens, statut, horloge)
-   dans un conteneur unique.
 
-   UTILISATION dans chaque page HTML :
+   Génère automatiquement le header CPD dans :
 
-   1. Dans <head> :
-        <link rel="stylesheet" href="nav.css">
+      <div id="site-header"></div>
 
-   2. Dans <body>, remplacer l'ancien header par :
-        <div id="site-header"></div>
+   Chaque page doit définir PAGE_CONFIG avant de charger
+   nav.js :
 
-   3. Avant le script propre à la page :
+      <script>
+        const PAGE_CONFIG = {
+          subtitle:"Guide radio — Codes & procédures de communication",
+          currentPage:"code.html",
+          docCode:"CPD-RAD-001",
+          version:"1.0"
+        };
+      </script>
 
-        <script>
-          const PAGE_CONFIG = {
-            subtitle:"Procédures opérationnelles — Manuel CPD",
-            currentPage:"index.html",
-            docCode:"CPD-TPL-001",
-            version:"1.0"
-          };
-        </script>
-
-        <script src="nav.js"></script>
+      <script src="nav.js"></script>
 
 ========================================================== */
 
 
 /* ==========================================================
-   LISTE DES LIENS DE NAVIGATION
+   LIENS DE NAVIGATION
 ========================================================== */
 
 const NAV_LINKS = [
@@ -81,7 +76,7 @@ const NAV_LINKS = [
 
 
 /* ==========================================================
-   SVG BADGE
+   SVG BADGE CPD
 ========================================================== */
 
 const STAR_SVG = `
@@ -230,21 +225,51 @@ const STAR_SVG = `
 
 
 /* ==========================================================
+   NETTOYAGE DU NOM DE FICHIER
+========================================================== */
+
+function cleanFileName(value){
+
+  if(!value){
+
+    return "";
+
+  }
+
+
+  return value
+
+    .split("/")
+
+    .pop()
+
+    .split("?")[0]
+
+    .split("#")[0]
+
+    .toLowerCase();
+
+}
+
+
+
+/* ==========================================================
    DÉTECTION DE LA PAGE ACTUELLE
 ========================================================== */
 
 function getCurrentPage(){
 
-  const path =
+  let pathname =
     window.location.pathname;
 
+
   let currentFile =
-    path.split("/").pop();
+    pathname.split("/").pop();
 
 
   /*
-     Si aucune page n'est précisée dans l'URL,
-     on considère qu'il s'agit de index.html.
+     Si le navigateur ne retourne aucun nom de fichier,
+     on considère que nous sommes sur index.html.
   */
 
   if(!currentFile){
@@ -255,24 +280,7 @@ function getCurrentPage(){
   }
 
 
-  /*
-     Retire éventuellement les paramètres
-     présents dans l'URL.
-  */
-
-  currentFile =
-    currentFile.split("?")[0];
-
-
-  /*
-     Retire éventuellement une ancre.
-  */
-
-  currentFile =
-    currentFile.split("#")[0];
-
-
-  return currentFile;
+  return cleanFileName(currentFile);
 
 }
 
@@ -291,7 +299,7 @@ function renderSiteHeader(){
   if(!container){
 
     console.warn(
-      "nav.js : aucun élément #site-header trouvé sur cette page."
+      "nav.js : #site-header est introuvable."
     );
 
     return;
@@ -299,28 +307,48 @@ function renderSiteHeader(){
   }
 
 
+  /*
+     Récupération de la configuration de la page.
+  */
+
   const config =
     window.PAGE_CONFIG || {};
 
+
+
+  /*
+     Sous-titre.
+  */
 
   const subtitle =
     config.subtitle ||
     "Manuel CPD";
 
 
-  /*
-     PAGE_CONFIG.currentPage est prioritaire.
 
-     Si currentPage n'est pas renseigné,
-     nav.js détecte automatiquement le fichier
-     actuellement ouvert dans le navigateur.
+  /*
+     Page configurée.
+
+     Si currentPage est présent dans PAGE_CONFIG,
+     il est utilisé.
+
+     Sinon, nav.js détecte automatiquement
+     le fichier ouvert.
   */
 
   const currentPage =
+
     config.currentPage
-      ? config.currentPage.split("/").pop().split("?")[0].split("#")[0]
+
+      ? cleanFileName(config.currentPage)
+
       : getCurrentPage();
 
+
+
+  /*
+     Informations documentaires.
+  */
 
   const docCode =
     config.docCode || "";
@@ -337,84 +365,92 @@ function renderSiteHeader(){
 
   const linksHtml =
 
-    NAV_LINKS.map(link => {
+    NAV_LINKS
+
+      .map(link => {
 
 
-      /*
-         Les liens externes ne peuvent jamais
-         être considérés comme la page actuelle.
-      */
+        /*
+           Nettoyage du href pour comparer
+           correctement les fichiers locaux.
+        */
 
-      const isCurrent =
-
-        !link.external &&
-
-        link.href
-          .split("/")
-          .pop()
-          .split("?")[0]
-          .split("#")[0]
-          === currentPage;
+        const linkFile =
+          cleanFileName(link.href);
 
 
 
-      /*
-         Construction des classes CSS
-      */
+        /*
+           Un lien externe ne peut jamais être
+           considéré comme la page active.
+        */
 
-      const classes = [
+        const isCurrent =
 
-        "header-link",
+          !link.external &&
 
-        link.gold
-          ? "gold"
-          : "",
-
-        isCurrent
-          ? "current"
-          : ""
-
-      ]
-
-      .filter(Boolean)
-      .join(" ");
+          linkFile === currentPage;
 
 
 
-      /*
-         Attributs pour les liens externes
-      */
+        /*
+           Classes CSS.
+        */
 
-      const targetAttrs =
+        const classes = [
 
-        link.external
+          "header-link",
 
-          ? ` target="_blank" rel="noopener"`
+          link.gold
+            ? "gold"
+            : "",
 
-          : "";
+          isCurrent
+            ? "current"
+            : ""
+
+        ]
+
+        .filter(Boolean)
+
+        .join(" ");
 
 
 
-      return `
+        /*
+           Attributs des liens externes.
+        */
 
-        <a
-          class="${classes}"
-          href="${link.href}"${targetAttrs}>
+        const targetAttrs =
 
-          ${link.label}
+          link.external
 
-        </a>
+            ? ` target="_blank" rel="noopener"`
 
-      `;
+            : "";
 
-    })
 
-    .join("");
+
+        return `
+
+          <a
+            class="${classes}"
+            href="${link.href}"${targetAttrs}>
+
+            ${link.label}
+
+          </a>
+
+        `;
+
+      })
+
+      .join("");
 
 
 
   /* ========================================================
-     INSERTION DU HEADER
+     CONSTRUCTION DU HEADER
   ======================================================== */
 
   container.innerHTML = `
@@ -423,10 +459,12 @@ function renderSiteHeader(){
 
       <div class="header-inner">
 
+
+        <!-- ================================================
+             BADGE + TITRE
+        ================================================= -->
+
         <div class="badge-row">
-
-
-          <!-- BADGE + TITRE -->
 
           <div class="badge-left">
 
@@ -452,8 +490,9 @@ function renderSiteHeader(){
           </div>
 
 
-
-          <!-- NAVIGATION -->
+          <!-- ==============================================
+               NAVIGATION
+          =============================================== -->
 
           <div class="header-actions">
 
@@ -461,12 +500,12 @@ function renderSiteHeader(){
 
           </div>
 
-
         </div>
 
 
-
-        <!-- STATUS -->
+        <!-- ================================================
+             STATUS
+        ================================================= -->
 
         <div class="status-line">
 
@@ -482,7 +521,9 @@ function renderSiteHeader(){
 
           ${
             docCode
+
               ? `
+
                 <span>
 
                   DOCUMENT :
@@ -492,14 +533,18 @@ function renderSiteHeader(){
                   </b>
 
                 </span>
+
               `
+
               : ""
           }
 
 
           ${
             version
+
               ? `
+
                 <span>
 
                   VERSION :
@@ -509,7 +554,9 @@ function renderSiteHeader(){
                   </b>
 
                 </span>
+
               `
+
               : ""
           }
 
@@ -534,34 +581,34 @@ function renderSiteHeader(){
 
 
 /* ==========================================================
-   HORLOGE PARTAGÉE
+   HORLOGE
 ========================================================== */
 
 function updateNavClock(){
 
-  const el =
+  const clock =
     document.getElementById("nav-clock");
 
 
-  if(!el){
+  if(!clock){
 
     return;
 
   }
 
 
-  const d =
+  const now =
     new Date();
 
 
   const pad =
-    n =>
-      String(n).padStart(2,"0");
+    number =>
+      String(number).padStart(2,"0");
 
 
-  el.textContent =
+  clock.textContent =
 
-    `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
 }
 
@@ -574,6 +621,7 @@ function updateNavClock(){
 renderSiteHeader();
 
 updateNavClock();
+
 
 setInterval(
   updateNavClock,
