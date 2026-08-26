@@ -11,7 +11,7 @@ window.CPD_DATA = [
 
     badge: "OFFICIER 1 → 3",
 
-    image: "images/tenue-officier-1-3.png",
+    image: "images/tenueoffi3.png",
 
     caption: "Tenue réglementaire commune aux Officiers 1 à 3."
   },
@@ -40,7 +40,7 @@ window.CPD_DATA = [
 
     badge: "OFFICIER 1 → FTO",
 
-    image: "images/ceremonie-officier-1-fto.png",
+    image: "images/TenueCereOffi.webp",
 
     caption: "Tenue de cérémonie applicable des Officiers 1 jusqu'au FTO."
   },
@@ -52,7 +52,7 @@ window.CPD_DATA = [
 
     badge: "SUPÉRIEUR FTO",
 
-    image: "images/ceremonie-superieur-fto.png",
+    image: "images/TenueCereSerge.webp",
 
     caption: "Tenue de cérémonie applicable aux grades supérieurs au FTO."
   }
