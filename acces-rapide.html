@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPD — Accès rapide</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!--
+  ⚠️ Variables :root ci-dessous : je ne connaissais pas celles de ton
+  vrai site (aucune page HTML fournie), je les ai déduites du thème
+  vu dans nav.js / le screenshot. Si ton :root réel est différent,
+  colle-le moi et je remplace ce bloc — le reste ne bougera pas.
+-->
+<style>
+:root{
+  --bg:#0b0f14;
+  --panel:#121821;
+  --panel-2:#161e29;
+  --line:rgba(255,255,255,0.09);
+  --gold:#d9a441;
+  --steel:#4a6fa5;
+  --text:#e9edf2;
+  --text-dim:#8b96a5;
+  --amber:#e8b84b;
+  --green:#3ddc84;
+  --font-display:'Oswald', sans-serif;
+  --font-mono:'Roboto Mono', monospace;
+}
+
+*{box-sizing:border-box;}
+
+html, body{
+  height:100%;
+  margin:0;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-mono);
+  -webkit-font-smoothing:antialiased;
+  height:100dvh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+#site-header{
+  flex:0 0 auto;
+}
+
+/* ================= LAYOUT PAGE — tient sur un seul écran ================= */
+
+.qr-wrap{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  padding:10px 18px 14px;
+  max-width:1400px;
+  width:100%;
+  margin:0 auto;
+}
+
+.qr-titlebar{
+  flex:0 0 auto;
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:14px;
+  margin-bottom:8px;
+}
+
+.qr-title{
+  font-family:var(--font-display);
+  font-size:clamp(18px,2.4vh,26px);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+
+.qr-subtitle{
+  color:var(--text-dim);
+  font-size:11px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+
+/* ================= GRID PRINCIPALE : 3 colonnes, une seule rangée ================= */
+
+.qr-grid{
+  flex:1 1 auto;
+  min-height:0;
+  display:grid;
+  grid-template-columns:1fr 0.85fr 1.15fr;
+  gap:14px;
+}
+
+.qr-panel{
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:12px 14px;
+  overflow:hidden;
+}
+
+.qr-panel h2{
+  flex:0 0 auto;
+  font-family:var(--font-display);
+  font-size:14px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin:0 0 8px;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.qr-panel h2 input{
+  flex:1 1 auto;
+  min-width:0;
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:4px;
+  color:var(--text);
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:0.3px;
+  padding:5px 8px;
+  text-transform:none;
+}
+
+.qr-panel h2 input:focus{
+  outline:none;
+  border-color:var(--gold);
+}
+
+.qr-panel h2 input::placeholder{
+  color:var(--text-dim);
+}
+
+.qr-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+}
+
+.qr-scroll::-webkit-scrollbar{
+  width:5px;
+}
+.qr-scroll::-webkit-scrollbar-thumb{
+  background:var(--line);
+  border-radius:3px;
+}
+
+/* codes radio — 2 colonnes internes pour gagner de la hauteur */
+
+.code-list{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0 10px;
+  align-content:start;
+}
+
+.code-row{
+  display:grid;
+  grid-template-columns:52px 1fr;
+  gap:6px;
+  padding:3px 4px;
+  border-radius:3px;
+  font-size:clamp(10px,1.4vh,12.5px);
+  line-height:1.25;
+  align-items:baseline;
+}
+
+.code-row:hover{
+  background:var(--panel-2);
+}
+
+.code-row .code-num{
+  color:var(--amber);
+  font-weight:700;
+  letter-spacing:0.3px;
+  white-space:nowrap;
+}
+
+.code-row .code-def{
+  color:var(--text);
+}
+
+/* codes 2/3/4... */
+
+.code2-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.code2-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:4px;
+  font-size:clamp(10px,1.4vh,12.5px);
+}
+
+.code2-row .code-num{
+  color:var(--amber);
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.code2-row .code-def{
+  color:var(--text);
+  text-align:right;
+}
+
+/* ================= MIRANDA ================= */
+
+.miranda-actions{
+  display:flex;
+  justify-content:center;
+  margin-bottom:8px;
+  flex:0 0 auto;
+}
+
+.copy-btn{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:6px 14px;
+  border:1px solid var(--gold);
+  color:var(--gold);
+  background:transparent;
+  border-radius:4px;
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.copy-btn:hover{
+  background:var(--gold);
+  color:#0b0f14;
+}
+
+.copy-btn.copied{
+  background:var(--green);
+  border-color:var(--green);
+  color:#0b0f14;
+}
+
+.miranda-text{
+  font-size:clamp(9.5px,1.3vh,12px);
+  line-height:1.55;
+  color:var(--text);
+  text-align:center;
+}
+
+.miranda-text .fill{
+  color:var(--amber);
+  font-weight:600;
+}
+
+.miranda-text p{
+  margin:0 0 9px;
+}
+
+.miranda-text p.strong{
+  color:var(--gold);
+  font-weight:600;
+}
+
+.miranda-text .questions{
+  margin-top:4px;
+  color:var(--steel);
+}
+
+/* ================= MOBILE / ECRANS ETROITS ================= */
+
+@media(max-width:900px){
+  .qr-grid{
+    grid-template-columns:1fr;
+    grid-template-rows:1fr 1fr 1fr;
+  }
+  .code-list{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:520px){
+  .qr-subtitle{ display:none; }
+  .qr-panel h2{ font-size:12px; }
+}
+
+/* ================= IMPRESSION (tient sur une page) ================= */
+
+@media print{
+  #site-header{ display:none; }
+  body{ background:#fff; color:#111; overflow:visible; height:auto; }
+  .qr-wrap{ height:auto; }
+  .qr-grid{ min-height:0; }
+  .qr-scroll{ overflow:visible; }
+  .qr-panel{
+    border-color:#ccc;
+    background:#fff;
+  }
+  .miranda-actions{ display:none; }
+  .qr-title, .code-row .code-num, .code2-row .code-num,
+  .qr-panel h2{ color:#000 !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<div class="qr-wrap">
+
+  <div class="qr-titlebar">
+    <div class="qr-title">Accès rapide</div>
+    <div class="qr-subtitle">Codes radio · Codes · Miranda</div>
+  </div>
+
+  <div class="qr-grid">
+
+    <div class="qr-panel">
+      <h2>
+        Codes radio
+        <input type="text" id="code-search" placeholder="🔎 rechercher...">
+      </h2>
+      <div class="qr-scroll">
+        <div class="code-list" id="code-list">
+          <!-- rempli par JS depuis RADIO_CODES -->
+        </div>
+      </div>
+    </div>
+
+    <div class="qr-panel">
+      <h2>Codes</h2>
+      <div class="qr-scroll">
+        <div class="code2-list">
+          <div class="code2-row"><span class="code-num">Code 2</span><span class="code-def">Gyrophares</span></div>
+          <div class="code2-row"><span class="code-num">Code 3</span><span class="code-def">Gyrophares + Sirènes</span></div>
+          <div class="code2-row"><span class="code-num">Code 4</span><span class="code-def">Situation stable</span></div>
+          <div class="code2-row"><span class="code-num">Code 5</span><span class="code-def">En surveillance</span></div>
+          <div class="code2-row"><span class="code-num">Code 6</span><span class="code-def">Arrivée sur les lieux</span></div>
+          <div class="code2-row"><span class="code-num">Code 99</span><span class="code-def">Officier en danger</span></div>
+          <div class="code2-row"><span class="code-num">Code Robert</span><span class="code-def">Déploiement arme lourde</span></div>
+          <div class="code2-row"><span class="code-num">Code Sam</span><span class="code-def">Déploiement d'un Bean Bag</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="qr-panel">
+      <h2>
+        Droits Miranda
+        <button class="copy-btn" id="copy-miranda">📋 Copier</button>
+      </h2>
+      <div class="qr-scroll">
+        <div class="miranda-text" id="miranda-text">
+          <p class="strong">Monsieur/Madame <span class="fill">###</span>, nous sommes le <span class="fill">##/##/####</span>, il est <span class="fill">##h##</span>.<br>
+          Vous êtes en état d'arrestation pour : <span class="fill">###</span></p>
+
+          <p>Sachez que les chefs d'inculpations peuvent être amenés à changer une fois durant la procédure.<br>
+          Vous avez le droit de garder le silence.</p>
+
+          <p>Tout ce que vous direz pourra et sera retenu contre vous lors d'une cour de justice.<br>
+          Vous avez le droit à un avocat et d'avoir un avocat présent lors de votre interrogatoire.<br>
+          Si vous n'en avez pas les moyens, un avocat vous sera commis d'office.<br>
+          Durant chaque interrogatoire, vous pouvez décider à n'importe quel moment d'exercer vos droits,
+          de répondre à aucune question et de ne faire aucune déposition.<br>
+          Durant votre incarcération, vous avez le droit de demander à voir un médecin et/ou manger et boire.</p>
+
+          <p class="questions">Avez-vous bien compris les droits que je viens de vous lire ?<br>
+          Voulez-vous exercer l'un de vos droits ?</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  const PAGE_CONFIG = {
+    subtitle:"Procédures opérationnels — Manuel CPD",
+    currentPage:"acces-rapide.html",
+    docCode:"CPD-TPL-002",
+    version:"1.0"
+  };
+</script>
+<script src="nav.js"></script>
+
+<script>
+/* ==========================================================
+   Codes radio — modifie/ajoute ici, ça se répercute dans la liste
+========================================================== */
+const RADIO_CODES = [
+  ["10-4","Bien Reçu"],
+  ["10-5","Négatif / Relayer le message"],
+  ["10-6","Occupé / Pas dispo"],
+  ["10-7","Hors service temporaire"],
+  ["10-8","Prise de service"],
+  ["10-9","Répéter le dernier call"],
+  ["10-10","Fin de service"],
+  ["10-17","Refuel"],
+  ["10-18","En direction de.. (Localisation)"],
+  ["10-19","Retour PDP"],
+  ["10-20","Votre position"],
+  ["10-22","Annuler ou ignorer"],
+  ["10-37","Cambriolage"],
+  ["10-38","Contrôle routier ou traffic stop"],
+  ["10-40","Accident"],
+  ["10-56","Refus d'obtempérer (CP)"],
+  ["10-70","Vente de drogue"],
+  ["10-91","Braquage de banque"]
+];
+
+function renderCodes(filter){
+  const list = document.getElementById("code-list");
+  const f = (filter || "").trim().toLowerCase();
+
+  list.innerHTML = RADIO_CODES
+    .filter(([num, def]) =>
+      !f || num.toLowerCase().includes(f) || def.toLowerCase().includes(f)
+    )
+    .map(([num, def]) =>
+      `<div class="code-row"><span class="code-num">${num}</span><span class="code-def">${def}</span></div>`
+    ).join("") || `<div class="code-row"><span class="code-def" style="color:var(--text-dim)">Aucun résultat</span></div>`;
+}
+
+renderCodes("");
+
+document.getElementById("code-search").addEventListener("input", e => {
+  renderCodes(e.target.value);
+});
+
+document.getElementById("copy-miranda").addEventListener("click", () => {
+  const text = document.getElementById("miranda-text").innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById("copy-miranda");
+    btn.textContent = "✅ Copié !";
+    btn.classList.add("copied");
+    setTimeout(() => {
+      btn.textContent = "📋 Copier le texte";
+      btn.classList.remove("copied");
+    }, 1800);
+  });
+});
+</script>
+
+</body>
+</html>
