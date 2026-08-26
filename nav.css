@@ -1,25 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+
 /* ==========================================================
    CPD — NAV.CSS
-   Styles du header/nav partagés sur toutes les pages.
-   Nécessite les variables :root définies dans le CSS de
-   chaque page (--bg, --gold, --steel, --font-display, etc.)
+   Style global du header / menu de navigation
+========================================================== */
+
+
+/* ==========================================================
+   HEADER
 ========================================================== */
 
 header{
   position:relative;
+
   border-bottom:1px solid var(--line);
+
   padding:28px 32px 22px;
+
   overflow:hidden;
-  background:linear-gradient(
-    180deg,
-    rgba(74,111,165,0.06),
-    transparent
-  );
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(74,111,165,0.06),
+      transparent
+    );
 }
+
 
 header::before{
   content:"";
+
   position:absolute;
+
   inset:0;
 
   background-image:
@@ -34,123 +48,215 @@ header::before{
   pointer-events:none;
 }
 
+
+/* ==========================================================
+   CONTENEUR
+========================================================== */
+
 .header-inner{
   position:relative;
-  max-width:1200px;
+
+  max-width:1100px;
+
   margin:0 auto;
 }
 
+
+/* ==========================================================
+   BADGE ROW
+========================================================== */
+
 .badge-row{
   display:flex;
+
   align-items:center;
+
   justify-content:space-between;
+
   gap:20px;
+
   flex-wrap:wrap;
 }
+
+
+/* ==========================================================
+   BADGE + TITRE
+========================================================== */
 
 .badge-left{
   display:flex;
+
   align-items:center;
+
   gap:18px;
 }
 
+
 .star{
   width:60px;
+
   height:60px;
+
   flex:0 0 auto;
 }
 
+
 .brand-title{
   font-family:var(--font-display);
+
   font-size:25px;
+
   letter-spacing:2px;
+
   text-transform:uppercase;
+
   font-weight:600;
+
   color:var(--text);
+
   line-height:1.1;
 }
 
+
 .brand-sub{
   font-size:11px;
+
   letter-spacing:3px;
+
   color:var(--steel);
+
   text-transform:uppercase;
+
   margin-top:4px;
 }
 
+
+/* ==========================================================
+   NAVIGATION PRINCIPALE
+========================================================== */
+
 .header-actions{
   display:flex;
+
   gap:8px;
+
   flex-wrap:wrap;
 }
+
 
 .header-link{
   font-family:var(--font-mono);
+
   font-size:11.5px;
+
   letter-spacing:1px;
+
   text-transform:uppercase;
+
   padding:10px 16px;
+
   border:1px solid var(--steel);
+
   background:transparent;
+
   color:var(--steel);
+
   text-decoration:none;
+
   white-space:nowrap;
+
   transition:all .15s;
+
   cursor:pointer;
 }
 
+
 .header-link:hover{
   background:var(--steel);
+
   color:#0b0f14;
 }
+
 
 .header-link.gold{
   border-color:var(--gold);
+
   color:var(--gold);
 }
 
+
 .header-link.gold:hover{
   background:var(--gold);
+
   color:#0b0f14;
 }
+
+
+/* ==========================================================
+   PAGE ACTUELLE
+========================================================== */
 
 .header-link.current{
   background:var(--gold);
+
   color:#0b0f14;
+
   border-color:var(--gold);
+
   pointer-events:none;
+
   font-weight:600;
 }
+
+
+/* ==========================================================
+   STATUS
+========================================================== */
 
 .status-line{
   margin-top:16px;
+
   font-size:11px;
+
   color:var(--text-dim);
+
   letter-spacing:1px;
+
   display:flex;
+
   gap:22px;
+
   flex-wrap:wrap;
 }
 
+
 .status-line span b{
   color:var(--amber);
+
   font-weight:600;
 }
 
+
 .dot{
   width:6px;
+
   height:6px;
+
   border-radius:50%;
+
   background:var(--green);
+
   display:inline-block;
+
   margin-right:6px;
+
   box-shadow:0 0 6px var(--green);
 }
 
 
-/* =========================
+/* ==========================================================
    MOBILE
-========================= */
+========================================================== */
 
 @media(max-width:700px){
 
@@ -158,21 +264,27 @@ header::before{
     padding:20px;
   }
 
+
   .brand-title{
     font-size:19px;
   }
 
+
   .brand-sub{
     font-size:9px;
+
     letter-spacing:2px;
   }
+
 
   .header-actions{
     width:100%;
   }
 
+
   .header-link{
     flex:1;
+
     text-align:center;
   }
 
