@@ -14,6 +14,8 @@
   href="Seal_of_the_Chicago_Police_Department.png"
 >
 
+<link rel="stylesheet" href="nav.css">
+
 <style>
 
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
@@ -101,260 +103,6 @@ textarea{
   -moz-user-select:text;
   -ms-user-select:text;
   user-select:text;
-}
-
-
-/* ==========================================================
-   HEADER
-========================================================== */
-
-header{
-
-  position:relative;
-
-  border-bottom:1px solid var(--line);
-
-  padding:28px 32px 22px;
-
-  overflow:hidden;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(74,111,165,0.06),
-      transparent
-    );
-
-}
-
-
-header::before{
-
-  content:"";
-
-  position:absolute;
-
-  inset:0;
-
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgba(255,255,255,0.015) 0px,
-      rgba(255,255,255,0.015) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-
-  pointer-events:none;
-
-}
-
-
-.header-inner{
-
-  position:relative;
-
-  max-width:1200px;
-
-  margin:0 auto;
-
-}
-
-
-.badge-row{
-
-  display:flex;
-
-  align-items:center;
-
-  justify-content:space-between;
-
-  gap:20px;
-
-  flex-wrap:wrap;
-
-}
-
-
-.badge-left{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:18px;
-
-}
-
-
-.brand-title{
-
-  font-family:var(--font-display);
-
-  font-size:25px;
-
-  letter-spacing:2px;
-
-  text-transform:uppercase;
-
-  font-weight:600;
-
-  color:var(--text);
-
-  line-height:1.1;
-
-}
-
-
-.brand-sub{
-
-  font-size:11px;
-
-  letter-spacing:3px;
-
-  color:var(--steel);
-
-  text-transform:uppercase;
-
-  margin-top:4px;
-
-}
-
-
-/* ==========================================================
-   NAVIGATION
-========================================================== */
-
-.header-actions{
-
-  display:flex;
-
-  gap:8px;
-
-  flex-wrap:wrap;
-
-}
-
-
-.header-link{
-
-  font-family:var(--font-mono);
-
-  font-size:11.5px;
-
-  letter-spacing:1px;
-
-  text-transform:uppercase;
-
-  padding:10px 16px;
-
-  border:1px solid var(--steel);
-
-  background:transparent;
-
-  color:var(--steel);
-
-  text-decoration:none;
-
-  white-space:nowrap;
-
-  transition:all .15s;
-
-  cursor:pointer;
-
-}
-
-
-.header-link:hover{
-
-  background:var(--steel);
-
-  color:#0b0f14;
-
-}
-
-
-.header-link.gold{
-
-  border-color:var(--gold);
-
-  color:var(--gold);
-
-}
-
-
-.header-link.gold:hover{
-
-  background:var(--gold);
-
-  color:#0b0f14;
-
-}
-
-
-.header-link.current{
-
-  background:var(--gold);
-
-  color:#0b0f14;
-
-  border-color:var(--gold);
-
-  pointer-events:none;
-
-  font-weight:600;
-
-}
-
-
-/* ==========================================================
-   STATUS
-========================================================== */
-
-.status-line{
-
-  margin-top:16px;
-
-  font-size:11px;
-
-  color:var(--text-dim);
-
-  letter-spacing:1px;
-
-  display:flex;
-
-  gap:22px;
-
-  flex-wrap:wrap;
-
-}
-
-
-.status-line span b{
-
-  color:var(--amber);
-
-  font-weight:600;
-
-}
-
-
-.dot{
-
-  width:6px;
-
-  height:6px;
-
-  border-radius:50%;
-
-  background:var(--green);
-
-  display:inline-block;
-
-  margin-right:6px;
-
-  box-shadow:0 0 6px var(--green);
-
 }
 
 
@@ -1019,55 +767,9 @@ footer{
 
 @media(max-width:700px){
 
-  header{
-
-    padding:20px;
-
-  }
-
-
   main{
 
     padding:25px 16px 0;
-
-  }
-
-
-  .brand-title{
-
-    font-size:19px;
-
-  }
-
-
-  .brand-sub{
-
-    font-size:9px;
-
-    letter-spacing:2px;
-
-  }
-
-
-  .header-actions{
-
-    width:100%;
-
-  }
-
-
-  .header-link{
-
-    flex:1;
-
-    text-align:center;
-
-  }
-
-
-  .status-line{
-
-    gap:12px;
 
   }
 
@@ -1152,124 +854,10 @@ footer{
 
 
 <!-- ==========================================================
-     HEADER
+     HEADER NAV.JS
 ========================================================== -->
 
-<header>
-
-  <div class="header-inner">
-
-    <div class="badge-row">
-
-      <div class="badge-left">
-
-        <div>
-
-          <div class="brand-title">
-            Chicago Police Department
-          </div>
-
-          <div class="brand-sub">
-            Organigramme & divisions opérationnelles
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="header-actions">
-
-        <a
-          class="header-link"
-          href="index.html"
-        >
-          🗂 Procédures
-        </a>
-
-
-        <a
-          class="header-link"
-          href="code.html"
-        >
-          📻 Guide radio
-        </a>
-
-
-        <a
-          class="header-link"
-          href="reglement.html"
-        >
-          ⚖ Règlement
-        </a>
-
-
-        <a
-          class="header-link"
-          href="tenues-vehicules.html"
-        >
-          🎽 Tenues & Véhicules
-        </a>
-
-
-        <a
-          class="header-link current"
-          href="organigramme.html"
-        >
-          🧭 Organigramme
-        </a>
-
-
-        <a
-          class="header-link gold"
-          href="https://guidejuridiquesp.netlify.app/"
-          target="_blank"
-          rel="noopener"
-        >
-          📖 Guide juridique ↗
-        </a>
-
-      </div>
-
-    </div>
-
-
-    <div class="status-line">
-
-      <span>
-
-        <span class="dot"></span>
-
-        Système opérationnel
-
-      </span>
-
-
-      <span>
-
-        DOCUMENT :
-        <b>CPD-ORG-001</b>
-
-      </span>
-
-
-      <span>
-
-        VERSION :
-        <b>2.0</b>
-
-      </span>
-
-
-      <span id="clock">
-        --/--/---- --:--
-      </span>
-
-    </div>
-
-  </div>
-
-</header>
+<div id="site-header"></div>
 
 
 <!-- ==========================================================
@@ -1454,6 +1042,42 @@ footer{
 
 </footer>
 
+
+<!-- ==========================================================
+     CONFIGURATION NAVIGATION
+========================================================== -->
+
+<script>
+
+const PAGE_CONFIG = {
+
+  subtitle:
+    "Organigramme & divisions opérationnelles",
+
+  currentPage:
+    "organigramme.html",
+
+  docCode:
+    "CPD-ORG-001",
+
+  version:
+    "2.0"
+
+};
+
+</script>
+
+
+<!-- ==========================================================
+     NAVIGATION COMMUNE
+========================================================== -->
+
+<script src="nav.js"></script>
+
+
+<!-- ==========================================================
+     JAVASCRIPT DE LA PAGE
+========================================================== -->
 
 <script>
 
@@ -1766,53 +1390,6 @@ function renderDivisions(){
 
 
 /* ==========================================================
-   HORLOGE
-========================================================== */
-
-function updateClock(){
-
-  const d =
-    new Date();
-
-
-  const pad =
-    n =>
-      String(n).padStart(
-        2,
-        "0"
-      );
-
-
-  const clock =
-    document.getElementById(
-      "clock"
-    );
-
-
-  if(clock){
-
-    clock.textContent =
-      `${pad(d.getDate())}/` +
-      `${pad(d.getMonth()+1)}/` +
-      `${d.getFullYear()} ` +
-      `${pad(d.getHours())}:` +
-      `${pad(d.getMinutes())}`;
-
-  }
-
-}
-
-
-updateClock();
-
-
-setInterval(
-  updateClock,
-  15000
-);
-
-
-/* ==========================================================
    ZOOM IMAGE
 ========================================================== */
 
@@ -1916,11 +1493,14 @@ function updateZoom(){
 
 function resetZoom(){
 
-  zoom = 1;
+  zoom =
+    1;
 
-  positionX = 0;
+  positionX =
+    0;
 
-  positionY = 0;
+  positionY =
+    0;
 
   updateZoom();
 
@@ -2002,11 +1582,13 @@ zoomIn.addEventListener(
 
     event.stopPropagation();
 
+
     zoom =
       Math.min(
         zoom + 0.25,
         5
       );
+
 
     updateZoom();
 
@@ -2020,11 +1602,13 @@ zoomOut.addEventListener(
 
     event.stopPropagation();
 
+
     zoom =
       Math.max(
         zoom - 0.25,
         0.25
       );
+
 
     updateZoom();
 
@@ -2037,6 +1621,7 @@ zoomReset.addEventListener(
   (event) => {
 
     event.stopPropagation();
+
 
     resetZoom();
 
@@ -2064,6 +1649,7 @@ modalContent.addEventListener(
         );
 
     }
+
     else{
 
       zoom =
@@ -2097,7 +1683,8 @@ modalContent.addEventListener(
     }
 
 
-    isDragging = true;
+    isDragging =
+      true;
 
 
     startX =
@@ -2147,7 +1734,9 @@ window.addEventListener(
   "mouseup",
   () => {
 
-    isDragging = false;
+    isDragging =
+      false;
+
 
     modalContent.classList.remove(
       "grabbing"
@@ -2170,9 +1759,11 @@ modalContent.addEventListener(
 
     if(zoom === 1){
 
-      zoom = 2;
+      zoom =
+        2;
 
     }
+
     else{
 
       resetZoom();
