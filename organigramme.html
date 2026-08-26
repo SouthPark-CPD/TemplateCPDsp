@@ -112,7 +112,8 @@ body{
   padding-bottom:60px;
 
   -webkit-user-select:none;
-
+  -moz-user-select:none;
+  -ms-user-select:none;
   user-select:none;
 
 }
@@ -121,6 +122,8 @@ body{
 input,
 textarea{
   -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
   user-select:text;
 }
 
@@ -158,7 +161,6 @@ header::before{
   inset:0;
 
   background-image:
-
     repeating-linear-gradient(
       0deg,
       rgba(255,255,255,0.015) 0px,
@@ -406,10 +408,6 @@ main{
 }
 
 
-/* ==========================================================
-   PANELS
-========================================================== */
-
 .panel{
 
   background:var(--bg-panel-2);
@@ -459,32 +457,34 @@ main{
 
 
 /* ==========================================================
-   ORGANIGRAMME IMAGE
+   ORGANIGRAMME — IMAGE
 ========================================================== */
 
-.organigramme-wrap{
+.org-chart-wrap{
 
   padding:24px;
 
 }
 
 
-.organigramme-frame{
+.org-chart-image-container{
 
   position:relative;
 
-  width:100%;
+  background:var(--bg-dark);
 
-  background:#080b0f;
+  border:1px solid var(--steel-dim);
 
-  border:1px solid var(--line);
+  padding:16px;
+
+  text-align:center;
 
   overflow:hidden;
 
 }
 
 
-.organigramme-frame::before{
+.org-chart-image-container::before{
 
   content:"";
 
@@ -495,86 +495,74 @@ main{
   pointer-events:none;
 
   background:
-
     linear-gradient(
-      90deg,
-      rgba(74,111,165,0.04),
-      transparent 20%,
-      transparent 80%,
-      rgba(201,162,39,0.03)
+      135deg,
+      rgba(74,111,165,.04),
+      transparent 35%,
+      rgba(201,162,39,.03)
     );
 
 }
 
 
-.organigramme-image{
+.org-chart-hint{
+
+  position:relative;
+
+  margin-bottom:14px;
+
+  font-size:9px;
+
+  letter-spacing:1.3px;
+
+  color:var(--text-dim);
+
+  text-transform:uppercase;
+
+}
+
+
+.org-chart-image{
+
+  position:relative;
 
   display:block;
 
   width:100%;
 
+  max-width:1150px;
+
   height:auto;
 
-  max-width:100%;
+  margin:0 auto;
+
+  border:1px solid var(--line);
 
   cursor:zoom-in;
 
-  transition:opacity .2s;
+  transition:
+
+    border-color .2s,
+
+    opacity .2s;
 
 }
 
 
-.organigramme-image:hover{
+.org-chart-image:hover{
+
+  border-color:var(--gold);
 
   opacity:.96;
 
 }
 
 
-.organigramme-caption{
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-
-  gap:15px;
-
-  padding:12px 14px;
-
-  border-top:1px solid var(--line);
-
-  background:var(--bg-dark);
-
-  font-size:10px;
-
-  letter-spacing:.8px;
-
-  color:var(--text-dim);
-
-}
-
-
-.organigramme-caption span:first-child{
-
-  color:var(--steel);
-
-}
-
-
-.zoom-hint{
-
-  color:var(--gold);
-
-}
-
-
 /* ==========================================================
-   IMAGE MODAL
+   IMAGE VIEWER
 ========================================================== */
 
-.image-modal{
+.image-viewer{
 
   position:fixed;
 
@@ -584,35 +572,164 @@ main{
 
   display:none;
 
-  align-items:center;
+  flex-direction:column;
 
-  justify-content:center;
+  background:rgba(5,8,12,.97);
 
-  padding:30px;
-
-  background:rgba(0,0,0,.90);
-
-  backdrop-filter:blur(5px);
+  backdrop-filter:blur(8px);
 
 }
 
 
-.image-modal.open{
+.image-viewer.open{
 
   display:flex;
 
 }
 
 
-.modal-content{
+/* ==========================================================
+   VIEWER HEADER
+========================================================== */
+
+.viewer-top{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:15px;
+
+  padding:14px 20px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(17,22,29,.98),
+      rgba(12,16,21,.96)
+    );
+
+  border-bottom:1px solid var(--line);
+
+  flex:0 0 auto;
+
+}
+
+
+.viewer-title{
+
+  font-family:var(--font-display);
+
+  font-size:15px;
+
+  letter-spacing:1.5px;
+
+  color:var(--gold);
+
+  text-transform:uppercase;
+
+}
+
+
+.viewer-controls{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:7px;
+
+}
+
+
+.viewer-controls button{
+
+  width:38px;
+
+  height:34px;
+
+  border:1px solid var(--steel-dim);
+
+  background:var(--bg-dark);
+
+  color:var(--text);
+
+  font-family:var(--font-mono);
+
+  font-size:16px;
+
+  cursor:pointer;
+
+  transition:
+
+    background .15s,
+
+    border-color .15s,
+
+    color .15s;
+
+}
+
+
+.viewer-controls button:hover{
+
+  border-color:var(--gold);
+
+  color:var(--gold);
+
+  background:#111820;
+
+}
+
+
+.viewer-controls .viewer-close{
+
+  margin-left:8px;
+
+  border-color:var(--red);
+
+  color:var(--red);
+
+}
+
+
+.viewer-controls .viewer-close:hover{
+
+  background:var(--red);
+
+  color:#0b0f14;
+
+}
+
+
+#zoomLevel{
+
+  min-width:58px;
+
+  text-align:center;
+
+  font-size:10px;
+
+  letter-spacing:1px;
+
+  color:var(--amber);
+
+}
+
+
+/* ==========================================================
+   VIEWER IMAGE
+========================================================== */
+
+.image-viewer-content{
+
+  flex:1;
 
   position:relative;
 
-  max-width:1400px;
-
-  max-height:95vh;
-
-  width:100%;
+  overflow:hidden;
 
   display:flex;
 
@@ -620,64 +737,39 @@ main{
 
   justify-content:center;
 
+  cursor:grab;
+
+  touch-action:none;
+
 }
 
 
-.modal-image{
+.image-viewer-content.dragging{
 
-  display:block;
+  cursor:grabbing;
 
-  max-width:100%;
+}
 
-  max-height:90vh;
+
+#viewerImage{
+
+  max-width:none;
+
+  max-height:none;
 
   width:auto;
 
   height:auto;
 
-  object-fit:contain;
+  user-select:none;
 
-  border:1px solid var(--gold-dim);
+  -webkit-user-drag:none;
 
-  box-shadow:0 20px 70px rgba(0,0,0,.6);
+  cursor:grab;
 
-}
+  transform-origin:center center;
 
-
-.modal-close{
-
-  position:absolute;
-
-  top:-15px;
-
-  right:-15px;
-
-  width:38px;
-
-  height:38px;
-
-  border:1px solid var(--gold);
-
-  background:var(--bg-dark);
-
-  color:var(--gold);
-
-  font-family:var(--font-mono);
-
-  font-size:18px;
-
-  cursor:pointer;
-
-  z-index:2;
-
-}
-
-
-.modal-close:hover{
-
-  background:var(--gold);
-
-  color:#0b0f14;
+  will-change:transform;
 
 }
 
@@ -702,10 +794,6 @@ main{
 }
 
 
-/* ==========================================================
-   DIVISION CARD
-========================================================== */
-
 .division{
 
   background:var(--bg-panel-2);
@@ -716,7 +804,9 @@ main{
 
     border-color .2s,
 
-    background .2s;
+    background .2s,
+
+    transform .2s;
 
   min-width:0;
 
@@ -772,9 +862,9 @@ main{
 
 .division-icon{
 
-  width:48px;
+  width:42px;
 
-  height:48px;
+  height:42px;
 
   display:flex;
 
@@ -790,7 +880,7 @@ main{
 
   font-family:var(--font-display);
 
-  font-size:14px;
+  font-size:16px;
 
   flex:0 0 auto;
 
@@ -872,7 +962,8 @@ main{
 
   font-size:18px;
 
-  transition:transform .25s ease;
+  transition:
+    transform .25s ease;
 
 }
 
@@ -885,7 +976,7 @@ main{
 
 
 /* ==========================================================
-   UNITS CONTAINER
+   UNIT CONTAINER
 ========================================================== */
 
 .units-wrapper{
@@ -894,7 +985,8 @@ main{
 
   grid-template-rows:0fr;
 
-  transition:grid-template-rows .3s ease;
+  transition:
+    grid-template-rows .3s ease;
 
 }
 
@@ -912,6 +1004,10 @@ main{
 
 }
 
+
+/* ==========================================================
+   UNITS
+========================================================== */
 
 .units{
 
@@ -982,295 +1078,6 @@ main{
 
 
 /* ==========================================================
-   GRADES
-========================================================== */
-
-.grades{
-
-  padding:12px 24px 28px;
-
-}
-
-
-.grade{
-
-  border:1px solid var(--line);
-
-  background:var(--bg-dark);
-
-  margin-top:12px;
-
-  transition:border-color .15s;
-
-}
-
-
-.grade.open{
-
-  border-color:var(--steel-dim);
-
-}
-
-
-.grade-header{
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-
-  gap:15px;
-
-  padding:16px 18px;
-
-  border-bottom:1px solid transparent;
-
-  background:rgba(74,111,165,.04);
-
-  cursor:pointer;
-
-}
-
-
-.grade.open .grade-header{
-
-  border-bottom-color:var(--line);
-
-}
-
-
-.grade-header:hover{
-
-  background:rgba(74,111,165,.08);
-
-}
-
-
-.grade-left{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:14px;
-
-}
-
-
-.grade-rank{
-
-  color:var(--gold);
-
-  font-size:11px;
-
-  letter-spacing:1px;
-
-  min-width:28px;
-
-}
-
-
-.grade-title{
-
-  font-family:var(--font-display);
-
-  font-size:16px;
-
-  letter-spacing:1px;
-
-  text-transform:uppercase;
-
-}
-
-
-.grade-caret{
-
-  color:var(--text-dim);
-
-  transition:.2s;
-
-}
-
-
-.grade.open .grade-caret{
-
-  transform:rotate(90deg);
-
-  color:var(--gold);
-
-}
-
-
-.grade-content{
-
-  display:none;
-
-  padding:22px 20px 26px;
-
-}
-
-
-.grade.open .grade-content{
-
-  display:block;
-
-}
-
-
-/* ==========================================================
-   GRADE SECTIONS
-========================================================== */
-
-.section-label{
-
-  font-family:var(--font-display);
-
-  font-size:12.5px;
-
-  letter-spacing:2px;
-
-  text-transform:uppercase;
-
-  color:var(--steel);
-
-  margin-bottom:12px;
-
-  padding-bottom:8px;
-
-  border-bottom:1px solid var(--line);
-
-}
-
-
-.section-label.gold{
-
-  color:var(--gold);
-
-}
-
-
-.section-block{
-
-  margin-bottom:22px;
-
-}
-
-
-.section-block:last-child{
-
-  margin-bottom:0;
-
-}
-
-
-.item-list{
-
-  list-style:none;
-
-  margin:0;
-
-  padding:0;
-
-  font-size:12px;
-
-  line-height:1.75;
-
-}
-
-
-.item-list li{
-
-  position:relative;
-
-  padding-left:16px;
-
-  margin-bottom:6px;
-
-}
-
-
-.item-list li::before{
-
-  content:"›";
-
-  position:absolute;
-
-  left:0;
-
-  color:var(--amber);
-
-}
-
-
-.item-note{
-
-  font-size:11px;
-
-  color:var(--text-dim);
-
-  margin-top:10px;
-
-  line-height:1.6;
-
-}
-
-
-.item-note b{
-
-  color:var(--amber);
-
-}
-
-
-/* ==========================================================
-   NOTICE
-========================================================== */
-
-.notice{
-
-  border-left:3px solid var(--gold);
-
-  background:rgba(201,162,39,.05);
-
-  padding:14px 16px;
-
-  margin:18px 0;
-
-}
-
-
-.notice-title{
-
-  color:var(--gold);
-
-  font-family:var(--font-display);
-
-  letter-spacing:1px;
-
-  text-transform:uppercase;
-
-  font-size:12px;
-
-  margin-bottom:5px;
-
-}
-
-
-.notice p{
-
-  font-size:11.5px;
-
-  color:var(--text-dim);
-
-  line-height:1.6;
-
-  margin:0;
-
-}
-
-
-/* ==========================================================
    FOOTER
 ========================================================== */
 
@@ -1280,7 +1087,7 @@ footer{
 
   margin:0 auto;
 
-  padding:20px 32px 0;
+  padding:25px 32px 0;
 
   font-size:10.5px;
 
@@ -1297,7 +1104,7 @@ footer{
    MOBILE
 ========================================================== */
 
-@media(max-width:900px){
+@media(max-width:800px){
 
   .divisions{
 
@@ -1353,10 +1160,6 @@ footer{
 
     text-align:center;
 
-    padding:9px 10px;
-
-    font-size:10px;
-
   }
 
 
@@ -1374,27 +1177,25 @@ footer{
   }
 
 
-  .panel-title{
-
-    font-size:19px;
-
-  }
-
-
-  .organigramme-wrap{
+  .org-chart-wrap{
 
     padding:12px;
 
   }
 
 
-  .organigramme-caption{
+  .org-chart-image-container{
 
-    flex-direction:column;
+    padding:10px;
 
-    align-items:flex-start;
+  }
 
-    gap:5px;
+
+  .org-chart-hint{
+
+    font-size:8px;
+
+    line-height:1.5;
 
   }
 
@@ -1409,31 +1210,6 @@ footer{
   .division-header{
 
     padding:15px;
-
-    gap:10px;
-
-  }
-
-
-  .division-icon{
-
-    width:42px;
-
-    height:42px;
-
-  }
-
-
-  .division-count{
-
-    display:none;
-
-  }
-
-
-  .division-name{
-
-    font-size:14px;
 
   }
 
@@ -1454,39 +1230,34 @@ footer{
   }
 
 
-  .grades{
-
-    padding:10px 14px 20px;
-
-  }
-
-
-  .grade-content{
-
-    padding:18px 14px 20px;
-
-  }
-
-
-  .image-modal{
+  .viewer-top{
 
     padding:10px;
 
-  }
-
-
-  .modal-close{
-
-    top:5px;
-
-    right:5px;
+    flex-wrap:wrap;
 
   }
 
 
-  footer{
+  .viewer-title{
 
-    padding:20px 16px 0;
+    font-size:12px;
+
+  }
+
+
+  .viewer-controls{
+
+    gap:4px;
+
+  }
+
+
+  .viewer-controls button{
+
+    width:34px;
+
+    height:32px;
 
   }
 
@@ -1513,6 +1284,8 @@ footer{
 
       <div class="badge-left">
 
+
+        <!-- SEAL CPD -->
 
         <svg
           class="star"
@@ -1672,7 +1445,7 @@ footer{
           </div>
 
           <div class="brand-sub">
-            Organigramme — Divisions & unités
+            Organigramme & divisions opérationnelles
           </div>
 
         </div>
@@ -1683,6 +1456,7 @@ footer{
       <!-- NAVIGATION -->
 
       <div class="header-actions">
+
 
         <a
           class="header-link"
@@ -1733,6 +1507,7 @@ footer{
           📖 Guide juridique ↗
         </a>
 
+
       </div>
 
     </div>
@@ -1778,6 +1553,7 @@ footer{
 </header>
 
 
+
 <!-- ==========================================================
      MAIN
 ========================================================== -->
@@ -1798,37 +1574,38 @@ footer{
       </div>
 
       <div class="panel-desc">
-        Structure hiérarchique et organisation générale du Chicago Police Department.
-        L'organigramme officiel est présenté ci-dessous.
+        Organisation hiérarchique du Chicago Police Department.
+        Cliquez sur l'affiche pour l'ouvrir en plein écran et utiliser les fonctions de zoom.
       </div>
 
     </div>
 
 
-    <div class="organigramme-wrap">
+    <div class="org-chart-wrap">
 
-      <div class="organigramme-frame">
+      <div class="org-chart-image-container">
+
+        <div class="org-chart-hint">
+          🖱 Cliquez sur l'image pour l'agrandir — molette pour zoomer
+        </div>
+
+
+        <!-- ==================================================
+             👉 IMAGE DE TON ORGANIGRAMME
+             
+             Pour changer l'image :
+             modifier uniquement le src ci-dessous.
+             
+             Ton fichier actuel :
+             organigramme.webp
+        ================================================== -->
 
         <img
-          id="organigrammeImage"
-          class="organigramme-image"
+          id="orgChartImage"
+          class="org-chart-image"
           src="organigramme.webp"
           alt="Organigramme du Chicago Police Department"
-          loading="lazy"
         >
-
-
-        <div class="organigramme-caption">
-
-          <span>
-            CPD // STRUCTURE HIÉRARCHIQUE
-          </span>
-
-          <span class="zoom-hint">
-            ↗ CLIQUER POUR AGRANDIR
-          </span>
-
-        </div>
 
       </div>
 
@@ -1837,8 +1614,9 @@ footer{
   </section>
 
 
+
   <!-- ========================================================
-       DIVISIONS
+       DIVISIONS & UNITÉS
   ========================================================= -->
 
   <section class="panel">
@@ -1846,12 +1624,13 @@ footer{
     <div class="panel-head">
 
       <div class="panel-title">
-        Divisions & unités opérationnelles
+        Divisions & unités
       </div>
 
       <div class="panel-desc">
-        Organisation des différentes divisions du département et des unités qui les composent.
-        Cliquez sur une division pour afficher son contenu.
+        Organisation des différentes divisions et unités opérationnelles
+        du Chicago Police Department. Cliquez sur une division pour afficher
+        les unités qui la composent.
       </div>
 
     </div>
@@ -1865,69 +1644,94 @@ footer{
   </section>
 
 
-  <!-- ========================================================
-       GRADES
-  ========================================================= -->
-
-  <section class="panel">
-
-    <div class="panel-head">
-
-      <div class="panel-title">
-        Détail des grades & responsabilités
-      </div>
-
-      <div class="panel-desc">
-        Responsabilités et conditions de promotion pour chaque grade du département.
-        Cliquez sur un grade pour afficher les détails.
-      </div>
-
-    </div>
-
-
-    <div
-      class="grades"
-      id="grades"
-    ></div>
-
-  </section>
-
-
 </main>
 
 
+
 <!-- ==========================================================
-     MODAL IMAGE
+     IMAGE VIEWER
 ========================================================== -->
 
 <div
-  class="image-modal"
-  id="imageModal"
+  id="imageViewer"
+  class="image-viewer"
   aria-hidden="true"
 >
 
-  <div class="modal-content">
 
-    <button
-      class="modal-close"
-      id="modalClose"
-      type="button"
-      aria-label="Fermer"
-    >
-      ×
-    </button>
+  <div class="viewer-top">
 
+
+    <div class="viewer-title">
+      CPD // Organigramme
+    </div>
+
+
+    <div class="viewer-controls">
+
+
+      <button
+        type="button"
+        id="zoomOut"
+        title="Zoom arrière"
+      >
+        −
+      </button>
+
+
+      <span id="zoomLevel">
+        100%
+      </span>
+
+
+      <button
+        type="button"
+        id="zoomIn"
+        title="Zoom avant"
+      >
+        +
+      </button>
+
+
+      <button
+        type="button"
+        id="zoomReset"
+        title="Réinitialiser"
+      >
+        ↺
+      </button>
+
+
+      <button
+        type="button"
+        id="closeViewer"
+        class="viewer-close"
+        title="Fermer"
+      >
+        ✕
+      </button>
+
+
+    </div>
+
+  </div>
+
+
+  <div
+    id="imageViewerContent"
+    class="image-viewer-content"
+  >
 
     <img
-      class="modal-image"
-      id="modalImage"
+      id="viewerImage"
       src=""
-      alt="Organigramme agrandi"
+      alt="Organigramme du Chicago Police Department"
     >
 
   </div>
 
 </div>
+
 
 
 <!-- ==========================================================
@@ -1943,6 +1747,7 @@ footer{
 </footer>
 
 
+
 <script>
 
 
@@ -1950,11 +1755,14 @@ footer{
    DONNÉES
 ========================================================== */
 
-let cpdData = null;
+let divisions = [];
+
+const container =
+  document.getElementById("divisions");
 
 
 /* ==========================================================
-   CHARGEMENT DES DONNÉES
+   CHARGEMENT DATA-CPD.JS
 ========================================================== */
 
 async function loadData(){
@@ -1994,22 +1802,15 @@ async function loadData(){
     );
 
 
-    cpdData =
-      window.CPD_DATA;
+    const data =
+      window.CPD_DATA || {};
 
 
-    if(!cpdData){
-
-      throw new Error(
-        "CPD_DATA introuvable"
-      );
-
-    }
+    divisions =
+      data.divisions || [];
 
 
     renderDivisions();
-
-    renderGrades();
 
   }
 
@@ -2021,29 +1822,28 @@ async function loadData(){
     );
 
 
-    document.getElementById(
-      "divisions"
-    ).innerHTML = `
+    container.innerHTML = `
 
-      <div class="notice">
+      <div class="unit">
 
-        <div class="notice-title">
+        <div class="unit-name">
           Erreur de chargement
         </div>
 
-        <p>
-          Impossible de charger les données du CPD.
-          Vérifiez que le fichier data-cpd.js est bien présent.
-        </p>
+        <div class="unit-desc">
+
+          Impossible de charger
+          <b>data-cpd.js</b>.
+
+          Vérifiez que le fichier est bien présent
+          dans le même dossier que
+          <b>organigramme.html</b>.
+
+        </div>
 
       </div>
 
     `;
-
-
-    document.getElementById(
-      "grades"
-    ).innerHTML = "";
 
   }
 
@@ -2051,37 +1851,31 @@ async function loadData(){
 
 
 /* ==========================================================
-   DIVISIONS
+   AFFICHAGE DES DIVISIONS
 ========================================================== */
 
 function renderDivisions(){
 
-  const container =
-    document.getElementById(
-      "divisions"
-    );
-
-
   container.innerHTML = "";
 
 
-  const divisions =
-    cpdData.divisions || [];
-
-
-  if(divisions.length === 0){
+  if(
+    !Array.isArray(divisions) ||
+    divisions.length === 0
+  ){
 
     container.innerHTML = `
 
-      <div class="notice">
+      <div class="unit">
 
-        <div class="notice-title">
+        <div class="unit-name">
           Aucune division
         </div>
 
-        <p>
-          Aucune division n'est actuellement enregistrée.
-        </p>
+        <div class="unit-desc">
+          Aucune division n'a été trouvée
+          dans data-cpd.js.
+        </div>
 
       </div>
 
@@ -2093,12 +1887,11 @@ function renderDivisions(){
 
 
   divisions.forEach(
-    (division) => {
+    division => {
+
 
       const card =
-        document.createElement(
-          "section"
-        );
+        document.createElement("section");
 
 
       card.className =
@@ -2122,14 +1915,16 @@ function renderDivisions(){
           type="button"
         >
 
+
           <div class="division-icon">
             ${escapeHtml(
-              division.tag || "—"
+              division.short || "—"
             )}
           </div>
 
 
           <div class="division-info">
+
 
             <div class="division-name">
               ${escapeHtml(
@@ -2141,22 +1936,24 @@ function renderDivisions(){
             <div class="division-lead">
               LEAD :
               ${escapeHtml(
-                division.leads || "—"
+                division.lead || "—"
               )}
             </div>
 
 
             <div class="division-description">
               ${escapeHtml(
-                division.desc || ""
+                division.description || ""
               )}
             </div>
+
 
           </div>
 
 
           <div class="division-count">
-            ${units.length} UNITÉS
+            ${units.length}
+            UNITÉS
           </div>
 
 
@@ -2164,22 +1961,30 @@ function renderDivisions(){
             ▼
           </div>
 
+
         </button>
 
 
         <div class="units-wrapper">
 
+
           <div class="units-inner">
+
 
             <div class="units">
 
+
               ${
-                units.length
+                units.length > 0
+
                 ?
-                units.map(
+
+                units
+                .map(
                   unit => `
 
                     <div class="unit">
+
 
                       <div class="unit-name">
                         ${escapeHtml(
@@ -2187,17 +1992,22 @@ function renderDivisions(){
                         )}
                       </div>
 
+
                       <div class="unit-desc">
                         ${escapeHtml(
                           unit.desc || ""
                         )}
                       </div>
 
+
                     </div>
 
                   `
-                ).join("")
+                )
+                .join("")
+
                 :
+
                 `
 
                   <div class="unit">
@@ -2207,17 +2017,22 @@ function renderDivisions(){
                     </div>
 
                     <div class="unit-desc">
-                      Aucune unité n'est actuellement définie.
+                      Aucune unité n'est actuellement
+                      renseignée pour cette division.
                     </div>
 
                   </div>
 
                 `
+
               }
+
 
             </div>
 
+
           </div>
+
 
         </div>
 
@@ -2253,279 +2068,13 @@ function renderDivisions(){
 
 
 /* ==========================================================
-   GRADES
-========================================================== */
-
-function renderGrades(){
-
-  const container =
-    document.getElementById(
-      "grades"
-    );
-
-
-  container.innerHTML = "";
-
-
-  const grades =
-    cpdData.gradeDetails || [];
-
-
-  if(
-    !Array.isArray(grades) ||
-    grades.length === 0
-  ){
-
-    container.innerHTML = `
-
-      <div class="notice">
-
-        <div class="notice-title">
-          Aucun grade disponible
-        </div>
-
-        <p>
-          Aucun détail de grade n'a été trouvé
-          dans data-cpd.js.
-        </p>
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  grades.forEach(
-    (grade,index) => {
-
-      const el =
-        document.createElement(
-          "div"
-        );
-
-
-      el.className =
-        "grade";
-
-
-      el.id =
-        `grade-${index}`;
-
-
-      const responsibilities =
-        grade.responsabilites || [];
-
-
-      const prerequisites =
-        grade.prerequis || [];
-
-
-      el.innerHTML = `
-
-        <div
-          class="grade-header"
-          data-grade="${index}"
-        >
-
-          <div class="grade-left">
-
-            <div class="grade-rank">
-
-              GR.
-              ${escapeHtml(
-                String(
-                  grade.rank || "—"
-                )
-              )}
-
-            </div>
-
-
-            <div class="grade-title">
-
-              ${escapeHtml(
-                grade.title || "Grade"
-              )}
-
-            </div>
-
-          </div>
-
-
-          <div class="grade-caret">
-            ▸
-          </div>
-
-        </div>
-
-
-        <div class="grade-content">
-
-
-          <div class="section-block">
-
-            <div class="section-label gold">
-              🛡 Responsabilités
-            </div>
-
-
-            <ul class="item-list">
-
-              ${
-                responsibilities.length
-                ?
-                responsibilities
-                  .map(
-                    responsibility => `
-
-                      <li>
-                        ${escapeHtml(
-                          responsibility
-                        )}
-                      </li>
-
-                    `
-                  )
-                  .join("")
-                :
-                `
-                  <li>
-                    Aucune responsabilité renseignée.
-                  </li>
-                `
-              }
-
-            </ul>
-
-          </div>
-
-
-          <div class="section-block">
-
-            <div class="section-label">
-              📋 Prérequis de promotion
-            </div>
-
-
-            <ul class="item-list">
-
-              ${
-                prerequisites.length
-                ?
-                prerequisites
-                  .map(
-                    prerequisite => `
-
-                      <li>
-                        ${escapeHtml(
-                          prerequisite
-                        )}
-                      </li>
-
-                    `
-                  )
-                  .join("")
-                :
-                `
-                  <li>
-                    Aucun prérequis renseigné.
-                  </li>
-                `
-              }
-
-            </ul>
-
-
-            <div class="item-note">
-
-              Temps de service minimum :
-              <b>
-                ${escapeHtml(
-                  grade.tempsService || "—"
-                )}
-              </b>
-
-            </div>
-
-          </div>
-
-
-          ${
-            grade.reportsTo
-            ?
-            `
-
-              <div class="section-block">
-
-                <div class="section-label">
-                  🧭 Rattachement hiérarchique
-                </div>
-
-                <div class="item-note">
-
-                  Supérieur hiérarchique :
-                  <b>
-                    ${escapeHtml(
-                      grade.reportsTo
-                    )}
-                  </b>
-
-                </div>
-
-              </div>
-
-            `
-            :
-            ""
-          }
-
-
-        </div>
-
-      `;
-
-
-      const header =
-        el.querySelector(
-          ".grade-header"
-        );
-
-
-      header.addEventListener(
-        "click",
-        () => {
-
-          el.classList.toggle(
-            "open"
-          );
-
-        }
-      );
-
-
-      container.appendChild(
-        el
-      );
-
-    }
-  );
-
-}
-
-
-/* ==========================================================
    ESCAPE HTML
 ========================================================== */
 
 function escapeHtml(value){
 
   const div =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
 
   div.textContent =
@@ -2553,9 +2102,8 @@ function updateClock(){
 
   const pad =
     n =>
-      String(
-        n
-      ).padStart(
+      String(n)
+      .padStart(
         2,
         "0"
       );
@@ -2570,10 +2118,15 @@ function updateClock(){
   if(clock){
 
     clock.textContent =
+
       `${pad(d.getDate())}/` +
+
       `${pad(d.getMonth()+1)}/` +
+
       `${d.getFullYear()} ` +
+
       `${pad(d.getHours())}:` +
+
       `${pad(d.getMinutes())}`;
 
   }
@@ -2591,67 +2144,148 @@ setInterval(
 
 
 /* ==========================================================
-   ZOOM ORGANIGRAMME
+   VISIONNEUSE ORGANIGRAMME
 ========================================================== */
 
-const organigrammeImage =
+const orgChartImage =
   document.getElementById(
-    "organigrammeImage"
+    "orgChartImage"
   );
 
 
-const imageModal =
+const imageViewer =
   document.getElementById(
-    "imageModal"
+    "imageViewer"
   );
 
 
-const modalImage =
+const viewerImage =
   document.getElementById(
-    "modalImage"
+    "viewerImage"
   );
 
 
-const modalClose =
+const viewerContent =
   document.getElementById(
-    "modalClose"
+    "imageViewerContent"
   );
 
 
-organigrammeImage.addEventListener(
-  "click",
-  () => {
-
-    modalImage.src =
-      organigrammeImage.src;
+const zoomIn =
+  document.getElementById(
+    "zoomIn"
+  );
 
 
-    imageModal.classList.add(
-      "open"
-    );
+const zoomOut =
+  document.getElementById(
+    "zoomOut"
+  );
 
 
-    imageModal.setAttribute(
-      "aria-hidden",
-      "false"
-    );
+const zoomReset =
+  document.getElementById(
+    "zoomReset"
+  );
 
 
-    document.body.style.overflow =
-      "hidden";
+const closeViewer =
+  document.getElementById(
+    "closeViewer"
+  );
 
-  }
-);
+
+const zoomLevel =
+  document.getElementById(
+    "zoomLevel"
+  );
 
 
-function closeModal(){
+let zoom = 1;
 
-  imageModal.classList.remove(
+let posX = 0;
+
+let posY = 0;
+
+let dragging = false;
+
+let startX = 0;
+
+let startY = 0;
+
+
+/* ==========================================================
+   TRANSFORMATION
+========================================================== */
+
+function updateImageTransform(){
+
+  viewerImage.style.transform =
+
+    `translate(${posX}px, ${posY}px) ` +
+
+    `scale(${zoom})`;
+
+
+  zoomLevel.textContent =
+    `${Math.round(zoom * 100)}%`;
+
+}
+
+
+/* ==========================================================
+   OUVRIR
+========================================================== */
+
+function openImageViewer(){
+
+  viewerImage.src =
+    orgChartImage.src;
+
+
+  viewerImage.alt =
+    orgChartImage.alt;
+
+
+  zoom = 1;
+
+  posX = 0;
+
+  posY = 0;
+
+
+  updateImageTransform();
+
+
+  imageViewer.classList.add(
     "open"
   );
 
 
-  imageModal.setAttribute(
+  imageViewer.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+
+  document.body.style.overflow =
+    "hidden";
+
+}
+
+
+/* ==========================================================
+   FERMER
+========================================================== */
+
+function closeImageViewer(){
+
+  imageViewer.classList.remove(
+    "open"
+  );
+
+
+  imageViewer.setAttribute(
     "aria-hidden",
     "true"
   );
@@ -2663,81 +2297,261 @@ function closeModal(){
 }
 
 
-modalClose.addEventListener(
+/* ==========================================================
+   ZOOM
+========================================================== */
+
+function changeZoom(
+  amount
+){
+
+  zoom += amount;
+
+
+  zoom =
+    Math.max(
+      0.25,
+      Math.min(
+        5,
+        zoom
+      )
+    );
+
+
+  updateImageTransform();
+
+}
+
+
+/* ==========================================================
+   RESET
+========================================================== */
+
+function resetZoom(){
+
+  zoom = 1;
+
+  posX = 0;
+
+  posY = 0;
+
+
+  updateImageTransform();
+
+}
+
+
+/* ==========================================================
+   CLIC IMAGE
+========================================================== */
+
+orgChartImage.addEventListener(
   "click",
-  closeModal
+  openImageViewer
 );
 
 
-imageModal.addEventListener(
+/* ==========================================================
+   BOUTONS
+========================================================== */
+
+zoomIn.addEventListener(
   "click",
-  (event) => {
+  function(){
 
-    if(
-      event.target ===
-      imageModal
-    ){
-
-      closeModal();
-
-    }
+    changeZoom(.25);
 
   }
 );
 
 
-document.addEventListener(
-  "keydown",
-  (event) => {
+zoomOut.addEventListener(
+  "click",
+  function(){
 
-    if(
-      event.key === "Escape" &&
-      imageModal.classList.contains(
-        "open"
-      )
-    ){
+    changeZoom(-.25);
 
-      closeModal();
+  }
+);
+
+
+zoomReset.addEventListener(
+  "click",
+  resetZoom
+);
+
+
+closeViewer.addEventListener(
+  "click",
+  closeImageViewer
+);
+
+
+/* ==========================================================
+   MOLETTE
+========================================================== */
+
+viewerContent.addEventListener(
+  "wheel",
+  function(e){
+
+    e.preventDefault();
+
+
+    if(e.deltaY < 0){
+
+      changeZoom(.15);
 
     }
+
+    else{
+
+      changeZoom(-.15);
+
+    }
+
+  },
+  {
+    passive:false
+  }
+);
+
+
+/* ==========================================================
+   DÉPLACEMENT
+========================================================== */
+
+viewerContent.addEventListener(
+  "pointerdown",
+  function(e){
+
+    dragging = true;
+
+
+    startX =
+      e.clientX - posX;
+
+
+    startY =
+      e.clientY - posY;
+
+
+    viewerContent.classList.add(
+      "dragging"
+    );
+
+
+    viewerContent.setPointerCapture(
+      e.pointerId
+    );
+
+  }
+);
+
+
+viewerContent.addEventListener(
+  "pointermove",
+  function(e){
+
+    if(!dragging){
+      return;
+    }
+
+
+    posX =
+      e.clientX - startX;
+
+
+    posY =
+      e.clientY - startY;
+
+
+    updateImageTransform();
+
+  }
+);
+
+
+viewerContent.addEventListener(
+  "pointerup",
+  function(){
+
+    dragging = false;
+
+
+    viewerContent.classList.remove(
+      "dragging"
+    );
+
+  }
+);
+
+
+viewerContent.addEventListener(
+  "pointercancel",
+  function(){
+
+    dragging = false;
+
+
+    viewerContent.classList.remove(
+      "dragging"
+    );
 
   }
 );
 
 
 /* ==========================================================
-   ERREUR IMAGE
+   CLAVIER
 ========================================================== */
 
-organigrammeImage.addEventListener(
-  "error",
-  () => {
+document.addEventListener(
+  "keydown",
+  function(e){
 
-    const frame =
-      document.querySelector(
-        ".organigramme-frame"
-      );
+    if(
+      !imageViewer.classList.contains(
+        "open"
+      )
+    ){
+
+      return;
+
+    }
 
 
-    frame.innerHTML = `
+    if(e.key === "Escape"){
 
-      <div class="notice">
+      closeImageViewer();
 
-        <div class="notice-title">
-          Organigramme indisponible
-        </div>
+      return;
 
-        <p>
-          L'image
-          <b>organigramme.png</b>
-          n'a pas été trouvée.
-          Placez votre affiche dans le même dossier que
-          organigramme.html.
-        </p>
+    }
 
-      </div>
 
-    `;
+    if(
+      e.key === "+" ||
+      e.key === "="
+    ){
+
+      changeZoom(.25);
+
+    }
+
+
+    if(e.key === "-"){
+
+      changeZoom(-.25);
+
+    }
+
+
+    if(e.key === "0"){
+
+      resetZoom();
+
+    }
 
   }
 );
@@ -2751,7 +2565,7 @@ loadData();
 
 
 /* ==========================================================
-   PROTECTION
+   PROTECTION ANTI-COPIE
 ========================================================== */
 
 document.addEventListener(
@@ -2787,6 +2601,8 @@ document.addEventListener(
     ){
 
       e.preventDefault();
+
+      return;
 
     }
 
