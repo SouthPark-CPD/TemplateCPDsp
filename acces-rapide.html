@@ -34,30 +34,22 @@
 
 *{box-sizing:border-box;}
 
-html, body{
-  height:100%;
+html{
   margin:0;
 }
 
 body{
+  margin:0;
   background:var(--bg);
   color:var(--text);
   font-family:var(--font-mono);
   -webkit-font-smoothing:antialiased;
-  height:100dvh;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
 }
 
-#site-header{
-  flex:0 0 auto;
-}
-
-/* ================= LAYOUT PAGE — tient sur un seul écran ================= */
+/* ================= LAYOUT PAGE — le 1er écran (radio/codes/miranda) tient dans la hauteur visible ================= */
 
 .qr-wrap{
-  flex:1 1 auto;
+  height:calc(100dvh - var(--header-h, 96px));
   min-height:0;
   display:flex;
   flex-direction:column;
@@ -65,6 +57,7 @@ body{
   max-width:1400px;
   width:100%;
   margin:0 auto;
+  overflow:hidden;
 }
 
 .qr-titlebar{
@@ -291,6 +284,131 @@ body{
   color:var(--steel);
 }
 
+/* ================= CODES PÉNAUX — SECTION SOUS L'ÉCRAN PRINCIPAL ================= */
+
+.penal-wrap{
+  max-width:1400px;
+  width:100%;
+  margin:0 auto;
+  padding:6px 18px 40px;
+}
+
+.penal-panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:16px 18px;
+}
+
+.penal-panel h2{
+  font-family:var(--font-display);
+  font-size:16px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin:0 0 12px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.penal-panel h2 input{
+  min-width:180px;
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:4px;
+  color:var(--text);
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:0.3px;
+  padding:6px 10px;
+  text-transform:none;
+}
+
+.penal-panel h2 input:focus{
+  outline:none;
+  border-color:var(--gold);
+}
+
+.penal-panel h2 input::placeholder{
+  color:var(--text-dim);
+}
+
+.penal-table{
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+}
+
+.penal-head-row, .penal-row{
+  display:grid;
+  grid-template-columns:64px 1fr 90px 110px;
+  gap:10px;
+  align-items:center;
+  padding:8px 10px;
+  font-size:12.5px;
+}
+
+.penal-head-row{
+  color:var(--text-dim);
+  font-size:10px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding-bottom:6px;
+}
+
+.penal-row{
+  border-radius:4px;
+}
+
+.penal-row:nth-child(even){
+  background:var(--panel-2);
+}
+
+.penal-row:hover{
+  background:rgba(217,164,65,0.08);
+}
+
+.penal-code{
+  color:var(--gold);
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.penal-title{
+  color:var(--text);
+}
+
+.penal-amende{
+  color:var(--amber);
+  white-space:nowrap;
+}
+
+.penal-prison{
+  color:var(--steel);
+  white-space:nowrap;
+  text-align:right;
+}
+
+@media(max-width:700px){
+  .penal-head-row{ display:none; }
+  .penal-row{
+    grid-template-columns:1fr;
+    gap:3px;
+    padding:10px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  .penal-amende, .penal-prison{
+    text-align:left;
+  }
+  .penal-amende::before{ content:"Amende : "; color:var(--text-dim); }
+  .penal-prison::before{ content:"Sanction : "; color:var(--text-dim); }
+}
+
 /* ================= MOBILE / ECRANS ETROITS ================= */
 
 @media(max-width:900px){
@@ -312,17 +430,17 @@ body{
 
 @media print{
   #site-header{ display:none; }
-  body{ background:#fff; color:#111; overflow:visible; height:auto; }
-  .qr-wrap{ height:auto; }
+  body{ background:#fff; color:#111; }
+  .qr-wrap{ height:auto; overflow:visible; }
   .qr-grid{ min-height:0; }
   .qr-scroll{ overflow:visible; }
-  .qr-panel{
+  .qr-panel, .penal-panel{
     border-color:#ccc;
     background:#fff;
   }
   .miranda-actions{ display:none; }
   .qr-title, .code-row .code-num, .code2-row .code-num,
-  .qr-panel h2{ color:#000 !important; }
+  .qr-panel h2, .penal-panel h2, .penal-code{ color:#000 !important; }
 }
 </style>
 </head>
@@ -397,6 +515,24 @@ body{
 
 </div>
 
+<div class="penal-wrap">
+  <div class="penal-panel">
+    <h2>
+      Codes pénaux — les plus utilisés
+      <input type="text" id="penal-search" placeholder="🔎 rechercher un code ou une infraction...">
+    </h2>
+    <div class="penal-head-row">
+      <span>Code</span>
+      <span>Infraction</span>
+      <span>Amende</span>
+      <span style="text-align:right">Prison</span>
+    </div>
+    <div class="penal-table" id="penal-table">
+      <!-- rempli par JS depuis PENAL_CODES -->
+    </div>
+  </div>
+</div>
+
 <script>
   const PAGE_CONFIG = {
     subtitle:"Procédures opérationnels — Manuel CPD",
@@ -462,6 +598,71 @@ document.getElementById("copy-miranda").addEventListener("click", () => {
       btn.classList.remove("copied");
     }, 1800);
   });
+});
+
+/* ==========================================================
+   Le bloc du haut (radio/codes/miranda) doit tenir exactement
+   dans la hauteur restante sous le header — on mesure sa
+   hauteur réelle et on l'injecte en variable CSS.
+========================================================== */
+function syncHeaderHeight(){
+  const header = document.getElementById("site-header");
+  if(header){
+    document.documentElement.style.setProperty("--header-h", header.offsetHeight + "px");
+  }
+}
+syncHeaderHeight();
+window.addEventListener("resize", syncHeaderHeight);
+window.addEventListener("load", syncHeaderHeight);
+
+/* ==========================================================
+   Codes pénaux — sélection des plus utilisés en RP
+   (liste complète bien plus longue, ce n'est qu'un extrait)
+========================================================== */
+const PENAL_CODES = [
+  ["0.M","Excès de vitesse 5 à 25 km/h","100$","—"],
+  ["0.R","Excès de vitesse 60 km/h et +","200$","—"],
+  ["1.N","Excès de vitesse 50 à 100 km/h","500$","30 min"],
+  ["1.A-C","Excès de vitesse > 100 km/h","1000$","30 min"],
+  ["1.M","Possession de produits illégaux (<10g)","300$","15 min"],
+  ["2.C","Possession de produits illégaux (10 à 29g)","600$","25 min"],
+  ["2.E","Trafic de produits illégaux (30g et +)","1200$","40 min"],
+  ["2.N","Vente de produits illégaux","750$","20 min"],
+  ["1.L","Arme blanche sortie en public","200$","10 min"],
+  ["3.P","Détention/conservation mineure d'arme à feu","—","Perpétuité"],
+  ["4.P","Détention/conservation majeure d'arme de guerre","—","Perpétuité"],
+  ["1.O","Refus d'obtempérer","400$","15 min"],
+  ["1.P","Délit de fuite","300$","15 min"],
+  ["2.B","Vol de véhicule","1000$","25 min"],
+  ["2.F","Agression sur un civil","1300$","15 min"],
+  ["2.G","Agression sur un représentant de l'état","1800$","30 min"],
+  ["3.E","Braquage de banque","3500$","60 min"],
+  ["3.A","Kidnapping / Séquestration","1500$/pers","45 min"],
+  ["3.I","Meurtre","—","Peine Capitale"]
+];
+
+function renderPenalCodes(filter){
+  const table = document.getElementById("penal-table");
+  const f = (filter || "").trim().toLowerCase();
+
+  table.innerHTML = PENAL_CODES
+    .filter(([code, title]) =>
+      !f || code.toLowerCase().includes(f) || title.toLowerCase().includes(f)
+    )
+    .map(([code, title, amende, prison]) => `
+      <div class="penal-row">
+        <span class="penal-code">${code}</span>
+        <span class="penal-title">${title}</span>
+        <span class="penal-amende">${amende}</span>
+        <span class="penal-prison">${prison}</span>
+      </div>
+    `).join("") || `<div class="penal-row"><span class="penal-title" style="color:var(--text-dim)">Aucun résultat</span></div>`;
+}
+
+renderPenalCodes("");
+
+document.getElementById("penal-search").addEventListener("input", e => {
+  renderPenalCodes(e.target.value);
 });
 </script>
 
