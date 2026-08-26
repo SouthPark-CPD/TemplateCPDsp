@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -11,7 +10,7 @@
   content="width=device-width, initial-scale=1.0"
 >
 
-<title>CPD // Organigramme</title>
+<title>CPD // Organisation</title>
 
 <link
   rel="icon"
@@ -23,38 +22,53 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
+
 :root{
+
   --bg:#0b0f14;
+
   --bg-panel:#11161d;
+
   --bg-panel-2:#151b23;
+
   --bg-dark:#0c1015;
 
   --line:#232b35;
 
   --steel:#4a6fa5;
+
   --steel-dim:#2c3d54;
 
   --gold:#c9a227;
+
   --gold-dim:#725d16;
 
   --text:#dfe4e8;
+
   --text-dim:#7c8894;
 
   --amber:#e0a13a;
+
   --red:#c94b4b;
+
   --green:#4caf6f;
 
   --font-display:'Oswald','Arial Narrow',sans-serif;
+
   --font-mono:'IBM Plex Mono','Consolas',monospace;
+
 }
+
 
 *{
   box-sizing:border-box;
 }
 
+
 html{
   scroll-behavior:smooth;
 }
+
 
 html,
 body{
@@ -62,18 +76,23 @@ body{
   padding:0;
 }
 
+
 body{
+
   background:
+
     radial-gradient(
       circle at 15% 0%,
       rgba(74,111,165,0.10),
       transparent 40%
     ),
+
     radial-gradient(
       circle at 100% 100%,
       rgba(201,162,39,0.06),
       transparent 45%
     ),
+
     var(--bg);
 
   color:var(--text);
@@ -85,21 +104,30 @@ body{
   padding-bottom:60px;
 
   -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
   user-select:none;
+
 }
+
 
 input,
 textarea{
+
   -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
   user-select:text;
+
 }
 
 
-/* =========================================
+/* ==========================================================
    HEADER
-========================================= */
+========================================================== */
 
 header{
+
   position:relative;
 
   border-bottom:1px solid var(--line);
@@ -114,9 +142,12 @@ header{
       rgba(74,111,165,0.06),
       transparent
     );
+
 }
 
+
 header::before{
+
   content:"";
 
   position:absolute;
@@ -124,6 +155,7 @@ header::before{
   inset:0;
 
   background-image:
+
     repeating-linear-gradient(
       0deg,
       rgba(255,255,255,0.015) 0px,
@@ -133,17 +165,23 @@ header::before{
     );
 
   pointer-events:none;
+
 }
 
+
 .header-inner{
+
   position:relative;
 
   max-width:1200px;
 
   margin:0 auto;
+
 }
 
+
 .badge-row{
+
   display:flex;
 
   align-items:center;
@@ -153,17 +191,34 @@ header::before{
   gap:20px;
 
   flex-wrap:wrap;
+
 }
 
+
 .badge-left{
+
   display:flex;
 
   align-items:center;
 
   gap:18px;
+
 }
 
+
+.star{
+
+  width:60px;
+
+  height:60px;
+
+  flex:0 0 auto;
+
+}
+
+
 .brand-title{
+
   font-family:var(--font-display);
 
   font-size:25px;
@@ -175,9 +230,14 @@ header::before{
   font-weight:600;
 
   color:var(--text);
+
+  line-height:1.1;
+
 }
 
+
 .brand-sub{
+
   font-size:11px;
 
   letter-spacing:3px;
@@ -187,17 +247,27 @@ header::before{
   text-transform:uppercase;
 
   margin-top:4px;
+
 }
 
+
+/* ==========================================================
+   NAVIGATION
+========================================================== */
+
 .header-actions{
+
   display:flex;
 
   gap:8px;
 
   flex-wrap:wrap;
+
 }
 
+
 .header-link{
+
   font-family:var(--font-mono);
 
   font-size:11.5px;
@@ -219,27 +289,41 @@ header::before{
   white-space:nowrap;
 
   transition:all .15s;
+
+  cursor:pointer;
+
 }
 
+
 .header-link:hover{
+
   background:var(--steel);
 
   color:#0b0f14;
+
 }
 
+
 .header-link.gold{
+
   border-color:var(--gold);
 
   color:var(--gold);
+
 }
 
+
 .header-link.gold:hover{
+
   background:var(--gold);
 
   color:#0b0f14;
+
 }
 
+
 .header-link.current{
+
   background:var(--gold);
 
   color:#0b0f14;
@@ -249,9 +333,16 @@ header::before{
   pointer-events:none;
 
   font-weight:600;
+
 }
 
+
+/* ==========================================================
+   STATUS
+========================================================== */
+
 .status-line{
+
   margin-top:16px;
 
   font-size:11px;
@@ -265,14 +356,23 @@ header::before{
   gap:22px;
 
   flex-wrap:wrap;
+
 }
+
 
 .status-line span b{
+
   color:var(--amber);
+
+  font-weight:600;
+
 }
 
+
 .dot{
+
   width:6px;
+
   height:6px;
 
   border-radius:50%;
@@ -284,22 +384,31 @@ header::before{
   margin-right:6px;
 
   box-shadow:0 0 6px var(--green);
+
 }
 
 
-/* =========================================
+/* ==========================================================
    MAIN
-========================================= */
+========================================================== */
 
 main{
+
   max-width:1200px;
 
   margin:0 auto;
 
   padding:0 32px;
+
 }
 
+
+/* ==========================================================
+   PANELS
+========================================================== */
+
 .panel{
+
   background:var(--bg-panel-2);
 
   border:1px solid var(--steel-dim);
@@ -307,15 +416,21 @@ main{
   border-top:2px solid var(--gold);
 
   margin-top:24px;
+
 }
 
+
 .panel-head{
+
   padding:28px;
 
   border-bottom:1px solid var(--line);
+
 }
 
+
 .panel-title{
+
   font-family:var(--font-display);
 
   font-size:22px;
@@ -323,9 +438,12 @@ main{
   letter-spacing:1.5px;
 
   text-transform:uppercase;
+
 }
 
+
 .panel-desc{
+
   font-size:12px;
 
   color:var(--text-dim);
@@ -333,18 +451,23 @@ main{
   margin-top:7px;
 
   line-height:1.6;
+
 }
 
 
-/* =========================================
-   CHAINE
-========================================= */
+/* ==========================================================
+   CHAÎNE DE COMMANDEMENT
+========================================================== */
 
 .chart-wrap{
+
   padding:32px 20px 24px;
+
 }
 
+
 .chain{
+
   display:flex;
 
   flex-direction:column;
@@ -352,13 +475,19 @@ main{
   align-items:center;
 
   width:100%;
+
 }
+
 
 .tier-group{
+
   width:100%;
+
 }
 
+
 .tier-label{
+
   text-align:center;
 
   font-size:9.5px;
@@ -370,9 +499,12 @@ main{
   color:var(--text-dim);
 
   margin-bottom:10px;
+
 }
 
+
 .tier-row{
+
   display:flex;
 
   justify-content:center;
@@ -382,9 +514,12 @@ main{
   gap:10px;
 
   flex-wrap:wrap;
+
 }
 
+
 .chain-node{
+
   flex:1 1 150px;
 
   max-width:220px;
@@ -406,17 +541,23 @@ main{
   text-align:center;
 
   transition:.15s;
+
 }
 
+
 .chain-node:hover{
+
   border-color:var(--steel);
 
   background:#0e141b;
 
   transform:translateY(-2px);
+
 }
 
+
 .chain-node.tier-exec{
+
   border-top-color:var(--gold);
 
   background:
@@ -425,23 +566,35 @@ main{
       rgba(201,162,39,0.07),
       transparent
     );
+
 }
+
 
 .chain-node.tier-command{
+
   border-top-color:var(--gold-dim);
+
 }
+
 
 .chain-node.tier-super{
+
   border-top-color:var(--steel);
+
 }
 
+
 .chain-node.tier-base{
+
   border-top-color:var(--steel-dim);
 
   opacity:.92;
+
 }
 
+
 .chain-title{
+
   font-family:var(--font-display);
 
   font-size:13px;
@@ -449,15 +602,21 @@ main{
   letter-spacing:.6px;
 
   text-transform:uppercase;
+
 }
 
+
 .tier-exec .chain-title{
+
   font-size:15px;
 
   color:var(--gold);
+
 }
 
+
 .chain-sub{
+
   font-size:9.5px;
 
   color:var(--text-dim);
@@ -465,9 +624,12 @@ main{
   margin-top:5px;
 
   line-height:1.4;
+
 }
 
+
 .chain-connector{
+
   width:1px;
 
   height:22px;
@@ -475,18 +637,23 @@ main{
   background:var(--steel-dim);
 
   margin:4px auto;
+
 }
 
 
-/* =========================================
+/* ==========================================================
    GRADES
-========================================= */
+========================================================== */
 
 .grades{
+
   padding:12px 28px 28px;
+
 }
 
+
 .grade{
+
   border:1px solid var(--line);
 
   background:var(--bg-dark);
@@ -494,13 +661,19 @@ main{
   margin-top:14px;
 
   transition:border-color .15s;
+
 }
+
 
 .grade.open{
+
   border-color:var(--steel-dim);
+
 }
 
+
 .grade-header{
+
   display:flex;
 
   justify-content:space-between;
@@ -516,25 +689,37 @@ main{
   background:rgba(74,111,165,.04);
 
   cursor:pointer;
+
 }
+
 
 .grade.open .grade-header{
+
   border-bottom-color:var(--line);
+
 }
+
 
 .grade-header:hover{
+
   background:rgba(74,111,165,.08);
+
 }
 
+
 .grade-left{
+
   display:flex;
 
   align-items:center;
 
   gap:14px;
+
 }
 
+
 .grade-rank{
+
   color:var(--gold);
 
   font-size:11px;
@@ -542,9 +727,12 @@ main{
   letter-spacing:1px;
 
   min-width:28px;
+
 }
 
+
 .grade-title{
+
   font-family:var(--font-display);
 
   font-size:16px;
@@ -552,42 +740,50 @@ main{
   letter-spacing:1px;
 
   text-transform:uppercase;
+
 }
 
-.grade-reports{
-  font-size:10px;
-
-  color:var(--text-dim);
-}
 
 .grade-caret{
+
   color:var(--text-dim);
 
   transition:.2s;
+
 }
 
+
 .grade.open .grade-caret{
+
   transform:rotate(90deg);
 
   color:var(--gold);
+
 }
 
+
 .grade-content{
+
   display:none;
 
   padding:22px 20px 26px;
+
 }
+
 
 .grade.open .grade-content{
+
   display:block;
+
 }
 
 
-/* =========================================
+/* ==========================================================
    SECTIONS
-========================================= */
+========================================================== */
 
 .section-label{
+
   font-family:var(--font-display);
 
   font-size:12.5px;
@@ -603,21 +799,33 @@ main{
   padding-bottom:8px;
 
   border-bottom:1px solid var(--line);
+
 }
+
 
 .section-label.gold{
+
   color:var(--gold);
+
 }
+
 
 .section-block{
+
   margin-bottom:22px;
+
 }
+
 
 .section-block:last-child{
+
   margin-bottom:0;
+
 }
 
+
 .item-list{
+
   list-style:none;
 
   margin:0;
@@ -627,17 +835,23 @@ main{
   font-size:12px;
 
   line-height:1.75;
+
 }
 
+
 .item-list li{
+
   position:relative;
 
   padding-left:16px;
 
   margin-bottom:6px;
+
 }
 
+
 .item-list li::before{
+
   content:"›";
 
   position:absolute;
@@ -645,9 +859,12 @@ main{
   left:0;
 
   color:var(--amber);
+
 }
 
+
 .item-note{
+
   font-size:11px;
 
   color:var(--text-dim);
@@ -655,14 +872,16 @@ main{
   margin-top:6px;
 
   line-height:1.6;
+
 }
 
 
-/* =========================================
+/* ==========================================================
    MEMBRES DISCORD
-========================================= */
+========================================================== */
 
 .members-grid{
+
   display:grid;
 
   grid-template-columns:
@@ -672,9 +891,12 @@ main{
     );
 
   gap:10px;
+
 }
 
+
 .member-card{
+
   display:flex;
 
   align-items:center;
@@ -700,9 +922,12 @@ main{
     transform .15s,
     border-color .15s,
     background .15s;
+
 }
 
+
 .member-card:hover{
+
   transform:translateY(-2px);
 
   border-color:var(--gold);
@@ -713,9 +938,12 @@ main{
       rgba(201,162,39,.09),
       rgba(12,16,21,.98)
     );
+
 }
 
+
 .member-avatar{
+
   width:54px;
 
   height:54px;
@@ -729,19 +957,28 @@ main{
   border:2px solid var(--steel-dim);
 
   background:#11161d;
+
 }
+
 
 .member-card:hover .member-avatar{
+
   border-color:var(--gold);
+
 }
 
+
 .member-info{
+
   min-width:0;
 
   flex:1;
+
 }
 
+
 .member-name{
+
   font-family:var(--font-display);
 
   font-size:15px;
@@ -755,9 +992,12 @@ main{
   text-overflow:ellipsis;
 
   text-transform:uppercase;
+
 }
 
+
 .member-username{
+
   font-size:9.5px;
 
   color:var(--text-dim);
@@ -769,9 +1009,12 @@ main{
   text-overflow:ellipsis;
 
   white-space:nowrap;
+
 }
 
+
 .member-meta{
+
   display:flex;
 
   align-items:center;
@@ -781,9 +1024,12 @@ main{
   margin-top:7px;
 
   flex-wrap:wrap;
+
 }
 
+
 .member-matricule{
+
   font-size:10px;
 
   color:var(--gold);
@@ -793,17 +1039,23 @@ main{
   padding:3px 6px;
 
   letter-spacing:.7px;
+
 }
 
+
 .member-discord{
+
   font-size:9px;
 
   color:var(--steel);
 
   letter-spacing:.4px;
+
 }
 
+
 .member-activity{
+
   width:100%;
 
   font-size:9.5px;
@@ -815,19 +1067,28 @@ main{
   letter-spacing:.2px;
 
   line-height:1.5;
+
 }
 
+
 .member-activity.old{
+
   color:var(--red);
 
   font-weight:600;
+
 }
+
 
 .member-activity.unknown{
+
   color:var(--text-dim);
+
 }
 
+
 .members-empty{
+
   font-size:11px;
 
   color:var(--text-dim);
@@ -835,24 +1096,316 @@ main{
   font-style:italic;
 
   padding:6px 0;
+
 }
 
 
-/* =========================================
+/* ==========================================================
+   DIVISIONS
+========================================================== */
+
+.divisions{
+
+  padding:12px 28px 28px;
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:14px;
+
+  align-items:start;
+
+}
+
+
+.division{
+
+  background:var(--bg-panel-2);
+
+  border:1px solid var(--steel-dim);
+
+  transition:
+    border-color .2s,
+    background .2s;
+
+  min-width:0;
+
+}
+
+
+.division:hover{
+
+  border-color:var(--steel);
+
+  background:#171e27;
+
+}
+
+
+.division-header{
+
+  width:100%;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:15px;
+
+  padding:18px;
+
+  border:0;
+
+  background:transparent;
+
+  color:var(--text);
+
+  font-family:var(--font-mono);
+
+  text-align:left;
+
+  cursor:pointer;
+
+}
+
+
+.division-header:hover{
+
+  background:rgba(74,111,165,0.04);
+
+}
+
+
+.division-icon{
+
+  width:42px;
+
+  height:42px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  border:1px solid var(--gold-dim);
+
+  color:var(--gold);
+
+  background:rgba(201,162,39,0.04);
+
+  font-family:var(--font-display);
+
+  font-size:14px;
+
+  flex:0 0 auto;
+
+}
+
+
+.division-info{
+
+  flex:1;
+
+  min-width:0;
+
+}
+
+
+.division-name{
+
+  font-family:var(--font-display);
+
+  font-size:16px;
+
+  letter-spacing:1.2px;
+
+  text-transform:uppercase;
+
+  color:var(--text);
+
+}
+
+
+.division-lead{
+
+  margin-top:4px;
+
+  font-size:9.5px;
+
+  letter-spacing:1px;
+
+  color:var(--amber);
+
+  text-transform:uppercase;
+
+}
+
+
+.division-description{
+
+  margin-top:5px;
+
+  font-size:10.5px;
+
+  color:var(--text-dim);
+
+  line-height:1.5;
+
+}
+
+
+.division-count{
+
+  font-size:9px;
+
+  letter-spacing:1px;
+
+  padding:5px 8px;
+
+  border:1px solid var(--steel);
+
+  color:var(--steel);
+
+  white-space:nowrap;
+
+}
+
+
+.division-arrow{
+
+  color:var(--gold);
+
+  font-size:18px;
+
+  transition:transform .25s ease;
+
+}
+
+
+.division.open .division-arrow{
+
+  transform:rotate(180deg);
+
+}
+
+
+/* ==========================================================
+   UNIT CONTAINER
+========================================================== */
+
+.units-wrapper{
+
+  display:grid;
+
+  grid-template-rows:0fr;
+
+  transition:grid-template-rows .3s ease;
+
+}
+
+
+.division.open .units-wrapper{
+
+  grid-template-rows:1fr;
+
+}
+
+
+.units-inner{
+
+  overflow:hidden;
+
+}
+
+
+.units{
+
+  padding:0 18px 18px;
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:8px;
+
+}
+
+
+.unit{
+
+  padding:12px;
+
+  background:var(--bg-dark);
+
+  border:1px solid var(--line);
+
+  transition:
+    border-color .15s,
+    background .15s;
+
+}
+
+
+.unit:hover{
+
+  border-color:var(--steel-dim);
+
+  background:#10171f;
+
+}
+
+
+.unit-name{
+
+  color:var(--gold);
+
+  font-family:var(--font-display);
+
+  font-size:12px;
+
+  letter-spacing:.8px;
+
+  text-transform:uppercase;
+
+}
+
+
+.unit-desc{
+
+  margin-top:5px;
+
+  font-size:10.5px;
+
+  line-height:1.55;
+
+  color:var(--text-dim);
+
+}
+
+
+/* ==========================================================
    NOTICE
-========================================= */
+========================================================== */
 
 .notice{
+
   border-left:3px solid var(--gold);
 
   background:rgba(201,162,39,.05);
 
   padding:14px 16px;
 
-  margin:18px 32px 0;
+  margin:18px 28px 0;
+
 }
 
+
 .notice-title{
+
   color:var(--gold);
 
   font-family:var(--font-display);
@@ -864,9 +1417,12 @@ main{
   font-size:12px;
 
   margin-bottom:5px;
+
 }
 
+
 .notice p{
+
   font-size:11.5px;
 
   color:var(--text-dim);
@@ -874,14 +1430,16 @@ main{
   line-height:1.6;
 
   margin:0;
+
 }
 
 
-/* =========================================
+/* ==========================================================
    FOOTER
-========================================= */
+========================================================== */
 
 footer{
+
   max-width:1200px;
 
   margin:0 auto;
@@ -895,59 +1453,149 @@ footer{
   letter-spacing:1px;
 
   text-align:center;
+
 }
 
 
-/* =========================================
+/* ==========================================================
    MOBILE
-========================================= */
+========================================================== */
+
+@media(max-width:800px){
+
+  .divisions{
+
+    grid-template-columns:1fr;
+
+  }
+
+}
+
 
 @media(max-width:700px){
 
   header{
+
     padding:20px;
+
   }
+
 
   main{
+
     padding:0 16px;
+
   }
+
 
   .brand-title{
+
     font-size:19px;
+
   }
+
 
   .brand-sub{
+
     font-size:9px;
+
+    letter-spacing:2px;
+
   }
+
 
   .header-actions{
+
     width:100%;
+
   }
 
+
   .header-link{
+
     flex:1;
 
     text-align:center;
+
   }
+
+
+  .status-line{
+
+    gap:12px;
+
+  }
+
 
   .panel-head{
+
     padding:20px;
+
   }
+
+
+  .chart-wrap{
+
+    padding:25px 14px 20px;
+
+  }
+
 
   .grades{
+
     padding:10px 14px 20px;
+
   }
+
 
   .grade-content{
+
     padding:18px 14px 20px;
+
   }
+
 
   .members-grid{
+
     grid-template-columns:1fr;
+
   }
 
+
+  .divisions{
+
+    padding:10px 14px 20px;
+
+  }
+
+
+  .division-header{
+
+    padding:15px;
+
+  }
+
+
+  .division-description{
+
+    font-size:10px;
+
+  }
+
+
+  .units{
+
+    grid-template-columns:1fr;
+
+    padding:0 15px 15px;
+
+  }
+
+
   .notice{
+
     margin:18px 16px 0;
+
   }
 
 }
@@ -970,7 +1618,160 @@ footer{
 
     <div class="badge-row">
 
+
       <div class="badge-left">
+
+
+        <svg
+          class="star"
+          viewBox="0 0 200 200"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+
+          <defs>
+
+            <path
+              id="arc-top"
+              d="M 34 100 A 66 66 0 0 1 166 100"
+            />
+
+            <path
+              id="arc-bottom"
+              d="M 47 128 A 60 60 0 0 0 153 128"
+            />
+
+            <path
+              id="mini-star"
+              d="M0,-7 L1.76,-2.43 L6.66,-2.16 L2.85,0.93 L4.12,5.66 L0,3 L-4.12,5.66 L-2.85,0.93 L-6.66,-2.16 L-1.76,-2.43 Z"
+            />
+
+          </defs>
+
+
+          <path
+            d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
+            fill="none"
+            stroke="var(--gold)"
+            stroke-width="2.5"
+            stroke-linejoin="round"
+          />
+
+
+          <circle
+            cx="100"
+            cy="100"
+            r="78"
+            fill="#151b23"
+            stroke="var(--gold)"
+            stroke-width="2"
+          />
+
+
+          <circle
+            cx="100"
+            cy="100"
+            r="74"
+            fill="none"
+            stroke="var(--gold)"
+            stroke-width="1"
+          />
+
+
+          <circle
+            cx="100"
+            cy="100"
+            r="55"
+            fill="#0c1015"
+            stroke="var(--gold)"
+            stroke-width="1.5"
+          />
+
+
+          <text
+            font-family="Oswald, sans-serif"
+            font-size="16"
+            font-weight="700"
+            letter-spacing="2"
+            fill="var(--gold)"
+          >
+
+            <textPath
+              href="#arc-top"
+              startOffset="50%"
+              text-anchor="middle"
+            >
+              CHICAGO
+            </textPath>
+
+          </text>
+
+
+          <text
+            font-family="Oswald, sans-serif"
+            font-size="16"
+            font-weight="700"
+            letter-spacing="2"
+            fill="var(--gold)"
+          >
+
+            <textPath
+              href="#arc-bottom"
+              startOffset="50%"
+              text-anchor="middle"
+            >
+              POLICE
+            </textPath>
+
+          </text>
+
+
+          <use
+            href="#mini-star"
+            transform="translate(27,100) scale(1.1)"
+            fill="var(--gold)"
+          />
+
+
+          <use
+            href="#mini-star"
+            transform="translate(173,100) scale(1.1)"
+            fill="var(--gold)"
+          />
+
+
+          <use
+            href="#mini-star"
+            transform="translate(100,88) scale(2.4)"
+            fill="var(--gold)"
+            opacity="0.9"
+          />
+
+
+          <rect
+            x="64"
+            y="116"
+            width="72"
+            height="17"
+            rx="2"
+            fill="var(--gold)"
+          />
+
+
+          <text
+            x="100"
+            y="128"
+            font-family="Oswald, sans-serif"
+            font-size="9.5"
+            font-weight="700"
+            letter-spacing="0.5"
+            text-anchor="middle"
+            fill="#0c1015"
+          >
+            URBS IN HORTO
+          </text>
+
+        </svg>
+
 
         <div>
 
@@ -979,7 +1780,7 @@ footer{
           </div>
 
           <div class="brand-sub">
-            Organigramme — Chaîne de commandement
+            Organisation — Structure & unités
           </div>
 
         </div>
@@ -987,7 +1788,10 @@ footer{
       </div>
 
 
+      <!-- NAVIGATION -->
+
       <div class="header-actions">
+
 
         <a
           class="header-link"
@@ -996,12 +1800,14 @@ footer{
           🗂 Procédures
         </a>
 
+
         <a
           class="header-link"
           href="code.html"
         >
           📻 Guide radio
         </a>
+
 
         <a
           class="header-link"
@@ -1010,6 +1816,7 @@ footer{
           ⚖ Règlement
         </a>
 
+
         <a
           class="header-link"
           href="tenues-vehicules.html"
@@ -1017,19 +1824,14 @@ footer{
           🎽 Tenues & Véhicules
         </a>
 
+
         <a
           class="header-link current"
           href="organigramme.html"
         >
-          🧭 Organigramme
+          🏛 Organisation
         </a>
 
-        <a
-          class="header-link"
-          href="divisions.html"
-        >
-          🏛 Divisions
-        </a>
 
         <a
           class="header-link gold"
@@ -1040,27 +1842,40 @@ footer{
           📖 Guide juridique ↗
         </a>
 
+
       </div>
 
     </div>
 
 
+    <!-- STATUS -->
+
     <div class="status-line">
 
       <span>
+
         <span class="dot"></span>
+
         Système opérationnel
+
       </span>
 
+
       <span>
+
         DOCUMENT :
-        <b>CPD-TPL-003</b>
+        <b>CPD-ORG-001</b>
+
       </span>
 
+
       <span>
+
         VERSION :
-        <b>1.2</b>
+        <b>2.0</b>
+
       </span>
+
 
       <span id="clock">
         --/--/---- --:--
@@ -1073,6 +1888,7 @@ footer{
 </header>
 
 
+
 <!-- ==========================================================
      MAIN
 ========================================================== -->
@@ -1081,7 +1897,7 @@ footer{
 
 
   <!-- ========================================================
-       CHAINE DE COMMANDEMENT
+       CHAÎNE DE COMMANDEMENT
   ========================================================= -->
 
   <div class="panel">
@@ -1089,7 +1905,7 @@ footer{
     <div class="panel-head">
 
       <div class="panel-title">
-        Chaîne de commandement
+        🧭 Chaîne de commandement
       </div>
 
       <div class="panel-desc">
@@ -1111,6 +1927,7 @@ footer{
   </div>
 
 
+
   <!-- ========================================================
        DETAIL DES GRADES
   ========================================================= -->
@@ -1120,11 +1937,11 @@ footer{
     <div class="panel-head">
 
       <div class="panel-title">
-        Détail des rôles & prérequis
+        📋 Détail des rôles & prérequis
       </div>
 
       <div class="panel-desc">
-        Responsabilités et conditions de promotion pour chaque grade. Cliquez sur un grade pour afficher les membres.
+        Responsabilités et conditions de promotion pour chaque grade. Cliquez sur un grade pour afficher les membres actuels.
       </div>
 
     </div>
@@ -1138,35 +1955,68 @@ footer{
   </div>
 
 
+
+  <!-- ========================================================
+       DIVISIONS
+  ========================================================= -->
+
+  <div class="panel">
+
+    <div class="panel-head">
+
+      <div class="panel-title">
+        🏛 Divisions & unités
+      </div>
+
+      <div class="panel-desc">
+        Organisation des différentes divisions et unités opérationnelles du Chicago Police Department. Cliquez sur une division pour afficher les unités qui la composent.
+      </div>
+
+    </div>
+
+
+    <div
+      class="divisions"
+      id="divisions"
+    ></div>
+
+  </div>
+
+
 </main>
 
+
+
+<!-- ==========================================================
+     FOOTER
+========================================================== -->
 
 <footer>
 
   CPD INTERNAL SYSTEM —
-  ORGANIGRAMME —
-  USAGE INTERNE UNIQUEMENT
+  ORGANISATION — STRUCTURE & UNITÉS —
+  USAGE ROLEPLAY UNIQUEMENT — NE PAS DIFFUSER HORS SERVEUR
 
 </footer>
 
 
+
 <script>
 
-
-/* =========================================
+/* ==========================================================
    DONNÉES
-========================================= */
+========================================================== */
 
 let chainOfCommand = [];
 
-let divisions = [];
-
 let gradeDetails = [];
 
+let divisions = [];
 
-/* =========================================
-   API BOT
-========================================= */
+
+/* ==========================================================
+   API DISCORD
+========================================================== */
 
 const BOT_API_URL =
   "https://gq9m0i599d.apps.bot-hosting.cloud/api/organigramme";
@@ -1177,9 +2027,9 @@ let liveMembers = {};
 let liveMembersState = "loading";
 
 
-/* =========================================
+/* ==========================================================
    CHARGEMENT DES DONNÉES
-========================================= */
+========================================================== */
 
 async function loadData(){
 
@@ -1191,6 +2041,7 @@ async function loadData(){
         Date.now()
       );
 
+
     if(!response.ok){
 
       throw new Error(
@@ -1199,18 +2050,23 @@ async function loadData(){
 
     }
 
+
     const text =
       await response.text();
+
 
     const script =
       document.createElement("script");
 
+
     script.textContent =
       text;
+
 
     document.head.appendChild(
       script
     );
+
 
     const data =
       window.CPD_DATA || {};
@@ -1220,21 +2076,25 @@ async function loadData(){
       data.chainOfCommand || [];
 
 
-    divisions =
-      data.divisions || [];
-
-
     gradeDetails =
       data.gradeDetails || [];
+
+
+    divisions =
+      data.divisions || [];
 
 
     renderChain();
 
     renderGradeDetails();
 
+    renderDivisions();
+
+
     await loadMembers();
 
   }
+
 
   catch(err){
 
@@ -1242,6 +2102,7 @@ async function loadData(){
       "Erreur chargement données :",
       err
     );
+
 
     document.getElementById(
       "chain"
@@ -1255,6 +2116,9 @@ async function loadData(){
 
         <p>
           Impossible de charger les données de l'organigramme.
+          Vérifiez que le fichier
+          data-organigramme.js
+          est disponible.
         </p>
 
       </div>
@@ -1264,18 +2128,21 @@ async function loadData(){
 
     document.getElementById(
       "grades"
+    ).innerHTML = "";
+
+
+    document.getElementById(
+      "divisions"
     ).innerHTML = `
 
       <div class="notice">
 
         <div class="notice-title">
-          Grades indisponibles
+          Divisions indisponibles
         </div>
 
         <p>
-          Le fichier
-          data-organigramme.js
-          n'a pas pu être chargé.
+          Les données des divisions n'ont pas pu être chargées.
         </p>
 
       </div>
@@ -1287,9 +2154,9 @@ async function loadData(){
 }
 
 
-/* =========================================
+/* ==========================================================
    MEMBRES DISCORD
-========================================= */
+========================================================== */
 
 async function loadMembers(){
 
@@ -1315,10 +2182,12 @@ async function loadMembers(){
     liveMembers =
       await response.json();
 
+
     liveMembersState =
       "loaded";
 
   }
+
 
   catch(err){
 
@@ -1327,8 +2196,10 @@ async function loadMembers(){
       err
     );
 
+
     liveMembers =
       {};
+
 
     liveMembersState =
       "error";
@@ -1336,18 +2207,14 @@ async function loadMembers(){
   }
 
 
-  /*
-    Même si l'API Discord est indisponible,
-    les grades restent affichés.
-  */
   renderGradeDetails();
 
 }
 
 
-/* =========================================
-   CHAINE HIERARCHIQUE
-========================================= */
+/* ==========================================================
+   CHAÎNE HIÉRARCHIQUE
+========================================================== */
 
 function renderChain(){
 
@@ -1356,11 +2223,13 @@ function renderChain(){
       "chain"
     );
 
+
   container.innerHTML = "";
 
 
   chainOfCommand.forEach(
     (group,index) => {
+
 
       if(index > 0){
 
@@ -1369,8 +2238,10 @@ function renderChain(){
             "div"
           );
 
+
         connector.className =
           "chain-connector";
+
 
         container.appendChild(
           connector
@@ -1383,6 +2254,7 @@ function renderChain(){
         document.createElement(
           "div"
         );
+
 
       tierGroup.className =
         "tier-group";
@@ -1400,20 +2272,27 @@ function renderChain(){
             >
 
               <div class="chain-title">
+
                 ${escapeHtml(
                   rank.title
                 )}
+
               </div>
+
 
               ${
                 rank.sub
                 ?
                 `
+
                 <div class="chain-sub">
+
                   ${escapeHtml(
                     rank.sub
                   )}
+
                 </div>
+
                 `
                 :
                 ""
@@ -1429,13 +2308,18 @@ function renderChain(){
       tierGroup.innerHTML = `
 
         <div class="tier-label">
+
           ${escapeHtml(
             group.label
           )}
+
         </div>
 
+
         <div class="tier-row">
+
           ${nodesHtml}
+
         </div>
 
       `;
@@ -1451,9 +2335,9 @@ function renderChain(){
 }
 
 
-/* =========================================
+/* ==========================================================
    GRADES
-========================================= */
+========================================================== */
 
 function renderGradeDetails(){
 
@@ -1462,16 +2346,24 @@ function renderGradeDetails(){
       "grades"
     );
 
+
   if(!container){
+
     return;
+
   }
+
 
   container.innerHTML = "";
 
 
-  if(!Array.isArray(
-    gradeDetails
-  ) || gradeDetails.length === 0){
+  if(
+    !Array.isArray(
+      gradeDetails
+    )
+    ||
+    gradeDetails.length === 0
+  ){
 
     container.innerHTML = `
 
@@ -1498,13 +2390,16 @@ function renderGradeDetails(){
   gradeDetails.forEach(
     (grade,index) => {
 
+
       const el =
         document.createElement(
           "div"
         );
 
+
       el.className =
         "grade";
+
 
       el.id =
         `grade-${index}`;
@@ -1520,18 +2415,23 @@ function renderGradeDetails(){
           <div class="grade-left">
 
             <div class="grade-rank">
+
               GR.
               ${escapeHtml(
                 String(
                   grade.rank || "—"
                 )
               )}
+
             </div>
 
+
             <div class="grade-title">
+
               ${escapeHtml(
                 grade.title || "Grade"
               )}
+
             </div>
 
           </div>
@@ -1547,13 +2447,14 @@ function renderGradeDetails(){
         <div class="grade-content">
 
 
-          <!-- RESPONSABILITES -->
+          <!-- RESPONSABILITÉS -->
 
           <div class="section-block">
 
             <div class="section-label gold">
               🛡 Responsabilités
             </div>
+
 
             <ul class="item-list">
 
@@ -1564,11 +2465,15 @@ function renderGradeDetails(){
                 )
                 .map(
                   responsibility => `
+
                     <li>
+
                       ${escapeHtml(
                         responsibility
                       )}
+
                     </li>
+
                   `
                 )
                 .join("")
@@ -1579,13 +2484,14 @@ function renderGradeDetails(){
           </div>
 
 
-          <!-- PREREQUIS -->
+          <!-- PRÉREQUIS -->
 
           <div class="section-block">
 
             <div class="section-label">
               📋 Prérequis de promotion
             </div>
+
 
             <ul class="item-list">
 
@@ -1596,11 +2502,15 @@ function renderGradeDetails(){
                 )
                 .map(
                   prerequisite => `
+
                     <li>
+
                       ${escapeHtml(
                         prerequisite
                       )}
+
                     </li>
+
                   `
                 )
                 .join("")
@@ -1612,10 +2522,13 @@ function renderGradeDetails(){
             <div class="item-note">
 
               Temps de service minimum :
+
               <b>
+
                 ${escapeHtml(
                   grade.tempsService || "—"
                 )}
+
               </b>
 
             </div>
@@ -1654,9 +2567,212 @@ function renderGradeDetails(){
 }
 
 
-/* =========================================
-   CONVERSION DATE ACTIVITE
-========================================= */
+/* ==========================================================
+   DIVISIONS
+========================================================== */
+
+function renderDivisions(){
+
+  const container =
+    document.getElementById(
+      "divisions"
+    );
+
+
+  if(!container){
+
+    return;
+
+  }
+
+
+  container.innerHTML = "";
+
+
+  if(
+    !Array.isArray(
+      divisions
+    )
+    ||
+    divisions.length === 0
+  ){
+
+    container.innerHTML = `
+
+      <div class="notice">
+
+        <div class="notice-title">
+          Aucune division disponible
+        </div>
+
+        <p>
+          Aucune division n'a été trouvée
+          dans data-organigramme.js.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  divisions.forEach(
+    (division,index) => {
+
+
+      const card =
+        document.createElement(
+          "section"
+        );
+
+
+      card.className =
+        "division";
+
+
+      card.innerHTML = `
+
+        <button
+          class="division-header"
+          type="button"
+        >
+
+          <div class="division-icon">
+
+            ${escapeHtml(
+              division.short
+            )}
+
+          </div>
+
+
+          <div class="division-info">
+
+            <div class="division-name">
+
+              ${escapeHtml(
+                division.name
+              )}
+
+            </div>
+
+
+            <div class="division-lead">
+
+              LEAD :
+              ${escapeHtml(
+                division.lead
+              )}
+
+            </div>
+
+
+            <div class="division-description">
+
+              ${escapeHtml(
+                division.description
+              )}
+
+            </div>
+
+          </div>
+
+
+          <div class="division-count">
+
+            ${division.units.length}
+            UNITÉS
+
+          </div>
+
+
+          <div class="division-arrow">
+            ▼
+          </div>
+
+        </button>
+
+
+        <div class="units-wrapper">
+
+          <div class="units-inner">
+
+            <div class="units">
+
+              ${
+                division.units
+                .map(
+                  unit => `
+
+                    <div class="unit">
+
+                      <div class="unit-name">
+
+                        ${escapeHtml(
+                          unit.name
+                        )}
+
+                      </div>
+
+
+                      <div class="unit-desc">
+
+                        ${escapeHtml(
+                          unit.desc
+                        )}
+
+                      </div>
+
+                    </div>
+
+                  `
+                )
+                .join("")
+              }
+
+            </div>
+
+          </div>
+
+        </div>
+
+      `;
+
+
+      const button =
+        card.querySelector(
+          ".division-header"
+        );
+
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          card.classList.toggle(
+            "open"
+          );
+
+        }
+      );
+
+
+      container.appendChild(
+        card
+      );
+
+    }
+  );
+
+}
+
+
+/* ==========================================================
+   DATE ACTIVITÉ
+========================================================== */
 
 function parseActivityDate(
   value
@@ -1682,50 +2798,26 @@ function parseActivityDate(
   }
 
 
-  const day =
-    Number(
-      match[1]
-    );
-
-
-  const month =
-    Number(
-      match[2]
-    ) - 1;
-
-
-  const year =
-    Number(
-      match[3]
-    );
-
-
-  const hours =
-    Number(
-      match[4]
-    );
-
-
-  const minutes =
-    Number(
-      match[5]
-    );
-
-
   return new Date(
-    year,
-    month,
-    day,
-    hours,
-    minutes
+
+    Number(match[3]),
+
+    Number(match[2]) - 1,
+
+    Number(match[1]),
+
+    Number(match[4]),
+
+    Number(match[5])
+
   );
 
 }
 
 
-/* =========================================
-   STATUT ACTIVITE
-========================================= */
+/* ==========================================================
+   STATUT ACTIVITÉ
+========================================================== */
 
 function getActivityStatus(
   activity
@@ -1818,9 +2910,9 @@ function getActivityStatus(
 }
 
 
-/* =========================================
-   CARTES MEMBRES
-========================================= */
+/* ==========================================================
+   MEMBRES
+========================================================== */
 
 function renderMembersList(
   gradeTitle
@@ -1834,7 +2926,9 @@ function renderMembersList(
     return `
 
       <div class="members-empty">
+
         Chargement des membres Discord…
+
       </div>
 
     `;
@@ -1850,7 +2944,9 @@ function renderMembersList(
     return `
 
       <div class="members-empty">
+
         Liste des membres indisponible.
+
       </div>
 
     `;
@@ -1871,7 +2967,9 @@ function renderMembersList(
     return `
 
       <div class="members-empty">
+
         Aucun membre actuellement à ce grade.
+
       </div>
 
     `;
@@ -1887,6 +2985,7 @@ function renderMembersList(
         members
         .map(
           member => {
+
 
             const avatar =
               member.avatar ||
@@ -1928,12 +3027,15 @@ function renderMembersList(
 
                 <div class="member-info">
 
+
                   <div class="member-name">
+
                     ${escapeHtml(
                       member.name ||
                       member.username ||
                       "Inconnu"
                     )}
+
                   </div>
 
 
@@ -1941,11 +3043,15 @@ function renderMembersList(
                     member.username
                     ?
                     `
+
                     <div class="member-username">
+
                       @${escapeHtml(
                         member.username
                       )}
+
                     </div>
+
                     `
                     :
                     ""
@@ -1957,17 +3063,22 @@ function renderMembersList(
                     <span
                       class="member-matricule"
                     >
+
                       MAT.
                       ${escapeHtml(
                         member.matricule ||
                         "N/A"
                       )}
+
                     </span>
+
 
                     <span
                       class="member-discord"
                     >
+
                       ↗ PROFIL DISCORD
+
                     </span>
 
                   </div>
@@ -1976,9 +3087,11 @@ function renderMembersList(
                   <div
                     class="${activity.className}"
                   >
+
                     ${escapeHtml(
                       activity.text
                     )}
+
                   </div>
 
 
@@ -2000,9 +3113,9 @@ function renderMembersList(
 }
 
 
-/* =========================================
+/* ==========================================================
    TOGGLE GRADE
-========================================= */
+========================================================== */
 
 function toggleGrade(
   index
@@ -2025,9 +3138,9 @@ function toggleGrade(
 }
 
 
-/* =========================================
+/* ==========================================================
    ESCAPE HTML
-========================================= */
+========================================================== */
 
 function escapeHtml(
   value
@@ -2050,9 +3163,9 @@ function escapeHtml(
 }
 
 
-/* =========================================
+/* ==========================================================
    HORLOGE
-========================================= */
+========================================================== */
 
 function updateClock(){
 
@@ -2099,16 +3212,16 @@ setInterval(
 );
 
 
-/* =========================================
+/* ==========================================================
    INIT
-========================================= */
+========================================================== */
 
 loadData();
 
 
-/* =========================================
+/* ==========================================================
    PROTECTION
-========================================= */
+========================================================== */
 
 document.addEventListener(
   "contextmenu",
@@ -2190,4 +3303,3 @@ document.addEventListener(
 </body>
 
 </html>
-```
