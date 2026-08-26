@@ -123,7 +123,7 @@ window.CPD_DATA = [
 
     short:"TRN",
 
-    lead:"20",
+    lead:"08",
 
     description:
       "Division responsable de la formation et de l'évaluation des membres du département.",
