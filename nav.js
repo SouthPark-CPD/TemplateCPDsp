@@ -37,6 +37,7 @@
 
 const NAV_LINKS = [
   { href:"index.html",              label:"🗂 Procédures" },
+  { href:"acces-rapide.html",       label:"⚡ Accès rapide", gold:true },
   { href:"code.html",               label:"📻 Guide radio" },
   { href:"reglement.html",          label:"⚖ Règlement" },
   { href:"divisions.html",          label:"🏛 Divisions" },
