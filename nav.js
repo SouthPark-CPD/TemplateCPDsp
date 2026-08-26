@@ -44,8 +44,8 @@ const NAV_LINKS = [
   },
 
   {
-    href:"tenues.html",
-    label:"🎽 Tenues & Véhicules"
+    href:"tenues-véhicules.html",
+    label:"🎽 Tenues"
   },
 
   {
