@@ -72,12 +72,8 @@ body{
   user-select:none;
 }
 
-input,
-textarea{
-  -webkit-user-select:text;
-  -moz-user-select:text;
-  -ms-user-select:text;
-  user-select:text;
+img{
+  -webkit-user-drag:none;
 }
 
 /* ==========================================================
@@ -178,7 +174,6 @@ header::before{
 
   text-decoration:none;
   white-space:nowrap;
-
   transition:all .15s;
   cursor:pointer;
 }
@@ -270,116 +265,141 @@ main{
 }
 
 /* ==========================================================
-   BLOCS TENUES
+   SECTIONS
 ========================================================== */
 
-.outfits{
-  padding:18px 28px 30px;
+.section{
+  padding:12px 28px 28px;
 }
 
-.outfit{
-  border:1px solid var(--line);
-  background:var(--bg-dark);
-  margin-top:16px;
+.section + .section{
+  padding-top:0;
 }
 
-.outfit-header{
-  padding:17px 20px;
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+
+  font-family:var(--font-display);
+  font-size:16px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+
+  color:var(--gold);
+
+  padding:18px 0 12px;
+  margin-bottom:4px;
 
   border-bottom:1px solid var(--line);
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(74,111,165,0.07),
-      transparent
-    );
 }
 
-.outfit-title{
+.section-title .icon{
+  font-size:18px;
+}
+
+.section-desc{
+  color:var(--text-dim);
+  font-size:11px;
+  line-height:1.6;
+  margin:12px 0 16px;
+}
+
+/* ==========================================================
+   TENUE CARDS
+========================================================== */
+
+.uniform-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:14px;
+}
+
+.uniform-card{
+  border:1px solid var(--line);
+  background:var(--bg-dark);
+  transition:
+    border-color .15s,
+    transform .15s,
+    background .15s;
+}
+
+.uniform-card:hover{
+  border-color:var(--steel-dim);
+  background:#0e1319;
+  transform:translateY(-2px);
+}
+
+.uniform-card-header{
+  padding:15px 17px;
+  border-bottom:1px solid var(--line);
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+
+  background:rgba(74,111,165,0.04);
+}
+
+.uniform-card-title{
   font-family:var(--font-display);
-  font-size:17px;
-  letter-spacing:1.5px;
+  font-size:14px;
+  letter-spacing:1px;
   text-transform:uppercase;
   color:var(--text);
 }
 
-.outfit-subtitle{
-  margin-top:5px;
-  font-size:10.5px;
+.uniform-card-badge{
+  font-size:9px;
   letter-spacing:1px;
-  color:var(--text-dim);
   text-transform:uppercase;
+
+  color:var(--gold);
+  border:1px solid var(--gold);
+  padding:5px 8px;
+  white-space:nowrap;
 }
 
-.outfit-body{
-  padding:20px;
+.uniform-card-body{
+  padding:14px;
 }
 
 /* ==========================================================
-   IMAGES
+   IMAGE
 ========================================================== */
 
-.image-grid{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:14px;
-}
-
-.image-slot{
-  position:relative;
-
+.uniform-image{
   width:100%;
-
-  min-height:220px;
-
-  border:1px solid var(--steel-dim);
-
-  background:
-    repeating-linear-gradient(
-      45deg,
-      rgba(74,111,165,0.04) 0px,
-      rgba(74,111,165,0.04) 8px,
-      transparent 8px,
-      transparent 16px
-    ),
-    var(--bg-panel);
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  overflow:hidden;
-}
-
-.image-slot img{
   display:block;
 
-  width:100%;
-  max-height:700px;
+  max-height:650px;
 
   object-fit:contain;
 
-  background:#0c1015;
+  background:#080b0f;
+
+  border:1px solid var(--steel-dim);
 
   cursor:zoom-in;
+
+  transition:
+    border-color .15s,
+    opacity .15s;
 }
 
-.image-placeholder{
-  padding:30px;
-  text-align:center;
+.uniform-image:hover{
+  border-color:var(--gold);
+  opacity:.94;
+}
 
+.image-caption{
+  margin-top:9px;
+
+  font-size:10px;
+  line-height:1.5;
   color:var(--text-dim);
-
-  font-size:11px;
-  letter-spacing:1px;
-  text-transform:uppercase;
-}
-
-.image-placeholder b{
-  display:block;
-  color:var(--steel);
-  margin-top:8px;
+  text-align:center;
 }
 
 /* ==========================================================
@@ -441,18 +461,50 @@ main{
 }
 
 /* ==========================================================
+   NOTICE
+========================================================== */
+
+.notice{
+  border-left:3px solid var(--gold);
+  background:rgba(201,162,39,0.05);
+
+  padding:14px 16px;
+  margin:20px 28px;
+}
+
+.notice-title{
+  color:var(--gold);
+
+  font-family:var(--font-display);
+  letter-spacing:1px;
+  text-transform:uppercase;
+
+  font-size:12px;
+
+  margin-bottom:5px;
+}
+
+.notice p{
+  font-size:11.5px;
+  color:var(--text-dim);
+  line-height:1.6;
+  margin:0;
+}
+
+/* ==========================================================
    FOOTER
 ========================================================== */
 
 footer{
   max-width:1100px;
   margin:0 auto;
+
   padding:20px 32px 0;
 
   font-size:10.5px;
   color:var(--text-dim);
-
   letter-spacing:1px;
+
   text-align:center;
 }
 
@@ -492,16 +544,26 @@ footer{
     padding:20px;
   }
 
-  .outfits{
+  .section{
     padding:10px 14px 20px;
   }
 
-  .outfit-body{
-    padding:14px;
+  .uniform-grid{
+    grid-template-columns:1fr;
   }
 
-  .image-slot{
-    min-height:160px;
+  .uniform-card-header{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .uniform-card-badge{
+    width:100%;
+    text-align:center;
+  }
+
+  .notice{
+    margin:18px 14px;
   }
 
   .image-lightbox{
@@ -510,11 +572,28 @@ footer{
 
 }
 
+/* ==========================================================
+   REDUCED MOTION
+========================================================== */
+
+@media(prefers-reduced-motion:reduce){
+
+  *,
+  *::before,
+  *::after{
+    scroll-behavior:auto !important;
+    transition:none !important;
+  }
+
+}
+
 </style>
 
 </head>
 
+
 <body>
+
 
 <!-- ==========================================================
      HEADER
@@ -667,6 +746,7 @@ footer{
 
         </svg>
 
+
         <div>
 
           <div class="brand-title">
@@ -674,12 +754,13 @@ footer{
           </div>
 
           <div class="brand-sub">
-            Tenues — Référentiel opérationnel
+            Tenues — Référentiel réglementaire
           </div>
 
         </div>
 
       </div>
+
 
       <div class="header-actions">
 
@@ -738,22 +819,39 @@ footer{
 
     </div>
 
+
     <div class="status-line">
 
       <span>
+
         <span class="dot"></span>
+
         Système opérationnel
+
       </span>
 
+
       <span>
+
         DOCUMENT :
-        <b>CPD-TPL-002</b>
+
+        <b>
+          CPD-TPL-002
+        </b>
+
       </span>
 
+
       <span>
+
         VERSION :
-        <b>3.0</b>
+
+        <b>
+          3.0
+        </b>
+
       </span>
+
 
       <span id="clock">
         --/--/---- --:--
@@ -781,17 +879,48 @@ footer{
       </div>
 
       <div class="panel-desc">
-        Référentiel visuel des tenues autorisées au sein du Chicago Police Department.
-        Sélectionnez les différentes catégories pour consulter les équipements correspondants.
+        Référentiel officiel des tenues autorisées selon le grade et le niveau de responsabilité.
       </div>
 
     </div>
 
 
-    <div
-      class="outfits"
-      id="outfits"
-    ></div>
+    <section class="section">
+
+      <div class="section-title">
+        <span class="icon">🎽</span>
+        Tenues réglementaires
+      </div>
+
+      <div class="section-desc">
+        Tenues utilisées dans le cadre du service courant.
+      </div>
+
+      <div
+        class="uniform-grid"
+        id="reglementaires"
+      ></div>
+
+    </section>
+
+
+    <section class="section">
+
+      <div class="section-title">
+        <span class="icon">🎖️</span>
+        Tenues cérémonie
+      </div>
+
+      <div class="section-desc">
+        Tenues utilisées lors des cérémonies et événements officiels du département.
+      </div>
+
+      <div
+        class="uniform-grid"
+        id="ceremonies"
+      ></div>
+
+    </section>
 
   </div>
 
@@ -804,10 +933,9 @@ footer{
 
 <footer>
 
-  CPD INTERNAL SYSTEM —
-  TENUES —
-  USAGE INTERNE UNIQUEMENT —
-  NE PAS DIFFUSER
+  CPD INTERNAL SYSTEM — TENUES —
+
+  USAGE INTERNE UNIQUEMENT — NE PAS DIFFUSER
 
 </footer>
 
@@ -843,9 +971,10 @@ footer{
 
 /* ==========================================================
    DONNÉES
+   Chargées depuis data-tenues.js
 ========================================================== */
 
-let outfits = [];
+let uniforms = [];
 
 
 /* ==========================================================
@@ -854,72 +983,50 @@ let outfits = [];
 
 function loadData(){
 
-  return new Promise(
-    (resolve,reject)=>{
+  return new Promise((resolve,reject)=>{
 
-      window.CPD_DATA = undefined;
+    window.CPD_DATA = undefined;
 
-      const script =
-        document.createElement("script");
+    const script = document.createElement("script");
 
-      script.src =
-        "data-tenues.js?v=" +
-        Date.now();
+    script.src =
+      "data-tenues.js?v=" +
+      Date.now();
 
-      script.async = false;
+    script.async = false;
 
-      script.onload =
-        function(){
+    script.onload = function(){
 
-          console.log(
-            "CPD — data-tenues.js chargé."
-          );
+      if(!Array.isArray(window.CPD_DATA)){
 
-          if(
-            !Array.isArray(
-              window.CPD_DATA
-            )
-          ){
+        reject(
+          new Error(
+            "window.CPD_DATA n'est pas un tableau."
+          )
+        );
 
-            reject(
-              new Error(
-                "window.CPD_DATA n'est pas un tableau."
-              )
-            );
+        return;
+      }
 
-            return;
+      uniforms = window.CPD_DATA;
 
-          }
+      resolve();
 
-          outfits =
-            window.CPD_DATA;
+    };
 
-          console.log(
-            "CPD_DATA :",
-            outfits
-          );
+    script.onerror = function(){
 
-          resolve();
-
-        };
-
-      script.onerror =
-        function(){
-
-          reject(
-            new Error(
-              "Impossible de charger data-tenues.js."
-            )
-          );
-
-        };
-
-      document.head.appendChild(
-        script
+      reject(
+        new Error(
+          "Impossible de charger data-tenues.js."
+        )
       );
 
-    }
-  );
+    };
+
+    document.head.appendChild(script);
+
+  });
 
 }
 
@@ -942,57 +1049,91 @@ function escapeHtml(value){
 
 
 /* ==========================================================
-   IMAGE
+   RENDU D'UNE CARTE
 ========================================================== */
 
-function renderImage(image){
+function createUniformCard(item){
 
-  if(
-    !image ||
-    typeof image.src !== "string" ||
-    !image.src.trim()
-  ){
-
-    return `
-      <div class="image-slot">
-
-        <div class="image-placeholder">
-
-          Image non renseignée
-
-          <b>
-            Ajoutez le chemin dans data-tenues.js
-          </b>
-
-        </div>
-
-      </div>
-    `;
-
+  if(!item){
+    return "";
   }
 
-  const src =
-    image.src.trim();
+  const title =
+    item.title || "";
 
-  const label =
-    image.label ||
-    "Tenue CPD";
+  const badge =
+    item.badge || "";
+
+  const image =
+    item.image || "";
+
+  const caption =
+    item.caption || "";
 
   return `
 
-    <div class="image-slot">
+    <article class="uniform-card">
 
-      <img
-        src="${escapeHtml(src)}"
-        alt="${escapeHtml(label)}"
-        title="${escapeHtml(label)}"
-        loading="lazy"
-        decoding="async"
-        onclick="openLightbox(this)"
-        onerror="imageError(this)"
-      >
+      <div class="uniform-card-header">
 
-    </div>
+        <div class="uniform-card-title">
+          ${escapeHtml(title)}
+        </div>
+
+        ${
+          badge
+            ? `
+              <div class="uniform-card-badge">
+                ${escapeHtml(badge)}
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+
+      <div class="uniform-card-body">
+
+        ${
+          image
+            ? `
+              <img
+                class="uniform-image"
+                src="${escapeHtml(image)}"
+                alt="${escapeHtml(title)}"
+                loading="lazy"
+                decoding="async"
+                onclick="openLightbox(this)"
+                onerror="imageError(this)"
+              >
+            `
+            : `
+              <div class="notice" style="margin:0;">
+                <div class="notice-title">
+                  Image non renseignée
+                </div>
+
+                <p>
+                  Ajoutez le chemin de l'image dans
+                  <code>data-tenues.js</code>.
+                </p>
+              </div>
+            `
+        }
+
+        ${
+          caption
+            ? `
+              <div class="image-caption">
+                ${escapeHtml(caption)}
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+
+    </article>
 
   `;
 
@@ -1003,151 +1144,84 @@ function renderImage(image){
    RENDU
 ========================================================== */
 
-function renderOutfits(){
+function render(){
 
-  const container =
+  const reglementaires =
     document.getElementById(
-      "outfits"
+      "reglementaires"
     );
 
-  container.innerHTML = "";
-
-  outfits.forEach(
-    (outfit,index)=>{
-
-      const element =
-        document.createElement(
-          "section"
-        );
-
-      element.className =
-        "outfit";
-
-      const images =
-        Array.isArray(
-          outfit.images
-        )
-          ? outfit.images
-          : [];
-
-      element.innerHTML = `
-
-        <div class="outfit-header">
-
-          <div class="outfit-title">
-
-            ${escapeHtml(
-              outfit.title ||
-              `Tenue ${index + 1}`
-            )}
-
-          </div>
-
-          ${
-            outfit.description
-
-              ? `
-
-                <div class="outfit-subtitle">
-
-                  ${escapeHtml(
-                    outfit.description
-                  )}
-
-                </div>
-
-              `
-
-              : ""
-          }
-
-        </div>
+  const ceremonies =
+    document.getElementById(
+      "ceremonies"
+    );
 
 
-        <div class="outfit-body">
+  reglementaires.innerHTML = "";
 
-          <div class="image-grid">
+  ceremonies.innerHTML = "";
 
-            ${
-              images.length > 0
 
-                ? images
-                    .map(
-                      image =>
-                        renderImage(image)
-                    )
-                    .join("")
+  uniforms.forEach(item => {
 
-                : `
+    if(item.category === "reglementaire"){
 
-                  <div class="image-slot">
-
-                    <div class="image-placeholder">
-
-                      Aucune image renseignée
-
-                      <b>
-                        Modifiez data-tenues.js
-                      </b>
-
-                    </div>
-
-                  </div>
-
-                `
-            }
-
-          </div>
-
-        </div>
-
-      `;
-
-      container.appendChild(
-        element
-      );
+      reglementaires.innerHTML +=
+        createUniformCard(item);
 
     }
-  );
-
-}
 
 
-/* ==========================================================
-   ERREUR IMAGE
-========================================================== */
+    if(item.category === "ceremonie"){
 
-function imageError(img){
+      ceremonies.innerHTML +=
+        createUniformCard(item);
 
-  if(!img){
-    return;
+    }
+
+  });
+
+
+  if(!reglementaires.innerHTML){
+
+    reglementaires.innerHTML = `
+
+      <div class="notice">
+
+        <div class="notice-title">
+          Aucune tenue
+        </div>
+
+        <p>
+          Aucune tenue réglementaire n'est actuellement renseignée.
+        </p>
+
+      </div>
+
+    `;
+
   }
 
-  const slot =
-    img.closest(
-      ".image-slot"
-    );
 
-  if(!slot){
-    return;
+  if(!ceremonies.innerHTML){
+
+    ceremonies.innerHTML = `
+
+      <div class="notice">
+
+        <div class="notice-title">
+          Aucune tenue
+        </div>
+
+        <p>
+          Aucune tenue de cérémonie n'est actuellement renseignée.
+        </p>
+
+      </div>
+
+    `;
+
   }
-
-  img.style.display =
-    "none";
-
-  slot.innerHTML = `
-
-    <div class="image-placeholder">
-
-      ⚠ Image indisponible
-
-      <b>
-        Vérifiez le chemin de l'image
-      </b>
-
-    </div>
-
-  `;
 
 }
 
@@ -1158,13 +1232,8 @@ function imageError(img){
 
 function openLightbox(img){
 
-  if(
-    !img ||
-    !img.src
-  ){
-
+  if(!img || !img.src){
     return;
-
   }
 
   const lightbox =
@@ -1177,11 +1246,13 @@ function openLightbox(img){
       "lightboxImage"
     );
 
+
   lightboxImage.src =
     img.src;
 
   lightboxImage.alt =
     img.alt || "";
+
 
   lightbox.classList.add(
     "active"
@@ -1195,13 +1266,13 @@ function closeLightbox(event){
   if(
     event &&
     event.target &&
-    event.target.id ===
-      "lightboxImage"
+    event.target.id === "lightboxImage"
   ){
 
     return;
 
   }
+
 
   document
     .getElementById(
@@ -1218,9 +1289,7 @@ document.addEventListener(
   "keydown",
   function(event){
 
-    if(
-      event.key === "Escape"
-    ){
+    if(event.key === "Escape"){
 
       document
         .getElementById(
@@ -1237,6 +1306,57 @@ document.addEventListener(
 
 
 /* ==========================================================
+   ERREUR IMAGE
+========================================================== */
+
+function imageError(img){
+
+  if(!img){
+    return;
+  }
+
+  img.style.display = "none";
+
+  const container =
+    img.closest(
+      ".uniform-card-body"
+    );
+
+  if(!container){
+    return;
+  }
+
+  const notice =
+    document.createElement(
+      "div"
+    );
+
+  notice.className = "notice";
+
+  notice.style.margin = "0";
+
+  notice.innerHTML = `
+
+    <div class="notice-title">
+      Image indisponible
+    </div>
+
+    <p>
+      Vérifiez le chemin de l'image dans
+      <code>data-tenues.js</code>.
+    </p>
+
+  `;
+
+  container.insertBefore(
+    notice,
+    container.firstChild
+  );
+
+}
+
+
+/* ==========================================================
    HORLOGE
 ========================================================== */
 
@@ -1250,10 +1370,9 @@ function updateClock(){
       String(number)
         .padStart(2,"0");
 
+
   document
-    .getElementById(
-      "clock"
-    )
+    .getElementById("clock")
     .textContent =
 
       `${pad(date.getDate())}/` +
@@ -1263,6 +1382,7 @@ function updateClock(){
       `${pad(date.getMinutes())}`;
 
 }
+
 
 updateClock();
 
@@ -1278,67 +1398,43 @@ setInterval(
 
 loadData()
 
-  .then(
-    function(){
+  .then(function(){
 
-      console.log(
-        "CPD — Données tenues prêtes."
-      );
+    console.log(
+      "CPD — Données des tenues prêtes."
+    );
 
-      renderOutfits();
+    render();
 
-    }
-  )
+  })
 
-  .catch(
-    function(error){
+  .catch(function(error){
 
-      console.error(
-        "CPD — Erreur :",
-        error
-      );
+    console.error(
+      "CPD — Erreur :",
+      error
+    );
 
-      document.getElementById(
-        "outfits"
-      ).innerHTML = `
 
-        <div
-          style="
-            border-left:3px solid var(--red);
-            background:rgba(201,75,75,0.05);
-            padding:16px;
-          "
-        >
+    document.getElementById(
+      "reglementaires"
+    ).innerHTML = `
 
-          <div
-            style="
-              color:var(--red);
-              font-family:var(--font-display);
-              text-transform:uppercase;
-              letter-spacing:1px;
-              margin-bottom:6px;
-            "
-          >
-            Erreur de chargement
-          </div>
+      <div class="notice">
 
-          <div
-            style="
-              color:var(--text-dim);
-              font-size:11.5px;
-            "
-          >
-            ${escapeHtml(
-              error.message
-            )}
-          </div>
-
+        <div class="notice-title">
+          Erreur de chargement
         </div>
 
-      `;
+        <p>
+          ${escapeHtml(error.message)}
+        </p>
 
-    }
-  );
+      </div>
+
+    `;
+
+  });
 
 
 /* ==========================================================
@@ -1362,14 +1458,15 @@ document.addEventListener(
     const key =
       event.key.toUpperCase();
 
-    if(
-      key === "F12"
-    ){
+
+    if(key === "F12"){
 
       event.preventDefault();
+
       return;
 
     }
+
 
     if(
       (event.ctrlKey || event.metaKey) &&
@@ -1377,9 +1474,11 @@ document.addEventListener(
     ){
 
       event.preventDefault();
+
       return;
 
     }
+
 
     if(
       (event.ctrlKey || event.metaKey) &&
