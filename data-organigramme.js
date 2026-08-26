@@ -1,42 +1,76 @@
 /* ==========================================================
-   DONNÉES — Organisation complète CPD
-
-   Contient :
-   - Chaîne de commandement
-   - Détail des grades
-   - Divisions
-   - Unités
-
-   Ce fichier est chargé dynamiquement par
-   organigramme.html.
+   DONNÉES — CPD
+   Organigramme, Divisions, Unités & Grades
+   Chargé dynamiquement par organigramme.html
 ========================================================== */
-
 
 window.CPD_DATA = {
 
 
   /* ========================================================
-     CHAÎNE DE COMMANDEMENT
+     DIVISIONS & UNITÉS
   ======================================================== */
 
-  chainOfCommand:[
+  divisions:[
 
+
+    /* ======================================================
+       DETECTIVE BUREAU
+    ====================================================== */
 
     {
-      label:"Direction générale",
 
-      tier:"tier-exec",
+      tag:"DB",
 
-      ranks:[
+      name:"Detective Bureau",
+
+      leads:"78 & 39",
+
+      desc:
+        "Bureau chargé des enquêtes criminelles et du traitement des affaires majeures.",
+
+      units:[
 
         {
-          title:"Chief of Police",
-          sub:"Autorité suprême du département"
+          name:"Violent Crimes Unit",
+
+          desc:
+            "Homicides, agressions graves et crimes violents."
         },
 
         {
-          title:"Superintendent of Police",
-          sub:"Direction générale des opérations"
+          name:"Financial Crimes Unit",
+
+          desc:
+            "Fraudes, escroqueries, blanchiment et crimes financiers."
+        },
+
+        {
+          name:"Gang Unit",
+
+          desc:
+            "Enquêtes liées aux gangs et à la criminalité organisée."
+        },
+
+        {
+          name:"Narcotics Unit",
+
+          desc:
+            "Trafic de stupéfiants et réseaux de distribution."
+        },
+
+        {
+          name:"Major Case Unit",
+
+          desc:
+            "Affaires majeures nécessitant une enquête approfondie."
+        },
+
+        {
+          name:"Special Investigations Unit",
+
+          desc:
+            "Affaires sensibles et investigations spécialisées."
         }
 
       ]
@@ -44,26 +78,49 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       SWAT DIVISION
+    ====================================================== */
+
     {
-      label:"Commandement",
 
-      tier:"tier-command",
+      tag:"SWAT",
 
-      ranks:[
+      name:"SWAT Division",
+
+      leads:"12 & 47",
+
+      desc:
+        "Division tactique spécialisée dans les interventions à haut risque.",
+
+      units:[
 
         {
-          title:"Deputy Chief",
-          sub:"Second du Chief of Police"
+          name:"SWAT Tactical Unit",
+
+          desc:
+            "Interventions à haut risque, suspects barricadés et prises d'otages."
         },
 
         {
-          title:"Commander",
-          sub:"Supervise plusieurs Captains / bureaux"
+          name:"Hostage Rescue Team",
+
+          desc:
+            "Interventions spécialisées lors de prises d'otages."
         },
 
         {
-          title:"Captain",
-          sub:"Responsable d'une division ou d'un secteur"
+          name:"Tactical Negotiations",
+
+          desc:
+            "Gestion et négociation lors des situations de crise."
+        },
+
+        {
+          name:"K-9 Tactical Unit",
+
+          desc:
+            "Soutien cynophile lors des opérations tactiques."
         }
 
       ]
@@ -71,26 +128,28 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       TRAINING DIVISION
+    ====================================================== */
+
     {
-      label:"Supervision",
 
-      tier:"tier-super",
+      tag:"TRN",
 
-      ranks:[
+      name:"Training Division",
 
-        {
-          title:"Lieutenant",
-          sub:"Coordination des opérations de terrain"
-        },
+      leads:"20",
 
-        {
-          title:"Sergeant",
-          sub:"Supervision des équipes de patrouille"
-        },
+      desc:
+        "Division responsable de la formation et de l'évaluation des membres du département.",
+
+      units:[
 
         {
-          title:"SLO / FTO",
-          sub:"Senior Lead / Field Training Officer"
+          name:"Police Academy",
+
+          desc:
+            "Formation initiale des nouvelles recrues."
         }
 
       ]
@@ -98,31 +157,49 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       TRAFFIC DIVISION
+    ====================================================== */
+
     {
-      label:"Grades de base",
 
-      tier:"tier-base",
+      tag:"TRF",
 
-      ranks:[
+      name:"Traffic Division",
+
+      leads:"07",
+
+      desc:
+        "Division spécialisée dans la circulation, les infractions routières et les accidents.",
+
+      units:[
 
         {
-          title:"Officer 3",
-          sub:""
+          name:"ASD",
+
+          desc:
+            "Aviation Support Division — soutien aérien et interventions par hélicoptère."
         },
 
         {
-          title:"Officer 2",
-          sub:""
+          name:"Highway Patrol",
+
+          desc:
+            "Surveillance et intervention sur les axes routiers principaux."
         },
 
         {
-          title:"Officer 1",
-          sub:""
+          name:"Marine Unit",
+
+          desc:
+            "Patrouilles à moto, escortes et contrôle de la circulation."
         },
 
         {
-          title:"Rookie",
-          sub:"Grade d'entrée — sous formation"
+          name:"VIR",
+
+          desc:
+            "Véhicules rapides dédiés à l'interception et aux interventions mobiles."
         }
 
       ]
@@ -132,7 +209,6 @@ window.CPD_DATA = {
   ],
 
 
-
   /* ========================================================
      DÉTAIL DES GRADES
   ======================================================== */
@@ -140,7 +216,12 @@ window.CPD_DATA = {
   gradeDetails:[
 
 
+    /* ======================================================
+       01 — CHIEF
+    ====================================================== */
+
     {
+
       rank:"01",
 
       title:"Chief of Police",
@@ -168,7 +249,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       02 — SUPERINTENDENT
+    ====================================================== */
+
     {
+
       rank:"02",
 
       title:"Superintendent of Police",
@@ -196,7 +282,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       03 — DEPUTY CHIEF
+    ====================================================== */
+
     {
+
       rank:"03",
 
       title:"Deputy Chief",
@@ -224,7 +315,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       04 — COMMANDER
+    ====================================================== */
+
     {
+
       rank:"04",
 
       title:"Commander",
@@ -252,7 +348,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       05 — CAPTAIN
+    ====================================================== */
+
     {
+
       rank:"05",
 
       title:"Captain",
@@ -282,7 +383,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       06 — LIEUTENANT
+    ====================================================== */
+
     {
+
       rank:"06",
 
       title:"Lieutenant",
@@ -293,7 +399,7 @@ window.CPD_DATA = {
 
         "Supervise plusieurs Sergeants",
 
-        "Coordonne les opérations sur son secteur/service",
+        "Coordonne les opérations sur son secteur ou service",
 
         "Valide les demandes de renfort et d'autorisation"
 
@@ -314,7 +420,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       07 — SERGEANT
+    ====================================================== */
+
     {
+
       rank:"07",
 
       title:"Sergeant",
@@ -346,7 +457,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       08 — SLO / FTO
+    ====================================================== */
+
     {
+
       rank:"08",
 
       title:"SLO / FTO",
@@ -357,7 +473,9 @@ window.CPD_DATA = {
 
         "Encadre une équipe de patrouille",
 
-        "Forme les nouveaux membres (Field Training Officer)",
+        "Forme les nouveaux membres",
+
+        "Assure les fonctions de Field Training Officer",
 
         "Valide les rapports des grades inférieurs"
 
@@ -378,7 +496,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       09 — OFFICER 3
+    ====================================================== */
+
     {
+
       rank:"09",
 
       title:"Officer 3",
@@ -408,7 +531,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       10 — OFFICER 2
+    ====================================================== */
+
     {
+
       rank:"10",
 
       title:"Officer 2",
@@ -436,7 +564,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       11 — OFFICER 1
+    ====================================================== */
+
     {
+
       rank:"11",
 
       title:"Officer 1",
@@ -447,7 +580,9 @@ window.CPD_DATA = {
 
         "Patrouille en semi-autonomie",
 
-        "Applique les procédures standards (contrôle, arrestation)"
+        "Applique les procédures standards",
+
+        "Effectue les contrôles et arrestations conformément aux procédures"
 
       ],
 
@@ -464,7 +599,12 @@ window.CPD_DATA = {
     },
 
 
+    /* ======================================================
+       12 — ROOKIE
+    ====================================================== */
+
     {
+
       rank:"12",
 
       title:"Rookie",
@@ -473,7 +613,7 @@ window.CPD_DATA = {
 
       responsabilites:[
 
-        "Effectue des patrouilles encadrées par un Officer/SLO",
+        "Effectue des patrouilles encadrées par un Officer ou SLO",
 
         "Applique les procédures de base",
 
@@ -490,218 +630,6 @@ window.CPD_DATA = {
       ],
 
       tempsService:"—"
-
-    }
-
-  ],
-
-
-
-  /* ========================================================
-     DIVISIONS & UNITÉS
-  ======================================================== */
-
-  divisions:[
-
-
-    {
-      name:"Detective Bureau",
-
-      short:"DB",
-
-      lead:"78 & 39",
-
-      description:
-        "Bureau chargé des enquêtes criminelles et du traitement des affaires majeures.",
-
-      units:[
-
-        {
-          name:"Violent Crimes Unit",
-
-          desc:
-            "Homicides, agressions graves et crimes violents."
-
-        },
-
-
-        {
-          name:"Financial Crimes Unit",
-
-          desc:
-            "Fraudes, escroqueries, blanchiment et crimes financiers."
-
-        },
-
-
-        {
-          name:"Gang Unit",
-
-          desc:
-            "Enquêtes liées aux gangs et à la criminalité organisée."
-
-        },
-
-
-        {
-          name:"Narcotics Unit",
-
-          desc:
-            "Trafic de stupéfiants et réseaux de distribution."
-
-        },
-
-
-        {
-          name:"Major Case Unit",
-
-          desc:
-            "Affaires majeures nécessitant une enquête approfondie."
-
-        },
-
-
-        {
-          name:"Special Investigations Unit",
-
-          desc:
-            "Affaires sensibles et investigations spécialisées."
-
-        }
-
-      ]
-
-    },
-
-
-
-    {
-      name:"SWAT Division",
-
-      short:"SWAT",
-
-      lead:"12 & 47",
-
-      description:
-        "Division tactique spécialisée dans les interventions à haut risque.",
-
-      units:[
-
-        {
-          name:"SWAT Tactical Unit",
-
-          desc:
-            "Interventions à haut risque, suspects barricadés et prises d'otages."
-
-        },
-
-
-        {
-          name:"Hostage Rescue Team",
-
-          desc:
-            "Interventions spécialisées lors de prises d'otages."
-
-        },
-
-
-        {
-          name:"Tactical Negotiations",
-
-          desc:
-            "Gestion et négociation lors des situations de crise."
-
-        },
-
-
-        {
-          name:"K-9 Tactical Unit",
-
-          desc:
-            "Soutien cynophile lors des opérations tactiques."
-
-        }
-
-      ]
-
-    },
-
-
-
-    {
-      name:"Training Division",
-
-      short:"TRN",
-
-      lead:"20",
-
-      description:
-        "Division responsable de la formation et de l'évaluation des membres du département.",
-
-      units:[
-
-        {
-          name:"Police Academy",
-
-          desc:
-            "Formation initiale des nouvelles recrues."
-
-        }
-
-      ]
-
-    },
-
-
-
-    {
-      name:"Traffic Division",
-
-      short:"TRF",
-
-      lead:"07",
-
-      description:
-        "Division spécialisée dans la circulation, les infractions routières et les accidents.",
-
-      units:[
-
-        {
-          name:"ASD",
-
-          desc:
-            "Aviation Support Division — soutien aérien et interventions par hélicoptère."
-
-        },
-
-
-        {
-          name:"Highway Patrol",
-
-          desc:
-            "Surveillance et intervention sur les axes routiers principaux."
-
-        },
-
-
-        {
-          name:"Marine Unit",
-
-          desc:
-            "Patrouilles à moto, escortes et contrôle de la circulation."
-
-        },
-
-
-        {
-          name:"VIR",
-
-          desc:
-            "Véhicules rapides dédiés à l'interception et aux interventions mobiles."
-
-        }
-
-      ]
 
     }
 
