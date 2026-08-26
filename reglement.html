@@ -1,980 +1,1501 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CPD // Règlement intérieur</title>
-	<link rel="icon" type="image/png" href="Seal_of_the_Chicago_Police_Department.png">
-<style>
-  :root{
-    --bg:#0b0f14;
-    --bg-panel:#11161d;
-    --bg-panel-2:#151b23;
-    --bg-dark:#0c1015;
-    --line:#232b35;
-    --steel:#4a6fa5;
-    --steel-dim:#2c3d54;
-    --gold:#c9a227;
-    --gold-dim:#725d16;
-    --text:#dfe4e8;
-    --text-dim:#7c8894;
-    --amber:#e0a13a;
-    --red:#c94b4b;
-    --green:#4caf6f;
-    --font-display:'Oswald','Arial Narrow',sans-serif;
-    --font-mono:'IBM Plex Mono','Consolas',monospace;
-  }
-  *{
-    box-sizing:border-box;
-  }
-  html{
-    scroll-behavior:smooth;
-  }
-  html,body{
-    margin:0;
-    padding:0;
-  }
-  body{
-    background:
-      radial-gradient(circle at 15% 0%, rgba(74,111,165,0.10), transparent 40%),
-      radial-gradient(circle at 100% 100%, rgba(201,162,39,0.06), transparent 45%),
-      var(--bg);
-    color:var(--text);
-    font-family:var(--font-mono);
-    min-height:100vh;
-    padding-bottom:60px;
 
-    -webkit-user-select:none;
-    -moz-user-select:none;
-    -ms-user-select:none;
-    user-select:none;
-  }
-  .search-box, input, textarea{
-    -webkit-user-select:text;
-    -moz-user-select:text;
-    -ms-user-select:text;
-    user-select:text;
-  }
-  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-  /* =========================
-     HEADER
-  ========================= */
-  header{
-    position:relative;
-    border-bottom:1px solid var(--line);
-    padding:28px 32px 22px;
-    overflow:hidden;
-    background:linear-gradient(
-      180deg,
-      rgba(74,111,165,0.06),
-      transparent
-    );
-  }
-  header::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background-image:
-      repeating-linear-gradient(
-        0deg,
-        rgba(255,255,255,0.015) 0px,
-        rgba(255,255,255,0.015) 1px,
-        transparent 1px,
-        transparent 3px
-      );
-    pointer-events:none;
-  }
-  .header-inner{
-    position:relative;
-    max-width:1100px;
-    margin:0 auto;
-  }
-  .badge-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:20px;
-    flex-wrap:wrap;
-  }
-  .badge-left{
-    display:flex;
-    align-items:center;
-    gap:18px;
-  }
-  .star{
-    width:60px;
-    height:60px;
-    flex:0 0 auto;
-  }
-  .brand-title{
-    font-family:var(--font-display);
-    font-size:25px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    font-weight:600;
-    color:var(--text);
-    line-height:1.1;
-  }
-  .brand-sub{
-    font-size:11px;
-    letter-spacing:3px;
-    color:var(--steel);
-    text-transform:uppercase;
-    margin-top:4px;
-  }
-  .header-actions{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-  }
-  .header-link{
-    font-family:var(--font-mono);
-    font-size:11.5px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    padding:10px 16px;
-    border:1px solid var(--steel);
-    background:transparent;
-    color:var(--steel);
-    text-decoration:none;
-    white-space:nowrap;
-    transition:all .15s;
-    cursor:pointer;
-  }
-  .header-link:hover{
-    background:var(--steel);
-    color:#0b0f14;
-  }
-  .header-link.gold{
-    border-color:var(--gold);
-    color:var(--gold);
-  }
-  .header-link.gold:hover{
-    background:var(--gold);
-    color:#0b0f14;
-  }
-  .header-link.current{
-    background:var(--gold);
-    color:#0b0f14;
-    border-color:var(--gold);
-    pointer-events:none;
-    font-weight:600;
-  }
-  .status-line{
-    margin-top:16px;
-    font-size:11px;
-    color:var(--text-dim);
-    letter-spacing:1px;
-    display:flex;
-    gap:22px;
-    flex-wrap:wrap;
-  }
-  .status-line span b{
-    color:var(--amber);
-    font-weight:600;
-  }
-  .dot{
-    width:6px;
-    height:6px;
-    border-radius:50%;
-    background:var(--green);
-    display:inline-block;
-    margin-right:6px;
-    box-shadow:0 0 6px var(--green);
-  }
-  /* =========================
-     SEARCH
-  ========================= */
-  .search-container{
-    position:relative;
-    max-width:1100px;
-    margin:24px auto 0;
-    padding:0 32px;
-  }
-  .search-box{
-    width:100%;
-    background:var(--bg-dark);
-    border:1px solid var(--steel-dim);
-    color:var(--text);
-    padding:15px 18px;
-    font-family:var(--font-mono);
-    font-size:13px;
-    outline:none;
-    transition:border-color .15s;
-  }
-  .search-box:focus{
-    border-color:var(--gold);
-  }
-  .search-box::placeholder{
-    color:var(--text-dim);
-  }
-  /* =========================
-     NAVIGATION
-  ========================= */
-  nav{
-    max-width:1100px;
-    margin:22px auto 0;
-    padding:0 32px;
-    display:flex;
-    gap:2px;
-    flex-wrap:wrap;
-  }
-  nav button{
-    font-family:var(--font-display);
-    background:var(--bg-panel);
-    border:1px solid var(--line);
-    color:var(--text-dim);
-    padding:12px 17px;
-    font-size:12px;
-    letter-spacing:1.2px;
-    text-transform:uppercase;
-    cursor:pointer;
-    transition:all .15s;
-  }
-  nav button:hover{
-    color:var(--text);
-    border-color:var(--steel-dim);
-  }
-  nav button.active{
-    color:var(--gold);
-    background:var(--bg-panel-2);
-    border-color:var(--steel-dim);
-  }
-  /* =========================
-     MAIN
-  ========================= */
-  main{
-    max-width:1100px;
-    margin:0 auto;
-    padding:0 32px;
-  }
-  .panel{
-    background:var(--bg-panel-2);
-    border:1px solid var(--steel-dim);
-    border-top:2px solid var(--gold);
-    margin-top:0;
-  }
-  .panel-head{
-    padding:28px;
-    border-bottom:1px solid var(--line);
-  }
-  .panel-title{
-    font-family:var(--font-display);
-    font-size:22px;
-    letter-spacing:1.5px;
-    text-transform:uppercase;
-    color:var(--text);
-  }
-  .panel-desc{
-    font-size:12px;
-    color:var(--text-dim);
-    margin-top:7px;
-    line-height:1.6;
-  }
-  .article-count{
-    margin-top:12px;
-    font-size:10px;
-    color:var(--amber);
-    letter-spacing:1px;
-  }
-  /* =========================
-     ARTICLES
-  ========================= */
-  .articles{
-    padding:12px 28px 28px;
-  }
-  .article{
-    border:1px solid var(--line);
-    background:var(--bg-dark);
-    margin-top:14px;
-  }
-  .article-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    padding:15px 18px;
-    border-bottom:1px solid var(--line);
-    background:rgba(74,111,165,0.04);
-  }
-  .article-number{
-    color:var(--gold);
-    font-size:11px;
-    letter-spacing:1px;
-    min-width:55px;
-  }
-  .article-title{
-    flex:1;
-    font-family:var(--font-display);
-    font-size:15px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:var(--text);
-  }
-  .severity{
-    font-size:9px;
-    letter-spacing:1px;
-    padding:5px 8px;
-    border:1px solid;
-    white-space:nowrap;
-  }
-  .severity.info{
-    color:var(--steel);
-    border-color:var(--steel);
-  }
-  .severity.warning{
-    color:var(--amber);
-    border-color:var(--amber);
-  }
-  .severity.critical{
-    color:var(--red);
-    border-color:var(--red);
-  }
-  .article-body{
-    padding:18px;
-    font-size:12px;
-    line-height:1.75;
-    color:var(--text);
-  }
-  .article-body p{
-    margin:0 0 12px;
-  }
-  .article-body p:last-child{
-    margin-bottom:0;
-  }
-  .article-body ul{
-    margin:8px 0 12px 20px;
-    padding:0;
-  }
-  .article-body li{
-    margin:5px 0;
-  }
-  .article-body strong{
-    color:var(--amber);
-    font-weight:600;
-  }
-  .article-body .highlight{
-    color:var(--gold);
-  }
-  .article-body .danger{
-    color:var(--red);
-  }
-  .article-body .good{
-    color:var(--green);
-  }
-  .article-body code{
-    color:var(--amber);
-    background:rgba(224,161,58,0.08);
-    padding:2px 5px;
-  }
-  /* =========================
-     SPECIAL BOXES
-  ========================= */
-  .notice{
-    border-left:3px solid var(--gold);
-    background:rgba(201,162,39,0.05);
-    padding:14px 16px;
-    margin:15px 0;
-  }
-  .notice.blue{
-    border-left-color:var(--steel);
-    background:rgba(74,111,165,0.05);
-  }
-  .notice.red{
-    border-left-color:var(--red);
-    background:rgba(201,75,75,0.05);
-  }
-  .notice.green{
-    border-left-color:var(--green);
-    background:rgba(76,175,111,0.05);
-  }
-  .notice-title{
-    color:var(--gold);
-    font-family:var(--font-display);
-    letter-spacing:1px;
-    text-transform:uppercase;
-    font-size:12px;
-    margin-bottom:5px;
-  }
-  .notice.blue .notice-title{
-    color:var(--steel);
-  }
-  .notice.red .notice-title{
-    color:var(--red);
-  }
-  .notice.green .notice-title{
-    color:var(--green);
-  }
-  /* =========================
-     TABLE
-  ========================= */
-  .rules-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:12px;
-    font-size:11px;
-  }
-  .rules-table th,
-  .rules-table td{
-    border:1px solid var(--line);
-    padding:10px;
-    text-align:left;
-  }
-  .rules-table th{
-    color:var(--gold);
-    font-family:var(--font-display);
-    text-transform:uppercase;
-    letter-spacing:1px;
-    background:rgba(74,111,165,0.05);
-  }
-  .rules-table td{
-    color:var(--text);
-  }
-  /* =========================
-     FOOTER
-  ========================= */
+<title>CPD // Règlement intérieur</title>
+
+<link
+  rel="icon"
+  type="image/png"
+  href="Seal_of_the_Chicago_Police_Department.png"
+>
+
+<link rel="stylesheet" href="nav.css">
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+
+:root{
+
+  --bg:#0b0f14;
+  --bg-panel:#11161d;
+  --bg-panel-2:#151b23;
+  --bg-dark:#0c1015;
+
+  --line:#232b35;
+
+  --steel:#4a6fa5;
+  --steel-dim:#2c3d54;
+
+  --gold:#c9a227;
+  --gold-dim:#725d16;
+
+  --text:#dfe4e8;
+  --text-dim:#7c8894;
+
+  --amber:#e0a13a;
+  --red:#c94b4b;
+  --green:#4caf6f;
+
+  --font-display:'Oswald','Arial Narrow',sans-serif;
+  --font-mono:'IBM Plex Mono','Consolas',monospace;
+
+}
+
+
+*{
+  box-sizing:border-box;
+}
+
+
+html{
+  scroll-behavior:smooth;
+}
+
+
+html,
+body{
+  margin:0;
+  padding:0;
+}
+
+
+body{
+
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(74,111,165,0.10),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(201,162,39,0.06),
+      transparent 45%
+    ),
+    var(--bg);
+
+  color:var(--text);
+
+  font-family:var(--font-mono);
+
+  min-height:100vh;
+
+  padding-bottom:60px;
+
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+
+}
+
+
+.search-box,
+input,
+textarea{
+
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
+  user-select:text;
+
+}
+
+
+/* ==========================================================
+   SEARCH
+========================================================== */
+
+.search-container{
+
+  position:relative;
+
+  max-width:1100px;
+
+  margin:24px auto 0;
+
+  padding:0 32px;
+
+}
+
+
+.search-box{
+
+  width:100%;
+
+  background:var(--bg-dark);
+
+  border:1px solid var(--steel-dim);
+
+  color:var(--text);
+
+  padding:15px 18px;
+
+  font-family:var(--font-mono);
+
+  font-size:13px;
+
+  outline:none;
+
+  transition:border-color .15s;
+
+}
+
+
+.search-box:focus{
+
+  border-color:var(--gold);
+
+}
+
+
+.search-box::placeholder{
+
+  color:var(--text-dim);
+
+}
+
+
+/* ==========================================================
+   NAVIGATION DES CATÉGORIES
+========================================================== */
+
+nav{
+
+  max-width:1100px;
+
+  margin:22px auto 0;
+
+  padding:0 32px;
+
+  display:flex;
+
+  gap:2px;
+
+  flex-wrap:wrap;
+
+}
+
+
+nav button{
+
+  font-family:var(--font-display);
+
+  background:var(--bg-panel);
+
+  border:1px solid var(--line);
+
+  color:var(--text-dim);
+
+  padding:12px 17px;
+
+  font-size:12px;
+
+  letter-spacing:1.2px;
+
+  text-transform:uppercase;
+
+  cursor:pointer;
+
+  transition:all .15s;
+
+}
+
+
+nav button:hover{
+
+  color:var(--text);
+
+  border-color:var(--steel-dim);
+
+}
+
+
+nav button.active{
+
+  color:var(--gold);
+
+  background:var(--bg-panel-2);
+
+  border-color:var(--steel-dim);
+
+}
+
+
+/* ==========================================================
+   MAIN
+========================================================== */
+
+main{
+
+  max-width:1100px;
+
+  margin:0 auto;
+
+  padding:0 32px;
+
+}
+
+
+/* ==========================================================
+   PANEL
+========================================================== */
+
+.panel{
+
+  background:var(--bg-panel-2);
+
+  border:1px solid var(--steel-dim);
+
+  border-top:2px solid var(--gold);
+
+  margin-top:0;
+
+}
+
+
+.panel-head{
+
+  padding:28px;
+
+  border-bottom:1px solid var(--line);
+
+}
+
+
+.panel-title{
+
+  font-family:var(--font-display);
+
+  font-size:22px;
+
+  letter-spacing:1.5px;
+
+  text-transform:uppercase;
+
+  color:var(--text);
+
+}
+
+
+.panel-desc{
+
+  font-size:12px;
+
+  color:var(--text-dim);
+
+  margin-top:7px;
+
+  line-height:1.6;
+
+}
+
+
+.article-count{
+
+  margin-top:12px;
+
+  font-size:10px;
+
+  color:var(--amber);
+
+  letter-spacing:1px;
+
+}
+
+
+/* ==========================================================
+   ARTICLES
+========================================================== */
+
+.articles{
+
+  padding:12px 28px 28px;
+
+}
+
+
+.article{
+
+  border:1px solid var(--line);
+
+  background:var(--bg-dark);
+
+  margin-top:14px;
+
+}
+
+
+.article-header{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  gap:15px;
+
+  padding:15px 18px;
+
+  border-bottom:1px solid var(--line);
+
+  background:rgba(74,111,165,0.04);
+
+}
+
+
+.article-number{
+
+  color:var(--gold);
+
+  font-size:11px;
+
+  letter-spacing:1px;
+
+  min-width:55px;
+
+}
+
+
+.article-title{
+
+  flex:1;
+
+  font-family:var(--font-display);
+
+  font-size:15px;
+
+  letter-spacing:1px;
+
+  text-transform:uppercase;
+
+  color:var(--text);
+
+}
+
+
+.severity{
+
+  font-size:9px;
+
+  letter-spacing:1px;
+
+  padding:5px 8px;
+
+  border:1px solid;
+
+  white-space:nowrap;
+
+}
+
+
+.severity.info{
+
+  color:var(--steel);
+
+  border-color:var(--steel);
+
+}
+
+
+.severity.warning{
+
+  color:var(--amber);
+
+  border-color:var(--amber);
+
+}
+
+
+.severity.critical{
+
+  color:var(--red);
+
+  border-color:var(--red);
+
+}
+
+
+.article-body{
+
+  padding:18px;
+
+  font-size:12px;
+
+  line-height:1.75;
+
+  color:var(--text);
+
+}
+
+
+.article-body p{
+
+  margin:0 0 12px;
+
+}
+
+
+.article-body p:last-child{
+
+  margin-bottom:0;
+
+}
+
+
+.article-body ul{
+
+  margin:8px 0 12px 20px;
+
+  padding:0;
+
+}
+
+
+.article-body li{
+
+  margin:5px 0;
+
+}
+
+
+.article-body strong{
+
+  color:var(--amber);
+
+  font-weight:600;
+
+}
+
+
+.article-body .highlight{
+
+  color:var(--gold);
+
+}
+
+
+.article-body .danger{
+
+  color:var(--red);
+
+}
+
+
+.article-body .good{
+
+  color:var(--green);
+
+}
+
+
+.article-body code{
+
+  color:var(--amber);
+
+  background:rgba(224,161,58,0.08);
+
+  padding:2px 5px;
+
+}
+
+
+/* ==========================================================
+   SPECIAL BOXES
+========================================================== */
+
+.notice{
+
+  border-left:3px solid var(--gold);
+
+  background:rgba(201,162,39,0.05);
+
+  padding:14px 16px;
+
+  margin:15px 0;
+
+}
+
+
+.notice.blue{
+
+  border-left-color:var(--steel);
+
+  background:rgba(74,111,165,0.05);
+
+}
+
+
+.notice.red{
+
+  border-left-color:var(--red);
+
+  background:rgba(201,75,75,0.05);
+
+}
+
+
+.notice.green{
+
+  border-left-color:var(--green);
+
+  background:rgba(76,175,111,0.05);
+
+}
+
+
+.notice-title{
+
+  color:var(--gold);
+
+  font-family:var(--font-display);
+
+  letter-spacing:1px;
+
+  text-transform:uppercase;
+
+  font-size:12px;
+
+  margin-bottom:5px;
+
+}
+
+
+.notice.blue .notice-title{
+
+  color:var(--steel);
+
+}
+
+
+.notice.red .notice-title{
+
+  color:var(--red);
+
+}
+
+
+.notice.green .notice-title{
+
+  color:var(--green);
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.rules-table{
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  margin-top:12px;
+
+  font-size:11px;
+
+}
+
+
+.rules-table th,
+.rules-table td{
+
+  border:1px solid var(--line);
+
+  padding:10px;
+
+  text-align:left;
+
+}
+
+
+.rules-table th{
+
+  color:var(--gold);
+
+  font-family:var(--font-display);
+
+  text-transform:uppercase;
+
+  letter-spacing:1px;
+
+  background:rgba(74,111,165,0.05);
+
+}
+
+
+.rules-table td{
+
+  color:var(--text);
+
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+footer{
+
+  max-width:1100px;
+
+  margin:0 auto;
+
+  padding:20px 32px 0;
+
+  font-size:10.5px;
+
+  color:var(--text-dim);
+
+  letter-spacing:1px;
+
+  text-align:center;
+
+}
+
+
+/* ==========================================================
+   PRINT
+========================================================== */
+
+@media print{
+
+  body{
+
+    background:white;
+
+    color:black;
+
+  }
+
+
+  #site-header,
+  nav,
+  .search-container,
   footer{
-    max-width:1100px;
-    margin:0 auto;
-    padding:20px 32px 0;
-    font-size:10.5px;
-    color:var(--text-dim);
-    letter-spacing:1px;
+
+    display:none;
+
+  }
+
+
+  main{
+
+    max-width:none;
+
+    padding:0;
+
+  }
+
+
+  .panel{
+
+    border:none;
+
+  }
+
+
+  .article{
+
+    break-inside:avoid;
+
+    background:white;
+
+    border:1px solid #999;
+
+  }
+
+
+  .article-body{
+
+    color:black;
+
+  }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media(max-width:700px){
+
+  main{
+
+    padding:0 16px;
+
+  }
+
+
+  nav{
+
+    padding:0 16px;
+
+  }
+
+
+  .search-container{
+
+    padding:0 16px;
+
+  }
+
+
+  .panel-head{
+
+    padding:20px;
+
+  }
+
+
+  .articles{
+
+    padding:10px 15px 20px;
+
+  }
+
+
+  .article-header{
+
+    align-items:flex-start;
+
+    flex-wrap:wrap;
+
+  }
+
+
+  .article-number{
+
+    min-width:auto;
+
+  }
+
+
+  .severity{
+
+    order:3;
+
+    width:100%;
+
     text-align:center;
+
   }
-  /* =========================
-     PRINT
-  ========================= */
-  @media print{
-    body{
-      background:white;
-      color:black;
-    }
-    header,
-    nav,
-    .search-container,
-    footer{
-      display:none;
-    }
-    main{
-      max-width:none;
-      padding:0;
-    }
-    .panel{
-      border:none;
-    }
-    .article{
-      break-inside:avoid;
-      background:white;
-      border:1px solid #999;
-    }
-    .article-body{
-      color:black;
-    }
+
+
+  .article-body{
+
+    font-size:11.5px;
+
   }
-  /* =========================
-     MOBILE
-  ========================= */
-  @media(max-width:700px){
-    header{
-      padding:20px;
-    }
-    main{
-      padding:0 16px;
-    }
-    nav{
-      padding:0 16px;
-    }
-    .search-container{
-      padding:0 16px;
-    }
-    .brand-title{
-      font-size:19px;
-    }
-    .brand-sub{
-      font-size:9px;
-      letter-spacing:2px;
-    }
-    .header-actions{
-      width:100%;
-    }
-    .header-link{
-      flex:1;
-      text-align:center;
-    }
-    .panel-head{
-      padding:20px;
-    }
-    .articles{
-      padding:10px 15px 20px;
-    }
-    .article-header{
-      align-items:flex-start;
-      flex-wrap:wrap;
-    }
-    .article-number{
-      min-width:auto;
-    }
-    .severity{
-      order:3;
-      width:100%;
-      text-align:center;
-    }
-    .article-body{
-      font-size:11.5px;
-    }
-    .rules-table{
-      display:block;
-      overflow-x:auto;
-      white-space:nowrap;
-    }
+
+
+  .rules-table{
+
+    display:block;
+
+    overflow-x:auto;
+
+    white-space:nowrap;
+
   }
+
+}
+
 </style>
+
 </head>
+
+
 <body>
-<header>
-  <div class="header-inner">
-    <div class="badge-row">
-      <div class="badge-left">
-        <svg class="star" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <path id="arc-top"
-                  d="M 34 100 A 66 66 0 0 1 166 100"/>
-            <path id="arc-bottom"
-                  d="M 47 128 A 60 60 0 0 0 153 128"/>
-            <path id="mini-star"
-                  d="M0,-7 L1.76,-2.43 L6.66,-2.16 L2.85,0.93 L4.12,5.66 L0,3 L-4.12,5.66 L-2.85,0.93 L-6.66,-2.16 L-1.76,-2.43 Z"/>
-          </defs>
-          <path
-            d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
-            fill="none"
-            stroke="var(--gold)"
-            stroke-width="2.5"
-            stroke-linejoin="round"/>
-          <circle
-            cx="100"
-            cy="100"
-            r="78"
-            fill="#151b23"
-            stroke="var(--gold)"
-            stroke-width="2"/>
-          <circle
-            cx="100"
-            cy="100"
-            r="74"
-            fill="none"
-            stroke="var(--gold)"
-            stroke-width="1"/>
-          <circle
-            cx="100"
-            cy="100"
-            r="55"
-            fill="#0c1015"
-            stroke="var(--gold)"
-            stroke-width="1.5"/>
-          <text
-            font-family="Oswald, sans-serif"
-            font-size="16"
-            font-weight="700"
-            letter-spacing="2"
-            fill="var(--gold)">
-            <textPath
-              href="#arc-top"
-              startOffset="50%"
-              text-anchor="middle">
-              CHICAGO
-            </textPath>
-          </text>
-          <text
-            font-family="Oswald, sans-serif"
-            font-size="16"
-            font-weight="700"
-            letter-spacing="2"
-            fill="var(--gold)">
-            <textPath
-              href="#arc-bottom"
-              startOffset="50%"
-              text-anchor="middle">
-              POLICE
-            </textPath>
-          </text>
-          <use
-            href="#mini-star"
-            transform="translate(27,100) scale(1.1)"
-            fill="var(--gold)"/>
-          <use
-            href="#mini-star"
-            transform="translate(173,100) scale(1.1)"
-            fill="var(--gold)"/>
-          <use
-            href="#mini-star"
-            transform="translate(100,88) scale(2.4)"
-            fill="var(--gold)"
-            opacity="0.9"/>
-          <rect
-            x="64"
-            y="116"
-            width="72"
-            height="17"
-            rx="2"
-            fill="var(--gold)"/>
-          <text
-            x="100"
-            y="128"
-            font-family="Oswald, sans-serif"
-            font-size="9.5"
-            font-weight="700"
-            letter-spacing="0.5"
-            text-anchor="middle"
-            fill="#0c1015">
-            URBS IN HORTO
-          </text>
-        </svg>
-        <div>
-          <div class="brand-title">
-            Chicago Police Department
-          </div>
-          <div class="brand-sub">
-            Règlement intérieur — Manuel opérationnel
-          </div>
-        </div>
-      </div>
-      <div class="header-actions">
-       
-         <a
-          class="header-link"
-          href="index.html">
-          🗂 Procédures
-        </a>
-        <a
-          class="header-link"
-          href="code.html">
-          📻 Guide radio
-        </a>
-        <a
-          class="header-link current"
-          href="reglement.html">
-          ⚖ Règlement
-        </a>
-        <a
-          class="header-link"
-          href="tenues-vehicules.html">
-          🎽 Tenues & Véhicules
-        </a>
-		
-        <a
-          class="header-link"
-          href="organigramme.html">
-          🧭 Organigramme
-        </a>		
-		
-        <a
-          class="header-link"
-          href="divisions.html">
-          🏛 Divisions
-        </a>
-		
-        <a
-          class="header-link gold"
-          href="https://guidejuridiquesp.netlify.app/"
-          target="_blank"
-          rel="noopener">
-          📖 Guide juridique ↗
-        </a>
-      </div>
-    </div>
-    <div class="status-line">
-      <span>
-        <span class="dot"></span>
-        Système opérationnel
-      </span>
-      <span>
-        DOCUMENT :
-        <b>CPD-REG-001</b>
-      </span>
-      <span>
-        VERSION :
-        <b>1.0</b>
-      </span>
-      <span id="clock">
-        --/--/---- --:--
-      </span>
-    </div>
-  </div>
-</header>
+
+
+<!-- ==========================================================
+     HEADER CENTRALISÉ
+========================================================== -->
+
+<div id="site-header"></div>
+
+
+<!-- ==========================================================
+     RECHERCHE
+========================================================== -->
+
 <div class="search-container">
+
   <input
     type="text"
     id="search"
     class="search-box"
     placeholder="⌕ Rechercher dans le règlement : arrestation, radio, arme, véhicule, sanction..."
-    autocomplete="off">
+    autocomplete="off"
+  >
+
 </div>
+
+
+<!-- ==========================================================
+     CATÉGORIES
+========================================================== -->
+
 <nav id="categories"></nav>
+
+
+<!-- ==========================================================
+     MAIN
+========================================================== -->
+
 <main>
+
   <div class="panel">
+
     <div class="panel-head">
-      <div class="panel-title" id="panel-title">
+
+      <div
+        class="panel-title"
+        id="panel-title"
+      >
         Dispositions générales
       </div>
-      <div class="panel-desc" id="panel-desc">
+
+
+      <div
+        class="panel-desc"
+        id="panel-desc"
+      >
         Principes fondamentaux applicables à l'ensemble des membres du Chicago Police Department.
       </div>
-      <div class="article-count" id="article-count">
+
+
+      <div
+        class="article-count"
+        id="article-count"
+      >
         00 ARTICLES
       </div>
+
     </div>
-    <div class="articles" id="articles"></div>
+
+
+    <div
+      class="articles"
+      id="articles"
+    ></div>
+
   </div>
+
 </main>
+
+
+<!-- ==========================================================
+     FOOTER
+========================================================== -->
+
 <footer>
-  CPD INTERNAL SYSTEM — RÈGLEMENT INTÉRIEUR — USAGE INTERNE UNIQUEMENT — NE PAS DIFFUSER
+
+  CPD INTERNAL SYSTEM —
+  RÈGLEMENT INTÉRIEUR —
+  USAGE INTERNE UNIQUEMENT —
+  NE PAS DIFFUSER
+
 </footer>
+
+
+<!-- ==========================================================
+     CONFIGURATION DE LA PAGE
+========================================================== -->
+
 <script>
+
+const PAGE_CONFIG = {
+
+  subtitle:"Règlement intérieur — Manuel opérationnel",
+
+  currentPage:"reglement.html",
+
+  docCode:"CPD-REG-001",
+
+  version:"1.0"
+
+};
+
+</script>
+
+
+<!-- ==========================================================
+     NAVIGATION CENTRALISÉE
+========================================================== -->
+
+<script src="nav.js"></script>
+
+
+<!-- ==========================================================
+     JAVASCRIPT DE LA PAGE
+========================================================== -->
+
+<script>
+
+
 /* ==========================================================
    DONNÉES DU RÈGLEMENT
-   Chargées dynamiquement depuis data-reglement.js (voir loadData).
-   Ne sont plus écrites en dur ici : Ctrl+U sur reglement.html
-   ne montre plus le contenu des articles.
+
+   Chargées dynamiquement depuis data-reglement.js.
 ========================================================== */
+
 let categories = [];
+
+
 /* ==========================================================
    VARIABLES
 ========================================================== */
+
 let currentCategory = "general";
+
+
 /* ==========================================================
    CHARGEMENT DES DONNÉES
 ========================================================== */
+
 async function loadData(){
+
   try{
 
-    const response = await fetch("data-reglement.js?_=" + Date.now());
-    const text = await response.text();
+    const response =
+      await fetch(
+        "data-reglement.js?_=" +
+        Date.now()
+      );
 
-    const script = document.createElement("script");
-    script.textContent = text;
-    document.head.appendChild(script);
 
-    categories = window.CPD_DATA || [];
+    if(!response.ok){
+
+      throw new Error(
+        "Impossible de charger data-reglement.js"
+      );
+
+    }
+
+
+    const text =
+      await response.text();
+
+
+    const script =
+      document.createElement("script");
+
+
+    script.textContent =
+      text;
+
+
+    document.head.appendChild(
+      script
+    );
+
+
+    categories =
+      window.CPD_DATA || [];
+
 
     render();
 
-  }catch(err){
+  }
 
-    document.getElementById("articles").innerHTML = `
+  catch(err){
+
+    console.error(
+      "Erreur chargement données :",
+      err
+    );
+
+
+    document.getElementById(
+      "articles"
+    ).innerHTML = `
 
       <div class="notice">
-        <div class="notice-title">Erreur de chargement</div>
-        Impossible de charger les données (data-reglement.js).
-        Vérifiez que le site est bien hébergé en ligne (http/https)
+
+        <div class="notice-title">
+          Erreur de chargement
+        </div>
+
+        Impossible de charger les données
+        (data-reglement.js).
+
+        Vérifiez que le site est bien hébergé
+        en ligne (http/https)
         et non ouvert en local.
+
       </div>
 
     `;
 
   }
+
 }
+
+
 /* ==========================================================
-   NAVIGATION
+   NAVIGATION DES CATÉGORIES
 ========================================================== */
+
 function renderCategories(){
-  const nav = document.getElementById("categories");
+
+  const nav =
+    document.getElementById(
+      "categories"
+    );
+
+
   nav.innerHTML = "";
-  categories.forEach(category => {
-    const button = document.createElement("button");
-    button.textContent = category.label;
-    if(category.id === currentCategory){
-      button.classList.add("active");
+
+
+  categories.forEach(
+    category => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+
+      button.textContent =
+        category.label;
+
+
+      if(
+        category.id ===
+        currentCategory
+      ){
+
+        button.classList.add(
+          "active"
+        );
+
+      }
+
+
+      button.onclick = () => {
+
+        currentCategory =
+          category.id;
+
+
+        document.getElementById(
+          "search"
+        ).value = "";
+
+
+        render();
+
+
+        window.scrollTo({
+
+          top:
+            document.querySelector(
+              "nav"
+            ).offsetTop - 10,
+
+          behavior:"smooth"
+
+        });
+
+      };
+
+
+      nav.appendChild(
+        button
+      );
+
     }
-    button.onclick = () => {
-      currentCategory = category.id;
-      document.getElementById("search").value = "";
-      render();
-      window.scrollTo({
-        top:document.querySelector("nav").offsetTop - 10,
-        behavior:"smooth"
-      });
-    };
-    nav.appendChild(button);
-  });
+  );
+
 }
+
+
 /* ==========================================================
    AFFICHAGE
 ========================================================== */
+
 function render(){
+
   const category =
-    categories.find(c => c.id === currentCategory);
+    categories.find(
+      c =>
+        c.id ===
+        currentCategory
+    );
+
+
   if(!category){
+
     return;
+
   }
-  document.getElementById("panel-title").textContent =
+
+
+  document.getElementById(
+    "panel-title"
+  ).textContent =
     category.label;
-  document.getElementById("panel-desc").textContent =
+
+
+  document.getElementById(
+    "panel-desc"
+  ).textContent =
     category.desc;
-  document.getElementById("article-count").textContent =
-    `${String(category.articles.length).padStart(2,"0")} ARTICLES`;
-  renderArticles(category.articles);
+
+
+  document.getElementById(
+    "article-count"
+  ).textContent =
+    `${String(
+      category.articles.length
+    ).padStart(2,"0")} ARTICLES`;
+
+
+  renderArticles(
+    category.articles
+  );
+
+
   renderCategories();
+
 }
+
+
 /* ==========================================================
    ARTICLES
 ========================================================== */
-function renderArticles(articles){
+
+function renderArticles(
+  articles
+){
+
   const container =
-    document.getElementById("articles");
+    document.getElementById(
+      "articles"
+    );
+
+
   container.innerHTML = "";
-  if(articles.length === 0){
+
+
+  if(
+    articles.length === 0
+  ){
+
     container.innerHTML = `
+
       <div class="notice">
+
         <div class="notice-title">
           Aucun résultat
         </div>
-        Aucun article ne correspond à votre recherche.
+
+        Aucun article ne correspond
+        à votre recherche.
+
       </div>
+
     `;
+
     return;
+
   }
-  articles.forEach(article => {
-    const element =
-      document.createElement("article");
-    element.className = "article";
-    element.innerHTML = `
-      <div class="article-header">
-        <div class="article-number">
-          ART. ${article.number}
+
+
+  articles.forEach(
+    article => {
+
+      const element =
+        document.createElement(
+          "article"
+        );
+
+
+      element.className =
+        "article";
+
+
+      element.innerHTML = `
+
+        <div class="article-header">
+
+          <div class="article-number">
+
+            ART. ${article.number}
+
+          </div>
+
+
+          <div class="article-title">
+
+            ${article.title}
+
+          </div>
+
+
+          <div
+            class="severity ${article.severity}"
+          >
+
+            ${getSeverityLabel(
+              article.severity
+            )}
+
+          </div>
+
         </div>
-        <div class="article-title">
-          ${article.title}
+
+
+        <div class="article-body">
+
+          ${article.body}
+
         </div>
-        <div class="severity ${article.severity}">
-          ${getSeverityLabel(article.severity)}
-        </div>
-      </div>
-      <div class="article-body">
-        ${article.body}
-      </div>
-    `;
-    container.appendChild(element);
-  });
+
+      `;
+
+
+      container.appendChild(
+        element
+      );
+
+    }
+  );
+
 }
+
+
 /* ==========================================================
    GRAVITÉ
 ========================================================== */
-function getSeverityLabel(severity){
+
+function getSeverityLabel(
+  severity
+){
+
   switch(severity){
+
     case "critical":
+
       return "MAJEUR";
+
+
     case "warning":
+
       return "IMPORTANT";
+
+
     default:
+
       return "INFORMATION";
+
   }
+
 }
+
+
 /* ==========================================================
    RECHERCHE
 ========================================================== */
+
 document
   .getElementById("search")
-  .addEventListener("input", function(){
-    const query =
-      this.value
-        .toLowerCase()
-        .trim();
-    if(!query){
-      render();
-      return;
-    }
-    const results = [];
-    categories.forEach(category => {
-      category.articles.forEach(article => {
-        const searchable =
-          (
-            category.label +
-            " " +
-            category.desc +
-            " " +
-            article.title +
-            " " +
-            article.body
-          )
-          .toLowerCase();
-        if(searchable.includes(query)){
-          results.push({
-            ...article,
-            category:category.label
-          });
+  .addEventListener(
+    "input",
+    function(){
+
+      const query =
+        this.value
+          .toLowerCase()
+          .trim();
+
+
+      if(!query){
+
+        render();
+
+        return;
+
+      }
+
+
+      const results = [];
+
+
+      categories.forEach(
+        category => {
+
+          category.articles.forEach(
+            article => {
+
+              const searchable =
+                (
+                  category.label +
+                  " " +
+                  category.desc +
+                  " " +
+                  article.title +
+                  " " +
+                  article.body
+                )
+                .toLowerCase();
+
+
+              if(
+                searchable.includes(
+                  query
+                )
+              ){
+
+                results.push({
+
+                  ...article,
+
+                  category:
+                    category.label
+
+                });
+
+              }
+
+            }
+          );
+
         }
-      });
-    });
-    document.getElementById("panel-title").textContent =
-      "Résultats de recherche";
-    document.getElementById("panel-desc").textContent =
-      `Recherche globale : "${this.value}"`;
-    document.getElementById("article-count").textContent =
-      `${String(results.length).padStart(2,"0")} RÉSULTAT(S)`;
-    renderArticles(results);
-  });
-/* ==========================================================
-   HORLOGE
-========================================================== */
-function updateClock(){
-  const d = new Date();
-  const pad =
-    n => String(n).padStart(2,"0");
-  document.getElementById("clock").textContent =
-    `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-updateClock();
-setInterval(updateClock,15000);
+      );
+
+
+      document.getElementById(
+        "panel-title"
+      ).textContent =
+        "Résultats de recherche";
+
+
+      document.getElementById(
+        "panel-desc"
+      ).textContent =
+        `Recherche globale : "${this.value}"`;
+
+
+      document.getElementById(
+        "article-count"
+      ).textContent =
+        `${String(
+          results.length
+        ).padStart(2,"0")} RÉSULTAT(S)`;
+
+
+      renderArticles(
+        results
+      );
+
+    }
+  );
+
+
 /* ==========================================================
    INITIALISATION
 ========================================================== */
+
 loadData();
+
 
 /* ==========================================================
    PROTECTION ANTI-COPIE
-   (dissuasion — ne bloque pas un utilisateur déterminé,
-   mais stoppe la copie "en 2 clics")
-   Note : n'affecte pas l'impression (Ctrl+P reste autorisé
-   par le navigateur ; seule la combinaison couverte par les
-   raccourcis bloqués plus bas est interceptée).
+
+   Dissuasion uniquement.
 ========================================================== */
 
-document.addEventListener("contextmenu", function(e){
-  e.preventDefault();
-});
+document.addEventListener(
+  "contextmenu",
+  function(e){
 
-document.addEventListener("keydown", function(e){
-
-  const key = e.key.toUpperCase();
-
-  if(key === "F12"){
     e.preventDefault();
-    return;
-  }
 
-  if((e.ctrlKey || e.metaKey) && ["U","S","I","J"].includes(key)){
+  }
+);
+
+
+document.addEventListener(
+  "keydown",
+  function(e){
+
+    const key =
+      e.key.toUpperCase();
+
+
+    if(key === "F12"){
+
+      e.preventDefault();
+
+      return;
+
+    }
+
+
+    if(
+      (e.ctrlKey || e.metaKey) &&
+      ["U","S","I","J"].includes(key)
+    ){
+
+      e.preventDefault();
+
+      return;
+
+    }
+
+
+    if(
+      (e.ctrlKey || e.metaKey) &&
+      e.shiftKey &&
+      ["I","J","C"].includes(key)
+    ){
+
+      e.preventDefault();
+
+      return;
+
+    }
+
+  }
+);
+
+
+document.addEventListener(
+  "dragstart",
+  function(e){
+
     e.preventDefault();
-    return;
-  }
 
-  if((e.ctrlKey || e.metaKey) && e.shiftKey && ["I","J","C"].includes(key)){
+  }
+);
+
+
+document.addEventListener(
+  "copy",
+  function(e){
+
     e.preventDefault();
-    return;
+
   }
-
-});
-
-document.addEventListener("dragstart", function(e){
-  e.preventDefault();
-});
-
-document.addEventListener("copy", function(e){
-  e.preventDefault();
-});
-
-})();
+);
 
 </script>
+
+
 </body>
+
 </html>
