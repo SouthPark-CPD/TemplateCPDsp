@@ -34,12 +34,6 @@ const NAV_LINKS = [
   },
 
   {
-    href:"acces-rapide.html",
-    label:"⚡ Accès rapide",
-    gold:true
-  },
-
-  {
     href:"code.html",
     label:"📻 Guide radio"
   },
@@ -47,11 +41,6 @@ const NAV_LINKS = [
   {
     href:"reglement.html",
     label:"⚖ Règlement"
-  },
-
-  {
-    href:"divisions.html",
-    label:"🏛 Divisions"
   },
 
   {
@@ -64,6 +53,12 @@ const NAV_LINKS = [
     label:"🧭 Organigramme"
   },
 
+  {
+    href:"acces-rapide.html",
+    label:"⚡ Accès rapide",
+    gold:true
+  },
+   
   {
     href:"https://guidejuridiquesp.netlify.app/",
     label:"📖 Guide juridique ↗",
