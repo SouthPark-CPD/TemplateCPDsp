@@ -8,6 +8,9 @@
 
 <title>CPD // Procédures</title>
 <link rel="icon" type="image/png" href="Seal_of_the_Chicago_Police_Department.png">
+
+<link rel="stylesheet" href="nav.css">
+
 <style>
 
   :root{
@@ -71,153 +74,6 @@
 
 
   /* =========================
-     HEADER
-  ========================= */
-
-  header{
-    position:relative;
-    border-bottom:1px solid var(--line);
-    padding:28px 32px 22px;
-    overflow:hidden;
-    background:linear-gradient(
-      180deg,
-      rgba(74,111,165,0.06),
-      transparent
-    );
-  }
-
-  header::before{
-    content:"";
-    position:absolute;
-    inset:0;
-
-    background-image:
-      repeating-linear-gradient(
-        0deg,
-        rgba(255,255,255,0.015) 0px,
-        rgba(255,255,255,0.015) 1px,
-        transparent 1px,
-        transparent 3px
-      );
-
-    pointer-events:none;
-  }
-
-  .header-inner{
-    position:relative;
-    max-width:1100px;
-    margin:0 auto;
-  }
-
-  .badge-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:20px;
-    flex-wrap:wrap;
-  }
-
-  .badge-left{
-    display:flex;
-    align-items:center;
-    gap:18px;
-  }
-
-  .star{
-    width:60px;
-    height:60px;
-    flex:0 0 auto;
-  }
-
-  .brand-title{
-    font-family:var(--font-display);
-    font-size:25px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    font-weight:600;
-    color:var(--text);
-    line-height:1.1;
-  }
-
-  .brand-sub{
-    font-size:11px;
-    letter-spacing:3px;
-    color:var(--steel);
-    text-transform:uppercase;
-    margin-top:4px;
-  }
-
-  .header-actions{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-  }
-
-  .header-link{
-    font-family:var(--font-mono);
-    font-size:11.5px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    padding:10px 16px;
-    border:1px solid var(--steel);
-    background:transparent;
-    color:var(--steel);
-    text-decoration:none;
-    white-space:nowrap;
-    transition:all .15s;
-    cursor:pointer;
-  }
-
-  .header-link:hover{
-    background:var(--steel);
-    color:#0b0f14;
-  }
-
-  .header-link.gold{
-    border-color:var(--gold);
-    color:var(--gold);
-  }
-
-  .header-link.gold:hover{
-    background:var(--gold);
-    color:#0b0f14;
-  }
-
-  .header-link.current{
-    background:var(--gold);
-    color:#0b0f14;
-    border-color:var(--gold);
-    pointer-events:none;
-    font-weight:600;
-  }
-
-  .status-line{
-    margin-top:16px;
-    font-size:11px;
-    color:var(--text-dim);
-    letter-spacing:1px;
-    display:flex;
-    gap:22px;
-    flex-wrap:wrap;
-  }
-
-  .status-line span b{
-    color:var(--amber);
-    font-weight:600;
-  }
-
-  .dot{
-    width:6px;
-    height:6px;
-    border-radius:50%;
-    background:var(--green);
-    display:inline-block;
-    margin-right:6px;
-    box-shadow:0 0 6px var(--green);
-  }
-
-
-  /* =========================
      SEARCH
   ========================= */
 
@@ -250,7 +106,7 @@
 
 
   /* =========================
-     NAVIGATION
+     NAVIGATION (catégories internes à la page)
   ========================= */
 
   nav{
@@ -520,10 +376,6 @@
 
   @media(max-width:700px){
 
-    header{
-      padding:20px;
-    }
-
     main{
       padding:0 16px;
     }
@@ -534,24 +386,6 @@
 
     .search-container{
       padding:0 16px;
-    }
-
-    .brand-title{
-      font-size:19px;
-    }
-
-    .brand-sub{
-      font-size:9px;
-      letter-spacing:2px;
-    }
-
-    .header-actions{
-      width:100%;
-    }
-
-    .header-link{
-      flex:1;
-      text-align:center;
     }
 
     .panel-head{
@@ -601,278 +435,10 @@
 
 
 <!-- ==========================================================
-     HEADER
+     HEADER (généré par nav.js — voir nav.js/nav.css)
 ========================================================== -->
 
-<header>
-
-  <div class="header-inner">
-
-    <div class="badge-row">
-
-      <div class="badge-left">
-
-        <svg class="star"
-             viewBox="0 0 200 200"
-             xmlns="http://www.w3.org/2000/svg">
-
-          <defs>
-
-            <path
-              id="arc-top"
-              d="M 34 100 A 66 66 0 0 1 166 100"/>
-
-            <path
-              id="arc-bottom"
-              d="M 47 128 A 60 60 0 0 0 153 128"/>
-
-            <path
-              id="mini-star"
-              d="M0,-7 L1.76,-2.43 L6.66,-2.16 L2.85,0.93 L4.12,5.66 L0,3 L-4.12,5.66 L-2.85,0.93 L-6.66,-2.16 L-1.76,-2.43 Z"/>
-
-          </defs>
-
-
-          <path
-            d="M100,4 L123.5,67.6 L191.3,70.3 L138,112.4 L156.4,177.7 L100,140 L43.6,177.7 L62,112.4 L8.7,70.3 L76.5,67.6 Z"
-            fill="none"
-            stroke="var(--gold)"
-            stroke-width="2.5"
-            stroke-linejoin="round"/>
-
-
-          <circle
-            cx="100"
-            cy="100"
-            r="78"
-            fill="#151b23"
-            stroke="var(--gold)"
-            stroke-width="2"/>
-
-
-          <circle
-            cx="100"
-            cy="100"
-            r="74"
-            fill="none"
-            stroke="var(--gold)"
-            stroke-width="1"/>
-
-
-          <circle
-            cx="100"
-            cy="100"
-            r="55"
-            fill="#0c1015"
-            stroke="var(--gold)"
-            stroke-width="1.5"/>
-
-
-          <text
-            font-family="Oswald, sans-serif"
-            font-size="16"
-            font-weight="700"
-            letter-spacing="2"
-            fill="var(--gold)">
-
-            <textPath
-              href="#arc-top"
-              startOffset="50%"
-              text-anchor="middle">
-
-              CHICAGO
-
-            </textPath>
-
-          </text>
-
-
-          <text
-            font-family="Oswald, sans-serif"
-            font-size="16"
-            font-weight="700"
-            letter-spacing="2"
-            fill="var(--gold)">
-
-            <textPath
-              href="#arc-bottom"
-              startOffset="50%"
-              text-anchor="middle">
-
-              POLICE
-
-            </textPath>
-
-          </text>
-
-
-          <use
-            href="#mini-star"
-            transform="translate(27,100) scale(1.1)"
-            fill="var(--gold)"/>
-
-
-          <use
-            href="#mini-star"
-            transform="translate(173,100) scale(1.1)"
-            fill="var(--gold)"/>
-
-
-          <use
-            href="#mini-star"
-            transform="translate(100,88) scale(2.4)"
-            fill="var(--gold)"
-            opacity="0.9"/>
-
-
-          <rect
-            x="64"
-            y="116"
-            width="72"
-            height="17"
-            rx="2"
-            fill="var(--gold)"/>
-
-
-          <text
-            x="100"
-            y="128"
-            font-family="Oswald, sans-serif"
-            font-size="9.5"
-            font-weight="700"
-            letter-spacing="0.5"
-            text-anchor="middle"
-            fill="#0c1015">
-
-            URBS IN HORTO
-
-          </text>
-
-        </svg>
-
-
-        <div>
-
-          <div class="brand-title">
-            Chicago Police Department
-          </div>
-
-          <div class="brand-sub">
-            Procédures opérationnels — Manuel CPD
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- NAVIGATION PRINCIPALE -->
-
-      <div class="header-actions current">
-
-          <a
-          class="header-link current"
-          href="index.html">
-
-          🗂 Procédures
-
-        </a>
-
-
-        <a
-          class="header-link"
-          href="code.html">
-
-          📻 Guide radio
-
-        </a>
-
-
-        <a
-          class="header-link"
-          href="reglement.html">
-
-          ⚖ Règlement
-
-        </a>
-
-
-        <a
-          class="header-link"
-          href="tenues-vehicules.html">
-
-          🎽 Tenues & Véhicules
-
-        </a>
-		
-        <a
-          class="header-link"
-          href="organigramme.html">
-
-          🧭 Organigramme
-
-        </a>		
-		
-        <a
-          class="header-link"
-          href="divisions.html">
-
-          🏛 Divisions
-
-        </a>
-		
-        <a
-          class="header-link gold"
-          href="https://guidejuridiquesp.netlify.app/"
-          target="_blank"
-          rel="noopener">
-
-          📖 Guide juridique ↗
-
-        </a>
-      </div>
-
-    </div>
-
-
-    <!-- STATUS -->
-
-    <div class="status-line">
-
-      <span>
-
-        <span class="dot"></span>
-
-        Système opérationnel
-
-      </span>
-
-
-      <span>
-
-        DOCUMENT :
-        <b>CPD-TPL-001</b>
-
-      </span>
-
-
-      <span>
-
-        VERSION :
-        <b>1.0</b>
-
-      </span>
-
-
-      <span id="clock">
-        --/--/---- --:--
-      </span>
-
-    </div>
-
-  </div>
-
-</header>
+<div id="site-header"></div>
 
 
 
@@ -964,6 +530,17 @@
 
 </footer>
 
+
+
+<script>
+  const PAGE_CONFIG = {
+    subtitle:"Procédures opérationnels — Manuel CPD",
+    currentPage:"index.html",
+    docCode:"CPD-TPL-001",
+    version:"1.0"
+  };
+</script>
+<script src="nav.js"></script>
 
 
 <script>
@@ -1339,38 +916,6 @@ document
 
     }
   );
-
-
-
-/* ==========================================================
-   HORLOGE
-========================================================== */
-
-function updateClock(){
-
-  const d =
-    new Date();
-
-
-  const pad =
-    n =>
-      String(n).padStart(2,"0");
-
-
-  document.getElementById("clock")
-    .textContent =
-      `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-
-}
-
-
-updateClock();
-
-
-setInterval(
-  updateClock,
-  15000
-);
 
 
 
