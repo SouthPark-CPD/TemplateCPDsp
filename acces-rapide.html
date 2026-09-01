@@ -10,12 +10,6 @@
 
 <link rel="stylesheet" href="nav.css">
 
-<!--
-  ⚠️ Variables :root ci-dessous : je ne connaissais pas celles de ton
-  vrai site (aucune page HTML fournie), je les ai déduites du thème
-  vu dans nav.js / le screenshot. Si ton :root réel est différent,
-  colle-le moi et je remplace ce bloc — le reste ne bougera pas.
--->
 <style>
 :root{
   --bg:#0b0f14;
@@ -32,7 +26,9 @@
   --font-mono:'Roboto Mono', monospace;
 }
 
-*{box-sizing:border-box;}
+*{
+  box-sizing:border-box;
+}
 
 html{
   margin:0;
@@ -46,7 +42,7 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* ================= LAYOUT PAGE — le 1er écran (radio/codes/miranda) tient dans la hauteur visible ================= */
+/* ================= LAYOUT PAGE ================= */
 
 .qr-wrap{
   height:calc(100dvh - var(--header-h, 96px));
@@ -84,7 +80,7 @@ body{
   text-transform:uppercase;
 }
 
-/* ================= GRID PRINCIPALE : 3 colonnes, une seule rangée ================= */
+/* ================= GRID PRINCIPALE ================= */
 
 .qr-grid{
   flex:1 1 auto;
@@ -153,12 +149,13 @@ body{
 .qr-scroll::-webkit-scrollbar{
   width:5px;
 }
+
 .qr-scroll::-webkit-scrollbar-thumb{
   background:var(--line);
   border-radius:3px;
 }
 
-/* codes radio — 2 colonnes internes pour gagner de la hauteur */
+/* ================= CODES RADIO ================= */
 
 .code-list{
   display:grid;
@@ -193,7 +190,7 @@ body{
   color:var(--text);
 }
 
-/* codes 2/3/4... */
+/* ================= CODES 2/3/4/5/6/7/99 ================= */
 
 .code2-list{
   display:flex;
@@ -222,6 +219,21 @@ body{
 .code2-row .code-def{
   color:var(--text);
   text-align:right;
+}
+
+/* Code 99 urgent */
+
+.code2-row.code-urgent{
+  border-color:rgba(220,60,60,0.5);
+}
+
+.code2-row.code-urgent .code-num{
+  color:#ff5555;
+}
+
+.code2-row.code-urgent .code-def{
+  color:#ff7777;
+  font-weight:600;
 }
 
 /* ================= MIRANDA ================= */
@@ -284,7 +296,7 @@ body{
   color:var(--steel);
 }
 
-/* ================= CODES PÉNAUX — SECTION SOUS L'ÉCRAN PRINCIPAL ================= */
+/* ================= CODES PÉNAUX ================= */
 
 .penal-wrap{
   max-width:1400px;
@@ -330,8 +342,6 @@ body{
 .penal-search::placeholder{
   color:var(--text-dim);
 }
-
-/* 3 gros blocs côte à côte */
 
 .penal-grid{
   display:grid;
@@ -405,47 +415,83 @@ body{
   padding:6px;
 }
 
+/* ================= RESPONSIVE ================= */
+
 @media(max-width:900px){
+
   .penal-grid{
     grid-template-columns:1fr;
   }
-}
 
-/* ================= MOBILE / ECRANS ETROITS ================= */
-
-@media(max-width:900px){
   .qr-grid{
     grid-template-columns:1fr;
     grid-template-rows:1fr 1fr 1fr;
   }
+
   .code-list{
     grid-template-columns:1fr 1fr;
   }
 }
 
 @media(max-width:520px){
-  .qr-subtitle{ display:none; }
-  .qr-panel h2{ font-size:12px; }
+
+  .qr-subtitle{
+    display:none;
+  }
+
+  .qr-panel h2{
+    font-size:12px;
+  }
 }
 
-/* ================= IMPRESSION (tient sur une page) ================= */
+/* ================= IMPRESSION ================= */
 
 @media print{
-  #site-header{ display:none; }
-  body{ background:#fff; color:#111; }
-  .qr-wrap{ height:auto; overflow:visible; }
-  .qr-grid{ min-height:0; }
-  .qr-scroll{ overflow:visible; }
-  .qr-panel, .penal-panel{
+
+  #site-header{
+    display:none;
+  }
+
+  body{
+    background:#fff;
+    color:#111;
+  }
+
+  .qr-wrap{
+    height:auto;
+    overflow:visible;
+  }
+
+  .qr-grid{
+    min-height:0;
+  }
+
+  .qr-scroll{
+    overflow:visible;
+  }
+
+  .qr-panel,
+  .penal-panel{
     border-color:#ccc;
     background:#fff;
   }
-  .miranda-actions{ display:none; }
-  .qr-title, .code-row .code-num, .code2-row .code-num,
-  .qr-panel h2, .penal-panel h3, .p-code{ color:#000 !important; }
+
+  .miranda-actions{
+    display:none;
+  }
+
+  .qr-title,
+  .code-row .code-num,
+  .code2-row .code-num,
+  .qr-panel h2,
+  .penal-panel h3,
+  .p-code{
+    color:#000 !important;
+  }
 }
 </style>
 </head>
+
 <body>
 
 <div id="site-header"></div>
@@ -459,233 +505,611 @@ body{
 
   <div class="qr-grid">
 
+    <!-- ================= CODES RADIO ================= -->
+
     <div class="qr-panel">
+
       <h2>
         Codes radio
-        <input type="text" id="code-search" placeholder="🔎 rechercher...">
+        <input
+          type="text"
+          id="code-search"
+          placeholder="🔎 rechercher..."
+        >
       </h2>
+
       <div class="qr-scroll">
         <div class="code-list" id="code-list">
-          <!-- rempli par JS depuis RADIO_CODES -->
+          <!-- rempli par JS -->
         </div>
       </div>
+
     </div>
 
+
+    <!-- ================= CODES ================= -->
+
     <div class="qr-panel">
+
       <h2>Codes</h2>
+
       <div class="qr-scroll">
+
         <div class="code2-list">
-          <div class="code2-row"><span class="code-num">Code 2</span><span class="code-def">Gyrophares</span></div>
-          <div class="code2-row"><span class="code-num">Code 3</span><span class="code-def">Gyrophares + Sirènes</span></div>
-          <div class="code2-row"><span class="code-num">Code 4</span><span class="code-def">Situation stable</span></div>
-          <div class="code2-row"><span class="code-num">Code 5</span><span class="code-def">En surveillance</span></div>
-          <div class="code2-row"><span class="code-num">Code 6</span><span class="code-def">Arrivée sur les lieux</span></div>
-          <div class="code2-row"><span class="code-num">Code 99</span><span class="code-def">Officier en danger</span></div>
-          <div class="code2-row"><span class="code-num">Code Robert</span><span class="code-def">Déploiement arme lourde</span></div>
-          <div class="code2-row"><span class="code-num">Code Sam</span><span class="code-def">Déploiement d'un Bean Bag</span></div>
+
+          <div class="code2-row">
+            <span class="code-num">Code 2</span>
+            <span class="code-def">
+              Prioritaire, répondre cependant sans sirènes
+            </span>
+          </div>
+
+          <div class="code2-row">
+            <span class="code-num">Code 3</span>
+            <span class="code-def">
+              Urgent, répondre avec lumières et sirènes
+            </span>
+          </div>
+
+          <div class="code2-row">
+            <span class="code-num">Code 4</span>
+            <span class="code-def">
+              Aucune autre assistance nécessaire — situation stable
+            </span>
+          </div>
+
+          <div class="code2-row">
+            <span class="code-num">Code 5</span>
+            <span class="code-def">
+              En surveillance, les autres unités doivent éviter les lieux
+            </span>
+          </div>
+
+          <div class="code2-row">
+            <span class="code-num">Code 6</span>
+            <span class="code-def">
+              Arriver sur scène, investigation en cours ou observation
+            </span>
+          </div>
+
+          <div class="code2-row">
+            <span class="code-num">Code 7</span>
+            <span class="code-def">
+              En patrouille ou reprise de patrouille
+            </span>
+          </div>
+
+          <div class="code2-row code-urgent">
+            <span class="code-num">Code 99</span>
+            <span class="code-def">
+              OFFICER EN DANGER — Besoin d'aide en urgence, toutes les unités se rendent obligatoirement sur zone!!!
+            </span>
+          </div>
+
         </div>
+
       </div>
+
     </div>
 
+
+    <!-- ================= MIRANDA ================= -->
+
     <div class="qr-panel">
+
       <h2>
         Droits Miranda
-        <button class="copy-btn" id="copy-miranda">📋 Copier</button>
+        <button class="copy-btn" id="copy-miranda">
+          📋 Copier
+        </button>
       </h2>
+
       <div class="qr-scroll">
+
         <div class="miranda-text" id="miranda-text">
-          <p class="strong">Monsieur/Madame <span class="fill">###</span>, nous sommes le <span class="fill">##/##/####</span>, il est <span class="fill">##h##</span>.<br>
-          Vous êtes en état d'arrestation pour : <span class="fill">###</span></p>
 
-          <p>Sachez que les chefs d'inculpations peuvent être amenés à changer une fois durant la procédure.<br>
-          Vous avez le droit de garder le silence.</p>
+          <p class="strong">
+            Monsieur/Madame
+            <span class="fill">###</span>,
+            nous sommes le
+            <span class="fill">##/##/####</span>,
+            il est
+            <span class="fill">##h##</span>.<br>
 
-          <p>Tout ce que vous direz pourra et sera retenu contre vous lors d'une cour de justice.<br>
-          Vous avez le droit à un avocat et d'avoir un avocat présent lors de votre interrogatoire.<br>
-          Si vous n'en avez pas les moyens, un avocat vous sera commis d'office.<br>
-          Durant chaque interrogatoire, vous pouvez décider à n'importe quel moment d'exercer vos droits,
-          de répondre à aucune question et de ne faire aucune déposition.<br>
-          Durant votre incarcération, vous avez le droit de demander à voir un médecin et/ou manger et boire.</p>
+            Vous êtes en état d'arrestation pour :
+            <span class="fill">###</span>
+          </p>
 
-          <p class="questions">Avez-vous bien compris les droits que je viens de vous lire ?<br>
-          Voulez-vous exercer l'un de vos droits ?</p>
+          <p>
+            Sachez que les chefs d'inculpations peuvent être amenés à changer
+            une fois durant la procédure.<br>
+
+            Vous avez le droit de garder le silence.
+          </p>
+
+          <p>
+            Tout ce que vous direz pourra et sera retenu contre vous lors d'une
+            cour de justice.<br>
+
+            Vous avez le droit à un avocat et d'avoir un avocat présent lors
+            de votre interrogatoire.<br>
+
+            Si vous n'en avez pas les moyens, un avocat vous sera commis
+            d'office.<br>
+
+            Durant chaque interrogatoire, vous pouvez décider à n'importe quel
+            moment d'exercer vos droits, de répondre à aucune question et de
+            ne faire aucune déposition.<br>
+
+            Durant votre incarcération, vous avez le droit de demander à voir
+            un médecin et/ou manger et boire.
+          </p>
+
+          <p class="questions">
+            Avez-vous bien compris les droits que je viens de vous lire ?<br>
+            Voulez-vous exercer l'un de vos droits ?
+          </p>
+
         </div>
+
       </div>
+
     </div>
 
   </div>
 
 </div>
+
+
+<!-- ================= CODES PÉNAUX ================= -->
 
 <div class="penal-wrap">
 
   <div class="penal-titlebar">
-    <div class="penal-heading">Codes pénaux — les plus utilisés</div>
-    <input type="text" id="penal-search" class="penal-search" placeholder="🔎 rechercher un code ou une infraction...">
+
+    <div class="penal-heading">
+      Codes pénaux — les plus utilisés
+    </div>
+
+    <input
+      type="text"
+      id="penal-search"
+      class="penal-search"
+      placeholder="🔎 rechercher un code ou une infraction..."
+    >
+
   </div>
+
 
   <div class="penal-grid">
 
     <div class="penal-panel">
+
       <h3>🚗 Vitesse &amp; Conduite</h3>
-      <div class="penal-list" id="penal-list-vitesse"></div>
+
+      <div
+        class="penal-list"
+        id="penal-list-vitesse">
+      </div>
+
     </div>
 
+
     <div class="penal-panel">
+
       <h3>🔫 Armes &amp; Stupéfiants</h3>
-      <div class="penal-list" id="penal-list-armes"></div>
+
+      <div
+        class="penal-list"
+        id="penal-list-armes">
+      </div>
+
     </div>
 
+
     <div class="penal-panel">
+
       <h3>⚠ Vols &amp; Violence</h3>
-      <div class="penal-list" id="penal-list-violence"></div>
+
+      <div
+        class="penal-list"
+        id="penal-list-violence">
+      </div>
+
     </div>
 
   </div>
 
 </div>
 
+
 <script>
-  const PAGE_CONFIG = {
-    subtitle:"Procédures opérationnels — Manuel CPD",
-    currentPage:"acces-rapide.html",
-    docCode:"CPD-TPL-002",
-    version:"1.0"
-  };
+
+const PAGE_CONFIG = {
+  subtitle:"Procédures opérationnels — Manuel CPD",
+  currentPage:"acces-rapide.html",
+  docCode:"CPD-TPL-002",
+  version:"1.0"
+};
+
 </script>
+
 <script src="nav.js"></script>
 
+
 <script>
+
 /* ==========================================================
-   Codes radio — modifie/ajoute ici, ça se répercute dans la liste
+   CODES RADIO — RÉFÉRENTIEL CPD
 ========================================================== */
+
 const RADIO_CODES = [
-  ["10-4","Bien Reçu"],
-  ["10-5","Négatif / Relayer le message"],
-  ["10-6","Occupé / Pas dispo"],
-  ["10-7","Hors service temporaire"],
-  ["10-8","Prise de service"],
-  ["10-9","Répéter le dernier call"],
+
+  ["10-1","Radio défectueuse"],
+
+  ["10-3","Retour Radio"],
+
+  ["10-4","Bien reçu / Affirmatif"],
+
+  ["10-5","Négatif"],
+
+  ["10-6","Occupé / En procédure"],
+
+  ["10-7","Hors service temporaire / En pause"],
+
+  ["10-8","Prise de service / Disponible pour appel"],
+
+  ["10-9","Répéter le dernier message"],
+
   ["10-10","Fin de service"],
-  ["10-17","Refuel"],
-  ["10-18","En direction de.. (Localisation)"],
-  ["10-19","Retour PDP"],
-  ["10-20","Votre position"],
-  ["10-22","Annuler ou ignorer"],
-  ["10-37","Cambriolage"],
-  ["10-38","Contrôle routier ou traffic stop"],
-  ["10-40","Accident"],
-  ["10-56","Refus d'obtempérer (CP)"],
-  ["10-70","Vente de drogue"],
-  ["10-91","Braquage de banque"]
+
+  ["10-12","Présence de visiteurs et peuvent entendre la radio"],
+
+  ["10-14","Escorte ou convoi"],
+
+  ["10-15","Suspect détenu / Transport de prisonnier"],
+
+  ["10-17","Plein d'essence"],
+
+  ["10-19","En route vers (préciser la destination)"],
+
+  ["10-20","Votre localisation"],
+
+  ["10-22","Annuler ou Ignorer"],
+
+  ["10-23","Stand-by / En attente"],
+
+  ["10-24","Demande une transmission de voiture à voiture"],
+
+  ["10-28","Vérification Plaque / Casier / Mandat"],
+
+  ["10-31","Tirs d'armes à feu"],
+
+  ["10-35","Demande de renfort sur (position)"],
+
+  ["10-37","Cambriolage en cours"],
+
+  ["10-38","Contrôle routier / Traffic Stop"],
+
+  ["10-40","Braquage de supérette"],
+
+  ["10-41","Début de patrouille"],
+
+  ["10-48","Braquage à main armée"],
+
+  ["10-49","Braquage de Conteneur"],
+
+  ["10-50","Accident léger"],
+
+  ["10-51","Accident grave"],
+
+  ["10-56","Refus d'obtempérer"],
+
+  ["10-57","Délit de fuite"],
+
+  ["10-58","Braquage ATM"],
+
+  ["10-59","Vol de véhicule"],
+
+  ["10-60","Vente de drogue"],
+
+  ["10-91","Braquage de banque / bijouterie"],
+
+  ["10-99","Officer en danger, besoin d'aide (urgent)"]
+
 ];
 
+
+/* ==========================================================
+   AFFICHAGE DES CODES RADIO
+========================================================== */
+
 function renderCodes(filter){
+
   const list = document.getElementById("code-list");
-  const f = (filter || "").trim().toLowerCase();
+
+  const f = (filter || "")
+    .trim()
+    .toLowerCase();
 
   list.innerHTML = RADIO_CODES
+
     .filter(([num, def]) =>
-      !f || num.toLowerCase().includes(f) || def.toLowerCase().includes(f)
+      !f ||
+      num.toLowerCase().includes(f) ||
+      def.toLowerCase().includes(f)
     )
-    .map(([num, def]) =>
-      `<div class="code-row"><span class="code-num">${num}</span><span class="code-def">${def}</span></div>`
-    ).join("") || `<div class="code-row"><span class="code-def" style="color:var(--text-dim)">Aucun résultat</span></div>`;
+
+    .map(([num, def]) => {
+
+      const isUrgent = num === "10-99";
+
+      return `
+        <div class="code-row ${isUrgent ? "code-urgent" : ""}">
+          <span class="code-num">${num}</span>
+          <span class="code-def">${def}</span>
+        </div>
+      `;
+
+    })
+
+    .join("")
+
+    ||
+
+    `
+      <div class="code-row">
+        <span
+          class="code-def"
+          style="color:var(--text-dim)"
+        >
+          Aucun résultat
+        </span>
+      </div>
+    `;
+
 }
+
 
 renderCodes("");
 
-document.getElementById("code-search").addEventListener("input", e => {
-  renderCodes(e.target.value);
-});
 
-document.getElementById("copy-miranda").addEventListener("click", () => {
-  const text = document.getElementById("miranda-text").innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById("copy-miranda");
-    btn.textContent = "✅ Copié !";
-    btn.classList.add("copied");
-    setTimeout(() => {
-      btn.textContent = "📋 Copier le texte";
-      btn.classList.remove("copied");
-    }, 1800);
+document
+  .getElementById("code-search")
+  .addEventListener("input", e => {
+
+    renderCodes(e.target.value);
+
   });
-});
+
 
 /* ==========================================================
-   Le bloc du haut (radio/codes/miranda) doit tenir exactement
-   dans la hauteur restante sous le header — on mesure sa
-   hauteur réelle et on l'injecte en variable CSS.
+   COPIE MIRANDA
 ========================================================== */
+
+document
+  .getElementById("copy-miranda")
+  .addEventListener("click", () => {
+
+    const text =
+      document
+        .getElementById("miranda-text")
+        .innerText;
+
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+
+        const btn =
+          document.getElementById("copy-miranda");
+
+        btn.textContent = "✅ Copié !";
+
+        btn.classList.add("copied");
+
+        setTimeout(() => {
+
+          btn.textContent = "📋 Copier";
+
+          btn.classList.remove("copied");
+
+        }, 1800);
+
+      });
+
+  });
+
+
+/* ==========================================================
+   SYNCHRONISATION HEADER
+========================================================== */
+
 function syncHeaderHeight(){
-  const header = document.getElementById("site-header");
+
+  const header =
+    document.getElementById("site-header");
+
   if(header){
-    document.documentElement.style.setProperty("--header-h", header.offsetHeight + "px");
+
+    document.documentElement
+      .style
+      .setProperty(
+        "--header-h",
+        header.offsetHeight + "px"
+      );
+
   }
+
 }
+
+
 syncHeaderHeight();
-window.addEventListener("resize", syncHeaderHeight);
-window.addEventListener("load", syncHeaderHeight);
+
+window.addEventListener(
+  "resize",
+  syncHeaderHeight
+);
+
+window.addEventListener(
+  "load",
+  syncHeaderHeight
+);
+
 
 /* ==========================================================
-   Codes pénaux — sélection des plus utilisés en RP
-   (liste complète bien plus longue, ce n'est qu'un extrait)
+   CODES PÉNAUX
 ========================================================== */
+
 const PENAL_CODES = [
+
   ["0.M","Excès de vitesse 5 à 25 km/h","100$","—","vitesse"],
+
   ["0.R","Excès de vitesse 60 km/h et +","200$","—","vitesse"],
+
   ["1.N","Excès de vitesse 50 à 100 km/h","500$","30 min","vitesse"],
+
   ["1.A-C","Excès de vitesse > 100 km/h","1000$","30 min","vitesse"],
+
   ["1.O","Refus d'obtempérer","400$","15 min","vitesse"],
+
   ["1.P","Délit de fuite","300$","15 min","vitesse"],
 
+
   ["1.M","Possession de produits illégaux (<10g)","300$","15 min","armes"],
+
   ["2.C","Possession de produits illégaux (10 à 29g)","600$","25 min","armes"],
+
   ["2.E","Trafic de produits illégaux (30g et +)","1200$","40 min","armes"],
+
   ["2.N","Vente de produits illégaux","750$","20 min","armes"],
+
   ["1.L","Arme blanche sortie en public","200$","10 min","armes"],
+
   ["3.P","Détention/conservation mineure d'arme à feu","—","Perpétuité","armes"],
+
   ["4.P","Détention/conservation majeure d'arme de guerre","—","Perpétuité","armes"],
 
+
   ["2.B","Vol de véhicule","1000$","25 min","violence"],
+
   ["2.F","Agression sur un civil","1300$","15 min","violence"],
+
   ["2.G","Agression sur un représentant de l'état","1800$","30 min","violence"],
+
   ["3.E","Braquage de banque","3500$","60 min","violence"],
+
   ["3.A","Kidnapping / Séquestration","1500$/pers","45 min","violence"],
+
   ["3.I","Meurtre","—","Peine Capitale","violence"]
+
 ];
 
+
+/* ==========================================================
+   AFFICHAGE DES CODES PÉNAUX
+========================================================== */
+
 function renderPenalCodes(filter){
-  const f = (filter || "").trim().toLowerCase();
+
+  const f =
+    (filter || "")
+      .trim()
+      .toLowerCase();
+
 
   const themes = {
-    vitesse:  document.getElementById("penal-list-vitesse"),
-    armes:    document.getElementById("penal-list-armes"),
-    violence: document.getElementById("penal-list-violence")
+
+    vitesse:
+      document.getElementById(
+        "penal-list-vitesse"
+      ),
+
+    armes:
+      document.getElementById(
+        "penal-list-armes"
+      ),
+
+    violence:
+      document.getElementById(
+        "penal-list-violence"
+      )
+
   };
 
-  Object.entries(themes).forEach(([theme, container]) => {
 
-    const items = PENAL_CODES.filter(([code, title, , , t]) =>
-      t === theme && (!f || code.toLowerCase().includes(f) || title.toLowerCase().includes(f))
-    );
+  Object.entries(themes)
+    .forEach(([theme, container]) => {
 
-    container.innerHTML = items.map(([code, title, amende, prison]) => `
-      <div class="penal-item">
-        <span class="p-code">${code}</span>
-        <span class="p-title">${title}</span>
-        <span class="p-meta">${amende} · <span class="p-prison">${prison}</span></span>
-      </div>
-    `).join("") || `<div class="penal-empty">Aucun résultat</div>`;
+      const items =
+        PENAL_CODES.filter(
+          ([code, title, , , t]) =>
+            t === theme &&
+            (
+              !f ||
+              code.toLowerCase().includes(f) ||
+              title.toLowerCase().includes(f)
+            )
+        );
 
-  });
+
+      container.innerHTML =
+
+        items
+
+          .map(
+            ([code, title, amende, prison]) => `
+
+              <div class="penal-item">
+
+                <span class="p-code">
+                  ${code}
+                </span>
+
+                <span class="p-title">
+                  ${title}
+                </span>
+
+                <span class="p-meta">
+                  ${amende}
+                  ·
+                  <span class="p-prison">
+                    ${prison}
+                  </span>
+                </span>
+
+              </div>
+
+            `
+          )
+
+          .join("")
+
+          ||
+
+          `
+            <div class="penal-empty">
+              Aucun résultat
+            </div>
+          `;
+
+    });
+
 }
+
 
 renderPenalCodes("");
 
-document.getElementById("penal-search").addEventListener("input", e => {
-  renderPenalCodes(e.target.value);
-});
+
+document
+  .getElementById("penal-search")
+  .addEventListener("input", e => {
+
+    renderPenalCodes(
+      e.target.value
+    );
+
+  });
+
 </script>
 
 </body>
