@@ -60,7 +60,7 @@
         </article>
 
         <article class="panel training-panel">
-          <div class="panel-heading"><div><p>Nouvelle entrée</p><h2>Ajouter une formation</h2></div></div>
+          <div class="panel-heading"><div><p id="training-form-kicker">Nouvelle entrée</p><h2 id="training-form-title">Ajouter une formation</h2></div></div>
           <form id="training-form">
             <label><span>Intitulé de la formation *</span><input id="training-type" name="trainingType" maxlength="120" required placeholder="Ex. Procédure d’interpellation"></label>
             <div class="form-grid">
@@ -78,7 +78,10 @@
             <label><span>Points forts</span><textarea id="training-strengths" name="strengths" maxlength="3000" rows="3" placeholder="Compétences maîtrisées et bons réflexes…"></textarea></label>
             <label><span>Axes d’amélioration</span><textarea id="training-improvements" name="improvements" maxlength="3000" rows="3" placeholder="Points à retravailler lors de la prochaine séance…"></textarea></label>
             <label><span>Commentaire de séance</span><textarea id="training-comment" name="comment" maxlength="5000" rows="4" placeholder="Déroulement et observations complémentaires…"></textarea></label>
-            <button id="save-training" class="primary-button" type="submit">Ajouter à l’historique</button>
+            <div class="form-actions">
+              <button id="save-training" class="primary-button" type="submit">Ajouter à l’historique</button>
+              <button id="cancel-training-edit" class="secondary-button" type="button" hidden>Annuler la modification</button>
+            </div>
           </form>
         </article>
       </section>
@@ -88,6 +91,14 @@
         <p id="history-empty" class="empty-history">Aucune formation enregistrée pour cet agent.</p>
         <div id="training-history" class="training-history" hidden></div>
       </section>
+
+      <details class="archive-panel">
+        <summary><span>Formations archivées</span><strong id="archive-count">0</strong></summary>
+        <div class="archive-content">
+          <p id="archive-empty" class="empty-history">Aucune formation archivée.</p>
+          <div id="archive-history" class="training-history" hidden></div>
+        </div>
+      </details>
     </div>
   </main>
   <script src="dossier.js"></script>

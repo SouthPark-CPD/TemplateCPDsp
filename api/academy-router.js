@@ -276,7 +276,7 @@ async function getStoredAgentSummaries() {
       files.rp_name,
       files.matricule,
       files.academy_status,
-      COUNT(trainings.id)::INTEGER AS training_count
+      COUNT(trainings.id) FILTER (WHERE trainings.archived_at IS NULL)::INTEGER AS training_count
     FROM academy_agent_files AS files
     LEFT JOIN academy_training_records AS trainings
       ON trainings.agent_discord_id = files.discord_id
@@ -362,7 +362,8 @@ async function agentDetail(req, res) {
       sql`
         SELECT id, training_type, training_date, result, score, comment,
           strengths, improvements, instructor_discord_id, instructor_name,
-          created_at, updated_at
+          created_at, updated_at, archived_at, archived_by_discord_id,
+          updated_by_discord_id, updated_by_name
         FROM academy_training_records
         WHERE agent_discord_id = ${discordId}
         ORDER BY training_date DESC, created_at DESC
@@ -382,7 +383,7 @@ async function agentDetail(req, res) {
         updatedAt: file?.updated_at || null,
         updatedByDiscordId: file?.updated_by_discord_id || null
       },
-      trainings: trainings.map(training => ({
+      trainings: trainings.filter(training => !training.archived_at).map(training => ({
         id: String(training.id),
         trainingType: training.training_type,
         trainingDate: training.training_date,
@@ -394,7 +395,27 @@ async function agentDetail(req, res) {
         instructorDiscordId: training.instructor_discord_id,
         instructorName: training.instructor_name,
         createdAt: training.created_at,
-        updatedAt: training.updated_at
+        updatedAt: training.updated_at,
+        updatedByDiscordId: training.updated_by_discord_id || null,
+        updatedByName: training.updated_by_name || ""
+      })),
+      archivedTrainings: trainings.filter(training => training.archived_at).map(training => ({
+        id: String(training.id),
+        trainingType: training.training_type,
+        trainingDate: training.training_date,
+        result: training.result,
+        score: training.score,
+        comment: training.comment || "",
+        strengths: training.strengths || "",
+        improvements: training.improvements || "",
+        instructorDiscordId: training.instructor_discord_id,
+        instructorName: training.instructor_name,
+        createdAt: training.created_at,
+        updatedAt: training.updated_at,
+        archivedAt: training.archived_at,
+        archivedByDiscordId: training.archived_by_discord_id || null,
+        updatedByDiscordId: training.updated_by_discord_id || null,
+        updatedByName: training.updated_by_name || ""
       }))
     });
   } catch (error) {
@@ -489,11 +510,12 @@ async function createTraining(req, res) {
       INSERT INTO academy_training_records (
         agent_discord_id, training_type, training_date, result, score, comment,
         strengths, improvements, instructor_discord_id, instructor_name,
-        created_at, updated_at
+        created_at, updated_at, updated_by_discord_id, updated_by_name
       ) VALUES (
         ${discordId}, ${trainingType}, ${trainingDate}, ${result}, ${rawScore},
         ${comment || null}, ${strengths || null}, ${improvements || null},
-        ${session.user.id}, ${session.user.globalName || session.user.username}, NOW(), NOW()
+        ${session.user.id}, ${session.user.globalName || session.user.username}, NOW(), NOW(),
+        ${session.user.id}, ${session.user.globalName || session.user.username}
       )
       RETURNING id
     `;
@@ -501,6 +523,106 @@ async function createTraining(req, res) {
   } catch (error) {
     console.error("Academy training creation failed", error);
     return res.status(500).json({ ok: false, code: "training_creation_failed" });
+  }
+}
+
+async function updateTraining(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const id = String(body.id || "");
+  const discordId = String(body.discordId || "");
+  const trainingType = textField(body.trainingType, 120);
+  const trainingDate = String(body.trainingDate || "");
+  const result = String(body.result || "");
+  const comment = textField(body.comment, 5000);
+  const strengths = textField(body.strengths, 3000);
+  const improvements = textField(body.improvements, 3000);
+  const rawScore = body.score === "" || body.score === null || body.score === undefined
+    ? null
+    : Number(body.score);
+
+  if (!/^\d+$/.test(id) || !validDiscordId(discordId) || !trainingType || !validDate(trainingDate)
+    || !TRAINING_RESULTS.has(result) || (rawScore !== null && (!Number.isInteger(rawScore) || rawScore < 0 || rawScore > 100))) {
+    return res.status(400).json({ ok: false, code: "invalid_training" });
+  }
+
+  try {
+    const agent = await eligibleAgent(discordId);
+    if (!agent) return res.status(404).json({ ok: false, code: "agent_not_eligible" });
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = await sql`
+      UPDATE academy_training_records
+      SET training_type = ${trainingType},
+        training_date = ${trainingDate},
+        result = ${result},
+        score = ${rawScore},
+        comment = ${comment || null},
+        strengths = ${strengths || null},
+        improvements = ${improvements || null},
+        updated_at = NOW(),
+        updated_by_discord_id = ${session.user.id},
+        updated_by_name = ${session.user.globalName || session.user.username}
+      WHERE id = ${id}
+        AND agent_discord_id = ${discordId}
+        AND archived_at IS NULL
+      RETURNING id, updated_at
+    `;
+    if (!rows.length) return res.status(404).json({ ok: false, code: "training_not_found" });
+    return res.status(200).json({ ok: true, id: String(rows[0].id), updatedAt: rows[0].updated_at });
+  } catch (error) {
+    console.error("Academy training update failed", error);
+    return res.status(500).json({ ok: false, code: "training_update_failed" });
+  }
+}
+
+async function archiveTraining(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const id = String(body.id || "");
+  const discordId = String(body.discordId || "");
+  const archived = body.archived === true;
+  if (!/^\d+$/.test(id) || !validDiscordId(discordId) || typeof body.archived !== "boolean") {
+    return res.status(400).json({ ok: false, code: "invalid_archive_request" });
+  }
+
+  try {
+    const agent = await eligibleAgent(discordId);
+    if (!agent) return res.status(404).json({ ok: false, code: "agent_not_eligible" });
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = archived
+      ? await sql`
+          UPDATE academy_training_records
+          SET archived_at = NOW(), archived_by_discord_id = ${session.user.id},
+            updated_at = NOW(), updated_by_discord_id = ${session.user.id},
+            updated_by_name = ${session.user.globalName || session.user.username}
+          WHERE id = ${id} AND agent_discord_id = ${discordId} AND archived_at IS NULL
+          RETURNING id
+        `
+      : await sql`
+          UPDATE academy_training_records
+          SET archived_at = NULL, archived_by_discord_id = NULL,
+            updated_at = NOW(), updated_by_discord_id = ${session.user.id},
+            updated_by_name = ${session.user.globalName || session.user.username}
+          WHERE id = ${id} AND agent_discord_id = ${discordId} AND archived_at IS NOT NULL
+          RETURNING id
+        `;
+    if (!rows.length) return res.status(404).json({ ok: false, code: "training_not_found" });
+    return res.status(200).json({ ok: true, archived });
+  } catch (error) {
+    console.error("Academy training archive failed", error);
+    return res.status(500).json({ ok: false, code: "training_archive_failed" });
   }
 }
 
@@ -515,6 +637,8 @@ module.exports = async function handler(req, res) {
     case "agent": return agentDetail(req, res);
     case "agent-save": return saveAgentFile(req, res);
     case "training-create": return createTraining(req, res);
+    case "training-update": return updateTraining(req, res);
+    case "training-archive": return archiveTraining(req, res);
     default: return res.status(404).json({ ok: false, code: "route_not_found" });
   }
 };

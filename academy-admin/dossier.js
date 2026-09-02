@@ -20,9 +20,18 @@ const elements = {
   trainingForm: document.querySelector("#training-form"),
   trainingDate: document.querySelector("#training-date"),
   saveTraining: document.querySelector("#save-training"),
+  cancelTrainingEdit: document.querySelector("#cancel-training-edit"),
+  trainingFormKicker: document.querySelector("#training-form-kicker"),
+  trainingFormTitle: document.querySelector("#training-form-title"),
   history: document.querySelector("#training-history"),
-  historyEmpty: document.querySelector("#history-empty")
+  historyEmpty: document.querySelector("#history-empty"),
+  archiveHistory: document.querySelector("#archive-history"),
+  archiveEmpty: document.querySelector("#archive-empty"),
+  archiveCount: document.querySelector("#archive-count")
 };
+
+let editingTrainingId = null;
+let trainingRecords = new Map();
 
 const resultLabels = {
   planifiee: "Planifiée",
@@ -69,12 +78,12 @@ async function api(url, options = {}) {
   return data;
 }
 
-function renderHistory(trainings) {
-  elements.count.textContent = String(trainings.length);
-  elements.historyEmpty.hidden = trainings.length > 0;
-  elements.history.hidden = trainings.length === 0;
-  elements.history.innerHTML = trainings.map(training => `
-    <article class="training-card">
+function trainingCard(training, archived = false) {
+  const updateText = training.updatedByName && training.updatedAt !== training.createdAt
+    ? ` · Modifié par ${escapeHtml(training.updatedByName)} le ${escapeHtml(formatDate(training.updatedAt, true))}`
+    : "";
+  return `
+    <article class="training-card${archived ? " archived" : ""}">
       <div class="training-topline">
         <div><span class="training-date">${escapeHtml(formatDate(training.trainingDate))}</span><h3>${escapeHtml(training.trainingType)}</h3></div>
         <span class="result result-${escapeHtml(training.result)}">${escapeHtml(resultLabels[training.result] || training.result)}</span>
@@ -85,9 +94,70 @@ function renderHistory(trainings) {
         ${training.improvements ? `<section><h4>Axes d’amélioration</h4><p>${escapeHtml(training.improvements)}</p></section>` : ""}
         ${training.comment ? `<section class="full"><h4>Commentaire</h4><p>${escapeHtml(training.comment)}</p></section>` : ""}
       </div>
-      <footer>Ajouté par ${escapeHtml(training.instructorName)} · ${escapeHtml(formatDate(training.createdAt, true))}</footer>
+      <footer>Ajouté par ${escapeHtml(training.instructorName)} · ${escapeHtml(formatDate(training.createdAt, true))}${updateText}</footer>
+      <div class="training-actions">
+        ${archived
+          ? `<button type="button" class="restore-button" data-action="restore" data-id="${escapeHtml(training.id)}">Restaurer</button>`
+          : `<button type="button" class="edit-button" data-action="edit" data-id="${escapeHtml(training.id)}">Modifier</button><button type="button" class="archive-button" data-action="archive" data-id="${escapeHtml(training.id)}">Archiver</button>`}
+      </div>
     </article>
-  `).join("");
+  `;
+}
+
+function renderHistory(trainings, archivedTrainings = []) {
+  trainingRecords = new Map([...trainings, ...archivedTrainings].map(training => [training.id, training]));
+  elements.count.textContent = String(trainings.length);
+  elements.historyEmpty.hidden = trainings.length > 0;
+  elements.history.hidden = trainings.length === 0;
+  elements.history.innerHTML = trainings.map(training => trainingCard(training)).join("");
+  elements.archiveCount.textContent = String(archivedTrainings.length);
+  elements.archiveEmpty.hidden = archivedTrainings.length > 0;
+  elements.archiveHistory.hidden = archivedTrainings.length === 0;
+  elements.archiveHistory.innerHTML = archivedTrainings.map(training => trainingCard(training, true)).join("");
+}
+
+function resetTrainingForm() {
+  editingTrainingId = null;
+  elements.trainingForm.reset();
+  elements.trainingDate.valueAsDate = new Date();
+  elements.trainingFormKicker.textContent = "Nouvelle entrée";
+  elements.trainingFormTitle.textContent = "Ajouter une formation";
+  elements.saveTraining.textContent = "Ajouter à l’historique";
+  elements.cancelTrainingEdit.hidden = true;
+}
+
+function editTraining(id) {
+  const training = trainingRecords.get(id);
+  if (!training) return;
+  editingTrainingId = id;
+  elements.trainingForm.elements.trainingType.value = training.trainingType;
+  elements.trainingForm.elements.trainingDate.value = String(training.trainingDate).slice(0, 10);
+  elements.trainingForm.elements.result.value = training.result;
+  elements.trainingForm.elements.score.value = training.score ?? "";
+  elements.trainingForm.elements.strengths.value = training.strengths;
+  elements.trainingForm.elements.improvements.value = training.improvements;
+  elements.trainingForm.elements.comment.value = training.comment;
+  elements.trainingFormKicker.textContent = "Modification";
+  elements.trainingFormTitle.textContent = "Modifier la formation";
+  elements.saveTraining.textContent = "Enregistrer les modifications";
+  elements.cancelTrainingEdit.hidden = false;
+  elements.trainingForm.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function setTrainingArchive(id, archived) {
+  const action = archived ? "archiver" : "restaurer";
+  if (!confirm(`Voulez-vous vraiment ${action} cette formation ?`)) return;
+  try {
+    await api("/api/academy-admin-data/training/archive", {
+      method: "POST",
+      body: JSON.stringify({ id, discordId, archived })
+    });
+    if (editingTrainingId === id) resetTrainingForm();
+    await loadDossier();
+    showNotice(archived ? "La formation a été archivée." : "La formation a été restaurée.");
+  } catch (error) {
+    if (error.message !== "unauthorized") showNotice("Cette opération n’a pas pu être effectuée.", "error");
+  }
 }
 
 async function loadDossier() {
@@ -109,7 +179,7 @@ async function loadDossier() {
     elements.updated.textContent = data.file.updatedAt
       ? `Mis à jour le ${formatDate(data.file.updatedAt, true)}`
       : "Nouveau dossier";
-    renderHistory(data.trainings);
+    renderHistory(data.trainings, data.archivedTrainings);
     elements.pageMessage.hidden = true;
     elements.content.hidden = false;
   } catch (error) {
@@ -152,12 +222,14 @@ elements.agentForm.addEventListener("submit", async event => {
 elements.trainingForm.addEventListener("submit", async event => {
   event.preventDefault();
   elements.saveTraining.disabled = true;
-  elements.saveTraining.textContent = "Ajout en cours…";
+  elements.saveTraining.textContent = editingTrainingId ? "Modification en cours…" : "Ajout en cours…";
   const form = new FormData(elements.trainingForm);
   try {
-    await api("/api/academy-admin-data/training/create", {
+    const isEditing = Boolean(editingTrainingId);
+    await api(isEditing ? "/api/academy-admin-data/training/update" : "/api/academy-admin-data/training/create", {
       method: "POST",
       body: JSON.stringify({
+        id: editingTrainingId,
         discordId,
         trainingType: form.get("trainingType"),
         trainingDate: form.get("trainingDate"),
@@ -168,17 +240,27 @@ elements.trainingForm.addEventListener("submit", async event => {
         comment: form.get("comment")
       })
     });
-    elements.trainingForm.reset();
-    elements.trainingDate.valueAsDate = new Date();
-    showNotice("La formation a bien été ajoutée à l’historique.");
+    resetTrainingForm();
+    showNotice(isEditing ? "La formation a bien été modifiée." : "La formation a bien été ajoutée à l’historique.");
     await loadDossier();
   } catch (error) {
     if (error.message !== "unauthorized") showNotice("Impossible d’ajouter cette formation. Vérifiez les champs puis réessayez.", "error");
   } finally {
     elements.saveTraining.disabled = false;
-    elements.saveTraining.textContent = "Ajouter à l’historique";
+    elements.saveTraining.textContent = editingTrainingId ? "Enregistrer les modifications" : "Ajouter à l’historique";
   }
 });
 
-elements.trainingDate.valueAsDate = new Date();
+elements.cancelTrainingEdit.addEventListener("click", resetTrainingForm);
+
+document.querySelector("#dossier-content").addEventListener("click", event => {
+  const button = event.target.closest("[data-action][data-id]");
+  if (!button) return;
+  const { action, id } = button.dataset;
+  if (action === "edit") editTraining(id);
+  if (action === "archive") setTrainingArchive(id, true);
+  if (action === "restore") setTrainingArchive(id, false);
+});
+
+resetTrainingForm();
 loadDossier();
