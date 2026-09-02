@@ -54,6 +54,11 @@ const NAV_LINKS = [
   },
 
   {
+    href:"divisions.html",
+    label:"🏛 Divisions"
+  },
+
+  {
     href:"acces-rapide.html",
     label:"⚡ Accès rapide",
     gold:true
@@ -64,6 +69,11 @@ const NAV_LINKS = [
     label:"📖 Guide juridique ↗",
     gold:true,
     external:true
+  },
+
+  {
+    href:"/api/auth/logout",
+    label:"↪ Déconnexion"
   }
 
 ];

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/mdt.js": {
+      "includeFiles": "mdt/**"
+    }
+  },
+  "routes": [
+    { "src": "/mdt", "dest": "/api/mdt?path=index.html" },
+    { "src": "/mdt/", "dest": "/api/mdt?path=index.html" },
+    { "src": "/mdt/(.*)", "dest": "/api/mdt?path=$1" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
