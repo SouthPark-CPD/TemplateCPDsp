@@ -11,6 +11,7 @@
   },
   "routes": [
     { "src": "/api/academy-admin-auth/(discord|callback|session|logout)", "dest": "/api/academy-router?action=$1" },
+    { "src": "/api/academy-admin-data/agents", "dest": "/api/academy-router?action=agents" },
     { "src": "/api/database-check", "dest": "/api/academy-router?action=database-check" },
     { "src": "/academy-admin", "dest": "/api/academy-admin?path=index.html" },
     { "src": "/academy-admin/", "dest": "/api/academy-admin?path=index.html" },
