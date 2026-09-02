@@ -71,7 +71,12 @@ const NAV_LINKS = [
 
 
 /* ==========================================================
-   SVG BADGE CPD
+   SVG BADGE CPD — version adoucie
+
+   Traits arrondis (linejoin round déjà présent), fonds
+   repris sur la même palette marine que le header (au lieu
+   du noir pur), bandeau "URBS IN HORTO" en pilule plutôt
+   qu'en rectangle dur.
 ========================================================== */
 
 const STAR_SVG = `
@@ -103,14 +108,15 @@ const STAR_SVG = `
     fill="none"
     stroke="var(--gold)"
     stroke-width="2.5"
-    stroke-linejoin="round"/>
+    stroke-linejoin="round"
+    stroke-linecap="round"/>
 
 
   <circle
     cx="100"
     cy="100"
     r="78"
-    fill="#151b23"
+    fill="var(--navy-2, #182338)"
     stroke="var(--gold)"
     stroke-width="2"/>
 
@@ -121,14 +127,15 @@ const STAR_SVG = `
     r="74"
     fill="none"
     stroke="var(--gold)"
-    stroke-width="1"/>
+    stroke-width="1"
+    opacity="0.7"/>
 
 
   <circle
     cx="100"
     cy="100"
     r="55"
-    fill="#0c1015"
+    fill="var(--navy-1, #0f1621)"
     stroke="var(--gold)"
     stroke-width="1.5"/>
 
@@ -136,7 +143,7 @@ const STAR_SVG = `
   <text
     font-family="Oswald, sans-serif"
     font-size="16"
-    font-weight="700"
+    font-weight="600"
     letter-spacing="2"
     fill="var(--gold)">
 
@@ -155,7 +162,7 @@ const STAR_SVG = `
   <text
     font-family="Oswald, sans-serif"
     font-size="16"
-    font-weight="700"
+    font-weight="600"
     letter-spacing="2"
     fill="var(--gold)">
 
@@ -191,23 +198,23 @@ const STAR_SVG = `
 
 
   <rect
-    x="64"
-    y="116"
-    width="72"
-    height="17"
-    rx="2"
+    x="62"
+    y="115"
+    width="76"
+    height="19"
+    rx="9.5"
     fill="var(--gold)"/>
 
 
   <text
     x="100"
     y="128"
-    font-family="Oswald, sans-serif"
-    font-size="9.5"
-    font-weight="700"
+    font-family="'IBM Plex Sans', sans-serif"
+    font-size="9"
+    font-weight="600"
     letter-spacing="0.5"
     text-anchor="middle"
-    fill="#0c1015">
+    fill="var(--navy-1, #0f1621)">
 
     URBS IN HORTO
 
@@ -499,7 +506,7 @@ function renderSiteHeader(){
 
 
         <!-- ================================================
-             STATUS
+             STATUS — condensée : essentiel seulement
         ================================================= -->
 
         <div class="status-line">
@@ -521,8 +528,6 @@ function renderSiteHeader(){
 
                 <span>
 
-                  DOCUMENT :
-
                   <b>
                     ${docCode}
                   </b>
@@ -542,10 +547,8 @@ function renderSiteHeader(){
 
                 <span>
 
-                  VERSION :
-
                   <b>
-                    ${version}
+                    v${version}
                   </b>
 
                 </span>
