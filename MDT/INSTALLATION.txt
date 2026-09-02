@@ -1,0 +1,11 @@
+INSTALLATION DU MDT
+
+1. Dans le dépôt GitHub, ouvrez le dossier mdt.
+2. Supprimez son ancien contenu.
+3. Importez tout le contenu de ce dossier MDT en conservant le sous-dossier images.
+4. Validez les changements sur la branche main.
+5. Attendez la fin du déploiement Vercel.
+6. Rechargez le site avec Ctrl + F5.
+
+La page divisions.html et le fichier data-divisions.js ne font plus partie du MDT.
+L'authentification Discord et les fonctions Vercel ne sont pas modifiées.

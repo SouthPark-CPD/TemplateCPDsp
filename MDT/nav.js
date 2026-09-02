@@ -30,53 +30,57 @@ const NAV_LINKS = [
 
   {
     href:"index.html",
-    label:"🗂 Procédures"
+    label:"Procédures"
   },
 
   {
     href:"code.html",
-    label:"📻 Guide radio"
+    label:"Guide radio"
   },
 
   {
     href:"reglement.html",
-    label:"⚖ Règlement"
+    label:"Règlement"
   },
 
   {
     href:"tenues-vehicules.html",
-    label:"🎽 Tenues"
+    label:"Tenues"
   },
 
   {
     href:"organigramme.html",
-    label:"🧭 Organigramme"
-  },
-
-  {
-    href:"divisions.html",
-    label:"🏛 Divisions"
+    label:"Organigramme"
   },
 
   {
     href:"acces-rapide.html",
-    label:"⚡ Accès rapide",
+    label:"Accès rapide",
     gold:true
   },
    
   {
     href:"https://guidejuridiquesp.netlify.app/",
-    label:"📖 Guide juridique ↗",
+    label:"Guide juridique ↗",
     gold:true,
     external:true
   },
 
   {
     href:"/api/auth/logout",
-    label:"↪ Déconnexion"
+    label:"Déconnexion",
+    logout:true
   }
 
 ];
+
+
+const BRAND_MARKUP = `
+  <img
+    class="star"
+    src="Seal_of_the_Chicago_Police_Department.png"
+    alt="Sceau du Chicago Police Department">
+`;
 
 
 
@@ -417,6 +421,10 @@ function renderSiteHeader(){
             ? "gold"
             : "",
 
+          link.logout
+            ? "logout"
+            : "",
+
           isCurrent
             ? "current"
             : ""
@@ -466,123 +474,79 @@ function renderSiteHeader(){
   ======================================================== */
 
   container.innerHTML = `
+    <aside class="mdt-sidebar" id="mdt-sidebar">
+      <a class="sidebar-brand" href="index.html" aria-label="Accueil du MDT">
+        ${BRAND_MARKUP}
+        <span class="sidebar-brand-copy">
+          <strong>Chicago Police</strong>
+          <small>Department MDT</small>
+        </span>
+      </a>
 
-    <header>
-
-      <div class="header-inner">
-
-
-        <!-- ================================================
-             BADGE + TITRE
-        ================================================= -->
-
-        <div class="badge-row">
-
-          <div class="badge-left">
-
-            ${STAR_SVG}
-
-            <div>
-
-              <div class="brand-title">
-
-                Chicago Police Department
-
-              </div>
-
-
-              <div class="brand-sub">
-
-                ${subtitle}
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <!-- ==============================================
-               NAVIGATION
-          =============================================== -->
-
-          <div class="header-actions">
-
-            ${linksHtml}
-
-          </div>
-
-        </div>
-
-
-        <!-- ================================================
-             STATUS — condensée : essentiel seulement
-        ================================================= -->
-
-        <div class="status-line">
-
-
-          <span>
-
-            <span class="dot"></span>
-
-            Système opérationnel
-
-          </span>
-
-
-          ${
-            docCode
-
-              ? `
-
-                <span>
-
-                  <b>
-                    ${docCode}
-                  </b>
-
-                </span>
-
-              `
-
-              : ""
-          }
-
-
-          ${
-            version
-
-              ? `
-
-                <span>
-
-                  <b>
-                    v${version}
-                  </b>
-
-                </span>
-
-              `
-
-              : ""
-          }
-
-
-          <span id="nav-clock">
-
-            --/--/---- --:--
-
-          </span>
-
-
-        </div>
-
+      <div class="sidebar-context">
+        <span>Espace opérationnel</span>
+        <strong>${subtitle}</strong>
       </div>
 
-    </header>
+      <span class="sidebar-label">Navigation</span>
+      <nav class="header-actions" id="mdt-navigation" aria-label="Navigation principale">
+        ${linksHtml}
+      </nav>
 
+      <div class="sidebar-footer">
+        <span class="system-state"><i aria-hidden="true"></i> Système opérationnel</span>
+        <small>Accès interne sécurisé</small>
+      </div>
+    </aside>
+
+    <button class="sidebar-overlay" type="button" aria-label="Fermer la navigation"></button>
+
+    <header class="mdt-topbar">
+      <button
+        class="nav-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mdt-sidebar"
+        aria-label="Ouvrir la navigation">
+        <span class="nav-toggle-icon" aria-hidden="true"></span>
+      </button>
+
+      <div class="topbar-copy">
+        <span>${docCode || "CPD • INTERNE"}</span>
+        <strong>${subtitle}</strong>
+      </div>
+
+      <div class="topbar-meta">
+        ${version ? `<span class="version-chip">Version ${version}</span>` : ""}
+        <time id="nav-clock">--/--/---- --:--</time>
+      </div>
+    </header>
   `;
+
+  document.body.classList.add("mdt-ui");
+
+  const toggle = container.querySelector(".nav-toggle");
+  const sidebar = container.querySelector(".mdt-sidebar");
+  const overlay = container.querySelector(".sidebar-overlay");
+
+  const setNavigationState = isOpen => {
+    toggle?.setAttribute("aria-expanded", String(isOpen));
+    sidebar?.classList.toggle("open", isOpen);
+    overlay?.classList.toggle("open", isOpen);
+    document.body.classList.toggle("nav-open", isOpen);
+  };
+
+  toggle?.addEventListener("click", () => {
+    setNavigationState(toggle.getAttribute("aria-expanded") !== "true");
+  });
+
+  overlay?.addEventListener("click", () => setNavigationState(false));
+  container.querySelectorAll(".header-link").forEach(link => {
+    link.addEventListener("click", () => setNavigationState(false));
+  });
+  document.addEventListener("keydown", event => {
+    if(event.key === "Escape") setNavigationState(false);
+  });
 
 }
 
