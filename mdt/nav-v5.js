@@ -504,17 +504,6 @@ function renderSiteHeader(){
         </nav>
       </div>
 
-      <div class="mdt-contextbar">
-        <div class="context-copy">
-          <span>${docCode || "CPD • INTERNE"}</span>
-          <strong>${subtitle}</strong>
-        </div>
-        <div class="context-meta">
-          <span class="system-state"><i aria-hidden="true"></i> Système opérationnel</span>
-          ${version ? `<span class="version-chip">Version ${version}</span>` : ""}
-          <time id="nav-clock">--/--/---- --:--</time>
-        </div>
-      </div>
     </header>
 
     <button class="nav-overlay" type="button" aria-label="Fermer la navigation"></button>
