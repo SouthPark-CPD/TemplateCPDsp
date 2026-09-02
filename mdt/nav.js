@@ -56,7 +56,8 @@ const NAV_LINKS = [
   {
     href:"acces-rapide.html",
     label:"Accès rapide",
-    gold:true
+    gold:true,
+    quick:true
   },
    
   {
@@ -78,7 +79,7 @@ const NAV_LINKS = [
 const BRAND_MARKUP = `
   <img
     class="star"
-    src="Seal_of_the_Chicago_Police_Department.png"
+    src="images/Seal_of_the_Chicago_Police_Department.png"
     alt="Sceau du Chicago Police Department">
 `;
 
@@ -423,6 +424,10 @@ function renderSiteHeader(){
 
           link.logout
             ? "logout"
+            : "",
+
+          link.quick
+            ? "quick"
             : "",
 
           isCurrent
