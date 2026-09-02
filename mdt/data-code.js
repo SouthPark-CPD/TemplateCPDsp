@@ -14,7 +14,7 @@ window.CPD_DATA = [
     codes:[
 
       ["10-1","Radio défectueuse"],
-      ["10-3","Retour Radio"],
+      ["10-3","Retour radio"],
       ["10-4","Bien reçu / Affirmatif"],
       ["10-5","Négatif"],
       ["10-6","Occupé / En procédure"],
@@ -22,16 +22,16 @@ window.CPD_DATA = [
       ["10-8","Prise de service / Disponible pour appel"],
       ["10-9","Répéter le dernier message"],
       ["10-10","Fin de service"],
-      ["10-12","Présence de visiteurs et peuvent entendre la radio"],
+      ["10-12","Présence de visiteurs pouvant entendre la radio"],
       ["10-14","Escorte ou convoi"],
       ["10-15","Suspect détenu / Transport de prisonnier"],
-      ["10-17","Plein d'essence"],
+      ["10-17","Ravitaillement en carburant"],
       ["10-19","En route vers (préciser la destination)"],
       ["10-20","Votre localisation"],
-      ["10-22","Annuler ou Ignorer"],
+      ["10-22","Annuler ou ignorer"],
       ["10-23","Stand-by / En attente"],
-      ["10-24","Demande une transmission de voiture à voiture"],
-      ["10-28","Vérification Plaque / Casier / Mandat"]
+      ["10-24","Demande de communication de véhicule à véhicule"],
+      ["10-28","Vérification de plaque / casier / mandat"]
 
     ]
   },
@@ -44,10 +44,10 @@ window.CPD_DATA = [
 
     codes:[
 
-      ["10-12","Présence de visiteurs et peuvent entendre la radio"],
+      ["10-12","Présence de visiteurs pouvant entendre la radio"],
       ["10-20","Votre localisation"],
-      ["10-24","Demande une transmission de voiture à voiture"],
-      ["10-28","Vérification Plaque / Casier / Mandat"],
+      ["10-24","Demande de communication de véhicule à véhicule"],
+      ["10-28","Vérification de plaque / casier / mandat"],
       ["10-35","Demande de renfort sur (position)"]
 
     ]
@@ -63,25 +63,25 @@ window.CPD_DATA = [
 
       ["10-14","Escorte ou convoi"],
       ["10-15","Suspect détenu / Transport de prisonnier"],
-      ["10-17","Plein d'essence"],
+      ["10-17","Ravitaillement en carburant"],
       ["10-19","En route vers (préciser la destination)"],
       ["10-20","Votre localisation"],
-      ["10-22","Annuler ou Ignorer"],
+      ["10-22","Annuler ou ignorer"],
       ["10-23","Stand-by / En attente"],
-      ["10-24","Demande une transmission de voiture à voiture"],
+      ["10-24","Demande de communication de véhicule à véhicule"],
       ["10-31","Tirs d'armes à feu"],
       ["10-35","Demande de renfort sur (position)"],
       ["10-37","Cambriolage en cours"],
-      ["10-38","Contrôle routier / Traffic Stop"],
+      ["10-38","Contrôle routier"],
       ["10-40","Braquage de supérette"],
       ["10-41","Début de patrouille"],
       ["10-48","Braquage à main armée"],
-      ["10-49","Braquage de Conteneur"],
+      ["10-49","Braquage de conteneur"],
       ["10-50","Accident léger"],
       ["10-51","Accident grave"],
       ["10-56","Refus d'obtempérer"],
       ["10-57","Délit de fuite"],
-      ["10-58","Braquage ATM"],
+      ["10-58","Braquage de distributeur automatique"],
       ["10-59","Vol de véhicule"]
 
     ]
@@ -99,12 +99,12 @@ window.CPD_DATA = [
       ["10-37","Cambriolage en cours"],
       ["10-40","Braquage de supérette"],
       ["10-48","Braquage à main armée"],
-      ["10-49","Braquage de Conteneur"],
-      ["10-58","Braquage ATM"],
+      ["10-49","Braquage de conteneur"],
+      ["10-58","Braquage de distributeur automatique"],
       ["10-59","Vol de véhicule"],
       ["10-60","Vente de drogue"],
       ["10-91","Braquage de banque / bijouterie"],
-      ["10-99","Officer en danger, besoin d'aide (urgent)"]
+      ["10-99","Agent en danger, besoin d'aide urgente"]
 
     ]
   },
@@ -119,13 +119,13 @@ window.CPD_DATA = [
 
     codes:[
 
-      ["Code 2","Prioritaire, répondre cependant sans sirènes"],
-      ["Code 3","Urgent, répondre avec lumières et sirènes"],
-      ["Code 4","Aucune autre assistance nécessaire - situation stable"],
+      ["Code 2","Intervention prioritaire sans avertisseurs lumineux ni sirène"],
+      ["Code 3","Intervention urgente avec avertisseurs lumineux et sirène"],
+      ["Code 4","Aucune autre assistance nécessaire — situation stable"],
       ["Code 5","En surveillance, les autres unités doivent éviter les lieux"],
-      ["Code 6","Arriver sur scène, investigation en cours ou observation"],
+      ["Code 6","Arrivée sur les lieux — enquête ou observation en cours"],
       ["Code 7","En patrouille ou reprise de patrouille"],
-      ["Code 99","OFFICER EN DANGER — Besoin d'aide en urgence, toutes les unités se rendent obligatoirement sur zone!!!"]
+      ["Code 99","AGENT EN DANGER — Besoin d'aide urgente ; toutes les unités doivent se rendre sur place !"]
 
     ]
   },
@@ -149,7 +149,7 @@ window.CPD_DATA = [
 
   {
     id:"unites",
-    label:"Codes d'unité au CDP",
+    label:"Codes d'unité du CPD",
     desc:"Correspondance entre les indicatifs radio et les différents types d'unités.",
 
     codes:[
@@ -158,8 +158,8 @@ window.CPD_DATA = [
       ["K-9","K-9 — Patrouille avec un officier canin"],
       ["W","William (W) — Unité banalisée DB"],
       ["N","Nora (N) — Unité banalisée avec l'État-Major"],
-      ["V","Victor (V) — Unité Vélo"],
-      ["M","Mary (M) — Unité Motocycliste"],
+      ["V","Victor (V) — Unité cycliste"],
+      ["M","Mary (M) — Unité motocycliste"],
       ["D","David (D) — Véhicule blindé / SWAT"],
       ["B","Bravo (B) — Unité en bateau"],
       ["E","Edward (E) — Unité Traffic Division"]

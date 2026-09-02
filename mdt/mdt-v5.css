@@ -72,6 +72,11 @@ body.mdt-ui input{
   background:transparent!important;
 }
 
+#site-header,
+#site-header *{
+  box-sizing:border-box;
+}
+
 .mdt-header{
   position:relative;
   width:min(var(--content-width),100%);
@@ -156,10 +161,13 @@ body.mdt-ui input{
 .header-actions{
   display:flex;
   min-width:0;
+  max-width:none!important;
   flex:1;
+  flex-wrap:nowrap!important;
   align-items:center;
   justify-content:flex-end;
   gap:4px;
+  margin:0!important;
   padding:0!important;
   border:0!important;
   border-radius:0!important;
@@ -723,6 +731,7 @@ body.mdt-ui > header{display:none}
     width:min(480px,calc(100vw - 36px));
     max-height:calc(100dvh - 160px);
     grid-template-columns:1fr 1fr;
+    flex-wrap:initial!important;
     gap:6px;
     padding:12px;
     overflow-y:auto;

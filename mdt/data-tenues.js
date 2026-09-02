@@ -7,25 +7,13 @@ window.CPD_DATA = [
   {
     category: "reglementaire",
 
-    title: "Officier 1 à Officier 3",
+    title: "Officier 1 à FTO",
 
-    badge: "OFFICIER 1 → 3",
+    badge: "OFFICIER 1 → FTO",
 
     image: "images/tenueoffi3.png",
 
-    caption: "Tenue réglementaire commune aux Officiers 1 à 3."
-  },
-
-  {
-    category: "reglementaire",
-
-    title: "FTO",
-
-    badge: "FTO",
-
-    image: "images/tenue-fto.png",
-
-    caption: "Tenue réglementaire FTO."
+    caption: "Tenue réglementaire commune aux officiers 1 à FTO."
   },
 
 
@@ -42,15 +30,15 @@ window.CPD_DATA = [
 
     image: "images/TenueCereOffi.webp",
 
-    caption: "Tenue de cérémonie applicable des Officiers 1 jusqu'au FTO."
+    caption: "Tenue de cérémonie applicable aux officiers 1 à FTO."
   },
 
   {
     category: "ceremonie",
 
-    title: "Au-dessus de FTO",
+    title: "Grades supérieurs au FTO",
 
-    badge: "SUPÉRIEUR FTO",
+    badge: "SUPÉRIEUR AU FTO",
 
     image: "images/TenueCereSerge.webp",
 

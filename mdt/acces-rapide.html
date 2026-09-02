@@ -499,7 +499,7 @@ body{
 
   <div class="qr-titlebar">
     <div class="qr-title">Accès rapide</div>
-    <div class="qr-subtitle">Codes radio · Codes · Miranda</div>
+    <div class="qr-subtitle">Codes radio · Codes d'intervention · Droits Miranda</div>
   </div>
 
   <div class="qr-grid">
@@ -513,7 +513,7 @@ body{
         <input
           type="text"
           id="code-search"
-          placeholder="🔎 rechercher..."
+          placeholder="🔎 Rechercher..."
         >
       </h2>
 
@@ -539,14 +539,14 @@ body{
           <div class="code2-row">
             <span class="code-num">Code 2</span>
             <span class="code-def">
-              Prioritaire, répondre cependant sans sirènes
+              Intervention prioritaire sans avertisseurs lumineux ni sirène
             </span>
           </div>
 
           <div class="code2-row">
             <span class="code-num">Code 3</span>
             <span class="code-def">
-              Urgent, répondre avec lumières et sirènes
+              Intervention urgente avec avertisseurs lumineux et sirène
             </span>
           </div>
 
@@ -567,7 +567,7 @@ body{
           <div class="code2-row">
             <span class="code-num">Code 6</span>
             <span class="code-def">
-              Arriver sur scène, investigation en cours ou observation
+              Arrivée sur les lieux — enquête ou observation en cours
             </span>
           </div>
 
@@ -581,7 +581,7 @@ body{
           <div class="code2-row code-urgent">
             <span class="code-num">Code 99</span>
             <span class="code-def">
-              OFFICER EN DANGER — Besoin d'aide en urgence, toutes les unités se rendent obligatoirement sur zone!!!
+              AGENT EN DANGER — Besoin d'aide urgente ; toutes les unités doivent se rendre sur place !
             </span>
           </div>
 
@@ -620,33 +620,30 @@ body{
           </p>
 
           <p>
-            Sachez que les chefs d'inculpations peuvent être amenés à changer
-            une fois durant la procédure.<br>
+            Les chefs d'inculpation pourront être modifiés au cours de la procédure.<br>
 
             Vous avez le droit de garder le silence.
           </p>
 
           <p>
-            Tout ce que vous direz pourra et sera retenu contre vous lors d'une
-            cour de justice.<br>
+            Tout ce que vous direz pourra être retenu contre vous devant un tribunal.<br>
 
-            Vous avez le droit à un avocat et d'avoir un avocat présent lors
-            de votre interrogatoire.<br>
+            Vous avez droit à un avocat et à sa présence lors de votre interrogatoire.<br>
 
             Si vous n'en avez pas les moyens, un avocat vous sera commis
             d'office.<br>
 
-            Durant chaque interrogatoire, vous pouvez décider à n'importe quel
-            moment d'exercer vos droits, de répondre à aucune question et de
+            Durant chaque interrogatoire, vous pouvez décider à tout
+            moment d'exercer vos droits, de ne répondre à aucune question et de
             ne faire aucune déposition.<br>
 
             Durant votre incarcération, vous avez le droit de demander à voir
-            un médecin et/ou manger et boire.
+            un médecin, ainsi qu'à manger et à boire.
           </p>
 
           <p class="questions">
             Avez-vous bien compris les droits que je viens de vous lire ?<br>
-            Voulez-vous exercer l'un de vos droits ?
+            Souhaitez-vous exercer l'un de ces droits ?
           </p>
 
         </div>
@@ -674,7 +671,7 @@ body{
       type="text"
       id="penal-search"
       class="penal-search"
-      placeholder="🔎 rechercher un code ou une infraction..."
+      placeholder="🔎 Rechercher un code ou une infraction..."
     >
 
   </div>
@@ -684,7 +681,7 @@ body{
 
     <div class="penal-panel">
 
-      <h3>🚗 Vitesse &amp; Conduite</h3>
+      <h3>🚗 Vitesse et conduite</h3>
 
       <div
         class="penal-list"
@@ -696,7 +693,7 @@ body{
 
     <div class="penal-panel">
 
-      <h3>🔫 Armes &amp; Stupéfiants</h3>
+      <h3>🔫 Armes et stupéfiants</h3>
 
       <div
         class="penal-list"
@@ -708,7 +705,7 @@ body{
 
     <div class="penal-panel">
 
-      <h3>⚠ Vols &amp; Violence</h3>
+      <h3>⚠ Vols et violences</h3>
 
       <div
         class="penal-list"
@@ -725,7 +722,7 @@ body{
 <script>
 
 const PAGE_CONFIG = {
-  subtitle:"Procédures opérationnelles — Manuel CPD",
+  subtitle:"Accès rapide — Référentiel opérationnel",
   currentPage:"acces-rapide.html",
   docCode:"CPD-TPL-002",
   version:"1.0"
@@ -750,11 +747,11 @@ const RADIO_CODES = [
   ["10-8","Prise de service / Disponible pour appel"],
   ["10-9","Répéter le dernier message"],
   ["10-10","Fin de service"],
-  ["10-17","Plein d'essence"],
+  ["10-17","Ravitaillement en carburant"],
   ["10-20","Votre localisation"],
-  ["10-22","Annuler ou Ignorer"],
+  ["10-22","Annuler ou ignorer"],
   ["10-37","Cambriolage en cours"],
-  ["10-38","Contrôle routier / Traffic Stop"],
+  ["10-38","Contrôle routier"],
   ["10-56","Refus d'obtempérer"],
   ["10-60","Vente de drogue"],
   ["10-91","Braquage de banque / bijouterie"]
@@ -901,45 +898,45 @@ window.addEventListener(
 
 const PENAL_CODES = [
 
-  ["0.M","Excès de vitesse 5 à 25 km/h","100$","—","vitesse"],
+  ["0.M","Excès de vitesse de 5 à 25 km/h","100 $","—","vitesse"],
 
-  ["0.R","Excès de vitesse 60 km/h et +","200$","—","vitesse"],
+  ["0.R","Excès de vitesse de 60 km/h ou plus","200 $","—","vitesse"],
 
-  ["1.N","Excès de vitesse 50 à 100 km/h","500$","30 min","vitesse"],
+  ["1.N","Excès de vitesse de 50 à 100 km/h","500 $","30 min","vitesse"],
 
-  ["1.A-C","Excès de vitesse > 100 km/h","1000$","30 min","vitesse"],
+  ["1.A-C","Excès de vitesse supérieur à 100 km/h","1 000 $","30 min","vitesse"],
 
-  ["1.O","Refus d'obtempérer","400$","15 min","vitesse"],
+  ["1.O","Refus d'obtempérer","400 $","15 min","vitesse"],
 
-  ["1.P","Délit de fuite","300$","15 min","vitesse"],
+  ["1.P","Délit de fuite","300 $","15 min","vitesse"],
 
 
-  ["1.M","Possession de produits illégaux (<10g)","300$","15 min","armes"],
+  ["1.M","Possession de produits illégaux (moins de 10 g)","300 $","15 min","armes"],
 
-  ["2.C","Possession de produits illégaux (10 à 29g)","600$","25 min","armes"],
+  ["2.C","Possession de produits illégaux (10 à 29 g)","600 $","25 min","armes"],
 
-  ["2.E","Trafic de produits illégaux (30g et +)","1200$","40 min","armes"],
+  ["2.E","Trafic de produits illégaux (30 g ou plus)","1 200 $","40 min","armes"],
 
-  ["2.N","Vente de produits illégaux","750$","20 min","armes"],
+  ["2.N","Vente de produits illégaux","750 $","20 min","armes"],
 
-  ["1.L","Arme blanche sortie en public","200$","10 min","armes"],
+  ["1.L","Port apparent d'une arme blanche en public","200 $","10 min","armes"],
 
   ["3.P","Détention/conservation mineure d'arme à feu","—","Perpétuité","armes"],
 
   ["4.P","Détention/conservation majeure d'arme de guerre","—","Perpétuité","armes"],
 
 
-  ["2.B","Vol de véhicule","1000$","25 min","violence"],
+  ["2.B","Vol de véhicule","1 000 $","25 min","violence"],
 
-  ["2.F","Agression sur un civil","1300$","15 min","violence"],
+  ["2.F","Agression sur un civil","1 300 $","15 min","violence"],
 
-  ["2.G","Agression sur un représentant de l'état","1800$","30 min","violence"],
+  ["2.G","Agression sur un représentant de l'État","1 800 $","30 min","violence"],
 
-  ["3.E","Braquage de banque","3500$","60 min","violence"],
+  ["3.E","Braquage de banque","3 500 $","60 min","violence"],
 
-  ["3.A","Kidnapping / Séquestration","1500$/pers","45 min","violence"],
+  ["3.A","Enlèvement / séquestration","1 500 $/personne","45 min","violence"],
 
-  ["3.I","Meurtre","—","Peine Capitale","violence"]
+  ["3.I","Meurtre","—","Peine capitale","violence"]
 
 ];
 

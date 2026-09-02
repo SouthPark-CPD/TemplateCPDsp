@@ -263,7 +263,7 @@ window.CPD_DATA = [
             <li>Identifier la nature de l'appel.</li>
             <li>Identifier les personnes potentiellement impliquées.</li>
             <li>Évaluer les risques.</li>
-            <li>Demander des renforts lorsque nécessaire.</li>
+            <li>Demander des renforts lorsque cela est nécessaire.</li>
           </ul>
         `
       },
@@ -313,7 +313,7 @@ window.CPD_DATA = [
             <li>Communiquer clairement.</li>
             <li>Éviter les provocations.</li>
             <li>Demander des renforts si nécessaire.</li>
-            <li>Utiliser la force uniquement lorsque justifié.</li>
+            <li>Utiliser la force uniquement lorsque son usage est justifié.</li>
           </ul>
         `
       }
@@ -625,7 +625,7 @@ window.CPD_DATA = [
         severity:"critical",
         body:`
           <p>
-            Une communication d'urgence ou de priorité doit
+            Une communication d'urgence ou prioritaire doit
             immédiatement monopoliser l'attention du réseau.
           </p>
           <div class="notice red">
@@ -683,7 +683,7 @@ window.CPD_DATA = [
           </p>
           <p>
             La destruction, la dissimulation ou la modification
-            volontaire d'une preuve constitue un manquement majeur.
+            volontaire d'une preuve constituent des manquements majeurs.
           </p>
         `
       },
@@ -700,7 +700,7 @@ window.CPD_DATA = [
             <li>Ne pas inventer d'informations.</li>
             <li>Ne pas omettre volontairement un élément important.</li>
             <li>Distinguer les faits observés des informations rapportées.</li>
-            <li>Utiliser des horaires et lieux précis lorsque disponibles.</li>
+            <li>Utiliser des horaires et des lieux précis lorsqu'ils sont disponibles.</li>
           </ul>
         `
       }
@@ -761,7 +761,7 @@ window.CPD_DATA = [
   },
   {
     id:"civils",
-    label:"Relations civils",
+    label:"Relations avec le public",
     desc:"Règles relatives aux interactions avec la population.",
     articles:[
       {
@@ -826,7 +826,7 @@ window.CPD_DATA = [
             <li>Arrestation importante.</li>
             <li>Usage significatif de la force.</li>
             <li>Utilisation d'une arme.</li>
-            <li>Accident de véhicule.</li>
+            <li>Accident impliquant un véhicule.</li>
             <li>Incident particulier.</li>
             <li>Événement nécessitant un suivi hiérarchique.</li>
           </ul>
@@ -876,7 +876,7 @@ window.CPD_DATA = [
         severity:"critical",
         body:`
           <p>
-            Constitue notamment un manquement disciplinaire :
+            Constituent notamment des manquements disciplinaires :
           </p>
           <ul>
             <li>Non-respect volontaire d'une procédure.</li>
@@ -922,7 +922,7 @@ window.CPD_DATA = [
               </tr>
               <tr>
                 <td>4</td>
-                <td>Rétrogradation ou retrait de fonction</td>
+                <td>Rétrogradation ou retrait de fonctions</td>
               </tr>
               <tr>
                 <td>5</td>
@@ -1022,8 +1022,8 @@ window.CPD_DATA = [
             de l'évolution des procédures.
           </p>
           <p>
-            Les agents sont responsables de prendre connaissance
-            des nouvelles versions publiées.
+            Les agents sont tenus de prendre connaissance
+            de toute nouvelle version publiée.
           </p>
         `
       },

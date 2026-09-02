@@ -6,7 +6,7 @@
       <div id="site-header"></div>
 
    Chaque page doit définir PAGE_CONFIG avant de charger
-   nav.js :
+   nav-v5.js :
 
       <script>
         const PAGE_CONFIG = {
@@ -17,7 +17,7 @@
         };
       </script>
 
-      <script src="nav.js"></script>
+      <script src="nav-v5.js"></script>
 
 ========================================================== */
 
@@ -316,7 +316,7 @@ function renderSiteHeader(){
   if(!container){
 
     console.warn(
-      "nav.js : #site-header est introuvable."
+      "nav-v5.js : #site-header est introuvable."
     );
 
     return;
@@ -349,7 +349,7 @@ function renderSiteHeader(){
      Si currentPage est présent dans PAGE_CONFIG,
      il est utilisé.
 
-     Sinon, nav.js détecte automatiquement
+     Sinon, nav-v5.js détecte automatiquement
      le fichier ouvert.
   */
 

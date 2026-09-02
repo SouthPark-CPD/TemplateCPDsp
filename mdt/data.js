@@ -11,7 +11,7 @@ window.CPD_DATA = [
 
     label:"Général",
 
-    desc:"Procédures généraux utilisés dans le cadre des opérations du CPD.",
+    desc:"Procédures générales utilisées dans le cadre des opérations du CPD.",
 
     Procédures:[
 
@@ -27,7 +27,7 @@ window.CPD_DATA = [
         number:"02",
         title:"Rapport d'incident",
         type:"RAPPORT",
-        description:"Procedure destiné à documenter un incident nécessitant un suivi administratif ou hiérarchique.",
+        description:"Procédure destinée à documenter un incident nécessitant un suivi administratif ou hiérarchique.",
         file:"https://docs.google.com/document/d/1El4E35B-fStabW3TSJFoQIyvIJgCsr3G5vqPMZSLFRU/edit?usp=sharing"
       },
 
@@ -41,9 +41,9 @@ window.CPD_DATA = [
 
       {
         number:"04",
-        title:"Droit Miranda",
-        type:"Droit",
-        description:"Procedure destiné à l'annonce des droits miranda",
+        title:"Droits Miranda",
+        type:"DROITS",
+        description:"Procédure destinée à la lecture des droits Miranda.",
         file:"https://docs.google.com/document/d/1ohEObrjaYPbMRByq0nK7I8iS87Q_jDMFbNGEzmt3I_o/edit?usp=sharing"
       }
 

@@ -174,7 +174,7 @@ window.CPD_DATA = [
         name:"Marine Unit",
 
         desc:
-          "Patrouilles à moto, escortes et contrôle de la circulation."
+          "Patrouilles nautiques, secours et interventions sur les voies navigables."
       },
 
 
