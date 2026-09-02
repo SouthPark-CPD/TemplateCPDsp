@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dossier agent — Police Academy</title>
+  <link rel="icon" href="../assets/cpd-seal.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dossier.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/academy-admin/">
+      <img src="../assets/cpd-seal.png" alt="">
+      <div><strong>Police Academy</strong><span>Dossier de formation</span></div>
+    </a>
+    <nav>
+      <a class="back-link" href="/academy-admin/">← Retour aux effectifs</a>
+      <a class="logout" href="/api/academy-admin-auth/logout">Déconnexion</a>
+    </nav>
+  </header>
+
+  <main>
+    <p id="page-message" class="page-message">Chargement du dossier…</p>
+
+    <div id="dossier-content" hidden>
+      <section class="agent-hero">
+        <img id="agent-avatar" src="" alt="">
+        <div class="agent-identity">
+          <p>Dossier individuel</p>
+          <h1 id="agent-name">Agent</h1>
+          <div class="badges"><span id="agent-rank" class="rank">—</span><span id="agent-discord" class="discord-id">—</span></div>
+        </div>
+        <div class="hero-stat"><span>Formations</span><strong id="training-count">0</strong></div>
+      </section>
+
+      <div id="notice" class="notice" role="status" hidden></div>
+
+      <section class="workspace-grid">
+        <article class="panel file-panel">
+          <div class="panel-heading"><div><p>Informations générales</p><h2>Dossier Academy</h2></div><span id="file-updated" class="updated">Nouveau dossier</span></div>
+          <form id="agent-form">
+            <div class="form-grid">
+              <label><span>Nom et prénom RP</span><input id="rp-name" name="rpName" maxlength="100" placeholder="Ex. John Carter"></label>
+              <label><span>Matricule</span><input id="matricule" name="matricule" maxlength="40" placeholder="Ex. 2417"></label>
+            </div>
+            <label><span>Statut Academy</span>
+              <select id="academy-status" name="academyStatus">
+                <option value="a_former">À former</option>
+                <option value="en_formation">En formation</option>
+                <option value="termine">Formation terminée</option>
+                <option value="suspendu">Suspendu</option>
+              </select>
+            </label>
+            <label><span>Note générale des instructeurs</span><textarea id="general-note" name="generalNote" maxlength="5000" rows="7" placeholder="Synthèse générale, suivi particulier, informations utiles…"></textarea></label>
+            <button id="save-agent" class="primary-button" type="submit">Enregistrer le dossier</button>
+          </form>
+        </article>
+
+        <article class="panel training-panel">
+          <div class="panel-heading"><div><p>Nouvelle entrée</p><h2>Ajouter une formation</h2></div></div>
+          <form id="training-form">
+            <label><span>Intitulé de la formation *</span><input id="training-type" name="trainingType" maxlength="120" required placeholder="Ex. Procédure d’interpellation"></label>
+            <div class="form-grid">
+              <label><span>Date *</span><input id="training-date" name="trainingDate" type="date" required></label>
+              <label><span>Résultat *</span>
+                <select id="training-result" name="result" required>
+                  <option value="planifiee">Planifiée</option>
+                  <option value="valide">Validée</option>
+                  <option value="a_revoir">À revoir</option>
+                  <option value="non_valide">Non validée</option>
+                </select>
+              </label>
+            </div>
+            <label><span>Note sur 100 <small>(facultatif)</small></span><input id="training-score" name="score" type="number" min="0" max="100" placeholder="Ex. 85"></label>
+            <label><span>Points forts</span><textarea id="training-strengths" name="strengths" maxlength="3000" rows="3" placeholder="Compétences maîtrisées et bons réflexes…"></textarea></label>
+            <label><span>Axes d’amélioration</span><textarea id="training-improvements" name="improvements" maxlength="3000" rows="3" placeholder="Points à retravailler lors de la prochaine séance…"></textarea></label>
+            <label><span>Commentaire de séance</span><textarea id="training-comment" name="comment" maxlength="5000" rows="4" placeholder="Déroulement et observations complémentaires…"></textarea></label>
+            <button id="save-training" class="primary-button" type="submit">Ajouter à l’historique</button>
+          </form>
+        </article>
+      </section>
+
+      <section class="history-panel">
+        <div class="panel-heading"><div><p>Suivi pédagogique</p><h2>Historique des formations</h2></div></div>
+        <p id="history-empty" class="empty-history">Aucune formation enregistrée pour cet agent.</p>
+        <div id="training-history" class="training-history" hidden></div>
+      </section>
+    </div>
+  </main>
+  <script src="dossier.js"></script>
+</body>
+</html>

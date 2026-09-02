@@ -42,6 +42,9 @@ const EXCLUDED_HIGH_RANKS = new Set([
   "1540495833529589770"
 ]);
 
+const ACADEMY_STATUSES = new Set(["a_former", "en_formation", "termine", "suspendu"]);
+const TRAINING_RESULTS = new Set(["planifiee", "valide", "a_revoir", "non_valide"]);
+
 function actionFromRequest(req) {
   return Array.isArray(req.query.action)
     ? req.query.action[0]
@@ -178,6 +181,10 @@ async function getAllCpdMembers() {
   return members;
 }
 
+async function getCpdMember(discordId) {
+  return discordBotRequest(`/guilds/${CPD_GUILD_ID}/members/${discordId}`);
+}
+
 function highestRecognizedRank(roleIds) {
   for (let index = CPD_RANKS.length - 1; index >= 0; index -= 1) {
     if (roleIds.includes(CPD_RANKS[index].id)) return CPD_RANKS[index];
@@ -197,6 +204,67 @@ function discordAvatar(member) {
     ? Number(user.discriminator) % 5
     : Number((BigInt(user.id) >> 22n) % 6n);
   return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
+}
+
+function publicAgent(member) {
+  const roles = Array.isArray(member.roles) ? member.roles : [];
+  const rank = highestRecognizedRank(roles);
+  if (!member.user || member.user.bot || !roles.includes(CPD_MEMBER_ROLE_ID)
+    || roles.some(roleId => EXCLUDED_HIGH_RANKS.has(roleId)) || !rank) {
+    return null;
+  }
+  return {
+    discordId: member.user.id,
+    displayName: member.nick || member.user.global_name || member.user.username,
+    username: member.user.username,
+    avatar: discordAvatar(member),
+    rank: rank.name,
+    rankLevel: rank.level
+  };
+}
+
+function readJsonBody(req) {
+  if (!req.body) return {};
+  if (typeof req.body === "object") return req.body;
+  try {
+    return JSON.parse(req.body);
+  } catch {
+    return null;
+  }
+}
+
+function textField(value, maxLength) {
+  return String(value || "").trim().slice(0, maxLength);
+}
+
+function validDiscordId(value) {
+  return /^\d{17,20}$/.test(String(value || ""));
+}
+
+function validDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value || ""))
+    && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
+}
+
+async function instructorAccess(req, res) {
+  const access = await validateSession(req, false);
+  if (!access.ok) {
+    res.setHeader("Set-Cookie", clearSessionCookie());
+    res.status(401).json({ ok: false, code: access.reason });
+    return null;
+  }
+  if (access.changed) res.setHeader("Set-Cookie", sessionCookie(access.session));
+  return access.session;
+}
+
+async function eligibleAgent(discordId) {
+  try {
+    const member = await getCpdMember(discordId);
+    return publicAgent(member);
+  } catch (error) {
+    if (error.status === 404) return null;
+    throw error;
+  }
 }
 
 async function getStoredAgentSummaries() {
@@ -225,12 +293,8 @@ async function agentsList(req, res) {
   if (req.method !== "GET") return res.status(405).end();
   res.setHeader("Cache-Control", "private, no-store");
 
-  const access = await validateSession(req, false);
-  if (!access.ok) {
-    res.setHeader("Set-Cookie", clearSessionCookie());
-    return res.status(401).json({ ok: false, code: access.reason });
-  }
-  if (access.changed) res.setHeader("Set-Cookie", sessionCookie(access.session));
+  const session = await instructorAccess(req, res);
+  if (!session) return;
 
   try {
     const [members, storedFiles] = await Promise.all([
@@ -245,17 +309,11 @@ async function agentsList(req, res) {
           && !roles.some(roleId => EXCLUDED_HIGH_RANKS.has(roleId));
       })
       .map(member => {
-        const roles = Array.isArray(member.roles) ? member.roles : [];
-        const rank = highestRecognizedRank(roles);
-        if (!rank || !member.user || member.user.bot) return null;
+        const agent = publicAgent(member);
+        if (!agent) return null;
         const stored = storedFiles.get(member.user.id);
         return {
-          discordId: member.user.id,
-          displayName: member.nick || member.user.global_name || member.user.username,
-          username: member.user.username,
-          avatar: discordAvatar(member),
-          rank: rank.name,
-          rankLevel: rank.level,
+          ...agent,
           rpName: stored?.rp_name || "",
           matricule: stored?.matricule || "",
           academyStatus: stored?.academy_status || "a_former",
@@ -278,6 +336,174 @@ async function agentsList(req, res) {
   }
 }
 
+async function agentDetail(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+
+  const discordId = Array.isArray(req.query.id) ? req.query.id[0] : String(req.query.id || "");
+  if (!validDiscordId(discordId)) return res.status(400).json({ ok: false, code: "invalid_agent_id" });
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  try {
+    const agent = await eligibleAgent(discordId);
+    if (!agent) return res.status(404).json({ ok: false, code: "agent_not_eligible" });
+
+    const sql = neon(process.env.DATABASE_URL);
+    const [files, trainings] = await Promise.all([
+      sql`
+        SELECT discord_id, rp_name, matricule, academy_status, general_note,
+          created_at, updated_at, updated_by_discord_id
+        FROM academy_agent_files
+        WHERE discord_id = ${discordId}
+        LIMIT 1
+      `,
+      sql`
+        SELECT id, training_type, training_date, result, score, comment,
+          strengths, improvements, instructor_discord_id, instructor_name,
+          created_at, updated_at
+        FROM academy_training_records
+        WHERE agent_discord_id = ${discordId}
+        ORDER BY training_date DESC, created_at DESC
+      `
+    ]);
+
+    const file = files[0] || null;
+    return res.status(200).json({
+      ok: true,
+      agent,
+      file: {
+        rpName: file?.rp_name || "",
+        matricule: file?.matricule || "",
+        academyStatus: file?.academy_status || "a_former",
+        generalNote: file?.general_note || "",
+        createdAt: file?.created_at || null,
+        updatedAt: file?.updated_at || null,
+        updatedByDiscordId: file?.updated_by_discord_id || null
+      },
+      trainings: trainings.map(training => ({
+        id: String(training.id),
+        trainingType: training.training_type,
+        trainingDate: training.training_date,
+        result: training.result,
+        score: training.score,
+        comment: training.comment || "",
+        strengths: training.strengths || "",
+        improvements: training.improvements || "",
+        instructorDiscordId: training.instructor_discord_id,
+        instructorName: training.instructor_name,
+        createdAt: training.created_at,
+        updatedAt: training.updated_at
+      }))
+    });
+  } catch (error) {
+    console.error("Academy agent detail failed", error);
+    const code = error.status === 403 ? "discord_members_forbidden" : "agent_detail_unavailable";
+    return res.status(500).json({ ok: false, code });
+  }
+}
+
+async function saveAgentFile(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const discordId = String(body.discordId || "");
+  const rpName = textField(body.rpName, 100);
+  const matricule = textField(body.matricule, 40);
+  const academyStatus = String(body.academyStatus || "");
+  const generalNote = textField(body.generalNote, 5000);
+  if (!validDiscordId(discordId) || !ACADEMY_STATUSES.has(academyStatus)) {
+    return res.status(400).json({ ok: false, code: "invalid_agent_file" });
+  }
+
+  try {
+    const agent = await eligibleAgent(discordId);
+    if (!agent) return res.status(404).json({ ok: false, code: "agent_not_eligible" });
+    const sql = neon(process.env.DATABASE_URL);
+    const [saved] = await sql`
+      INSERT INTO academy_agent_files (
+        discord_id, rp_name, matricule, academy_status, general_note,
+        updated_by_discord_id, created_at, updated_at
+      ) VALUES (
+        ${discordId}, ${rpName || null}, ${matricule || null}, ${academyStatus},
+        ${generalNote || null}, ${session.user.id}, NOW(), NOW()
+      )
+      ON CONFLICT (discord_id) DO UPDATE SET
+        rp_name = EXCLUDED.rp_name,
+        matricule = EXCLUDED.matricule,
+        academy_status = EXCLUDED.academy_status,
+        general_note = EXCLUDED.general_note,
+        updated_by_discord_id = EXCLUDED.updated_by_discord_id,
+        updated_at = NOW()
+      RETURNING updated_at
+    `;
+    return res.status(200).json({ ok: true, updatedAt: saved.updated_at });
+  } catch (error) {
+    console.error("Academy agent file save failed", error);
+    return res.status(500).json({ ok: false, code: "agent_file_save_failed" });
+  }
+}
+
+async function createTraining(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const discordId = String(body.discordId || "");
+  const trainingType = textField(body.trainingType, 120);
+  const trainingDate = String(body.trainingDate || "");
+  const result = String(body.result || "");
+  const comment = textField(body.comment, 5000);
+  const strengths = textField(body.strengths, 3000);
+  const improvements = textField(body.improvements, 3000);
+  const rawScore = body.score === "" || body.score === null || body.score === undefined
+    ? null
+    : Number(body.score);
+
+  if (!validDiscordId(discordId) || !trainingType || !validDate(trainingDate)
+    || !TRAINING_RESULTS.has(result) || (rawScore !== null && (!Number.isInteger(rawScore) || rawScore < 0 || rawScore > 100))) {
+    return res.status(400).json({ ok: false, code: "invalid_training" });
+  }
+
+  try {
+    const agent = await eligibleAgent(discordId);
+    if (!agent) return res.status(404).json({ ok: false, code: "agent_not_eligible" });
+    const sql = neon(process.env.DATABASE_URL);
+    await sql`
+      INSERT INTO academy_agent_files (
+        discord_id, academy_status, updated_by_discord_id, created_at, updated_at
+      ) VALUES (${discordId}, 'en_formation', ${session.user.id}, NOW(), NOW())
+      ON CONFLICT (discord_id) DO NOTHING
+    `;
+    const [created] = await sql`
+      INSERT INTO academy_training_records (
+        agent_discord_id, training_type, training_date, result, score, comment,
+        strengths, improvements, instructor_discord_id, instructor_name,
+        created_at, updated_at
+      ) VALUES (
+        ${discordId}, ${trainingType}, ${trainingDate}, ${result}, ${rawScore},
+        ${comment || null}, ${strengths || null}, ${improvements || null},
+        ${session.user.id}, ${session.user.globalName || session.user.username}, NOW(), NOW()
+      )
+      RETURNING id
+    `;
+    return res.status(201).json({ ok: true, id: String(created.id) });
+  } catch (error) {
+    console.error("Academy training creation failed", error);
+    return res.status(500).json({ ok: false, code: "training_creation_failed" });
+  }
+}
+
 module.exports = async function handler(req, res) {
   switch (actionFromRequest(req)) {
     case "discord": return discordLogin(req, res);
@@ -286,6 +512,9 @@ module.exports = async function handler(req, res) {
     case "logout": return logout(req, res);
     case "database-check": return databaseCheck(req, res);
     case "agents": return agentsList(req, res);
+    case "agent": return agentDetail(req, res);
+    case "agent-save": return saveAgentFile(req, res);
+    case "training-create": return createTraining(req, res);
     default: return res.status(404).json({ ok: false, code: "route_not_found" });
   }
 };

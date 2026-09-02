@@ -11,7 +11,10 @@
   },
   "routes": [
     { "src": "/api/academy-admin-auth/(discord|callback|session|logout)", "dest": "/api/academy-router?action=$1" },
+    { "src": "/api/academy-admin-data/agent/save", "dest": "/api/academy-router?action=agent-save" },
+    { "src": "/api/academy-admin-data/training/create", "dest": "/api/academy-router?action=training-create" },
     { "src": "/api/academy-admin-data/agents", "dest": "/api/academy-router?action=agents" },
+    { "src": "/api/academy-admin-data/agent", "dest": "/api/academy-router?action=agent" },
     { "src": "/api/database-check", "dest": "/api/academy-router?action=database-check" },
     { "src": "/academy-admin", "dest": "/api/academy-admin?path=index.html" },
     { "src": "/academy-admin/", "dest": "/api/academy-admin?path=index.html" },

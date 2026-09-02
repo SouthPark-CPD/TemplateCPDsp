@@ -49,7 +49,7 @@ function renderAgents() {
         <p>${escapeHtml(agent.displayName)}${agent.matricule ? ` · Matricule ${escapeHtml(agent.matricule)}` : ""}</p>
         <div class="agent-meta"><span>${escapeHtml(statusLabels[agent.academyStatus] || "À former")}</span><span>${agent.trainingCount} formation${agent.trainingCount > 1 ? "s" : ""}</span></div>
       </div>
-      <button class="file-button" type="button" disabled title="Disponible à l’étape suivante">Ouvrir le dossier</button>
+      <a class="file-button" href="/academy-admin/dossier.html?id=${encodeURIComponent(agent.discordId)}">Ouvrir le dossier</a>
     </article>
   `).join("");
 }
