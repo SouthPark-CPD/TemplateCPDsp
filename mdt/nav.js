@@ -474,64 +474,56 @@ function renderSiteHeader(){
   ======================================================== */
 
   container.innerHTML = `
-    <aside class="mdt-sidebar" id="mdt-sidebar">
-      <a class="sidebar-brand" href="index.html" aria-label="Accueil du MDT">
-        ${BRAND_MARKUP}
-        <span class="sidebar-brand-copy">
-          <strong>Chicago Police</strong>
-          <small>Department MDT</small>
-        </span>
-      </a>
+    <header class="mdt-header">
+      <div class="mdt-header-main">
+        <a class="header-brand" href="index.html" aria-label="Accueil du MDT">
+          ${BRAND_MARKUP}
+          <span class="header-brand-copy">
+            <strong>Chicago Police Department</strong>
+            <small>Mobile Data Terminal</small>
+          </span>
+        </a>
 
-      <div class="sidebar-context">
-        <span>Espace opérationnel</span>
-        <strong>${subtitle}</strong>
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="mdt-navigation"
+          aria-label="Ouvrir la navigation">
+          <span class="nav-toggle-label">Menu</span>
+          <span class="nav-toggle-icon" aria-hidden="true"></span>
+        </button>
+
+        <nav class="header-actions" id="mdt-navigation" aria-label="Navigation principale">
+          ${linksHtml}
+        </nav>
       </div>
 
-      <span class="sidebar-label">Navigation</span>
-      <nav class="header-actions" id="mdt-navigation" aria-label="Navigation principale">
-        ${linksHtml}
-      </nav>
-
-      <div class="sidebar-footer">
-        <span class="system-state"><i aria-hidden="true"></i> Système opérationnel</span>
-        <small>Accès interne sécurisé</small>
-      </div>
-    </aside>
-
-    <button class="sidebar-overlay" type="button" aria-label="Fermer la navigation"></button>
-
-    <header class="mdt-topbar">
-      <button
-        class="nav-toggle"
-        type="button"
-        aria-expanded="false"
-        aria-controls="mdt-sidebar"
-        aria-label="Ouvrir la navigation">
-        <span class="nav-toggle-icon" aria-hidden="true"></span>
-      </button>
-
-      <div class="topbar-copy">
-        <span>${docCode || "CPD • INTERNE"}</span>
-        <strong>${subtitle}</strong>
-      </div>
-
-      <div class="topbar-meta">
-        ${version ? `<span class="version-chip">Version ${version}</span>` : ""}
-        <time id="nav-clock">--/--/---- --:--</time>
+      <div class="mdt-contextbar">
+        <div class="context-copy">
+          <span>${docCode || "CPD • INTERNE"}</span>
+          <strong>${subtitle}</strong>
+        </div>
+        <div class="context-meta">
+          <span class="system-state"><i aria-hidden="true"></i> Système opérationnel</span>
+          ${version ? `<span class="version-chip">Version ${version}</span>` : ""}
+          <time id="nav-clock">--/--/---- --:--</time>
+        </div>
       </div>
     </header>
+
+    <button class="nav-overlay" type="button" aria-label="Fermer la navigation"></button>
   `;
 
   document.body.classList.add("mdt-ui");
 
   const toggle = container.querySelector(".nav-toggle");
-  const sidebar = container.querySelector(".mdt-sidebar");
-  const overlay = container.querySelector(".sidebar-overlay");
+  const navigation = container.querySelector(".header-actions");
+  const overlay = container.querySelector(".nav-overlay");
 
   const setNavigationState = isOpen => {
     toggle?.setAttribute("aria-expanded", String(isOpen));
-    sidebar?.classList.toggle("open", isOpen);
+    navigation?.classList.toggle("open", isOpen);
     overlay?.classList.toggle("open", isOpen);
     document.body.classList.toggle("nav-open", isOpen);
   };
