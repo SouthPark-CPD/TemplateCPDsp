@@ -4,9 +4,15 @@
   "functions": {
     "api/mdt.js": {
       "includeFiles": "mdt/**"
+    },
+    "api/academy-admin.js": {
+      "includeFiles": "academy-admin/**"
     }
   },
   "routes": [
+    { "src": "/academy-admin", "dest": "/api/academy-admin?path=index.html" },
+    { "src": "/academy-admin/", "dest": "/api/academy-admin?path=index.html" },
+    { "src": "/academy-admin/(.*)", "dest": "/api/academy-admin?path=$1" },
     { "src": "/mdt", "dest": "/api/mdt?path=index.html" },
     { "src": "/mdt/", "dest": "/api/mdt?path=index.html" },
     { "src": "/mdt/(.*)", "dest": "/api/mdt?path=$1" },

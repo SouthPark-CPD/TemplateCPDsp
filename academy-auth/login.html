@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Connexion Instructor — Police Academy</title>
+  <link rel="icon" href="../assets/cpd-seal.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <main class="login-shell">
+    <a class="back" href="../">← Retour au portail</a>
+    <section class="login-panel">
+      <img src="../assets/cpd-seal.png" alt="Sceau du Chicago Police Department">
+      <p class="eyebrow">Police Academy · Espace sécurisé</p>
+      <h1>Connexion Instructor</h1>
+      <p class="explanation">Cet espace est réservé aux membres possédant le rôle Instructor sur le serveur Police Academy.</p>
+      <a class="discord-button" href="/api/academy-admin-auth/discord">Se connecter avec Discord</a>
+      <p id="auth-message" class="auth-message" role="status" hidden></p>
+      <div class="security-note"><span>Contrôle d’accès</span><strong>Discord OAuth2 + rôle Instructor</strong></div>
+    </section>
+  </main>
+  <script src="login.js"></script>
+</body>
+</html>

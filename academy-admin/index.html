@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Instructor — Police Academy</title>
+  <link rel="icon" href="../assets/cpd-seal.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><img src="../assets/cpd-seal.png" alt=""><div><strong>Police Academy</strong><span>Instructor Administration</span></div></div>
+    <div class="identity"><div><span>Connecté en tant que</span><strong id="instructor-name">Instructor</strong></div><a href="/api/academy-admin-auth/logout">Déconnexion</a></div>
+  </header>
+  <main>
+    <section class="hero">
+      <p>Accès Instructor validé</p>
+      <h1>Espace Police Academy</h1>
+      <span>La connexion Discord et la vérification du rôle Instructor fonctionnent. La liste des agents sera ajoutée à l’étape suivante.</span>
+    </section>
+    <section class="status-grid">
+      <article><span>Authentification</span><strong>Opérationnelle</strong></article>
+      <article><span>Base de données</span><strong>Connectée</strong></article>
+      <article><span>Prochaine étape</span><strong>Liste des agents</strong></article>
+    </section>
+  </main>
+  <script src="admin.js"></script>
+</body>
+</html>
