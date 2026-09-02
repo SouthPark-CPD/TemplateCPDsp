@@ -1,0 +1,14 @@
+TEST DE CONNEXION À LA BASE NEON
+
+1. Déposer package.json à la racine du dépôt GitHub.
+2. Créer les dossiers api/academy-admin s'ils n'existent pas.
+3. Déposer database-check.js dans api/academy-admin.
+4. Valider les changements sur la branche main.
+5. Attendre que le déploiement Vercel affiche Ready.
+6. Ouvrir :
+   https://template-cp-dsp.vercel.app/api/academy-admin/database-check
+
+Résultat attendu :
+{"ok":true,"database":"connected","tables":"ready"}
+
+Ne jamais ajouter DATABASE_URL dans GitHub : Vercel l'a déjà créée automatiquement.
