@@ -5,6 +5,7 @@ const CHANNEL_TYPE_TEXT = 0;
 const CHANNEL_TYPE_CATEGORY = 4;
 const MEMBER_OVERWRITE = 1;
 const CANDIDATE_PERMISSIONS = String(1024 + 2048 + 16384 + 32768 + 65536);
+const CLOSE_TICKET_BUTTON_ID = "academy_ticket_close";
 
 class AcademyError extends Error {
   constructor(code, status = 500, detail = "") {
@@ -196,6 +197,20 @@ async function createApplicationTicket(user, application) {
       body: JSON.stringify({
         content: `<@${user.id}>, votre candidature **${applicationId}** a bien été créée. L’équipe Police Academy vous répondra dans ce salon.`,
         embeds: applicationEmbeds(applicationId, user, application),
+        components: [
+          {
+            type: 1,
+            components: [
+              {
+                type: 2,
+                style: 4,
+                label: "Clore le ticket",
+                custom_id: CLOSE_TICKET_BUTTON_ID,
+                emoji: { name: "🔒" }
+              }
+            ]
+          }
+        ],
         allowed_mentions: { parse: [], users: [user.id] }
       })
     });
@@ -216,6 +231,7 @@ async function createApplicationTicket(user, application) {
 module.exports = {
   ACADEMY_GUILD_ID,
   APPLICATION_CATEGORY_ID,
+  CLOSE_TICKET_BUTTON_ID,
   AcademyError,
   validateApplication,
   channelSlug,
