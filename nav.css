@@ -1,30 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 
 /* ==========================================================
    CPD — NAV.CSS
-   Style global du header / menu de navigation
-========================================================== */
 
-
-/* ==========================================================
-   HEADER
+   Palette locale scoped à header (aucun impact sur le reste
+   du site). Direction : poste de commandement propre et
+   chaleureux plutôt qu'opération tactique.
 ========================================================== */
 
 header{
+
+  --gold:#c9a24d;
+  --gold-dim:rgba(201,162,77,0.16);
+  --steel:#93a6c2;
+  --line:rgba(147,166,194,0.16);
+  --text:#eef2f7;
+  --text-dim:#9aacc4;
+  --amber:#dba24a;
+  --green:#5fb98a;
+  --accent:#5b8dc9;
+  --accent-dim:rgba(91,141,201,0.14);
+
+  --navy-1:#0f1621;
+  --navy-2:#182338;
+
   position:relative;
 
-  border-bottom:1px solid var(--line);
-
-  padding:28px 32px 22px;
+  padding:32px 36px 24px;
 
   overflow:hidden;
 
   background:
+    radial-gradient(
+      520px 260px at 8% -10%,
+      var(--accent-dim),
+      transparent 60%
+    ),
     linear-gradient(
-      180deg,
-      rgba(74,111,165,0.06),
-      transparent
+      165deg,
+      var(--navy-2),
+      var(--navy-1) 70%
     );
 }
 
@@ -34,18 +50,22 @@ header::before{
 
   position:absolute;
 
-  inset:0;
+  top:0;
+  left:0;
+  right:0;
 
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgba(255,255,255,0.015) 0px,
-      rgba(255,255,255,0.015) 1px,
-      transparent 1px,
-      transparent 3px
-    );
+  height:3px;
 
-  pointer-events:none;
+  background:linear-gradient(
+    90deg,
+    var(--gold) 0%,
+    var(--gold) 18%,
+    var(--steel) 18%,
+    var(--steel) 30%,
+    transparent 30%
+  );
+
+  opacity:0.85;
 }
 
 
@@ -56,7 +76,7 @@ header::before{
 .header-inner{
   position:relative;
 
-  max-width:1100px;
+  max-width:1140px;
 
   margin:0 auto;
 }
@@ -73,9 +93,13 @@ header::before{
 
   justify-content:space-between;
 
-  gap:20px;
+  gap:28px;
 
   flex-wrap:wrap;
+
+  padding-bottom:22px;
+
+  border-bottom:1px solid var(--line);
 }
 
 
@@ -93,102 +117,120 @@ header::before{
 
 
 .star{
-  width:60px;
+  width:54px;
 
-  height:60px;
+  height:54px;
 
   flex:0 0 auto;
+
+  filter:drop-shadow(0 3px 8px rgba(0,0,0,0.4));
 }
 
 
 .brand-title{
-  font-family:var(--font-display);
+  font-family:'Oswald', var(--font-display);
 
-  font-size:25px;
+  font-size:22px;
 
-  letter-spacing:2px;
+  letter-spacing:0.3px;
 
-  text-transform:uppercase;
+  text-transform:none;
 
   font-weight:600;
 
   color:var(--text);
 
-  line-height:1.1;
+  line-height:1.2;
 }
 
 
 .brand-sub{
-  font-size:11px;
+  font-family:'IBM Plex Sans', var(--font-mono);
 
-  letter-spacing:3px;
+  font-size:12.5px;
+
+  letter-spacing:0.1px;
 
   color:var(--steel);
 
-  text-transform:uppercase;
+  text-transform:none;
 
   margin-top:4px;
+
+  font-weight:400;
 }
 
 
 /* ==========================================================
-   NAVIGATION PRINCIPALE
+   NAVIGATION — toolbar groupée
 ========================================================== */
 
 .header-actions{
   display:flex;
 
-  gap:8px;
+  align-items:center;
 
-  flex-wrap:wrap;
+  gap:2px;
+
+  padding:4px;
+
+  background:rgba(255,255,255,0.03);
+
+  border:1px solid var(--line);
+
+  border-radius:12px;
 }
 
 
 .header-link{
-  font-family:var(--font-mono);
+  font-family:'IBM Plex Sans', var(--font-display);
 
-  font-size:11.5px;
+  font-size:13px;
 
-  letter-spacing:1px;
+  letter-spacing:0.1px;
 
-  text-transform:uppercase;
+  text-transform:none;
+
+  font-weight:500;
 
   padding:10px 16px;
 
-  border:1px solid var(--steel);
+  border:none;
+
+  border-radius:8px;
 
   background:transparent;
 
-  color:var(--steel);
+  color:var(--text-dim);
 
   text-decoration:none;
 
   white-space:nowrap;
 
-  transition:all .15s;
+  transition:background .15s ease, color .15s ease, transform .15s ease;
 
   cursor:pointer;
 }
 
 
 .header-link:hover{
-  background:var(--steel);
+  background:var(--accent-dim);
 
-  color:#0b0f14;
+  color:var(--text);
+
+  transform:translateY(-1px);
 }
 
 
 .header-link.gold{
-  border-color:var(--gold);
-
   color:var(--gold);
 }
 
 
 .header-link.gold:hover{
-  background:var(--gold);
+  background:var(--gold-dim);
 
-  color:#0b0f14;
+  color:var(--gold);
 }
 
 
@@ -199,41 +241,67 @@ header::before{
 .header-link.current{
   background:var(--gold);
 
-  color:#0b0f14;
-
-  border-color:var(--gold);
+  color:var(--navy-1);
 
   pointer-events:none;
 
   font-weight:600;
+
+  box-shadow:0 2px 10px rgba(201,162,77,0.35);
 }
 
 
 /* ==========================================================
-   STATUS
+   STATUS — simplifiée : essentiel seulement, moins de "console"
 ========================================================== */
 
 .status-line{
   margin-top:16px;
 
-  font-size:11px;
+  font-size:12px;
 
   color:var(--text-dim);
 
-  letter-spacing:1px;
+  letter-spacing:0.1px;
 
   display:flex;
 
-  gap:22px;
+  align-items:center;
 
   flex-wrap:wrap;
+
+  gap:0;
+
+  font-family:'IBM Plex Sans', var(--font-mono);
+}
+
+
+.status-line span{
+  padding:0 16px;
+
+  border-left:1px solid var(--line);
+
+  display:inline-flex;
+
+  align-items:center;
+
+  gap:7px;
+}
+
+
+.status-line span:first-child{
+  padding-left:0;
+
+  border-left:none;
 }
 
 
 .status-line span b{
-  color:var(--amber);
+  color:var(--text);
 
-  font-weight:600;
+  font-weight:500;
+
+  font-family:'IBM Plex Mono', var(--font-mono);
 }
 
 
@@ -248,9 +316,7 @@ header::before{
 
   display:inline-block;
 
-  margin-right:6px;
-
-  box-shadow:0 0 6px var(--green);
+  box-shadow:0 0 5px var(--green);
 }
 
 
@@ -265,27 +331,51 @@ header::before{
   }
 
 
+  .badge-row{
+    padding-bottom:16px;
+
+    gap:16px;
+  }
+
+
+  .star{
+    width:44px;
+
+    height:44px;
+  }
+
+
   .brand-title{
-    font-size:19px;
+    font-size:18px;
   }
 
 
   .brand-sub{
-    font-size:9px;
-
-    letter-spacing:2px;
+    font-size:10.5px;
   }
 
 
   .header-actions{
     width:100%;
+
+    flex-wrap:wrap;
   }
 
 
   .header-link{
-    flex:1;
+    flex:1 1 auto;
 
     text-align:center;
+  }
+
+
+  .status-line{
+    margin-top:14px;
+  }
+
+
+  .status-line span{
+    padding:0 10px;
   }
 
 }
