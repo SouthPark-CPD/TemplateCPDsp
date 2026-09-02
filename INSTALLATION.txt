@@ -1,18 +1,24 @@
-ACADEMY ADMIN — ÉTAPE 1 : AUTHENTIFICATION INSTRUCTOR
+CORRECTIF POUR LA LIMITE DE 12 FONCTIONS VERCEL HOBBY
 
-1. Ouvrir le dépôt GitHub du site.
-2. Importer le contenu de ce dossier à la racine du dépôt.
-3. Conserver exactement les dossiers academy-admin, academy-auth, api et server.
-4. Accepter uniquement le remplacement de vercel.json.
-5. Ne pas supprimer les autres fichiers déjà présents dans api ou server.
-6. Valider les changements sur la branche main.
-7. Attendre que le déploiement Vercel affiche Ready.
-8. Ouvrir : https://template-cp-dsp.vercel.app/academy-admin/
+ÉTAPE 1 — AJOUTER LES FICHIERS
+1. Ajouter api/academy-router.js dans le dossier api du dépôt GitHub.
+2. Remplacer le fichier vercel.json situé à la racine.
 
-Résultat attendu :
-- redirection vers la page Connexion Instructor ;
-- connexion avec Discord ;
-- redirection vers l'espace Police Academy si le rôle Instructor est présent ;
-- page Accès Instructor validé.
+ÉTAPE 2 — SUPPRIMER LES SIX ANCIENNES FONCTIONS
+Supprimer exactement :
+- api/database-check.js
+- api/academy-admin/database-check.js
+- api/academy-admin-auth/discord.js
+- api/academy-admin-auth/callback.js
+- api/academy-admin-auth/session.js
+- api/academy-admin-auth/logout.js
 
-Cette installation ne modifie pas la connexion du MDT policier, la connexion des candidats, le bot Discord ou la base de données.
+Les dossiers devenus vides api/academy-admin et api/academy-admin-auth disparaîtront automatiquement de GitHub.
+
+ÉTAPE 3 — DÉPLOYER ET TESTER
+1. Valider les ajouts, le remplacement et les suppressions dans un même commit.
+2. Attendre que Vercel affiche Ready.
+3. Tester https://template-cp-dsp.vercel.app/api/database-check
+4. Tester https://template-cp-dsp.vercel.app/academy-admin/
+
+Ne supprimer aucun autre fichier API.
