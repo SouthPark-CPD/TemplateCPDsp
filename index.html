@@ -1,10 +1,73 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#071629"><meta name="description" content="Portail du Chicago Police Department : informations publiques et accès sécurisé des agents."><title>Chicago Police Department — Portail</title><link rel="icon" href="assets/cpd-seal.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/portal.css"></head>
-<body class="home-page"><div class="page-glow glow-one" aria-hidden="true"></div><div class="page-glow glow-two" aria-hidden="true"></div>
-<header class="public-header"><a class="public-brand" href="./" aria-label="Accueil du Chicago Police Department"><img src="assets/cpd-seal.png" alt=""><span><strong>Chicago Police Department</strong><small>Portail du département</small></span></a><a class="header-agent-link" href="mdt/"><i aria-hidden="true"></i> Accès agent</a></header>
-<main><section class="welcome-section"><div class="welcome-copy"><p class="welcome-label"><span></span> Bienvenue sur notre portail</p><h1>Au service de<br><em>notre communauté.</em></h1><p class="welcome-intro">Retrouvez les informations accessibles au public ou rejoignez l’espace sécurisé réservé aux membres du Chicago Police Department.</p><div class="welcome-actions"><a class="button button-primary" href="public/">Découvrir l’espace public <span aria-hidden="true">→</span></a><a class="button button-secondary" href="mdt/">Je suis agent</a></div><div class="reassurance"><span><i aria-hidden="true">✓</i> Accès public libre</span><span><i aria-hidden="true">✓</i> Espace agent sécurisé</span></div></div>
-<div class="seal-showcase" aria-hidden="true"><div class="seal-orbit orbit-large"></div><div class="seal-orbit orbit-small"></div><div class="seal-halo"></div><img src="assets/cpd-seal.png" alt=""></div></section>
-<section class="path-section" aria-labelledby="path-title"><div class="section-heading"><p>Un portail, deux espaces</p><h2 id="path-title">Comment souhaitez-vous continuer ?</h2></div><div class="path-grid">
-<a class="path-card path-public" href="public/"><span class="path-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6M8 11h.01M12 11h.01M16 11h.01"/></svg></span><span class="path-copy"><small>Pour tous</small><strong>Espace visiteur</strong><span>Découvrez les informations du département et, prochainement, les modalités de recrutement.</span></span><span class="path-arrow" aria-hidden="true">↗</span></a>
-<a class="path-card path-agent" href="mdt/"><span class="path-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5zM12 14v3"/></svg></span><span class="path-copy"><small>Accès sécurisé</small><strong>Espace policier</strong><span>Connectez-vous avec Discord pour accéder aux procédures et aux ressources internes du MDT.</span></span><span class="path-arrow" aria-hidden="true">↗</span></a>
-</div></section></main><footer class="public-footer"><span>Chicago Police Department</span><span>Portail public et espace agent sécurisé</span></footer></body></html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071629">
+  <meta name="description" content="Accédez au recrutement Police Academy ou à l’espace sécurisé des policiers.">
+  <title>Chicago Police Department — Choisir mon accès</title>
+  <link rel="icon" href="assets/cpd-seal.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/portal.css">
+</head>
+<body class="choice-page">
+  <div class="backdrop-grid" aria-hidden="true"></div>
+  <div class="backdrop-glow glow-blue" aria-hidden="true"></div>
+  <div class="backdrop-glow glow-gold" aria-hidden="true"></div>
+
+  <header class="choice-header">
+    <a class="choice-brand" href="./" aria-label="Accueil du Chicago Police Department">
+      <img src="assets/cpd-seal.png" alt="">
+      <span>
+        <strong>Chicago Police Department</strong>
+        <small>Portail officiel du département</small>
+      </span>
+    </a>
+    <span class="secure-note"><i></i> Portail sécurisé</span>
+  </header>
+
+  <main class="choice-main">
+    <section class="choice-intro" aria-labelledby="choice-title">
+      <div class="mini-seal"><img src="assets/cpd-seal.png" alt="Sceau du Chicago Police Department"></div>
+      <p>Bienvenue</p>
+      <h1 id="choice-title">Choisissez votre accès</h1>
+      <span>Sélectionnez simplement le profil qui vous correspond.</span>
+    </section>
+
+    <section class="choice-grid" aria-label="Choix de l’espace">
+      <a class="choice-card citizen-card" href="public/">
+        <span class="choice-number">01</span>
+        <span class="choice-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7zM9 12l2 2 4-4"/></svg>
+        </span>
+        <span class="choice-content">
+          <small>Police Academy</small>
+          <strong>Je souhaite rejoindre<br>la police</strong>
+          <span>Découvrez le recrutement et déposez votre candidature pour intégrer le département.</span>
+        </span>
+        <span class="choice-action">Accéder au recrutement <b aria-hidden="true">→</b></span>
+      </a>
+
+      <a class="choice-card police-card" href="mdt/">
+        <span class="choice-number">02</span>
+        <span class="choice-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5zM12 14v3"/></svg>
+        </span>
+        <span class="choice-content">
+          <small>Connexion requise</small>
+          <strong>Je suis<br>policier</strong>
+          <span>Accès sécurisé au MDT, aux procédures et aux ressources internes.</span>
+        </span>
+        <span class="choice-action">Connexion avec Discord <b aria-hidden="true">→</b></span>
+      </a>
+    </section>
+  </main>
+
+  <footer class="choice-footer">
+    <span>Chicago Police Department</span>
+    <span>Service • Intégrité • Protection</span>
+  </footer>
+</body>
+</html>
