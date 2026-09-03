@@ -1,7 +1,8 @@
 .topbar .academy-navigation{display:flex;align-items:center;gap:8px;min-width:0}
 .topbar .admin-nav{flex:0 1 auto}
-.topbar .academy-ticket-link{display:inline-flex;align-items:center;justify-content:center;min-height:47px;padding:0 13px;color:#c9d9e7;border:1px solid rgba(139,194,241,.2);border-radius:12px;background:linear-gradient(135deg,rgba(139,194,241,.09),rgba(255,255,255,.025));font-size:.68rem;font-weight:700;text-decoration:none;white-space:nowrap}
-.topbar .academy-ticket-link:hover,.topbar .academy-ticket-link.active{color:#f1ce79;border-color:rgba(230,189,99,.35);background:linear-gradient(135deg,rgba(230,189,99,.11),rgba(255,255,255,.03))}
+.topbar .academy-ticket-link{display:inline-flex;align-items:center;justify-content:center;min-height:39px;padding:0 11px;color:var(--muted);border:1px solid rgba(190,218,243,.12);border-radius:10px;background:rgba(4,20,34,.28);font-size:.68rem;font-weight:700;text-decoration:none;white-space:nowrap}
+.topbar .academy-ticket-link:hover{color:var(--ink);background:rgba(255,255,255,.08)}
+.topbar .academy-ticket-link.active{color:var(--ink);border-color:rgba(230,189,99,.25);background:rgba(255,255,255,.08);box-shadow:inset 0 -2px var(--gold)}
 .topbar .identity{display:flex;align-items:center;gap:14px;min-width:0}
 .topbar .identity>div:not(.header-actions){display:grid;gap:3px;min-width:0}
 .topbar .header-actions{display:flex;align-items:center;gap:7px;min-width:max-content}
