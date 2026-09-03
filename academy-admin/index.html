@@ -3,42 +3,66 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Espace instructeur — Police Academy</title>
+  <title>Tableau de bord — Police Academy</title>
   <link rel="icon" href="../assets/cpd-seal.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><img src="../assets/cpd-seal.png" alt=""><div><strong>Police Academy</strong><span>Espace instructeur</span></div></div>
-    <nav class="admin-nav"><a class="active" href="/academy-admin/">Effectifs</a><a href="/academy-admin/recrutements.html">Demandes de recrutement</a></nav>
-    <div class="identity"><div><span>Connecté en tant que</span><strong id="instructor-name">Instructor</strong></div><a href="/api/academy-admin-auth/logout">Déconnexion</a></div>
+    <a class="brand" href="/academy-admin/"><img src="../assets/cpd-seal.png" alt=""><div><strong>Police Academy</strong><span>Espace instructeur</span></div></a>
+    <nav class="admin-nav" aria-label="Navigation principale"><a class="active" href="/academy-admin/">Tableau de bord</a><a href="/academy-admin/effectifs.html">Effectifs</a><a href="/academy-admin/recrutements.html">Recrutement</a></nav>
+    <div class="identity"><div><span>Connecté en tant que</span><strong id="instructor-name">Instructeur</strong></div><a href="/api/academy-admin-auth/logout">Déconnexion</a></div>
   </header>
+
   <main>
-    <section class="hero">
-      <p>Gestion des formations</p>
-      <h1>Effectifs du CPD</h1>
-      <span>Consultez les membres éligibles aux formations de l’Academy et retrouvez leur grade le plus élevé.</span>
+    <section class="welcome">
+      <div><p>Vue d’ensemble</p><h1>Bonjour, <span id="welcome-name">Instructeur</span></h1><strong>Retrouvez les dossiers et activités nécessitant votre attention.</strong></div>
+      <span id="dashboard-date" class="dashboard-date"></span>
     </section>
-    <section class="status-grid">
-      <article><span>Agents affichés</span><strong id="agent-total">—</strong></article>
-      <article><span>Dossiers commencés</span><strong id="file-total">—</strong></article>
-      <article><span>Formations enregistrées</span><strong id="training-total">—</strong></article>
-    </section>
-    <section class="directory">
-      <div class="directory-head">
-        <div><p class="section-kicker">Répertoire Academy</p><h2>Liste des agents</h2></div>
-        <div class="filters">
-          <label><span>Rechercher</span><input id="agent-search" type="search" placeholder="Nom, matricule ou identifiant…"></label>
-          <label><span>Grade</span><select id="rank-filter"><option value="">Tous les grades</option></select></label>
-        </div>
-      </div>
-      <p id="agents-message" class="message">Chargement des agents depuis Discord…</p>
-      <div id="agents-list" class="agents-list" hidden></div>
-    </section>
+
+    <p id="dashboard-message" class="message">Chargement du tableau de bord…</p>
+
+    <div id="dashboard-content" hidden>
+      <section class="metrics-grid" aria-label="Indicateurs principaux">
+        <a href="/academy-admin/effectifs.html"><span>Effectif suivi</span><strong id="metric-agents">—</strong><small id="metric-dossiers">— dossiers commencés</small></a>
+        <a href="/academy-admin/effectifs.html"><span>En formation</span><strong id="metric-training">—</strong><small id="metric-completed">— parcours terminés</small></a>
+        <a class="attention-metric" href="#attention"><span>Attention requise</span><strong id="metric-review">—</strong><small id="metric-without">— sans formation</small></a>
+        <a href="/academy-admin/recrutements.html"><span>Tickets ouverts</span><strong id="metric-tickets">—</strong><small id="metric-archives">— archives</small></a>
+      </section>
+
+      <section class="dashboard-grid">
+        <article id="attention" class="panel attention-panel">
+          <div class="panel-head"><div><p>Priorités</p><h2>À traiter</h2></div><a href="/academy-admin/effectifs.html">Tous les effectifs →</a></div>
+          <p id="attention-empty" class="empty">Aucun dossier ne nécessite d’attention.</p>
+          <div id="attention-list" class="attention-list" hidden></div>
+        </article>
+
+        <article class="panel recruitment-panel">
+          <div class="panel-head"><div><p>Police Academy</p><h2>Recrutement</h2></div><a href="/academy-admin/recrutements.html">Ouvrir →</a></div>
+          <div class="recruitment-stats">
+            <div><strong id="recruitment-active">—</strong><span>En cours</span></div>
+            <div><strong id="recruitment-closed">—</strong><span>Fermés</span></div>
+            <div><strong id="recruitment-archived">—</strong><span>Archivés</span></div>
+          </div>
+        </article>
+
+        <article class="panel recent-panel">
+          <div class="panel-head"><div><p>Suivi pédagogique</p><h2>Activité récente</h2></div></div>
+          <p id="recent-empty" class="empty">Aucune formation enregistrée.</p>
+          <div id="recent-list" class="recent-list" hidden></div>
+        </article>
+
+        <article class="panel instructors-panel">
+          <div class="panel-head"><div><p>30 derniers jours</p><h2>Activité des instructeurs</h2></div></div>
+          <p id="instructors-empty" class="empty">Aucune activité récente.</p>
+          <div id="instructors-list" class="instructors-list" hidden></div>
+        </article>
+      </section>
+    </div>
   </main>
-  <script src="admin.js"></script>
+  <script src="dashboard.js"></script>
 </body>
 </html>

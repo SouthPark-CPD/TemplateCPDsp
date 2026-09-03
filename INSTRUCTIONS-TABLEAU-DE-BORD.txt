@@ -1,0 +1,18 @@
+MISE À JOUR — TABLEAU DE BORD POLICE ACADEMY
+
+1. Ouvrez le dépôt GitHub SouthPark-CPD/TemplateCPDsp.
+2. Importez tout le contenu de ce pack à la racine du dépôt.
+3. Confirmez le remplacement des fichiers existants.
+4. Vérifiez que academy-admin/effectifs.html a bien été ajouté.
+5. Validez le commit sur la branche main.
+6. Attendez que le déploiement Vercel affiche Ready.
+7. Ouvrez https://template-cp-dsp.vercel.app/academy-admin/
+
+Aucune nouvelle variable Vercel n’est nécessaire.
+Aucune requête SQL n’est nécessaire.
+Aucune modification du bot Discord n’est nécessaire.
+
+Après la mise à jour :
+- /academy-admin/ affiche le tableau de bord ;
+- /academy-admin/effectifs.html affiche la liste des agents ;
+- /academy-admin/recrutements.html affiche les candidatures et tickets.

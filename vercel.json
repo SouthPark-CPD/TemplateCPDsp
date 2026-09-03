@@ -12,6 +12,7 @@
   "routes": [
     { "src": "/api/academy-admin-auth/(discord|callback|session|logout)", "dest": "/api/academy-router?action=$1" },
     { "src": "/api/academy-admin-data/agent/save", "dest": "/api/academy-router?action=agent-save" },
+    { "src": "/api/academy-admin-data/dashboard", "dest": "/api/academy-router?action=dashboard" },
     { "src": "/api/academy-admin-data/training/update", "dest": "/api/academy-router?action=training-update" },
     { "src": "/api/academy-admin-data/training/archive", "dest": "/api/academy-router?action=training-archive" },
     { "src": "/api/academy-admin-data/training/create", "dest": "/api/academy-router?action=training-create" },

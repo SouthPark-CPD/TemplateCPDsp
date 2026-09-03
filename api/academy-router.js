@@ -289,6 +289,8 @@ async function getStoredAgentSummaries() {
       files.rp_name,
       files.matricule,
       files.academy_status,
+      files.general_note,
+      files.updated_at,
       COUNT(trainings.id) FILTER (WHERE trainings.archived_at IS NULL)::INTEGER AS training_count
     FROM academy_agent_files AS files
     LEFT JOIN academy_training_records AS trainings
@@ -297,7 +299,9 @@ async function getStoredAgentSummaries() {
       files.discord_id,
       files.rp_name,
       files.matricule,
-      files.academy_status
+      files.academy_status,
+      files.general_note,
+      files.updated_at
   `;
   return new Map(rows.map(row => [row.discord_id, row]));
 }
@@ -345,6 +349,136 @@ async function agentsList(req, res) {
   } catch (error) {
     console.error("Academy agents list failed", error);
     const code = error.code || (error.status === 403 ? "discord_members_forbidden" : "agents_unavailable");
+    return res.status(500).json({ ok: false, code });
+  }
+}
+
+async function academyDashboard(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const [members, storedFiles, reviewRows, recentRows, instructorRows, ticketRows] = await Promise.all([
+      getAllCpdMembers(),
+      getStoredAgentSummaries(),
+      sql`
+        SELECT agent_discord_id, COUNT(*)::INTEGER AS review_count
+        FROM academy_training_records
+        WHERE archived_at IS NULL AND result = 'a_revoir'
+        GROUP BY agent_discord_id
+      `,
+      sql`
+        SELECT trainings.id, trainings.agent_discord_id, trainings.training_type,
+          trainings.training_date, trainings.result, trainings.score,
+          trainings.instructor_name, trainings.created_at, files.rp_name
+        FROM academy_training_records AS trainings
+        LEFT JOIN academy_agent_files AS files
+          ON files.discord_id = trainings.agent_discord_id
+        WHERE trainings.archived_at IS NULL
+        ORDER BY trainings.created_at DESC
+        LIMIT 30
+      `,
+      sql`
+        SELECT instructor_name, COUNT(*)::INTEGER AS training_count,
+          MAX(created_at) AS last_activity
+        FROM academy_training_records
+        WHERE archived_at IS NULL
+          AND created_at >= NOW() - INTERVAL '30 days'
+        GROUP BY instructor_name
+        ORDER BY training_count DESC, last_activity DESC
+        LIMIT 6
+      `,
+      sql`
+        SELECT COUNT(*)::INTEGER AS total,
+          COUNT(*) FILTER (WHERE ticket_status = 'active')::INTEGER AS active,
+          COUNT(*) FILTER (WHERE ticket_status = 'closed')::INTEGER AS closed,
+          COUNT(*) FILTER (WHERE ticket_status = 'deleted')::INTEGER AS archived
+        FROM academy_recruitment_tickets
+      `
+    ]);
+
+    const agents = members.map(publicAgent).filter(Boolean);
+    const agentsById = new Map(agents.map(agent => [agent.discordId, agent]));
+    const reviewByAgent = new Map(reviewRows.map(row => [row.agent_discord_id, Number(row.review_count || 0)]));
+    const eligibleFiles = agents.map(agent => ({ agent, file: storedFiles.get(agent.discordId) || null }));
+    const attention = eligibleFiles
+      .map(({ agent, file }) => {
+        const reviewCount = reviewByAgent.get(agent.discordId) || 0;
+        let reason = "";
+        let priority = 4;
+        if (reviewCount > 0) {
+          reason = `${reviewCount} formation${reviewCount > 1 ? "s" : ""} à revoir`;
+          priority = 1;
+        } else if (!file) {
+          reason = "Dossier non commencé";
+          priority = 2;
+        } else if (Number(file.training_count || 0) === 0) {
+          reason = "Aucune formation enregistrée";
+          priority = 3;
+        }
+        return reason ? {
+          discordId: agent.discordId,
+          name: file?.rp_name || agent.displayName,
+          rank: agent.rank,
+          avatar: agent.avatar,
+          reason,
+          priority
+        } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.priority - b.priority || a.name.localeCompare(b.name, "fr"))
+      .slice(0, 8);
+
+    const reviewTotal = agents.reduce(
+      (total, agent) => total + (reviewByAgent.get(agent.discordId) || 0),
+      0
+    );
+    const ticketStats = ticketRows[0] || {};
+    return res.status(200).json({
+      ok: true,
+      instructor: session.user,
+      metrics: {
+        totalAgents: agents.length,
+        dossiersStarted: eligibleFiles.filter(({ file }) => Boolean(file)).length,
+        inTraining: eligibleFiles.filter(({ file }) => file?.academy_status === "en_formation").length,
+        completed: eligibleFiles.filter(({ file }) => file?.academy_status === "termine").length,
+        withoutTraining: eligibleFiles.filter(({ file }) => !file || Number(file.training_count || 0) === 0).length,
+        toReview: reviewTotal
+      },
+      recruitment: {
+        total: Number(ticketStats.total || 0),
+        active: Number(ticketStats.active || 0),
+        closed: Number(ticketStats.closed || 0),
+        archived: Number(ticketStats.archived || 0)
+      },
+      attention,
+      recentTrainings: recentRows
+        .filter(row => agentsById.has(row.agent_discord_id))
+        .slice(0, 8)
+        .map(row => ({
+          id: String(row.id),
+          agentDiscordId: row.agent_discord_id,
+          agentName: row.rp_name || agentsById.get(row.agent_discord_id).displayName,
+          trainingType: row.training_type,
+          trainingDate: row.training_date,
+          result: row.result,
+          score: row.score,
+          instructorName: row.instructor_name,
+          createdAt: row.created_at
+        })),
+      instructorActivity: instructorRows.map(row => ({
+        name: row.instructor_name,
+        trainingCount: Number(row.training_count || 0),
+        lastActivity: row.last_activity
+      }))
+    });
+  } catch (error) {
+    console.error("Academy dashboard failed", error);
+    const code = error.status === 403 ? "discord_members_forbidden" : "dashboard_unavailable";
     return res.status(500).json({ ok: false, code });
   }
 }
@@ -865,6 +999,7 @@ module.exports = async function handler(req, res) {
     case "logout": return logout(req, res);
     case "database-check": return databaseCheck(req, res);
     case "agents": return agentsList(req, res);
+    case "dashboard": return academyDashboard(req, res);
     case "agent": return agentDetail(req, res);
     case "agent-save": return saveAgentFile(req, res);
     case "training-create": return createTraining(req, res);
