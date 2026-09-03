@@ -1,4 +1,5 @@
 const crypto = require("node:crypto");
+const policeAuth = require("./auth");
 
 const COOKIE_NAME = "cpd_academy_admin_session";
 const STATE_COOKIE_NAME = "cpd_academy_admin_oauth_state";
@@ -64,6 +65,10 @@ function sessionCookie(session) {
 
 function clearSessionCookie() {
   return cookie(COOKIE_NAME, "", 0);
+}
+
+function clearAllSessionCookies() {
+  return [clearSessionCookie(), policeAuth.clearSessionCookie()];
 }
 
 function readSession(req) {
@@ -161,14 +166,22 @@ function newSession(user, tokens) {
 }
 
 async function validateSession(req, forceRoleCheck = false) {
-  const session = readSession(req);
-  if (!session) return { ok: false, reason: "login_required" };
+  let session = readSession(req);
+  let source = "academy";
+  let changed = false;
+
+  if (!session) {
+    const policeAccess = await policeAuth.validateSession(req, false);
+    if (!policeAccess.ok) return { ok: false, reason: "login_required" };
+    session = policeAccess.session;
+    source = "police";
+    changed = policeAccess.changed;
+  }
 
   const now = Math.floor(Date.now() / 1000);
-  let changed = false;
   if (!session.accessToken || !session.refreshToken) return { ok: false, reason: "invalid_session" };
 
-  if (session.tokenExp <= now + 60) {
+  if (source === "academy" && session.tokenExp <= now + 60) {
     try {
       const tokens = await refreshToken(session.refreshToken);
       session.accessToken = tokens.access_token;
@@ -180,12 +193,14 @@ async function validateSession(req, forceRoleCheck = false) {
     }
   }
 
-  const roleCheckDue = forceRoleCheck || !session.roleCheckedAt || now - session.roleCheckedAt >= ROLE_CHECK_INTERVAL;
+  const checkedAt = source === "police" ? session.academyRoleCheckedAt : session.roleCheckedAt;
+  const roleCheckDue = forceRoleCheck || !checkedAt || now - checkedAt >= ROLE_CHECK_INTERVAL;
   if (roleCheckDue) {
     try {
       const member = await getAcademyMember(session.accessToken);
       if (!hasInstructorRole(member)) return { ok: false, reason: "missing_role" };
-      session.roleCheckedAt = now;
+      if (source === "police") session.academyRoleCheckedAt = now;
+      else session.roleCheckedAt = now;
       changed = true;
     } catch (error) {
       if ([401, 403, 404].includes(error.status)) return { ok: false, reason: "not_member" };
@@ -193,7 +208,13 @@ async function validateSession(req, forceRoleCheck = false) {
     }
   }
 
-  return { ok: true, session, changed };
+  return { ok: true, session, changed, source };
+}
+
+function validatedSessionCookie(result) {
+  return result.source === "police"
+    ? policeAuth.sessionCookie(result.session)
+    : sessionCookie(result.session);
 }
 
 module.exports = {
@@ -208,10 +229,12 @@ module.exports = {
   clearStateCookie,
   sessionCookie,
   clearSessionCookie,
+  clearAllSessionCookies,
   exchangeCode,
   getDiscordUser,
   getAcademyMember,
   hasInstructorRole,
   newSession,
-  validateSession
+  validateSession,
+  validatedSessionCookie
 };

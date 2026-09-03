@@ -1,6 +1,6 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
-const { validateSession, sessionCookie, clearSessionCookie } = require("../server/academy-admin-auth");
+const { validateSession, validatedSessionCookie, clearSessionCookie } = require("../server/academy-admin-auth");
 
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -49,7 +49,7 @@ module.exports = async function handler(req, res) {
     return res.status(401).end("Accès non autorisé");
   }
 
-  if (result.changed) res.setHeader("Set-Cookie", sessionCookie(result.session));
+  if (result.changed) res.setHeader("Set-Cookie", validatedSessionCookie(result));
 
   const adminRoot = path.resolve(process.cwd(), "academy-admin");
   const absolutePath = path.resolve(adminRoot, assetPath);

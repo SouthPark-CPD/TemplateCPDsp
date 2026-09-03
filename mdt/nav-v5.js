@@ -68,6 +68,11 @@ const NAV_LINKS = [
   },
 
   {
+    href:"portail.html",
+    label:"Portail agent"
+  },
+
+  {
     href:"/api/auth/logout",
     label:"Déconnexion",
     logout:true

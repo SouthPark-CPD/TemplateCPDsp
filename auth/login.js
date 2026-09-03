@@ -17,6 +17,6 @@ if(error&&errors[error]){authMessage.hidden=false;authMessage.textContent=errors
 if(!error){
   fetch("/api/auth/session",{credentials:"same-origin",cache:"no-store"})
     .then(response=>response.ok?response.json():null)
-    .then(data=>{if(data&&data.authenticated)location.replace("/mdt/");})
+    .then(data=>{if(data&&data.authenticated)location.replace("/mdt/portail.html");})
     .catch(()=>{});
 }

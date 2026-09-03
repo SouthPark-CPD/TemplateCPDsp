@@ -9,12 +9,14 @@ const {
   clearStateCookie,
   sessionCookie,
   clearSessionCookie,
+  clearAllSessionCookies,
   exchangeCode,
   getDiscordUser,
   getAcademyMember,
   hasInstructorRole,
   newSession,
-  validateSession
+  validateSession,
+  validatedSessionCookie
 } = require("../server/academy-admin-auth");
 
 const DISCORD_API = "https://discord.com/api/v10";
@@ -124,13 +126,13 @@ async function sessionStatus(req, res) {
     res.setHeader("Set-Cookie", clearSessionCookie());
     return res.status(401).json({ authenticated: false, reason: result.reason });
   }
-  if (result.changed) res.setHeader("Set-Cookie", sessionCookie(result.session));
+  if (result.changed) res.setHeader("Set-Cookie", validatedSessionCookie(result));
   return res.status(200).json({ authenticated: true, user: result.session.user });
 }
 
 function logout(req, res) {
   if (req.method !== "GET" && req.method !== "POST") return res.status(405).end();
-  res.setHeader("Set-Cookie", clearSessionCookie());
+  res.setHeader("Set-Cookie", clearAllSessionCookies());
   return res.redirect(302, "/");
 }
 
@@ -501,7 +503,7 @@ async function instructorAccess(req, res) {
     res.status(401).json({ ok: false, code: access.reason });
     return null;
   }
-  if (access.changed) res.setHeader("Set-Cookie", sessionCookie(access.session));
+  if (access.changed) res.setHeader("Set-Cookie", validatedSessionCookie(access));
   return access.session;
 }
 

@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
     }
 
     res.setHeader("Set-Cookie", [clearStateCookie(), sessionCookie(newSession(user, tokens))]);
-    return res.redirect(302, "/mdt/index.html");
+    return res.redirect(302, "/mdt/portail.html");
   } catch (error) {
     const reason = error.status === 403 || error.status === 404 ? "server" : "discord";
     res.setHeader("Set-Cookie", clearStateCookie());

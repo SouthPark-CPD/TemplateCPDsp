@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071629">
+  <title>Espace agent — Chicago Police Department</title>
+  <link rel="icon" href="../assets/cpd-seal.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="portail.css">
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <header>
+    <a class="brand" href="/mdt/portail.html"><img src="../assets/cpd-seal.png" alt=""><span><strong>Chicago Police Department</strong><small>Espace agent sécurisé</small></span></a>
+    <div class="user"><span>Session active</span><strong id="agent-name">Agent</strong><a href="/api/auth/logout">Déconnexion</a></div>
+  </header>
+
+  <main>
+    <section class="heading">
+      <p>Portail interne</p>
+      <h1>Choisissez votre espace</h1>
+      <span>Votre session reste active pendant 30 jours sur cet appareil.</span>
+    </section>
+
+    <p id="portal-message" class="message">Vérification de vos accès…</p>
+
+    <section id="portal-content" class="access-grid" hidden>
+      <a class="access-card mdt-card" href="/mdt/index.html">
+        <span class="card-index">01</span>
+        <span class="card-icon" aria-hidden="true">MDT</span>
+        <span class="card-copy"><small>Accès policier</small><strong>Mobile Data Terminal</strong><span>Procédures, règlement, radio, tenues et ressources opérationnelles.</span></span>
+        <span class="card-action">Ouvrir le MDT <b>→</b></span>
+      </a>
+
+      <a id="academy-card" class="access-card academy-card" href="/academy-admin/" hidden>
+        <span class="card-index">02</span>
+        <span class="card-icon academy-icon" aria-hidden="true">PA</span>
+        <span class="card-copy"><small>Accès instructeur</small><strong>Police Academy</strong><span>Effectifs, dossiers de formation, grilles d’évaluation et recrutement.</span></span>
+        <span class="card-action">Ouvrir le panel Academy <b>→</b></span>
+      </a>
+
+      <article id="academy-locked" class="access-card locked-card" hidden>
+        <span class="card-index">02</span>
+        <span class="card-icon academy-icon" aria-hidden="true">PA</span>
+        <span class="card-copy"><small>Accès restreint</small><strong>Police Academy</strong><span>Disponible uniquement pour les membres possédant le rôle Instructor.</span></span>
+        <span class="card-action">Rôle Instructor requis</span>
+      </article>
+    </section>
+  </main>
+
+  <footer><span>Chicago Police Department</span><span>Session sécurisée par Discord</span></footer>
+  <script src="portail.js"></script>
+</body>
+</html>

@@ -7,6 +7,8 @@ const ROLE_CHECK_INTERVAL = 60 * 60;
 const DISCORD_API = "https://discord.com/api/v10";
 const GUILD_ID = "1408092767963451615";
 const ROLE_ID = "1408092768026365974";
+const ACADEMY_GUILD_ID = "1538858756354473984";
+const INSTRUCTOR_ROLE_ID = "1538858756371386400";
 
 function env() {
   const clientId = process.env.DISCORD_CLIENT_ID;
@@ -140,8 +142,18 @@ async function getGuildMember(accessToken) {
   });
 }
 
+async function getAcademyMember(accessToken) {
+  return discordRequest(`${DISCORD_API}/users/@me/guilds/${ACADEMY_GUILD_ID}/member`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+}
+
 function hasRequiredRole(member) {
   return Array.isArray(member.roles) && member.roles.includes(ROLE_ID);
+}
+
+function hasInstructorRole(member) {
+  return Array.isArray(member.roles) && member.roles.includes(INSTRUCTOR_ROLE_ID);
 }
 
 function newSession(user, tokens) {
@@ -196,8 +208,9 @@ async function validateSession(req, forceRoleCheck = false) {
 }
 
 module.exports = {
-  COOKIE_NAME, DISCORD_API, GUILD_ID, ROLE_ID, SESSION_MAX_AGE,
+  COOKIE_NAME, DISCORD_API, GUILD_ID, ROLE_ID, ACADEMY_GUILD_ID, INSTRUCTOR_ROLE_ID, SESSION_MAX_AGE,
   env, siteUrl, createStateCookie, consumeState, clearStateCookie,
   sessionCookie, clearSessionCookie, exchangeCode, getDiscordUser,
-  getGuildMember, hasRequiredRole, newSession, validateSession
+  getGuildMember, getAcademyMember, hasRequiredRole, hasInstructorRole,
+  newSession, validateSession
 };
