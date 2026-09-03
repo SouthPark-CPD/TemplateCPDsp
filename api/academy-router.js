@@ -34,6 +34,17 @@ const CPD_RANKS = [
   { id: "1505210763499798750", name: "Capitaine", level: 10 }
 ];
 
+const STANDARD_TRAINING_MODULES = [
+  "Intégration et règlement",
+  "Communications radio",
+  "Contrôle routier",
+  "Procédure d’interpellation",
+  "Usage de la force",
+  "Conduite opérationnelle",
+  "Rédaction de rapports",
+  "Évaluation finale"
+];
+
 const EXCLUDED_HIGH_RANKS = new Set([
   "1505209645764055100",
   "1530139558333907014",
@@ -264,6 +275,40 @@ function normalizeTrainingResult(value) {
   return result === "validee" ? "valide" : result;
 }
 
+async function syncAgentCompletion(sql, discordId) {
+  const rows = await sql`
+    SELECT training_type, result, training_date, created_at
+    FROM academy_training_records
+    WHERE agent_discord_id = ${discordId} AND archived_at IS NULL
+    ORDER BY training_type, training_date DESC, created_at DESC
+  `;
+  const latestByModule = new Map();
+  rows.forEach(row => {
+    if (STANDARD_TRAINING_MODULES.includes(row.training_type) && !latestByModule.has(row.training_type)) {
+      latestByModule.set(row.training_type, normalizeTrainingResult(row.result));
+    }
+  });
+  const completed = STANDARD_TRAINING_MODULES.every(module => latestByModule.get(module) === "valide");
+  const fallbackStatus = rows.length ? "en_formation" : "a_former";
+  await sql`
+    UPDATE academy_agent_files
+    SET academy_status = CASE
+      WHEN academy_status = 'suspendu' THEN academy_status
+      WHEN ${completed} THEN 'termine'
+      WHEN academy_status = 'termine' THEN ${fallbackStatus}
+      ELSE academy_status
+    END,
+    updated_at = CASE
+      WHEN academy_status <> 'suspendu' AND (
+        (${completed} AND academy_status <> 'termine')
+        OR (NOT ${completed} AND academy_status = 'termine')
+      ) THEN NOW()
+      ELSE updated_at
+    END
+    WHERE discord_id = ${discordId}
+  `;
+}
+
 async function instructorAccess(req, res) {
   const access = await validateSession(req, false);
   if (!access.ok) {
@@ -358,6 +403,103 @@ async function agentsList(req, res) {
   }
 }
 
+async function trainingOverview(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const [members, storedFiles, trainingRows] = await Promise.all([
+      getAllCpdMembers(),
+      getStoredAgentSummaries(),
+      sql`
+        SELECT agent_discord_id, training_type, result, training_date, created_at
+        FROM academy_training_records
+        WHERE archived_at IS NULL
+        ORDER BY training_date DESC, created_at DESC
+      `
+    ]);
+
+    const rowsByAgent = new Map();
+    trainingRows.forEach(row => {
+      if (!rowsByAgent.has(row.agent_discord_id)) rowsByAgent.set(row.agent_discord_id, []);
+      rowsByAgent.get(row.agent_discord_id).push(row);
+    });
+
+    const agents = members
+      .map(publicAgent)
+      .filter(Boolean)
+      .map(agent => {
+        const file = storedFiles.get(agent.discordId) || null;
+        const rows = rowsByAgent.get(agent.discordId) || [];
+        const latestByModule = new Map();
+        rows.forEach(row => {
+          if (STANDARD_TRAINING_MODULES.includes(row.training_type) && !latestByModule.has(row.training_type)) {
+            latestByModule.set(row.training_type, normalizeTrainingResult(row.result));
+          }
+        });
+        const modules = STANDARD_TRAINING_MODULES.map(name => ({
+          name,
+          result: latestByModule.get(name) || "non_commence"
+        }));
+        const validatedCount = modules.filter(module => module.result === "valide").length;
+        const reviewCount = modules.filter(module => module.result === "a_revoir").length;
+        const failedCount = modules.filter(module => module.result === "non_valide").length;
+        const plannedCount = modules.filter(module => module.result === "planifiee").length;
+        const missingCount = modules.filter(module => module.result === "non_commence").length;
+        const calculatedCompleted = validatedCount === STANDARD_TRAINING_MODULES.length;
+        const academyStatus = file?.academy_status === "suspendu"
+          ? "suspendu"
+          : calculatedCompleted
+            ? "termine"
+            : file?.academy_status || (rows.length ? "en_formation" : "a_former");
+        return {
+          ...agent,
+          rpName: file?.rp_name || "",
+          matricule: file?.matricule || "",
+          academyStatus,
+          trainingCount: Number(file?.training_count || 0),
+          validatedCount,
+          reviewCount,
+          failedCount,
+          plannedCount,
+          missingCount,
+          percentage: Math.round((validatedCount / STANDARD_TRAINING_MODULES.length) * 100),
+          lastTrainingDate: rows[0]?.training_date || null,
+          modules
+        };
+      })
+      .sort((a, b) => {
+        const priorityA = a.reviewCount > 0 || a.failedCount > 0 ? 0 : a.percentage < 100 ? 1 : 2;
+        const priorityB = b.reviewCount > 0 || b.failedCount > 0 ? 0 : b.percentage < 100 ? 1 : 2;
+        return priorityA - priorityB || a.percentage - b.percentage
+          || b.rankLevel - a.rankLevel || a.displayName.localeCompare(b.displayName, "fr");
+      });
+
+    return res.status(200).json({
+      ok: true,
+      instructor: session.user,
+      modules: STANDARD_TRAINING_MODULES,
+      ranks: CPD_RANKS.map(rank => rank.name),
+      summary: {
+        total: agents.length,
+        completed: agents.filter(agent => agent.academyStatus === "termine").length,
+        inProgress: agents.filter(agent => agent.academyStatus === "en_formation").length,
+        toReview: agents.filter(agent => agent.reviewCount > 0 || agent.failedCount > 0).length,
+        notStarted: agents.filter(agent => agent.trainingCount === 0).length
+      },
+      agents
+    });
+  } catch (error) {
+    console.error("Academy training overview failed", error);
+    const code = error.status === 403 ? "discord_members_forbidden" : "training_overview_unavailable";
+    return res.status(500).json({ ok: false, code });
+  }
+}
+
 async function academyDashboard(req, res) {
   if (req.method !== "GET") return res.status(405).end();
   res.setHeader("Cache-Control", "private, no-store");
@@ -373,7 +515,7 @@ async function academyDashboard(req, res) {
       sql`
         SELECT agent_discord_id, COUNT(*)::INTEGER AS review_count
         FROM academy_training_records
-        WHERE archived_at IS NULL AND result = 'a_revoir'
+        WHERE archived_at IS NULL AND result IN ('a_revoir', 'non_valide')
         GROUP BY agent_discord_id
       `,
       sql`
@@ -416,7 +558,7 @@ async function academyDashboard(req, res) {
         let reason = "";
         let priority = 4;
         if (reviewCount > 0) {
-          reason = `${reviewCount} formation${reviewCount > 1 ? "s" : ""} à revoir`;
+          reason = `${reviewCount} formation${reviewCount > 1 ? "s" : ""} nécessitant un suivi`;
           priority = 1;
         } else if (!file) {
           reason = "Dossier non commencé";
@@ -671,6 +813,7 @@ async function createTraining(req, res) {
       )
       RETURNING id
     `;
+    await syncAgentCompletion(sql, discordId);
     return res.status(201).json({ ok: true, id: String(created.id) });
   } catch (error) {
     console.error("Academy training creation failed", error);
@@ -731,6 +874,7 @@ async function updateTraining(req, res) {
       RETURNING id, updated_at
     `;
     if (!rows.length) return res.status(404).json({ ok: false, code: "training_not_found" });
+    await syncAgentCompletion(sql, discordId);
     return res.status(200).json({ ok: true, id: String(rows[0].id), updatedAt: rows[0].updated_at });
   } catch (error) {
     console.error("Academy training update failed", error);
@@ -781,6 +925,7 @@ async function archiveTraining(req, res) {
           RETURNING id
         `;
     if (!rows.length) return res.status(404).json({ ok: false, code: "training_not_found" });
+    await syncAgentCompletion(sql, discordId);
     return res.status(200).json({ ok: true, archived });
   } catch (error) {
     console.error("Academy training archive failed", error);
@@ -1014,6 +1159,7 @@ module.exports = async function handler(req, res) {
     case "logout": return logout(req, res);
     case "database-check": return databaseCheck(req, res);
     case "agents": return agentsList(req, res);
+    case "training-overview": return trainingOverview(req, res);
     case "dashboard": return academyDashboard(req, res);
     case "agent": return agentDetail(req, res);
     case "agent-save": return saveAgentFile(req, res);
