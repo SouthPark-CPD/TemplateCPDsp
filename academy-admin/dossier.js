@@ -19,6 +19,10 @@ const elements = {
   saveAgent: document.querySelector("#save-agent"),
   trainingForm: document.querySelector("#training-form"),
   trainingDate: document.querySelector("#training-date"),
+  trainingType: document.querySelector("#training-type"),
+  customTrainingField: document.querySelector("#custom-training-field"),
+  customTraining: document.querySelector("#training-custom"),
+  optionalFields: document.querySelector(".optional-fields"),
   saveTraining: document.querySelector("#save-training"),
   cancelTrainingEdit: document.querySelector("#cancel-training-edit"),
   trainingFormKicker: document.querySelector("#training-form-kicker"),
@@ -27,7 +31,11 @@ const elements = {
   historyEmpty: document.querySelector("#history-empty"),
   archiveHistory: document.querySelector("#archive-history"),
   archiveEmpty: document.querySelector("#archive-empty"),
-  archiveCount: document.querySelector("#archive-count")
+  archiveCount: document.querySelector("#archive-count"),
+  pathPercentage: document.querySelector("#path-percentage"),
+  pathSummary: document.querySelector("#path-summary"),
+  pathProgress: document.querySelector("#path-progress"),
+  pathModules: document.querySelector("#path-modules")
 };
 
 let editingTrainingId = null;
@@ -36,9 +44,25 @@ let trainingRecords = new Map();
 const resultLabels = {
   planifiee: "Planifiée",
   valide: "Validée",
+  validee: "Validée",
   a_revoir: "À revoir",
   non_valide: "Non validée"
 };
+
+const standardModules = [
+  "Intégration et règlement",
+  "Communications radio",
+  "Contrôle routier",
+  "Procédure d’interpellation",
+  "Usage de la force",
+  "Conduite opérationnelle",
+  "Rédaction de rapports",
+  "Évaluation finale"
+];
+
+function canonicalResult(result) {
+  return result === "validee" ? "valide" : result;
+}
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>'"]/g, character => ({
@@ -79,6 +103,7 @@ async function api(url, options = {}) {
 }
 
 function trainingCard(training, archived = false) {
+  const result = canonicalResult(training.result);
   const updateText = training.updatedByName && training.updatedAt !== training.createdAt
     ? ` · Modifié par ${escapeHtml(training.updatedByName)} le ${escapeHtml(formatDate(training.updatedAt, true))}`
     : "";
@@ -86,7 +111,7 @@ function trainingCard(training, archived = false) {
     <article class="training-card${archived ? " archived" : ""}">
       <div class="training-topline">
         <div><span class="training-date">${escapeHtml(formatDate(training.trainingDate))}</span><h3>${escapeHtml(training.trainingType)}</h3></div>
-        <span class="result result-${escapeHtml(training.result)}">${escapeHtml(resultLabels[training.result] || training.result)}</span>
+        <span class="result result-${escapeHtml(result)}">${escapeHtml(resultLabels[result] || result)}</span>
       </div>
       ${training.score !== null ? `<div class="score"><strong>${Number(training.score)}</strong><span>/100</span></div>` : ""}
       <div class="training-details">
@@ -104,6 +129,35 @@ function trainingCard(training, archived = false) {
   `;
 }
 
+function renderPath(trainings) {
+  const latestByModule = new Map();
+  trainings.forEach(training => {
+    if (standardModules.includes(training.trainingType) && !latestByModule.has(training.trainingType)) {
+      latestByModule.set(training.trainingType, training);
+    }
+  });
+  const validated = standardModules.filter(module => {
+    const result = canonicalResult(latestByModule.get(module)?.result);
+    return result === "valide";
+  }).length;
+  const percentage = Math.round((validated / standardModules.length) * 100);
+  elements.pathPercentage.textContent = `${percentage} %`;
+  elements.pathSummary.textContent = `${validated} module${validated > 1 ? "s" : ""} validé${validated > 1 ? "s" : ""} sur ${standardModules.length}`;
+  elements.pathProgress.style.width = `${percentage}%`;
+  elements.pathModules.innerHTML = standardModules.map((module, index) => {
+    const training = latestByModule.get(module);
+    const result = canonicalResult(training?.result || "non_commence");
+    const label = resultLabels[result] || "Non commencé";
+    return `
+      <button class="path-module path-${escapeHtml(result)}" type="button" data-module="${escapeHtml(module)}">
+        <span>${String(index + 1).padStart(2, "0")}</span>
+        <strong>${escapeHtml(module)}</strong>
+        <small>${escapeHtml(label)}</small>
+      </button>
+    `;
+  }).join("");
+}
+
 function renderHistory(trainings, archivedTrainings = []) {
   trainingRecords = new Map([...trainings, ...archivedTrainings].map(training => [training.id, training]));
   elements.count.textContent = String(trainings.length);
@@ -114,12 +168,23 @@ function renderHistory(trainings, archivedTrainings = []) {
   elements.archiveEmpty.hidden = archivedTrainings.length > 0;
   elements.archiveHistory.hidden = archivedTrainings.length === 0;
   elements.archiveHistory.innerHTML = archivedTrainings.map(training => trainingCard(training, true)).join("");
+  renderPath(trainings);
+}
+
+function updateCustomTrainingField() {
+  const custom = elements.trainingType.value === "__custom__";
+  elements.customTrainingField.hidden = !custom;
+  elements.customTraining.required = custom;
+  if (custom) elements.customTraining.focus();
 }
 
 function resetTrainingForm() {
   editingTrainingId = null;
   elements.trainingForm.reset();
   elements.trainingDate.valueAsDate = new Date();
+  elements.customTrainingField.hidden = true;
+  elements.customTraining.required = false;
+  elements.optionalFields.open = false;
   elements.trainingFormKicker.textContent = "Nouvelle entrée";
   elements.trainingFormTitle.textContent = "Ajouter une formation";
   elements.saveTraining.textContent = "Ajouter à l’historique";
@@ -130,9 +195,16 @@ function editTraining(id) {
   const training = trainingRecords.get(id);
   if (!training) return;
   editingTrainingId = id;
-  elements.trainingForm.elements.trainingType.value = training.trainingType;
+  if (standardModules.includes(training.trainingType)) {
+    elements.trainingType.value = training.trainingType;
+    elements.customTraining.value = "";
+  } else {
+    elements.trainingType.value = "__custom__";
+    elements.customTraining.value = training.trainingType;
+  }
+  updateCustomTrainingField();
   elements.trainingForm.elements.trainingDate.value = String(training.trainingDate).slice(0, 10);
-  elements.trainingForm.elements.result.value = training.result;
+  elements.trainingForm.elements.result.value = canonicalResult(training.result);
   elements.trainingForm.elements.score.value = training.score ?? "";
   elements.trainingForm.elements.strengths.value = training.strengths;
   elements.trainingForm.elements.improvements.value = training.improvements;
@@ -141,6 +213,7 @@ function editTraining(id) {
   elements.trainingFormTitle.textContent = "Modifier la formation";
   elements.saveTraining.textContent = "Enregistrer les modifications";
   elements.cancelTrainingEdit.hidden = false;
+  elements.optionalFields.open = Boolean(training.score !== null || training.strengths || training.improvements || training.comment);
   elements.trainingForm.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -224,6 +297,16 @@ elements.trainingForm.addEventListener("submit", async event => {
   elements.saveTraining.disabled = true;
   elements.saveTraining.textContent = editingTrainingId ? "Modification en cours…" : "Ajout en cours…";
   const form = new FormData(elements.trainingForm);
+  const selectedTrainingType = form.get("trainingType");
+  const trainingType = selectedTrainingType === "__custom__"
+    ? String(form.get("customTrainingType") || "").trim()
+    : selectedTrainingType;
+  if (!trainingType) {
+    showNotice("Sélectionnez un module ou saisissez un intitulé personnalisé.", "error");
+    elements.saveTraining.disabled = false;
+    elements.saveTraining.textContent = editingTrainingId ? "Enregistrer les modifications" : "Ajouter à l’historique";
+    return;
+  }
   try {
     const isEditing = Boolean(editingTrainingId);
     await api(isEditing ? "/api/academy-admin-data/training/update" : "/api/academy-admin-data/training/create", {
@@ -231,7 +314,7 @@ elements.trainingForm.addEventListener("submit", async event => {
       body: JSON.stringify({
         id: editingTrainingId,
         discordId,
-        trainingType: form.get("trainingType"),
+        trainingType,
         trainingDate: form.get("trainingDate"),
         result: form.get("result"),
         score: form.get("score"),
@@ -252,6 +335,15 @@ elements.trainingForm.addEventListener("submit", async event => {
 });
 
 elements.cancelTrainingEdit.addEventListener("click", resetTrainingForm);
+elements.trainingType.addEventListener("change", updateCustomTrainingField);
+
+elements.pathModules.addEventListener("click", event => {
+  const button = event.target.closest("[data-module]");
+  if (!button) return;
+  elements.trainingType.value = button.dataset.module;
+  updateCustomTrainingField();
+  elements.trainingForm.scrollIntoView({ behavior: "smooth", block: "start" });
+});
 
 document.querySelector("#dossier-content").addEventListener("click", event => {
   const button = event.target.closest("[data-action][data-id]");

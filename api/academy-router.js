@@ -259,6 +259,11 @@ function validDate(value) {
     && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
 }
 
+function normalizeTrainingResult(value) {
+  const result = String(value || "");
+  return result === "validee" ? "valide" : result;
+}
+
 async function instructorAccess(req, res) {
   const access = await validateSession(req, false);
   if (!access.ok) {
@@ -630,7 +635,7 @@ async function createTraining(req, res) {
   const discordId = String(body.discordId || "");
   const trainingType = textField(body.trainingType, 120);
   const trainingDate = String(body.trainingDate || "");
-  const result = String(body.result || "");
+  const result = normalizeTrainingResult(body.result);
   const comment = textField(body.comment, 5000);
   const strengths = textField(body.strengths, 3000);
   const improvements = textField(body.improvements, 3000);
@@ -686,7 +691,7 @@ async function updateTraining(req, res) {
   const discordId = String(body.discordId || "");
   const trainingType = textField(body.trainingType, 120);
   const trainingDate = String(body.trainingDate || "");
-  const result = String(body.result || "");
+  const result = normalizeTrainingResult(body.result);
   const comment = textField(body.comment, 5000);
   const strengths = textField(body.strengths, 3000);
   const improvements = textField(body.improvements, 3000);

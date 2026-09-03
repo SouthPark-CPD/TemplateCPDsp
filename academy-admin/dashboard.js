@@ -15,9 +15,14 @@ const elements = {
 const resultLabels = {
   planifiee: "Planifiée",
   valide: "Validée",
+  validee: "Validée",
   a_revoir: "À revoir",
   non_valide: "Non validée"
 };
+
+function canonicalResult(result) {
+  return result === "validee" ? "valide" : result;
+}
 
 const errorMessages = {
   database_not_configured: "La base de données Academy n’est pas configurée.",
@@ -73,11 +78,12 @@ function renderRecent(items) {
   elements.recentEmpty.hidden = true;
   elements.recentList.hidden = false;
   elements.recentList.innerHTML = items.map(item => {
+    const result = canonicalResult(item.result);
     const score = item.score === null || item.score === undefined ? "" : `<small>${Number(item.score)}/100</small>`;
     return `
       <a class="recent-row" href="/academy-admin/dossier.html?id=${encodeURIComponent(item.agentDiscordId)}">
         <span class="recent-main"><strong>${escapeHtml(item.trainingType)}</strong><small>${escapeHtml(item.agentName)} · ${escapeHtml(formatDate(item.trainingDate))}</small></span>
-        <span class="result result-${escapeHtml(item.result)}">${escapeHtml(resultLabels[item.result] || item.result)}</span>
+        <span class="result result-${escapeHtml(result)}">${escapeHtml(resultLabels[result] || result)}</span>
         ${score}
       </a>
     `;
