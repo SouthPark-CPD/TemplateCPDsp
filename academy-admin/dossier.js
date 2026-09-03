@@ -37,8 +37,13 @@ const elements = {
   pathProgress: document.querySelector("#path-progress"),
   pathModules: document.querySelector("#path-modules"),
   printButton: document.querySelector("#print-dossier"),
-  printSheet: document.querySelector("#print-sheet")
+  printSheet: document.querySelector("#print-sheet"),
+  agentTrainingLink: document.querySelector("#agent-training-link")
 };
+
+if (elements.agentTrainingLink && discordId) {
+  elements.agentTrainingLink.href = `/academy-admin/evaluations.html?agent=${encodeURIComponent(discordId)}`;
+}
 
 let editingTrainingId = null;
 let trainingRecords = new Map();

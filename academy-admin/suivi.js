@@ -123,7 +123,7 @@ function render() {
           <span class="state state-${state}">${escapeHtml(stateLabels[state])}</span>
           <div class="progress"><div><strong>${Number(agent.percentage)} %</strong><span>${escapeHtml(details)}</span></div><i><b style="width:${Number(agent.percentage)}%"></b></i></div>
           <div class="last-training"><span>Dernière formation</span><strong>${escapeHtml(formatDate(agent.lastTrainingDate))}</strong></div>
-          <a href="/academy-admin/dossier.html?id=${encodeURIComponent(agent.discordId)}">Ouvrir le dossier</a>
+          <div class="agent-actions"><a class="train-agent" href="/academy-admin/evaluations.html?agent=${encodeURIComponent(agent.discordId)}">Former</a><a href="/academy-admin/dossier.html?id=${encodeURIComponent(agent.discordId)}">Ouvrir le dossier</a></div>
         </div>
         <div class="module-strip"><span>Modules</span><div>${moduleDots(agent.modules)}</div></div>
       </article>

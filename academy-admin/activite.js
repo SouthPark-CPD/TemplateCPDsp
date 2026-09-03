@@ -105,7 +105,7 @@ function targetLink(entry) {
   }
   if (entry.targetType === "recruitment") return "/academy-admin/recrutements.html";
   if (entry.targetType === "template") return "/academy-admin/evaluations.html";
-  if (entry.targetType === "session") return "/academy-admin/sessions.html";
+  if (entry.targetType === "session") return "/academy-admin/evaluations.html?tab=history";
   return "";
 }
 
