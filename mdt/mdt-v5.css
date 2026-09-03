@@ -12,6 +12,7 @@
   --glass:rgba(14,39,63,.62);
   --glass-deep:rgba(8,29,49,.78);
   --content-width:1220px;
+  --header-width:1400px;
   --font-display:'Oswald',sans-serif;
   --font-mono:'DM Sans',Arial,sans-serif;
 }
@@ -79,7 +80,7 @@ body.mdt-ui input{
 
 .mdt-header{
   position:relative;
-  width:min(var(--content-width),100%);
+  width:min(var(--header-width),100%);
   margin:auto;
   padding:0!important;
   overflow:visible!important;
@@ -124,7 +125,8 @@ body.mdt-ui input{
 
 .header-brand{
   display:flex;
-  min-width:250px;
+  min-width:270px;
+  flex:0 0 270px;
   align-items:center;
   gap:13px;
   color:var(--ink);
@@ -132,15 +134,27 @@ body.mdt-ui input{
 }
 
 .star{
+  display:block!important;
   width:50px;
   height:50px;
   flex:0 0 auto;
-  object-fit:contain;
+  min-width:50px!important;
+  min-height:50px!important;
+  max-width:50px!important;
+  max-height:50px!important;
+  padding:0!important;
+  margin:0!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  clip-path:none!important;
+  transform:none!important;
   filter:drop-shadow(0 9px 18px rgba(0,0,0,.42));
 }
 
 .header-brand-copy{
   display:grid;
+  min-width:0;
+  flex:0 0 auto;
   gap:4px;
 }
 
@@ -148,6 +162,7 @@ body.mdt-ui input{
   font:600 .98rem/1.15 'Oswald',sans-serif;
   letter-spacing:.048em;
   text-transform:uppercase;
+  white-space:nowrap;
 }
 
 .header-brand-copy small{
@@ -719,7 +734,7 @@ body.mdt-ui footer{
 
 body.mdt-ui > header{display:none}
 
-@media(max-width:1220px){
+@media(max-width:1440px){
   .mdt-header-main{justify-content:space-between}
   .nav-toggle{display:flex}
   .header-actions{
@@ -753,8 +768,8 @@ body.mdt-ui > header{display:none}
 @media(max-width:760px){
   #site-header{padding:9px 9px 0}
   .mdt-header-main{min-height:68px;padding:8px 10px 8px 13px;border-radius:18px}
-  .header-brand{min-width:0}
-  .star{width:45px;height:45px}
+  .header-brand{min-width:0;flex:1 1 auto}
+  .star{width:45px!important;height:45px!important;min-width:45px!important;min-height:45px!important;max-width:45px!important;max-height:45px!important}
   .header-brand-copy strong{font-size:.85rem}
   .header-brand-copy small{font-size:.6rem}
   .nav-toggle{min-width:44px;width:44px;height:44px}
@@ -780,7 +795,8 @@ body.mdt-ui > header{display:none}
 }
 
 @media(max-width:500px){
-  .header-brand-copy strong{max-width:150px}
+  .header-brand-copy{overflow:hidden}
+  .header-brand-copy strong{max-width:150px;overflow:hidden;text-overflow:ellipsis}
   .header-actions{grid-template-columns:1fr}
   .context-meta time{display:none}
   .panel-title,.page-title,.qr-title{font-size:1.55rem}
