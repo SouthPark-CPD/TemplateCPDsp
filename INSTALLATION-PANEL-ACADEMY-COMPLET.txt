@@ -1,0 +1,42 @@
+RESTAURATION COMPLÈTE — PANEL POLICE ACADEMY
+
+1. Décompressez cette archive.
+2. Ouvrez la racine du dépôt GitHub SouthPark-CPD/TemplateCPDsp.
+3. Importez tous les fichiers et dossiers contenus dans l’archive.
+4. Conservez l’arborescence exacte : ne placez pas les fichiers seuls à la racine.
+5. Acceptez le remplacement des fichiers existants.
+6. Validez le commit sur la branche main.
+7. Attendez que le déploiement Vercel affiche Ready.
+8. Rechargez avec Ctrl + F5.
+
+ADRESSES À TESTER
+
+Connexion instructeur :
+https://template-cp-dsp.vercel.app/academy-auth/login.html
+
+Tableau de bord :
+https://template-cp-dsp.vercel.app/academy-admin/
+
+Effectifs :
+https://template-cp-dsp.vercel.app/academy-admin/effectifs.html
+
+Recrutement :
+https://template-cp-dsp.vercel.app/academy-admin/recrutements.html
+
+CONTENU DU PACK
+
+- Connexion Discord et contrôle du rôle Instructor
+- Tableau de bord Academy
+- Liste des effectifs récupérés depuis Discord
+- Dossiers individuels des agents
+- Parcours standard de huit modules
+- Ajout, modification, archivage et restauration des formations
+- Demandes de recrutement et archives des tickets Discord
+- Configuration Vercel et dépendances nécessaires
+- Correctifs SQL fournis séparément
+
+IMPORTANT
+
+Ne supprimez pas les autres dossiers du site, du MDT ou de l’API.
+Ajoutez simplement le contenu de ce pack et acceptez les remplacements.
+Les variables Vercel existantes ne doivent pas être supprimées ou recréées.
