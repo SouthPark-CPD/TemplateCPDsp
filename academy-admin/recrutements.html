@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Demandes de recrutement — Police Academy</title>
+  <link rel="icon" href="../assets/cpd-seal.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="recrutements.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/academy-admin/"><img src="../assets/cpd-seal.png" alt=""><div><strong>Police Academy</strong><span>Espace instructeur</span></div></a>
+    <nav class="admin-nav"><a href="/academy-admin/">Effectifs</a><a class="active" href="/academy-admin/recrutements.html">Demandes de recrutement</a></nav>
+    <a class="logout" href="/api/academy-admin-auth/logout">Déconnexion</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p>Suivi des candidatures</p>
+      <h1>Demandes de recrutement</h1>
+      <span>Suivez les tickets ouverts, fermés et archivés depuis le portail Police Academy.</span>
+    </section>
+
+    <section class="status-grid">
+      <article><span>Total</span><strong id="total-count">—</strong></article>
+      <article><span>En cours</span><strong id="active-count">—</strong></article>
+      <article><span>Fermés</span><strong id="closed-count">—</strong></article>
+      <article><span>Archivés</span><strong id="deleted-count">—</strong></article>
+    </section>
+
+    <section class="directory">
+      <div class="directory-head">
+        <div><p class="section-kicker">Gestion Academy</p><h2>Tickets de recrutement</h2></div>
+        <div class="filters">
+          <label><span>Rechercher</span><input id="ticket-search" type="search" placeholder="Numéro, candidat ou Discord…"></label>
+          <label><span>État du ticket</span><select id="status-filter"><option value="">Tous</option><option value="active">En cours</option><option value="closed">Fermé</option><option value="deleted">Archivé</option></select></label>
+          <label><span>Décision</span><select id="decision-filter"><option value="">Toutes</option><option value="pending">En attente</option><option value="accepted">Accepté</option><option value="refused">Refusé</option><option value="withdrawn">Abandon</option></select></label>
+        </div>
+      </div>
+      <p id="tickets-message" class="message">Chargement des demandes…</p>
+      <div id="tickets-list" class="tickets-list" hidden></div>
+    </section>
+  </main>
+
+  <dialog id="ticket-dialog">
+    <div class="dialog-shell">
+      <header class="dialog-head"><div><p id="detail-application-id">Candidature</p><h2 id="detail-candidate">Candidat</h2></div><button id="close-dialog" type="button" aria-label="Fermer">×</button></header>
+      <div id="detail-loading" class="detail-loading">Chargement du dossier…</div>
+      <div id="detail-content" hidden>
+        <section class="ticket-summary">
+          <div><span>État du ticket</span><strong id="detail-status">—</strong></div>
+          <div><span>Identifiant Discord</span><strong id="detail-discord">—</strong></div>
+          <div><span>Création</span><strong id="detail-created">—</strong></div>
+          <div><span>Dernière action</span><strong id="detail-actor">—</strong></div>
+          <a id="detail-discord-link" target="_blank" rel="noopener">Ouvrir dans Discord ↗</a>
+        </section>
+
+        <section class="decision-panel">
+          <label><span>Décision de recrutement</span><select id="detail-decision"><option value="pending">En attente</option><option value="accepted">Accepté</option><option value="refused">Refusé</option><option value="withdrawn">Abandon</option></select></label>
+          <button id="save-decision" type="button">Enregistrer la décision</button>
+        </section>
+
+        <section class="detail-section"><div class="section-title"><p>Formulaire</p><h3>Réponses du candidat</h3></div><div id="form-data" class="form-data"></div></section>
+        <section class="detail-section"><div class="section-title"><p>Conversation</p><h3>Transcript Discord</h3></div><p id="transcript-empty" class="empty">Le transcript sera disponible après la première fermeture ou l’archivage du ticket.</p><div id="transcript" class="transcript" hidden></div></section>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="recrutements.js"></script>
+</body>
+</html>

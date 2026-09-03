@@ -1,4 +1,5 @@
 const { neon } = require("@neondatabase/serverless");
+const crypto = require("node:crypto");
 const {
   env,
   siteUrl,
@@ -44,6 +45,8 @@ const EXCLUDED_HIGH_RANKS = new Set([
 
 const ACADEMY_STATUSES = new Set(["a_former", "en_formation", "termine", "suspendu"]);
 const TRAINING_RESULTS = new Set(["planifiee", "valide", "a_revoir", "non_valide"]);
+const TICKET_STATUSES = new Set(["active", "closed", "deleted"]);
+const RECRUITMENT_DECISIONS = new Set(["pending", "accepted", "refused", "withdrawn"]);
 
 function actionFromRequest(req) {
   return Array.isArray(req.query.action)
@@ -231,6 +234,16 @@ function readJsonBody(req) {
   } catch {
     return null;
   }
+}
+
+function validSyncSecret(req) {
+  const expected = String(process.env.ACADEMY_SYNC_SECRET || "");
+  const provided = String(req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+  if (!expected || !provided) return false;
+  const expectedBuffer = Buffer.from(expected);
+  const providedBuffer = Buffer.from(provided);
+  return expectedBuffer.length === providedBuffer.length
+    && crypto.timingSafeEqual(expectedBuffer, providedBuffer);
 }
 
 function textField(value, maxLength) {
@@ -626,6 +639,224 @@ async function archiveTraining(req, res) {
   }
 }
 
+async function recruitmentTickets(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = await sql`
+      SELECT application_id, channel_id, channel_name, candidate_discord_id,
+        candidate_name, ticket_status, recruitment_decision, created_at,
+        closed_at, closed_by_name, deleted_at, deleted_by_name, updated_at,
+        CASE
+          WHEN transcript IS NULL THEN 0
+          ELSE COALESCE(jsonb_array_length(transcript->'messages'), 0)
+        END AS message_count
+      FROM academy_recruitment_tickets
+      ORDER BY created_at DESC
+    `;
+    return res.status(200).json({
+      ok: true,
+      tickets: rows.map(row => ({
+        applicationId: row.application_id,
+        channelId: row.channel_id,
+        channelName: row.channel_name || "",
+        candidateDiscordId: row.candidate_discord_id,
+        candidateName: row.candidate_name,
+        ticketStatus: row.ticket_status,
+        recruitmentDecision: row.recruitment_decision,
+        createdAt: row.created_at,
+        closedAt: row.closed_at,
+        closedByName: row.closed_by_name || "",
+        deletedAt: row.deleted_at,
+        deletedByName: row.deleted_by_name || "",
+        updatedAt: row.updated_at,
+        messageCount: Number(row.message_count || 0)
+      }))
+    });
+  } catch (error) {
+    console.error("Academy recruitment tickets list failed", error);
+    return res.status(500).json({ ok: false, code: "recruitment_tickets_unavailable" });
+  }
+}
+
+async function recruitmentTicketDetail(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  const applicationId = Array.isArray(req.query.id) ? req.query.id[0] : String(req.query.id || "");
+  if (!/^PA-\d{4,20}$/i.test(applicationId)) {
+    return res.status(400).json({ ok: false, code: "invalid_application_id" });
+  }
+
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = await sql`
+      SELECT application_id, channel_id, channel_name, candidate_discord_id,
+        candidate_name, ticket_status, recruitment_decision, form_data,
+        transcript, created_at, closed_at, closed_by_discord_id, closed_by_name,
+        deleted_at, deleted_by_discord_id, deleted_by_name, updated_at
+      FROM academy_recruitment_tickets
+      WHERE application_id = ${applicationId.toUpperCase()}
+      LIMIT 1
+    `;
+    if (!rows.length) return res.status(404).json({ ok: false, code: "recruitment_ticket_not_found" });
+    const row = rows[0];
+    return res.status(200).json({
+      ok: true,
+      ticket: {
+        applicationId: row.application_id,
+        channelId: row.channel_id,
+        channelName: row.channel_name || "",
+        candidateDiscordId: row.candidate_discord_id,
+        candidateName: row.candidate_name,
+        ticketStatus: row.ticket_status,
+        recruitmentDecision: row.recruitment_decision,
+        formData: row.form_data || null,
+        transcript: row.transcript || null,
+        createdAt: row.created_at,
+        closedAt: row.closed_at,
+        closedByDiscordId: row.closed_by_discord_id || null,
+        closedByName: row.closed_by_name || "",
+        deletedAt: row.deleted_at,
+        deletedByDiscordId: row.deleted_by_discord_id || null,
+        deletedByName: row.deleted_by_name || "",
+        updatedAt: row.updated_at
+      }
+    });
+  } catch (error) {
+    console.error("Academy recruitment ticket detail failed", error);
+    return res.status(500).json({ ok: false, code: "recruitment_ticket_unavailable" });
+  }
+}
+
+async function saveRecruitmentDecision(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const applicationId = String(body.applicationId || "").toUpperCase();
+  const decision = String(body.decision || "");
+  if (!/^PA-\d{4,20}$/.test(applicationId) || !RECRUITMENT_DECISIONS.has(decision)) {
+    return res.status(400).json({ ok: false, code: "invalid_recruitment_decision" });
+  }
+
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = await sql`
+      UPDATE academy_recruitment_tickets
+      SET recruitment_decision = ${decision}, updated_at = NOW()
+      WHERE application_id = ${applicationId}
+      RETURNING application_id, recruitment_decision, updated_at
+    `;
+    if (!rows.length) return res.status(404).json({ ok: false, code: "recruitment_ticket_not_found" });
+    return res.status(200).json({
+      ok: true,
+      applicationId: rows[0].application_id,
+      decision: rows[0].recruitment_decision,
+      updatedAt: rows[0].updated_at,
+      updatedBy: session.user.globalName || session.user.username
+    });
+  } catch (error) {
+    console.error("Academy recruitment decision save failed", error);
+    return res.status(500).json({ ok: false, code: "recruitment_decision_save_failed" });
+  }
+}
+
+async function syncRecruitmentTicket(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "no-store");
+  if (!validSyncSecret(req)) return res.status(401).json({ ok: false, code: "invalid_sync_secret" });
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  const contentLength = Number(req.headers["content-length"] || 0);
+  if (contentLength > 2500000) return res.status(413).json({ ok: false, code: "transcript_too_large" });
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+
+  const applicationId = textField(body.applicationId, 32).toUpperCase();
+  const channelId = textField(body.channelId, 32);
+  const channelName = textField(body.channelName, 100);
+  const candidateDiscordId = textField(body.candidateDiscordId, 32);
+  const candidateName = textField(body.candidateName, 120);
+  const ticketStatus = String(body.ticketStatus || "");
+  const actorDiscordId = textField(body.actorDiscordId, 32);
+  const actorName = textField(body.actorName, 100);
+  const transcript = body.transcript && typeof body.transcript === "object" ? body.transcript : null;
+  const createdAt = body.createdAt && !Number.isNaN(Date.parse(body.createdAt))
+    ? new Date(body.createdAt).toISOString()
+    : new Date().toISOString();
+
+  if (!/^PA-\d{4,20}$/.test(applicationId) || !validDiscordId(channelId)
+    || !validDiscordId(candidateDiscordId) || !candidateName || !TICKET_STATUSES.has(ticketStatus)
+    || (actorDiscordId && !validDiscordId(actorDiscordId))) {
+    return res.status(400).json({ ok: false, code: "invalid_ticket_sync" });
+  }
+
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const transcriptJson = transcript ? JSON.stringify(transcript) : null;
+    const closedAt = ticketStatus === "closed" ? new Date().toISOString() : null;
+    const deletedAt = ticketStatus === "deleted" ? new Date().toISOString() : null;
+    await sql`
+      INSERT INTO academy_recruitment_tickets (
+        application_id, channel_id, channel_name, candidate_discord_id,
+        candidate_name, ticket_status, recruitment_decision, transcript,
+        created_at, closed_at, closed_by_discord_id, closed_by_name,
+        deleted_at, deleted_by_discord_id, deleted_by_name, updated_at
+      ) VALUES (
+        ${applicationId}, ${channelId}, ${channelName || null}, ${candidateDiscordId},
+        ${candidateName}, ${ticketStatus}, 'pending', ${transcriptJson}::jsonb,
+        ${createdAt}, ${closedAt}, ${ticketStatus === "closed" ? actorDiscordId || null : null},
+        ${ticketStatus === "closed" ? actorName || null : null}, ${deletedAt},
+        ${ticketStatus === "deleted" ? actorDiscordId || null : null},
+        ${ticketStatus === "deleted" ? actorName || null : null}, NOW()
+      )
+      ON CONFLICT (application_id) DO UPDATE SET
+        channel_id = EXCLUDED.channel_id,
+        channel_name = EXCLUDED.channel_name,
+        candidate_discord_id = EXCLUDED.candidate_discord_id,
+        candidate_name = EXCLUDED.candidate_name,
+        ticket_status = EXCLUDED.ticket_status,
+        transcript = COALESCE(EXCLUDED.transcript, academy_recruitment_tickets.transcript),
+        closed_at = CASE
+          WHEN EXCLUDED.ticket_status = 'active' THEN NULL
+          WHEN EXCLUDED.ticket_status = 'closed' THEN COALESCE(academy_recruitment_tickets.closed_at, EXCLUDED.closed_at)
+          ELSE academy_recruitment_tickets.closed_at
+        END,
+        closed_by_discord_id = CASE
+          WHEN EXCLUDED.ticket_status = 'active' THEN NULL
+          WHEN EXCLUDED.ticket_status = 'closed' THEN COALESCE(EXCLUDED.closed_by_discord_id, academy_recruitment_tickets.closed_by_discord_id)
+          ELSE academy_recruitment_tickets.closed_by_discord_id
+        END,
+        closed_by_name = CASE
+          WHEN EXCLUDED.ticket_status = 'active' THEN NULL
+          WHEN EXCLUDED.ticket_status = 'closed' THEN COALESCE(EXCLUDED.closed_by_name, academy_recruitment_tickets.closed_by_name)
+          ELSE academy_recruitment_tickets.closed_by_name
+        END,
+        deleted_at = COALESCE(EXCLUDED.deleted_at, academy_recruitment_tickets.deleted_at),
+        deleted_by_discord_id = COALESCE(EXCLUDED.deleted_by_discord_id, academy_recruitment_tickets.deleted_by_discord_id),
+        deleted_by_name = COALESCE(EXCLUDED.deleted_by_name, academy_recruitment_tickets.deleted_by_name),
+        updated_at = NOW()
+    `;
+    return res.status(200).json({ ok: true, applicationId, ticketStatus });
+  } catch (error) {
+    console.error("Academy ticket sync failed", error);
+    return res.status(500).json({ ok: false, code: "ticket_sync_failed" });
+  }
+}
+
 module.exports = async function handler(req, res) {
   switch (actionFromRequest(req)) {
     case "discord": return discordLogin(req, res);
@@ -639,6 +870,10 @@ module.exports = async function handler(req, res) {
     case "training-create": return createTraining(req, res);
     case "training-update": return updateTraining(req, res);
     case "training-archive": return archiveTraining(req, res);
+    case "recruitment-tickets": return recruitmentTickets(req, res);
+    case "recruitment-ticket": return recruitmentTicketDetail(req, res);
+    case "recruitment-decision": return saveRecruitmentDecision(req, res);
+    case "ticket-sync": return syncRecruitmentTicket(req, res);
     default: return res.status(404).json({ ok: false, code: "route_not_found" });
   }
 };

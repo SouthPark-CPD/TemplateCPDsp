@@ -218,6 +218,7 @@ async function createApplicationTicket(user, application) {
     return {
       applicationId,
       channelId: channel.id,
+      channelName: channel.name || channelSlug(application.firstName, application.lastName, user.id),
       channelUrl: `https://discord.com/channels/${ACADEMY_GUILD_ID}/${channel.id}`
     };
   } catch (error) {

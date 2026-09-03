@@ -1,5 +1,6 @@
 const { readSession } = require("../../server/candidate-auth");
 const { AcademyError, validateApplication, createApplicationTicket } = require("../../server/academy");
+const { neon } = require("@neondatabase/serverless");
 
 function bodyFromRequest(req) {
   if (req.body && typeof req.body === "object") return req.body;
@@ -7,6 +8,43 @@ function bodyFromRequest(req) {
     try { return JSON.parse(req.body); } catch { throw new AcademyError("invalid_json", 400); }
   }
   throw new AcademyError("invalid_json", 400);
+}
+
+async function storeRecruitmentTicket(user, application, ticket) {
+  if (!process.env.DATABASE_URL) return;
+  const sql = neon(process.env.DATABASE_URL);
+  const formData = JSON.stringify({
+    firstName: application.firstName,
+    lastName: application.lastName,
+    age: application.age,
+    playerId: application.playerId,
+    policeExperience: application.policeExperience,
+    experience: application.experience,
+    availability: application.availability,
+    motivation: application.motivation,
+    qualities: application.qualities,
+    discordUsername: user.username,
+    discordGlobalName: user.globalName || user.username
+  });
+  await sql`
+    INSERT INTO academy_recruitment_tickets (
+      application_id, channel_id, channel_name, candidate_discord_id,
+      candidate_name, ticket_status, recruitment_decision, form_data,
+      created_at, updated_at
+    ) VALUES (
+      ${ticket.applicationId}, ${ticket.channelId}, ${ticket.channelName}, ${user.id},
+      ${`${application.firstName} ${application.lastName}`}, 'active', 'pending',
+      ${formData}::jsonb, NOW(), NOW()
+    )
+    ON CONFLICT (application_id) DO UPDATE SET
+      channel_id = EXCLUDED.channel_id,
+      channel_name = EXCLUDED.channel_name,
+      candidate_discord_id = EXCLUDED.candidate_discord_id,
+      candidate_name = EXCLUDED.candidate_name,
+      ticket_status = 'active',
+      form_data = EXCLUDED.form_data,
+      updated_at = NOW()
+  `;
 }
 
 module.exports = async function handler(req, res) {
@@ -22,6 +60,11 @@ module.exports = async function handler(req, res) {
   try {
     const application = validateApplication(bodyFromRequest(req));
     const ticket = await createApplicationTicket(session.user, application);
+    try {
+      await storeRecruitmentTicket(session.user, application, ticket);
+    } catch (databaseError) {
+      console.error("Academy ticket created but database tracking failed", databaseError);
+    }
     return res.status(201).json({ ok: true, ...ticket });
   } catch (error) {
     if (error instanceof AcademyError) {
