@@ -22,6 +22,7 @@ const {
 const DISCORD_API = "https://discord.com/api/v10";
 const CPD_GUILD_ID = "1408092767963451615";
 const CPD_MEMBER_ROLE_ID = "1408092768026365974";
+const CPD_CONVOCATION_CHANNEL_ID = "1448115717856563410";
 
 const CPD_RANKS = [
   { id: "1408092768043270224", name: "Officier I", level: 1 },
@@ -162,7 +163,7 @@ async function databaseCheck(req, res) {
   }
 }
 
-async function discordBotRequest(path) {
+async function discordBotRequest(path, options = {}) {
   const token = process.env.DISCORD_BOT_TOKEN;
   if (!token) {
     const error = new Error("DISCORD_BOT_TOKEN manquant");
@@ -171,7 +172,12 @@ async function discordBotRequest(path) {
   }
 
   const response = await fetch(`${DISCORD_API}${path}`, {
-    headers: { Authorization: `Bot ${token}` }
+    method: options.method || "GET",
+    headers: {
+      Authorization: `Bot ${token}`,
+      ...(options.body ? { "Content-Type": "application/json" } : {})
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined
   });
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
@@ -179,6 +185,7 @@ async function discordBotRequest(path) {
     error.status = response.status;
     throw error;
   }
+  if (response.status === 204) return null;
   return response.json();
 }
 
@@ -1015,6 +1022,7 @@ async function createTraining(req, res) {
   const body = readJsonBody(req);
   if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
   const discordId = String(body.discordId || "");
+  const scheduleId = body.scheduleId ? String(body.scheduleId) : "";
   const trainingType = textField(body.trainingType, 120);
   const trainingDate = String(body.trainingDate || "");
   const result = normalizeTrainingResult(body.result);
@@ -1026,7 +1034,7 @@ async function createTraining(req, res) {
     : Number(body.score);
   const evaluation = body.evaluationData ? evaluationPayload(body.evaluationData) : null;
 
-  if (!validDiscordId(discordId) || !trainingType || !validDate(trainingDate)
+  if (!validDiscordId(discordId) || (scheduleId && !/^\d+$/.test(scheduleId)) || !trainingType || !validDate(trainingDate)
     || !TRAINING_RESULTS.has(result) || (body.evaluationData && !evaluation)
     || (rawScore !== null && (!Number.isInteger(rawScore) || rawScore < 0 || rawScore > 100))) {
     return res.status(400).json({ ok: false, code: "invalid_training" });
@@ -1074,6 +1082,15 @@ async function createTraining(req, res) {
         result, score: rawScore, evaluatedWithGrid: Boolean(evaluation)
       }
     });
+    if (scheduleId) {
+      const scheduledRows = await sql`UPDATE academy_scheduled_sessions SET status='completed', updated_at=NOW()
+        WHERE id=${scheduleId} AND status='scheduled' RETURNING *`;
+      if (scheduledRows.length && scheduledRows[0].discord_message_id) {
+        await discordBotRequest(`/channels/${scheduledRows[0].discord_channel_id}/messages/${scheduledRows[0].discord_message_id}`, {
+          method: "PATCH", body: scheduleMessagePayload(publicSchedule(scheduledRows[0]), false)
+        }).catch(error => console.error("Completed schedule message update failed", error));
+      }
+    }
     return res.status(201).json({ ok: true, id: String(created.id) });
   } catch (error) {
     console.error("Academy training creation failed", error);
@@ -1097,6 +1114,7 @@ async function createTrainingSession(req, res) {
   if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
   const templateId = String(body.templateId || "");
   const trainingDate = String(body.trainingDate || "");
+  const scheduleId = body.scheduleId ? String(body.scheduleId) : "";
   const commonComment = textField(body.commonComment, 3500);
   const participants = Array.isArray(body.participants)
     ? body.participants.slice(0, 12).map(item => {
@@ -1115,7 +1133,7 @@ async function createTrainingSession(req, res) {
     || !TRAINING_RESULTS.has(item.result)
     || (item.score !== null && (!Number.isInteger(item.score) || item.score < 0 || item.score > 100)));
 
-  if (!/^\d+$/.test(templateId) || !validDate(trainingDate) || participants.length < 2
+  if (!/^\d+$/.test(templateId) || (scheduleId && !/^\d+$/.test(scheduleId)) || !validDate(trainingDate) || participants.length < 2
     || participants.length > 12 || uniqueIds.size !== participants.length || invalidParticipant) {
     return res.status(400).json({ ok: false, code: "invalid_training_session" });
   }
@@ -1173,6 +1191,15 @@ async function createTrainingSession(req, res) {
         participantIds: participants.map(item => item.discordId), trainingIds: createdIds
       }
     });
+    if (scheduleId) {
+      const scheduledRows = await sql`UPDATE academy_scheduled_sessions SET status='completed', updated_at=NOW()
+        WHERE id=${scheduleId} AND status='scheduled' RETURNING *`;
+      if (scheduledRows.length && scheduledRows[0].discord_message_id) {
+        await discordBotRequest(`/channels/${scheduledRows[0].discord_channel_id}/messages/${scheduledRows[0].discord_message_id}`, {
+          method: "PATCH", body: scheduleMessagePayload(publicSchedule(scheduledRows[0]), false)
+        }).catch(error => console.error("Completed schedule message update failed", error));
+      }
+    }
     return res.status(201).json({ ok: true, createdCount: createdIds.length, trainingIds: createdIds });
   } catch (error) {
     console.error("Academy training session creation failed", error);
@@ -1223,6 +1250,243 @@ async function trainingSessions(req, res) {
   } catch (error) {
     console.error("Academy training sessions read failed", error);
     return res.status(500).json({ ok: false, code: "training_sessions_unavailable" });
+  }
+}
+
+function validDateTime(value) {
+  const timestamp = Date.parse(String(value || ""));
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null;
+}
+
+function scheduleMessagePayload(schedule, mentionParticipants = false) {
+  const participants = Array.isArray(schedule.participants) ? schedule.participants : [];
+  const unixTime = Math.floor(new Date(schedule.startsAt).getTime() / 1000);
+  const status = schedule.status || "scheduled";
+  const title = status === "cancelled"
+    ? "Formation annulée"
+    : status === "completed"
+      ? "Formation terminée"
+      : "Convocation Police Academy";
+  const color = status === "cancelled" ? 0xc94c4c : status === "completed" ? 0x57a773 : 0xe6bd63;
+  const responseCount = participants.reduce((counts, participant) => {
+    const response = participant.response || "pending";
+    counts[response] = (counts[response] || 0) + 1;
+    return counts;
+  }, {});
+  const fields = [
+    { name: "Formation", value: schedule.trainingType, inline: false },
+    { name: "Date et heure", value: `<t:${unixTime}:F>\n<t:${unixTime}:R>`, inline: true },
+    { name: "Lieu", value: schedule.location || "À définir", inline: true },
+    { name: "Instructeur", value: schedule.instructorName, inline: true },
+    { name: "Participants", value: participants.map(participant => `<@${participant.discordId}>`).join("\n") || "Aucun", inline: false }
+  ];
+  if (status === "scheduled") {
+    fields.push({
+      name: "Réponses",
+      value: `Présents : ${responseCount.present || 0} · Indisponibles : ${responseCount.unavailable || 0} · En attente : ${responseCount.pending || 0}`,
+      inline: false
+    });
+  }
+  if (schedule.notes) fields.push({ name: "Informations", value: schedule.notes.slice(0, 1000), inline: false });
+  return {
+    content: mentionParticipants && status === "scheduled"
+      ? participants.map(participant => `<@${participant.discordId}>`).join(" ")
+      : "",
+    embeds: [{ title, description: status === "scheduled" ? "Vous êtes convoqué à une session de formation. Merci d’indiquer votre disponibilité." : "Cette convocation a été mise à jour par la Police Academy.", color, fields, footer: { text: `Planning Academy · séance ${schedule.id}` } }],
+    components: status === "scheduled" ? [{
+      type: 1,
+      components: [
+        { type: 2, style: 3, label: "Présent", emoji: { name: "✅" }, custom_id: "academy_schedule_present" },
+        { type: 2, style: 4, label: "Indisponible", emoji: { name: "❌" }, custom_id: "academy_schedule_unavailable" }
+      ]
+    }] : [],
+    allowed_mentions: { parse: [], users: mentionParticipants ? participants.map(participant => participant.discordId) : [] }
+  };
+}
+
+function publicSchedule(row) {
+  const participants = Array.isArray(row.participants) ? row.participants : [];
+  return {
+    id: String(row.id),
+    templateId: row.template_id ? String(row.template_id) : null,
+    trainingType: row.training_type,
+    startsAt: row.starts_at,
+    location: row.location || "",
+    notes: row.notes || "",
+    status: row.status,
+    instructorDiscordId: row.instructor_discord_id,
+    instructorName: row.instructor_name,
+    participants,
+    discordGuildId: row.discord_guild_id,
+    discordChannelId: row.discord_channel_id,
+    discordMessageId: row.discord_message_id || null,
+    notificationStatus: row.notification_status,
+    notificationError: row.notification_error || "",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+async function scheduledSessions(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = await sql`SELECT * FROM academy_scheduled_sessions ORDER BY starts_at DESC LIMIT 100`;
+    return res.status(200).json({ ok: true, sessions: rows.map(publicSchedule) });
+  } catch (error) {
+    console.error("Academy planning read failed", error);
+    return res.status(500).json({ ok: false, code: error.code === "42P01" ? "planning_table_missing" : "planning_unavailable" });
+  }
+}
+
+async function saveScheduledSession(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const id = body.id ? String(body.id) : "";
+  const templateId = String(body.templateId || "");
+  const startsAt = validDateTime(body.startsAt);
+  const location = textField(body.location, 160);
+  const notes = textField(body.notes, 1000);
+  const participantIds = Array.isArray(body.participants) ? [...new Set(body.participants.map(String))].slice(0, 12) : [];
+  if ((id && !/^\d+$/.test(id)) || !/^\d+$/.test(templateId) || !startsAt || !participantIds.length
+    || participantIds.some(participantId => !validDiscordId(participantId))) {
+    return res.status(400).json({ ok: false, code: "invalid_schedule" });
+  }
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const [templateRows, members] = await Promise.all([
+      sql`SELECT id, name FROM academy_training_templates WHERE id=${templateId} AND is_active=TRUE LIMIT 1`,
+      getAllCpdMembers()
+    ]);
+    if (!templateRows.length) return res.status(404).json({ ok: false, code: "training_template_not_found" });
+    const eligible = new Map(members.map(publicAgent).filter(Boolean).map(agent => [agent.discordId, agent]));
+    if (participantIds.some(participantId => !eligible.has(participantId))) {
+      return res.status(400).json({ ok: false, code: "schedule_contains_ineligible_agent" });
+    }
+    const existing = id ? (await sql`SELECT * FROM academy_scheduled_sessions WHERE id=${id} LIMIT 1`)[0] : null;
+    if (id && !existing) return res.status(404).json({ ok: false, code: "schedule_not_found" });
+    const existingResponses = new Map((existing?.participants || []).map(participant => [String(participant.discordId), participant]));
+    const participants = participantIds.map(participantId => ({
+      discordId: participantId,
+      name: eligible.get(participantId).displayName,
+      response: existingResponses.get(participantId)?.response || "pending",
+      responseAt: existingResponses.get(participantId)?.responseAt || null
+    }));
+    const instructorName = session.user.globalName || session.user.username;
+    let row;
+    if (existing) {
+      [row] = await sql`UPDATE academy_scheduled_sessions SET template_id=${templateId},
+        training_type=${templateRows[0].name}, starts_at=${startsAt}, location=${location || null},
+        notes=${notes || null}, participants=${JSON.stringify(participants)}::jsonb,
+        instructor_discord_id=${session.user.id}, instructor_name=${instructorName},
+        status='scheduled', updated_at=NOW() WHERE id=${id} RETURNING *`;
+    } else {
+      [row] = await sql`INSERT INTO academy_scheduled_sessions
+        (template_id, training_type, starts_at, location, notes, status,
+        instructor_discord_id, instructor_name, participants, discord_guild_id,
+        discord_channel_id, notification_status, created_at, updated_at)
+        VALUES (${templateId}, ${templateRows[0].name}, ${startsAt}, ${location || null},
+        ${notes || null}, 'scheduled', ${session.user.id}, ${instructorName},
+        ${JSON.stringify(participants)}::jsonb, ${CPD_GUILD_ID}, ${CPD_CONVOCATION_CHANNEL_ID},
+        'pending', NOW(), NOW()) RETURNING *`;
+    }
+    let notificationStatus = "sent";
+    let notificationError = null;
+    try {
+      const schedule = publicSchedule(row);
+      if (row.discord_message_id) {
+        await discordBotRequest(`/channels/${CPD_CONVOCATION_CHANNEL_ID}/messages/${row.discord_message_id}`, { method: "PATCH", body: scheduleMessagePayload(schedule, false) });
+      } else {
+        const message = await discordBotRequest(`/channels/${CPD_CONVOCATION_CHANNEL_ID}/messages`, { method: "POST", body: scheduleMessagePayload(schedule, true) });
+        row.discord_message_id = message.id;
+      }
+    } catch (error) {
+      notificationStatus = "failed";
+      notificationError = textField(error.message, 500);
+    }
+    [row] = await sql`UPDATE academy_scheduled_sessions SET discord_message_id=${row.discord_message_id || null},
+      notification_status=${notificationStatus}, notification_error=${notificationError}, updated_at=NOW()
+      WHERE id=${row.id} RETURNING *`;
+    await writeActivityLog(sql, session, {
+      actionType: existing ? "schedule_updated" : "schedule_created",
+      targetType: "schedule", targetId: String(row.id), targetName: row.training_type,
+      details: { startsAt, participantCount: participants.length, notificationStatus }
+    });
+    return res.status(existing ? 200 : 201).json({ ok: true, schedule: publicSchedule(row) });
+  } catch (error) {
+    console.error("Academy planning save failed", error);
+    return res.status(500).json({ ok: false, code: error.code === "42P01" ? "planning_table_missing" : "planning_save_failed" });
+  }
+}
+
+async function scheduledSessionAction(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  const body = readJsonBody(req);
+  const id = String(body?.id || "");
+  const action = String(body?.action || "");
+  if (!/^\d+$/.test(id) || !["cancel", "resend"].includes(action)) return res.status(400).json({ ok: false, code: "invalid_schedule_action" });
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    let row = (await sql`SELECT * FROM academy_scheduled_sessions WHERE id=${id} LIMIT 1`)[0];
+    if (!row) return res.status(404).json({ ok: false, code: "schedule_not_found" });
+    if (action === "cancel") {
+      [row] = await sql`UPDATE academy_scheduled_sessions SET status='cancelled', updated_at=NOW() WHERE id=${id} RETURNING *`;
+      if (row.discord_message_id) await discordBotRequest(`/channels/${row.discord_channel_id}/messages/${row.discord_message_id}`, { method: "PATCH", body: scheduleMessagePayload(publicSchedule(row), false) });
+    } else {
+      if (row.status !== "scheduled") return res.status(400).json({ ok: false, code: "schedule_not_active" });
+      if (row.discord_message_id) {
+        await discordBotRequest(`/channels/${row.discord_channel_id}/messages/${row.discord_message_id}`, { method: "PATCH", body: { components: [] } }).catch(() => null);
+      }
+      const message = await discordBotRequest(`/channels/${row.discord_channel_id}/messages`, { method: "POST", body: scheduleMessagePayload(publicSchedule(row), true) });
+      [row] = await sql`UPDATE academy_scheduled_sessions SET discord_message_id=${message.id}, notification_status='sent', notification_error=NULL, updated_at=NOW() WHERE id=${id} RETURNING *`;
+    }
+    await writeActivityLog(sql, session, { actionType: action === "cancel" ? "schedule_cancelled" : "schedule_resent", targetType: "schedule", targetId: id, targetName: row.training_type, details: {} });
+    return res.status(200).json({ ok: true, schedule: publicSchedule(row) });
+  } catch (error) {
+    console.error("Academy planning action failed", error);
+    return res.status(500).json({ ok: false, code: "schedule_action_failed" });
+  }
+}
+
+async function syncScheduledResponse(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "no-store");
+  if (!validSyncSecret(req)) return res.status(401).json({ ok: false, code: "invalid_sync_secret" });
+  const body = readJsonBody(req);
+  const messageId = String(body?.messageId || "");
+  const discordId = String(body?.discordId || "");
+  const responseValue = String(body?.response || "");
+  if (!validDiscordId(messageId) || !validDiscordId(discordId) || !["present", "unavailable"].includes(responseValue)) {
+    return res.status(400).json({ ok: false, code: "invalid_schedule_response" });
+  }
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    let row = (await sql`SELECT * FROM academy_scheduled_sessions WHERE discord_message_id=${messageId} LIMIT 1`)[0];
+    if (!row) return res.status(404).json({ ok: false, code: "schedule_not_found" });
+    if (row.status !== "scheduled") return res.status(409).json({ ok: false, code: "schedule_not_active" });
+    const participants = Array.isArray(row.participants) ? row.participants : [];
+    const participant = participants.find(item => String(item.discordId) === discordId);
+    if (!participant) return res.status(403).json({ ok: false, code: "not_a_participant" });
+    participant.response = responseValue;
+    participant.responseAt = new Date().toISOString();
+    [row] = await sql`UPDATE academy_scheduled_sessions SET participants=${JSON.stringify(participants)}::jsonb, updated_at=NOW() WHERE id=${row.id} RETURNING *`;
+    await discordBotRequest(`/channels/${row.discord_channel_id}/messages/${row.discord_message_id}`, { method: "PATCH", body: scheduleMessagePayload(publicSchedule(row), false) }).catch(error => console.error("Convocation response message update failed", error));
+    return res.status(200).json({ ok: true, response: responseValue, scheduleId: String(row.id) });
+  } catch (error) {
+    console.error("Academy schedule response sync failed", error);
+    return res.status(500).json({ ok: false, code: "schedule_response_failed" });
   }
 }
 
@@ -1591,6 +1855,10 @@ module.exports = async function handler(req, res) {
     case "training-create": return createTraining(req, res);
     case "training-session-create": return createTrainingSession(req, res);
     case "training-sessions": return trainingSessions(req, res);
+    case "scheduled-sessions": return scheduledSessions(req, res);
+    case "scheduled-session-save": return saveScheduledSession(req, res);
+    case "scheduled-session-action": return scheduledSessionAction(req, res);
+    case "scheduled-response-sync": return syncScheduledResponse(req, res);
     case "training-update": return updateTraining(req, res);
     case "training-archive": return archiveTraining(req, res);
     case "recruitment-tickets": return recruitmentTickets(req, res);

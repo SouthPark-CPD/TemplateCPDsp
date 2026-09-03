@@ -105,8 +105,14 @@
       templates = (templateData.templates || []).filter(template => template.active);
       (agentData.ranks || []).forEach(rank => group.rank.add(new Option(rank, rank)));
       templates.forEach(template => group.template.add(new Option(template.name, template.id)));
+      const params = new URLSearchParams(location.search);
       group.date.valueAsDate = new Date();
-      const requestedAgents = new URLSearchParams(location.search).getAll("agent");
+      if (params.get("date")) group.date.value = params.get("date");
+      if (params.get("template") && templates.some(template => template.id === params.get("template"))) {
+        group.template.value = params.get("template");
+        renderTemplateInfo();
+      }
+      const requestedAgents = params.getAll("agent");
       requestedAgents.filter(id => agents.some(agent => agent.discordId === id)).slice(0, 12).forEach(id => selected.set(id, defaultParticipant(id)));
       renderAgents();
       await loadHistory();
@@ -140,7 +146,8 @@
     group.save.disabled = true;
     group.save.textContent = "Enregistrement…";
     try {
-      const data = await api("/api/academy-admin-data/training-session/create", { method: "POST", body: JSON.stringify({ templateId: group.template.value, trainingDate: group.date.value, commonComment: group.comment.value.trim(), participants: [...selected.values()] }) });
+      const scheduleId = new URLSearchParams(location.search).get("schedule") || undefined;
+      const data = await api("/api/academy-admin-data/training-session/create", { method: "POST", body: JSON.stringify({ scheduleId, templateId: group.template.value, trainingDate: group.date.value, commonComment: group.comment.value.trim(), participants: [...selected.values()] }) });
       showNotice(`Session enregistrée dans ${data.createdCount} dossier${data.createdCount > 1 ? "s" : ""}.`);
       selected.clear(); group.comment.value = ""; renderAgents(); await loadHistory();
     } catch (error) {

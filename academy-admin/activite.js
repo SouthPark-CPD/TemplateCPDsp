@@ -22,7 +22,11 @@ const actionLabels = {
   template_created: "Grille de formation créée",
   template_updated: "Grille de formation modifiée",
   template_activated: "Grille de formation activée",
-  template_deactivated: "Grille de formation désactivée"
+  template_deactivated: "Grille de formation désactivée",
+  schedule_created: "Formation planifiée",
+  schedule_updated: "Formation planifiée modifiée",
+  schedule_cancelled: "Formation planifiée annulée",
+  schedule_resent: "Convocation Discord renvoyée"
 };
 
 const resultLabels = {
@@ -67,6 +71,7 @@ function formatDate(value) {
 function category(entry) {
   if (entry.actionType.startsWith("training_")) return "training";
   if (entry.actionType.startsWith("template_")) return "training";
+  if (entry.actionType.startsWith("schedule_")) return "training";
   if (entry.actionType.startsWith("recruitment_")) return "recruitment";
   return "agent";
 }
@@ -90,6 +95,7 @@ function detailItems(entry) {
   const items = [];
   if (details.trainingType) items.push(["Formation", details.trainingType]);
   if (details.trainingDate) items.push(["Date de formation", new Intl.DateTimeFormat("fr-FR").format(new Date(`${details.trainingDate}T12:00:00`))]);
+  if (details.startsAt) items.push(["Date prévue", new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(details.startsAt))]);
   if (details.result) items.push(["Résultat", resultLabels[details.result] || details.result]);
   if (details.score !== null && details.score !== undefined) items.push(["Note", `${details.score}/100`]);
   if (details.participantCount) items.push(["Participants", String(details.participantCount)]);
@@ -106,6 +112,7 @@ function targetLink(entry) {
   if (entry.targetType === "recruitment") return "/academy-admin/recrutements.html";
   if (entry.targetType === "template") return "/academy-admin/evaluations.html";
   if (entry.targetType === "session") return "/academy-admin/evaluations.html?tab=history";
+  if (entry.targetType === "schedule") return "/academy-admin/evaluations.html?tab=planning";
   return "";
 }
 

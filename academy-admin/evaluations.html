@@ -27,7 +27,8 @@
     <nav class="formation-tabs" aria-label="Sections du centre de formation">
       <button class="active" type="button" data-formation-tab="create"><span>01</span>Nouvelle formation</button>
       <button type="button" data-formation-tab="templates"><span>02</span>Grilles et modèles</button>
-      <button type="button" data-formation-tab="history"><span>03</span>Historique collectif</button>
+      <button type="button" data-formation-tab="planning"><span>03</span>Planning</button>
+      <button type="button" data-formation-tab="history"><span>04</span>Historique collectif</button>
     </nav>
 
     <div id="notice" class="notice" hidden></div>
@@ -101,6 +102,33 @@
         </article>
       </section>
 
+      <section class="formation-view" data-formation-view="planning" hidden>
+        <div class="planning-layout">
+          <article class="panel planning-editor">
+            <div class="panel-head"><div><p>Nouvelle convocation</p><h2 id="planning-editor-title">Planifier une formation</h2></div><span id="planning-selection-count">0 sélectionné</span></div>
+            <form id="planning-form">
+              <input id="planning-id" type="hidden">
+              <div class="planning-fields">
+                <label><span>Formation *</span><select id="planning-template" required><option value="">Sélectionner une formation…</option></select></label>
+                <label><span>Date et heure *</span><input id="planning-start" type="datetime-local" required></label>
+                <label><span>Lieu</span><input id="planning-location" maxlength="160" placeholder="Ex. Centre de formation CPD"></label>
+                <label class="full"><span>Informations complémentaires</span><textarea id="planning-notes" rows="3" maxlength="1000" placeholder="Consignes, tenue ou matériel nécessaire…"></textarea></label>
+              </div>
+              <div class="planning-participants-head"><div><span>Participants *</span><small>De 1 à 12 agents</small></div><input id="planning-agent-search" type="search" placeholder="Rechercher un agent…"></div>
+              <div id="planning-agents" class="planning-agents"></div>
+              <div class="planning-form-actions"><button id="planning-cancel-edit" class="secondary-button" type="button" hidden>Annuler la modification</button><button id="planning-save" class="primary-button" type="submit">Planifier et envoyer sur Discord</button></div>
+            </form>
+          </article>
+
+          <article class="panel planning-list-panel">
+            <div class="panel-head"><div><p>Agenda Academy</p><h2>Formations planifiées</h2></div><button id="planning-refresh" type="button">Actualiser</button></div>
+            <div class="planning-filters"><select id="planning-status-filter"><option value="upcoming">À venir</option><option value="scheduled">Toutes les planifiées</option><option value="completed">Terminées</option><option value="cancelled">Annulées</option><option value="all">Toutes</option></select></div>
+            <div id="planning-list" class="planning-list"></div>
+            <p id="planning-empty" class="group-empty" hidden>Aucune formation dans cette catégorie.</p>
+          </article>
+        </div>
+      </section>
+
       <section class="formation-view" data-formation-view="history" hidden>
         <article class="panel group-history-panel">
           <div class="panel-head"><div><p>Historique</p><h2>Sessions collectives récentes</h2></div><button id="group-refresh-history" type="button">Actualiser</button></div>
@@ -132,5 +160,6 @@
   <script src="formation-tabs.js"></script>
   <script src="evaluations.js"></script>
   <script src="formation-sessions.js"></script>
+  <script src="formation-planning.js"></script>
 </body>
 </html>
