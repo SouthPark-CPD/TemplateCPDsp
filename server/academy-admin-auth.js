@@ -8,6 +8,9 @@ const ROLE_CHECK_INTERVAL = 60 * 60;
 const DISCORD_API = "https://discord.com/api/v10";
 const ACADEMY_GUILD_ID = "1538858756354473984";
 const INSTRUCTOR_ROLE_ID = "1538858756371386400";
+const ROLE_CHECK_GRACE = 60 * 60 * 6;
+const DISCORD_MAX_ATTEMPTS = 2;
+const DISCORD_REQUEST_TIMEOUT = 3500;
 
 function env() {
   const clientId = process.env.DISCORD_CLIENT_ID;
@@ -92,14 +95,42 @@ function clearStateCookie() {
   return cookie(STATE_COOKIE_NAME, "", 0);
 }
 
+function wait(delay) {
+  return new Promise(resolve => setTimeout(resolve, delay));
+}
+
 async function discordRequest(url, options = {}) {
-  const response = await fetch(url, options);
-  if (!response.ok) {
-    const error = new Error(`Discord API ${response.status}`);
-    error.status = response.status;
-    throw error;
+  let lastError;
+
+  for (let attempt = 0; attempt < DISCORD_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: options.signal || AbortSignal.timeout(DISCORD_REQUEST_TIMEOUT)
+      });
+      if (response.ok) return response.json();
+
+      const detail = await response.text().catch(() => "");
+      const error = new Error(`Discord API ${response.status}`);
+      error.status = response.status;
+      lastError = error;
+
+      const retryable = response.status === 429 || response.status >= 500;
+      if (!retryable || attempt === DISCORD_MAX_ATTEMPTS - 1) throw error;
+
+      let retryAfter = Number(response.headers.get("retry-after") || 0);
+      try {
+        retryAfter ||= Number(JSON.parse(detail).retry_after || 0);
+      } catch {}
+      await wait(Math.min(1500, Math.max(250, retryAfter ? retryAfter * 1000 : 350)));
+    } catch (error) {
+      lastError = error;
+      if (error.status || attempt === DISCORD_MAX_ATTEMPTS - 1) throw error;
+      await wait(350 * (attempt + 1));
+    }
   }
-  return response.json();
+
+  throw lastError || new Error("Discord indisponible");
 }
 
 async function exchangeCode(req, code) {
@@ -137,7 +168,13 @@ async function getDiscordUser(accessToken) {
   });
 }
 
-async function getAcademyMember(accessToken) {
+async function getAcademyMember(accessToken, userId = "") {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  if (botToken && /^\d{17,20}$/.test(String(userId))) {
+    return discordRequest(`${DISCORD_API}/guilds/${ACADEMY_GUILD_ID}/members/${userId}`, {
+      headers: { Authorization: `Bot ${botToken}` }
+    });
+  }
   return discordRequest(`${DISCORD_API}/users/@me/guilds/${ACADEMY_GUILD_ID}/member`, {
     headers: { Authorization: `Bearer ${accessToken}` }
   });
@@ -197,12 +234,17 @@ async function validateSession(req, forceRoleCheck = false) {
   const roleCheckDue = forceRoleCheck || !checkedAt || now - checkedAt >= ROLE_CHECK_INTERVAL;
   if (roleCheckDue) {
     try {
-      const member = await getAcademyMember(session.accessToken);
+      const member = await getAcademyMember(session.accessToken, session.user?.id);
       if (!hasInstructorRole(member)) return { ok: false, reason: "missing_role" };
       if (source === "police") session.academyRoleCheckedAt = now;
       else session.roleCheckedAt = now;
       changed = true;
     } catch (error) {
+      const lastSuccessfulCheck = Number(checkedAt || 0);
+      const temporaryFailure = !error.status || error.status === 429 || error.status >= 500;
+      if (temporaryFailure && lastSuccessfulCheck && now - lastSuccessfulCheck < ROLE_CHECK_GRACE) {
+        return { ok: true, session, changed, source, degraded: true };
+      }
       if ([401, 403, 404].includes(error.status)) return { ok: false, reason: "not_member" };
       return { ok: false, reason: "discord_unavailable" };
     }

@@ -180,7 +180,13 @@ async function getGuildMember(accessToken) {
   });
 }
 
-async function getAcademyMember(accessToken) {
+async function getAcademyMember(accessToken, userId = "") {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  if (botToken && /^\d{17,20}$/.test(String(userId))) {
+    return discordRequest(`${DISCORD_API}/guilds/${ACADEMY_GUILD_ID}/members/${userId}`, {
+      headers: { Authorization: `Bot ${botToken}` }
+    });
+  }
   return discordRequest(`${DISCORD_API}/users/@me/guilds/${ACADEMY_GUILD_ID}/member`, {
     headers: { Authorization: `Bearer ${accessToken}` }
   });

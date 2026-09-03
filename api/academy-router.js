@@ -71,6 +71,7 @@ function actionFromRequest(req) {
 
 function discordLogin(req, res) {
   if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "no-store, max-age=0");
   try {
     const state = createState();
     const params = new URLSearchParams({
@@ -89,6 +90,7 @@ function discordLogin(req, res) {
 
 async function discordCallback(req, res) {
   if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "no-store, max-age=0");
   const code = typeof req.query.code === "string" ? req.query.code : "";
   const state = typeof req.query.state === "string" ? req.query.state : "";
 
@@ -99,10 +101,8 @@ async function discordCallback(req, res) {
 
   try {
     const tokens = await exchangeCode(req, code);
-    const [user, member] = await Promise.all([
-      getDiscordUser(tokens.access_token),
-      getAcademyMember(tokens.access_token)
-    ]);
+    const user = await getDiscordUser(tokens.access_token);
+    const member = await getAcademyMember(tokens.access_token, user.id);
 
     if (!hasInstructorRole(member)) {
       res.setHeader("Set-Cookie", [clearStateCookie(), clearSessionCookie()]);
