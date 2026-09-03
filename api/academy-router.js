@@ -1086,6 +1086,146 @@ async function createTraining(req, res) {
   }
 }
 
+async function createTrainingSession(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const templateId = String(body.templateId || "");
+  const trainingDate = String(body.trainingDate || "");
+  const commonComment = textField(body.commonComment, 3500);
+  const participants = Array.isArray(body.participants)
+    ? body.participants.slice(0, 12).map(item => {
+        const score = item?.score === "" || item?.score === null || item?.score === undefined
+          ? null : Number(item.score);
+        return {
+          discordId: String(item?.discordId || ""),
+          result: normalizeTrainingResult(item?.result),
+          score,
+          note: textField(item?.note, 900)
+        };
+      })
+    : [];
+  const uniqueIds = new Set(participants.map(item => item.discordId));
+  const invalidParticipant = participants.some(item => !validDiscordId(item.discordId)
+    || !TRAINING_RESULTS.has(item.result)
+    || (item.score !== null && (!Number.isInteger(item.score) || item.score < 0 || item.score > 100)));
+
+  if (!/^\d+$/.test(templateId) || !validDate(trainingDate) || participants.length < 2
+    || participants.length > 12 || uniqueIds.size !== participants.length || invalidParticipant) {
+    return res.status(400).json({ ok: false, code: "invalid_training_session" });
+  }
+
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const [templateRows, members] = await Promise.all([
+      sql`SELECT id, name FROM academy_training_templates
+        WHERE id=${templateId} AND is_active=TRUE LIMIT 1`,
+      getAllCpdMembers()
+    ]);
+    if (!templateRows.length) return res.status(404).json({ ok: false, code: "training_template_not_found" });
+
+    const eligibleAgents = new Map(members.map(publicAgent).filter(Boolean).map(agent => [agent.discordId, agent]));
+    if (participants.some(item => !eligibleAgents.has(item.discordId))) {
+      return res.status(400).json({ ok: false, code: "session_contains_ineligible_agent" });
+    }
+
+    const trainingType = templateRows[0].name;
+    const instructorName = session.user.globalName || session.user.username;
+    const sessionCreatedAt = new Date().toISOString();
+    const createdIds = [];
+
+    for (const participant of participants) {
+      const individualComment = participant.note ? `Note individuelle : ${participant.note}` : "";
+      const comment = textField([commonComment, individualComment].filter(Boolean).join("\n\n"), 5000);
+      await sql`
+        INSERT INTO academy_agent_files (
+          discord_id, academy_status, updated_by_discord_id, created_at, updated_at
+        ) VALUES (${participant.discordId}, 'en_formation', ${session.user.id}, NOW(), NOW())
+        ON CONFLICT (discord_id) DO NOTHING
+      `;
+      const [created] = await sql`
+        INSERT INTO academy_training_records (
+          agent_discord_id, training_type, training_date, result, score, comment,
+          strengths, improvements, instructor_discord_id, instructor_name,
+          created_at, updated_at, updated_by_discord_id, updated_by_name, evaluation_data
+        ) VALUES (
+          ${participant.discordId}, ${trainingType}, ${trainingDate}, ${participant.result},
+          ${participant.score}, ${comment || null}, NULL, NULL, ${session.user.id},
+          ${instructorName}, ${sessionCreatedAt}, ${sessionCreatedAt}, ${session.user.id}, ${instructorName}, NULL
+        ) RETURNING id
+      `;
+      createdIds.push(String(created.id));
+      await syncAgentCompletion(sql, participant.discordId);
+    }
+
+    await writeActivityLog(sql, session, {
+      actionType: "training_session_created",
+      targetType: "session",
+      targetId: createdIds[0],
+      targetName: trainingType,
+      details: {
+        trainingType, trainingDate, participantCount: participants.length,
+        participantIds: participants.map(item => item.discordId), trainingIds: createdIds
+      }
+    });
+    return res.status(201).json({ ok: true, createdCount: createdIds.length, trainingIds: createdIds });
+  } catch (error) {
+    console.error("Academy training session creation failed", error);
+    return res.status(500).json({ ok: false, code: "training_session_creation_failed" });
+  }
+}
+
+async function trainingSessions(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = await sql`
+      SELECT records.training_type, records.training_date, records.instructor_discord_id,
+        records.instructor_name, records.created_at AS session_created_at,
+        COUNT(*)::int AS participant_count,
+        JSON_AGG(JSON_BUILD_OBJECT(
+          'discordId', records.agent_discord_id,
+          'agentName', COALESCE(files.rp_name, records.agent_discord_id),
+          'result', records.result,
+          'score', records.score
+        ) ORDER BY COALESCE(files.rp_name, records.agent_discord_id)) AS participants
+      FROM academy_training_records AS records
+      LEFT JOIN academy_agent_files AS files ON files.discord_id = records.agent_discord_id
+      WHERE records.archived_at IS NULL
+      GROUP BY records.training_type, records.training_date, records.instructor_discord_id,
+        records.instructor_name, records.created_at
+      HAVING COUNT(*) > 1
+      ORDER BY session_created_at DESC
+      LIMIT 20
+    `;
+    return res.status(200).json({
+      ok: true,
+      sessions: rows.map(row => ({
+        trainingType: row.training_type,
+        trainingDate: row.training_date,
+        instructorDiscordId: row.instructor_discord_id,
+        instructorName: row.instructor_name,
+        createdAt: row.session_created_at,
+        participantCount: Number(row.participant_count || 0),
+        participants: Array.isArray(row.participants) ? row.participants : []
+      }))
+    });
+  } catch (error) {
+    console.error("Academy training sessions read failed", error);
+    return res.status(500).json({ ok: false, code: "training_sessions_unavailable" });
+  }
+}
+
 async function updateTraining(req, res) {
   if (req.method !== "POST") return res.status(405).end();
   res.setHeader("Cache-Control", "private, no-store");
@@ -1449,6 +1589,8 @@ module.exports = async function handler(req, res) {
     case "agent": return agentDetail(req, res);
     case "agent-save": return saveAgentFile(req, res);
     case "training-create": return createTraining(req, res);
+    case "training-session-create": return createTrainingSession(req, res);
+    case "training-sessions": return trainingSessions(req, res);
     case "training-update": return updateTraining(req, res);
     case "training-archive": return archiveTraining(req, res);
     case "recruitment-tickets": return recruitmentTickets(req, res);

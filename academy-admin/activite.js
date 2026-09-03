@@ -14,6 +14,7 @@ const elements = {
 const actionLabels = {
   agent_file_updated: "Dossier agent modifié",
   training_created: "Formation ajoutée",
+  training_session_created: "Session collective enregistrée",
   training_updated: "Formation modifiée",
   training_archived: "Formation archivée",
   training_restored: "Formation restaurée",
@@ -91,6 +92,7 @@ function detailItems(entry) {
   if (details.trainingDate) items.push(["Date de formation", new Intl.DateTimeFormat("fr-FR").format(new Date(`${details.trainingDate}T12:00:00`))]);
   if (details.result) items.push(["Résultat", resultLabels[details.result] || details.result]);
   if (details.score !== null && details.score !== undefined) items.push(["Note", `${details.score}/100`]);
+  if (details.participantCount) items.push(["Participants", String(details.participantCount)]);
   if (details.academyStatus) items.push(["Statut Academy", academyStatusLabels[details.academyStatus] || details.academyStatus]);
   if (details.matricule) items.push(["Matricule", details.matricule]);
   if (details.decision) items.push(["Décision", decisionLabels[details.decision] || details.decision]);
@@ -103,6 +105,7 @@ function targetLink(entry) {
   }
   if (entry.targetType === "recruitment") return "/academy-admin/recrutements.html";
   if (entry.targetType === "template") return "/academy-admin/evaluations.html";
+  if (entry.targetType === "session") return "/academy-admin/sessions.html";
   return "";
 }
 

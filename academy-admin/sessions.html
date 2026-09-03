@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sessions de formation — Police Academy</title>
+  <link rel="icon" href="../assets/cpd-seal.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="sessions.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/academy-admin/"><img src="../assets/cpd-seal.png" alt=""><div><strong>Police Academy</strong><span>Espace instructeur</span></div></a>
+    <nav class="admin-nav" aria-label="Navigation principale"><a href="/mdt/index.html">MDT</a><a href="/academy-admin/">Tableau de bord</a><a href="/academy-admin/effectifs.html">Effectifs</a><a href="/academy-admin/evaluations.html">Formations</a><a class="active" href="/academy-admin/sessions.html">Sessions</a><a href="/academy-admin/recrutements.html">Recrutement</a><a href="/academy-admin/activite.html">Activité</a></nav>
+    <div class="identity"><div><span>Connecté en tant que</span><strong id="instructor-name">Instructeur</strong></div><a href="/api/academy-admin-auth/logout">Déconnexion</a></div>
+  </header>
+
+  <main>
+    <section class="page-heading">
+      <div><p>Organisation pédagogique</p><h1>Sessions de formation</h1><span>Enregistrez une formation pour plusieurs agents en une seule opération.</span></div>
+      <div class="selection-counter"><strong id="selected-count">0</strong><span>participant sélectionné</span></div>
+    </section>
+
+    <div id="notice" class="notice" hidden></div>
+    <p id="loading-message" class="message">Chargement des agents et des formations…</p>
+
+    <form id="session-form" hidden>
+      <section class="session-grid">
+        <article class="panel setup-panel">
+          <div class="panel-head"><div><p>Étape 1</p><h2>Informations générales</h2></div></div>
+          <div class="setup-fields">
+            <label><span>Formation *</span><select id="training-template" required><option value="">Sélectionner une formation…</option></select></label>
+            <label><span>Date *</span><input id="training-date" type="date" required></label>
+            <label class="full"><span>Commentaire commun <small>facultatif</small></span><textarea id="common-comment" rows="4" maxlength="3500" placeholder="Objectifs de la séance, contexte ou observation commune…"></textarea></label>
+          </div>
+          <div id="template-info" class="template-info" hidden></div>
+        </article>
+
+        <article class="panel participants-panel">
+          <div class="panel-head responsive-head"><div><p>Étape 2</p><h2>Participants et résultats</h2></div><div class="participant-actions"><button id="select-visible" type="button">Sélectionner les visibles</button><button id="clear-selection" type="button">Tout retirer</button></div></div>
+          <div class="filters"><input id="agent-search" type="search" placeholder="Rechercher un agent ou un matricule…"><select id="rank-filter"><option value="">Tous les grades</option></select></div>
+          <div id="agents-list" class="agents-list"></div>
+          <p id="agents-empty" class="empty" hidden>Aucun agent ne correspond à la recherche.</p>
+        </article>
+      </section>
+
+      <section class="submit-bar">
+        <div><strong id="submit-summary">Aucun participant</strong><span>Chaque résultat sera ajouté au dossier individuel de l’agent.</span></div>
+        <button id="save-session" type="submit" disabled>Enregistrer la session</button>
+      </section>
+    </form>
+
+    <section id="history-panel" class="panel history-panel" hidden>
+      <div class="panel-head"><div><p>Historique</p><h2>Sessions récentes</h2></div><button id="refresh-history" type="button">Actualiser</button></div>
+      <div id="history-list" class="history-list"></div>
+      <p id="history-empty" class="empty" hidden>Aucune session collective enregistrée.</p>
+    </section>
+  </main>
+  <script src="sessions.js"></script>
+</body>
+</html>
