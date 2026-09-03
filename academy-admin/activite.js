@@ -26,7 +26,9 @@ const actionLabels = {
   schedule_created: "Formation planifiée",
   schedule_updated: "Formation planifiée modifiée",
   schedule_cancelled: "Formation planifiée annulée",
-  schedule_resent: "Convocation Discord renvoyée"
+  schedule_resent: "Convocation Discord renvoyée",
+  schedule_reminded: "Participants en attente relancés",
+  schedule_attendance_updated: "Présences de la session préparées"
 };
 
 const resultLabels = {

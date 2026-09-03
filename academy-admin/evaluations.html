@@ -114,6 +114,7 @@
                 <label><span>Lieu</span><input id="planning-location" maxlength="160" placeholder="Ex. Centre de formation CPD"></label>
                 <label class="full"><span>Informations complémentaires</span><textarea id="planning-notes" rows="3" maxlength="1000" placeholder="Consignes, tenue ou matériel nécessaire…"></textarea></label>
               </div>
+              <label class="planning-reminder-toggle"><input id="planning-reminders" type="checkbox" checked><span><strong>Rappels automatiques</strong><small>Relance uniquement les agents sans réponse, 24 h puis 1 h avant la séance.</small></span></label>
               <div class="planning-participants-head"><div><span>Participants *</span><small>De 1 à 12 agents</small></div><input id="planning-agent-search" type="search" placeholder="Rechercher un agent…"></div>
               <div id="planning-agents" class="planning-agents"></div>
               <div class="planning-form-actions"><button id="planning-cancel-edit" class="secondary-button" type="button" hidden>Annuler la modification</button><button id="planning-save" class="primary-button" type="submit">Planifier et envoyer sur Discord</button></div>
@@ -154,6 +155,17 @@
         <div id="criteria-editor" class="criteria-editor"></div>
       </div>
       <footer><button id="cancel-editor" class="secondary-button" type="button">Annuler</button><button class="primary-button" type="submit">Enregistrer la grille</button></footer>
+    </form>
+  </dialog>
+
+  <dialog id="attendance-dialog">
+    <form id="attendance-form" class="dialog-shell attendance-dialog-shell">
+      <header><div><p>Préparation de séance</p><h2 id="attendance-title">Gérer les présences</h2></div><button id="close-attendance" type="button" aria-label="Fermer">×</button></header>
+      <div class="dialog-body">
+        <p class="attendance-help">Indiquez le statut prévu ou constaté de chaque participant. Les agents présents et en retard seront automatiquement repris quand vous commencerez la formation.</p>
+        <div id="attendance-list" class="attendance-editor-list"></div>
+      </div>
+      <footer><button id="cancel-attendance" class="secondary-button" type="button">Annuler</button><button class="primary-button" type="submit">Enregistrer les présences</button></footer>
     </form>
   </dialog>
 

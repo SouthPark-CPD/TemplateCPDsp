@@ -1026,7 +1026,7 @@ async function createTraining(req, res) {
   const trainingType = textField(body.trainingType, 120);
   const trainingDate = String(body.trainingDate || "");
   const result = normalizeTrainingResult(body.result);
-  const comment = textField(body.comment, 5000);
+  let comment = textField(body.comment, 5000);
   const strengths = textField(body.strengths, 3000);
   const improvements = textField(body.improvements, 3000);
   const rawScore = body.score === "" || body.score === null || body.score === undefined
@@ -1044,6 +1044,24 @@ async function createTraining(req, res) {
     const agent = await eligibleAgent(discordId);
     if (!agent) return res.status(404).json({ ok: false, code: "agent_not_eligible" });
     const sql = neon(process.env.DATABASE_URL);
+    if (scheduleId) {
+      const scheduleRows = await sql`SELECT * FROM academy_scheduled_sessions WHERE id=${scheduleId} LIMIT 1`;
+      if (!scheduleRows.length) return res.status(404).json({ ok: false, code: "schedule_not_found" });
+      if (scheduleRows[0].status !== "scheduled") return res.status(409).json({ ok: false, code: "schedule_not_active" });
+      const scheduleParticipants = Array.isArray(scheduleRows[0].participants) ? scheduleRows[0].participants : [];
+      const scheduledParticipant = scheduleParticipants.find(participant => String(participant.discordId) === discordId);
+      if (!scheduledParticipant) return res.status(400).json({ ok: false, code: "agent_not_in_schedule" });
+      if (["absent", "excused"].includes(scheduledParticipant.attendance)) {
+        return res.status(400).json({ ok: false, code: "agent_not_attending" });
+      }
+      if (!scheduledParticipant.attendance || scheduledParticipant.attendance === "pending") {
+        scheduledParticipant.attendance = "present";
+        scheduledParticipant.attendanceAt = new Date().toISOString();
+        await sql`UPDATE academy_scheduled_sessions SET participants=${JSON.stringify(scheduleParticipants)}::jsonb,
+          updated_at=NOW() WHERE id=${scheduleId}`;
+      }
+      comment = textField([comment, `Présence : ${attendanceLabel(scheduledParticipant.attendance)}`].filter(Boolean).join("\n\n"), 5000);
+    }
     if (evaluation) {
       const templates = await sql`SELECT name FROM academy_training_templates
         WHERE id=${evaluation.templateId} AND is_active=TRUE LIMIT 1`;
@@ -1133,7 +1151,7 @@ async function createTrainingSession(req, res) {
     || !TRAINING_RESULTS.has(item.result)
     || (item.score !== null && (!Number.isInteger(item.score) || item.score < 0 || item.score > 100)));
 
-  if (!/^\d+$/.test(templateId) || (scheduleId && !/^\d+$/.test(scheduleId)) || !validDate(trainingDate) || participants.length < 2
+  if (!/^\d+$/.test(templateId) || (scheduleId && !/^\d+$/.test(scheduleId)) || !validDate(trainingDate) || participants.length < (scheduleId ? 1 : 2)
     || participants.length > 12 || uniqueIds.size !== participants.length || invalidParticipant) {
     return res.status(400).json({ ok: false, code: "invalid_training_session" });
   }
@@ -1156,10 +1174,38 @@ async function createTrainingSession(req, res) {
     const instructorName = session.user.globalName || session.user.username;
     const sessionCreatedAt = new Date().toISOString();
     const createdIds = [];
+    let scheduleParticipants = [];
+    let scheduleParticipantMap = new Map();
+
+    if (scheduleId) {
+      const scheduleRows = await sql`SELECT * FROM academy_scheduled_sessions WHERE id=${scheduleId} LIMIT 1`;
+      if (!scheduleRows.length) return res.status(404).json({ ok: false, code: "schedule_not_found" });
+      if (scheduleRows[0].status !== "scheduled") return res.status(409).json({ ok: false, code: "schedule_not_active" });
+      scheduleParticipants = Array.isArray(scheduleRows[0].participants) ? scheduleRows[0].participants : [];
+      scheduleParticipantMap = new Map(scheduleParticipants.map(item => [String(item.discordId), item]));
+      if (participants.some(item => !scheduleParticipantMap.has(item.discordId))) {
+        return res.status(400).json({ ok: false, code: "session_contains_unscheduled_agent" });
+      }
+      if (participants.some(item => ["absent", "excused"].includes(scheduleParticipantMap.get(item.discordId)?.attendance))) {
+        return res.status(400).json({ ok: false, code: "session_contains_non_attending_agent" });
+      }
+      participants.forEach(item => {
+        const scheduled = scheduleParticipantMap.get(item.discordId);
+        if (!scheduled.attendance || scheduled.attendance === "pending") {
+          scheduled.attendance = "present";
+          scheduled.attendanceAt = sessionCreatedAt;
+        }
+      });
+      await sql`UPDATE academy_scheduled_sessions SET participants=${JSON.stringify(scheduleParticipants)}::jsonb,
+        updated_at=NOW() WHERE id=${scheduleId}`;
+    }
 
     for (const participant of participants) {
       const individualComment = participant.note ? `Note individuelle : ${participant.note}` : "";
-      const comment = textField([commonComment, individualComment].filter(Boolean).join("\n\n"), 5000);
+      const attendanceComment = scheduleId
+        ? `Présence : ${attendanceLabel(scheduleParticipantMap.get(participant.discordId)?.attendance)}`
+        : "";
+      const comment = textField([commonComment, individualComment, attendanceComment].filter(Boolean).join("\n\n"), 5000);
       await sql`
         INSERT INTO academy_agent_files (
           discord_id, academy_status, updated_by_discord_id, created_at, updated_at
@@ -1258,6 +1304,37 @@ function validDateTime(value) {
   return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null;
 }
 
+const ATTENDANCE_STATUSES = new Set(["pending", "present", "late", "absent", "excused"]);
+
+function attendanceLabel(value) {
+  return value === "present" ? "Présent"
+    : value === "late" ? "En retard"
+      : value === "absent" ? "Absent"
+        : value === "excused" ? "Excusé"
+          : "À confirmer";
+}
+
+function scheduleReminderPayload(schedule, reminderLabel) {
+  const pending = (schedule.participants || []).filter(participant => (participant.response || "pending") === "pending");
+  const unixTime = Math.floor(new Date(schedule.startsAt).getTime() / 1000);
+  return {
+    content: pending.map(participant => `<@${participant.discordId}>`).join(" "),
+    embeds: [{
+      title: `Rappel Police Academy · ${reminderLabel}`,
+      description: "Votre réponse à cette convocation est toujours en attente.",
+      color: 0xe6bd63,
+      fields: [
+        { name: "Formation", value: schedule.trainingType, inline: false },
+        { name: "Date et heure", value: `<t:${unixTime}:F>\n<t:${unixTime}:R>`, inline: true },
+        { name: "Lieu", value: schedule.location || "À définir", inline: true },
+        { name: "Action attendue", value: "Répondez avec les boutons de la convocation d’origine.", inline: false }
+      ],
+      footer: { text: `Planning Academy · séance ${schedule.id}` }
+    }],
+    allowed_mentions: { parse: [], users: pending.map(participant => participant.discordId) }
+  };
+}
+
 function scheduleMessagePayload(schedule, mentionParticipants = false) {
   const participants = Array.isArray(schedule.participants) ? schedule.participants : [];
   const unixTime = Math.floor(new Date(schedule.startsAt).getTime() / 1000);
@@ -1273,6 +1350,11 @@ function scheduleMessagePayload(schedule, mentionParticipants = false) {
     counts[response] = (counts[response] || 0) + 1;
     return counts;
   }, {});
+  const attendanceCount = participants.reduce((counts, participant) => {
+    const attendance = participant.attendance || "pending";
+    counts[attendance] = (counts[attendance] || 0) + 1;
+    return counts;
+  }, {});
   const fields = [
     { name: "Formation", value: schedule.trainingType, inline: false },
     { name: "Date et heure", value: `<t:${unixTime}:F>\n<t:${unixTime}:R>`, inline: true },
@@ -1284,6 +1366,13 @@ function scheduleMessagePayload(schedule, mentionParticipants = false) {
     fields.push({
       name: "Réponses",
       value: `Présents : ${responseCount.present || 0} · Indisponibles : ${responseCount.unavailable || 0} · En attente : ${responseCount.pending || 0}`,
+      inline: false
+    });
+  }
+  if (participants.some(participant => participant.attendance && participant.attendance !== "pending")) {
+    fields.push({
+      name: "Présences préparées",
+      value: `Présents : ${attendanceCount.present || 0} · Retards : ${attendanceCount.late || 0} · Absents : ${attendanceCount.absent || 0} · Excusés : ${attendanceCount.excused || 0}`,
       inline: false
     });
   }
@@ -1322,6 +1411,9 @@ function publicSchedule(row) {
     discordMessageId: row.discord_message_id || null,
     notificationStatus: row.notification_status,
     notificationError: row.notification_error || "",
+    remindersEnabled: row.reminders_enabled !== false,
+    reminder24hSent: Boolean(row.reminder_24h_sent),
+    reminder1hSent: Boolean(row.reminder_1h_sent),
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -1356,6 +1448,7 @@ async function saveScheduledSession(req, res) {
   const startsAt = validDateTime(body.startsAt);
   const location = textField(body.location, 160);
   const notes = textField(body.notes, 1000);
+  const remindersEnabled = body.remindersEnabled !== false;
   const participantIds = Array.isArray(body.participants) ? [...new Set(body.participants.map(String))].slice(0, 12) : [];
   if ((id && !/^\d+$/.test(id)) || !/^\d+$/.test(templateId) || !startsAt || !participantIds.length
     || participantIds.some(participantId => !validDiscordId(participantId))) {
@@ -1363,9 +1456,10 @@ async function saveScheduledSession(req, res) {
   }
   try {
     const sql = neon(process.env.DATABASE_URL);
-    const [templateRows, members] = await Promise.all([
+    const [templateRows, members, instructorMember] = await Promise.all([
       sql`SELECT id, name FROM academy_training_templates WHERE id=${templateId} AND is_active=TRUE LIMIT 1`,
-      getAllCpdMembers()
+      getAllCpdMembers(),
+      getCpdMember(session.user.id).catch(() => null)
     ]);
     if (!templateRows.length) return res.status(404).json({ ok: false, code: "training_template_not_found" });
     const eligible = new Map(members.map(publicAgent).filter(Boolean).map(agent => [agent.discordId, agent]));
@@ -1379,25 +1473,31 @@ async function saveScheduledSession(req, res) {
       discordId: participantId,
       name: eligible.get(participantId).displayName,
       response: existingResponses.get(participantId)?.response || "pending",
-      responseAt: existingResponses.get(participantId)?.responseAt || null
+      responseAt: existingResponses.get(participantId)?.responseAt || null,
+      attendance: existingResponses.get(participantId)?.attendance || "pending"
     }));
-    const instructorName = session.user.globalName || session.user.username;
+    const instructorName = instructorMember?.nick
+      || instructorMember?.user?.global_name
+      || session.user.globalName
+      || session.user.username;
     let row;
     if (existing) {
       [row] = await sql`UPDATE academy_scheduled_sessions SET template_id=${templateId},
         training_type=${templateRows[0].name}, starts_at=${startsAt}, location=${location || null},
         notes=${notes || null}, participants=${JSON.stringify(participants)}::jsonb,
         instructor_discord_id=${session.user.id}, instructor_name=${instructorName},
+        reminders_enabled=${remindersEnabled}, reminder_24h_sent=FALSE, reminder_1h_sent=FALSE,
         status='scheduled', updated_at=NOW() WHERE id=${id} RETURNING *`;
     } else {
       [row] = await sql`INSERT INTO academy_scheduled_sessions
         (template_id, training_type, starts_at, location, notes, status,
         instructor_discord_id, instructor_name, participants, discord_guild_id,
-        discord_channel_id, notification_status, created_at, updated_at)
+        discord_channel_id, notification_status, reminders_enabled,
+        reminder_24h_sent, reminder_1h_sent, created_at, updated_at)
         VALUES (${templateId}, ${templateRows[0].name}, ${startsAt}, ${location || null},
         ${notes || null}, 'scheduled', ${session.user.id}, ${instructorName},
         ${JSON.stringify(participants)}::jsonb, ${CPD_GUILD_ID}, ${CPD_CONVOCATION_CHANNEL_ID},
-        'pending', NOW(), NOW()) RETURNING *`;
+        'pending', ${remindersEnabled}, FALSE, FALSE, NOW(), NOW()) RETURNING *`;
     }
     let notificationStatus = "sent";
     let notificationError = null;
@@ -1419,7 +1519,7 @@ async function saveScheduledSession(req, res) {
     await writeActivityLog(sql, session, {
       actionType: existing ? "schedule_updated" : "schedule_created",
       targetType: "schedule", targetId: String(row.id), targetName: row.training_type,
-      details: { startsAt, participantCount: participants.length, notificationStatus }
+      details: { startsAt, participantCount: participants.length, notificationStatus, remindersEnabled }
     });
     return res.status(existing ? 200 : 201).json({ ok: true, schedule: publicSchedule(row) });
   } catch (error) {
@@ -1436,7 +1536,7 @@ async function scheduledSessionAction(req, res) {
   const body = readJsonBody(req);
   const id = String(body?.id || "");
   const action = String(body?.action || "");
-  if (!/^\d+$/.test(id) || !["cancel", "resend"].includes(action)) return res.status(400).json({ ok: false, code: "invalid_schedule_action" });
+  if (!/^\d+$/.test(id) || !["cancel", "resend", "remind", "attendance"].includes(action)) return res.status(400).json({ ok: false, code: "invalid_schedule_action" });
   try {
     const sql = neon(process.env.DATABASE_URL);
     let row = (await sql`SELECT * FROM academy_scheduled_sessions WHERE id=${id} LIMIT 1`)[0];
@@ -1444,19 +1544,88 @@ async function scheduledSessionAction(req, res) {
     if (action === "cancel") {
       [row] = await sql`UPDATE academy_scheduled_sessions SET status='cancelled', updated_at=NOW() WHERE id=${id} RETURNING *`;
       if (row.discord_message_id) await discordBotRequest(`/channels/${row.discord_channel_id}/messages/${row.discord_message_id}`, { method: "PATCH", body: scheduleMessagePayload(publicSchedule(row), false) });
-    } else {
+    } else if (action === "resend") {
       if (row.status !== "scheduled") return res.status(400).json({ ok: false, code: "schedule_not_active" });
       if (row.discord_message_id) {
         await discordBotRequest(`/channels/${row.discord_channel_id}/messages/${row.discord_message_id}`, { method: "PATCH", body: { components: [] } }).catch(() => null);
       }
       const message = await discordBotRequest(`/channels/${row.discord_channel_id}/messages`, { method: "POST", body: scheduleMessagePayload(publicSchedule(row), true) });
       [row] = await sql`UPDATE academy_scheduled_sessions SET discord_message_id=${message.id}, notification_status='sent', notification_error=NULL, updated_at=NOW() WHERE id=${id} RETURNING *`;
+    } else if (action === "remind") {
+      if (row.status !== "scheduled") return res.status(400).json({ ok: false, code: "schedule_not_active" });
+      const schedule = publicSchedule(row);
+      const pending = schedule.participants.filter(participant => (participant.response || "pending") === "pending");
+      if (!pending.length) return res.status(409).json({ ok: false, code: "no_pending_participants" });
+      await discordBotRequest(`/channels/${row.discord_channel_id}/messages`, {
+        method: "POST", body: scheduleReminderPayload(schedule, "relance manuelle")
+      });
+    } else {
+      if (row.status !== "scheduled") return res.status(400).json({ ok: false, code: "schedule_not_active" });
+      const submitted = Array.isArray(body.participants) ? body.participants : [];
+      const submittedMap = new Map(submitted.map(participant => [String(participant?.discordId || ""), String(participant?.attendance || "pending")]));
+      const participants = Array.isArray(row.participants) ? row.participants : [];
+      if (submittedMap.size !== participants.length
+        || participants.some(participant => !submittedMap.has(String(participant.discordId)))
+        || [...submittedMap.values()].some(value => !ATTENDANCE_STATUSES.has(value))) {
+        return res.status(400).json({ ok: false, code: "invalid_attendance" });
+      }
+      const now = new Date().toISOString();
+      participants.forEach(participant => {
+        participant.attendance = submittedMap.get(String(participant.discordId));
+        participant.attendanceAt = now;
+      });
+      [row] = await sql`UPDATE academy_scheduled_sessions SET participants=${JSON.stringify(participants)}::jsonb,
+        updated_at=NOW() WHERE id=${id} RETURNING *`;
+      if (row.discord_message_id) {
+        await discordBotRequest(`/channels/${row.discord_channel_id}/messages/${row.discord_message_id}`, {
+          method: "PATCH", body: scheduleMessagePayload(publicSchedule(row), false)
+        }).catch(error => console.error("Attendance schedule message update failed", error));
+      }
     }
-    await writeActivityLog(sql, session, { actionType: action === "cancel" ? "schedule_cancelled" : "schedule_resent", targetType: "schedule", targetId: id, targetName: row.training_type, details: {} });
+    const activityTypes = { cancel: "schedule_cancelled", resend: "schedule_resent", remind: "schedule_reminded", attendance: "schedule_attendance_updated" };
+    await writeActivityLog(sql, session, { actionType: activityTypes[action], targetType: "schedule", targetId: id, targetName: row.training_type, details: {} });
     return res.status(200).json({ ok: true, schedule: publicSchedule(row) });
   } catch (error) {
     console.error("Academy planning action failed", error);
     return res.status(500).json({ ok: false, code: "schedule_action_failed" });
+  }
+}
+
+async function processScheduleReminders(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "no-store");
+  if (!validSyncSecret(req)) return res.status(401).json({ ok: false, code: "invalid_sync_secret" });
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = await sql`SELECT * FROM academy_scheduled_sessions
+      WHERE status='scheduled' AND reminders_enabled=TRUE AND starts_at > NOW()
+        AND ((starts_at <= NOW() + INTERVAL '1 hour' AND reminder_1h_sent=FALSE)
+          OR (starts_at > NOW() + INTERVAL '1 hour'
+            AND starts_at <= NOW() + INTERVAL '24 hours' AND reminder_24h_sent=FALSE))
+      ORDER BY starts_at ASC LIMIT 50`;
+    let sent = 0;
+    for (const current of rows) {
+      const schedule = publicSchedule(current);
+      const untilStart = new Date(schedule.startsAt).getTime() - Date.now();
+      const isOneHour = untilStart <= 60 * 60 * 1000;
+      const pending = schedule.participants.filter(participant => (participant.response || "pending") === "pending");
+      if (pending.length) {
+        await discordBotRequest(`/channels/${current.discord_channel_id}/messages`, {
+          method: "POST", body: scheduleReminderPayload(schedule, isOneHour ? "dans moins d’une heure" : "dans moins de 24 heures")
+        });
+        sent += 1;
+      }
+      if (isOneHour) {
+        await sql`UPDATE academy_scheduled_sessions SET reminder_1h_sent=TRUE, updated_at=NOW() WHERE id=${current.id}`;
+      } else {
+        await sql`UPDATE academy_scheduled_sessions SET reminder_24h_sent=TRUE, updated_at=NOW() WHERE id=${current.id}`;
+      }
+    }
+    return res.status(200).json({ ok: true, processed: rows.length, sent });
+  } catch (error) {
+    console.error("Academy automatic reminders failed", error);
+    return res.status(500).json({ ok: false, code: error.code === "42703" ? "reminder_columns_missing" : "schedule_reminders_failed" });
   }
 }
 
@@ -1859,6 +2028,7 @@ module.exports = async function handler(req, res) {
     case "scheduled-session-save": return saveScheduledSession(req, res);
     case "scheduled-session-action": return scheduledSessionAction(req, res);
     case "scheduled-response-sync": return syncScheduledResponse(req, res);
+    case "schedule-reminders": return processScheduleReminders(req, res);
     case "training-update": return updateTraining(req, res);
     case "training-archive": return archiveTraining(req, res);
     case "recruitment-tickets": return recruitmentTickets(req, res);

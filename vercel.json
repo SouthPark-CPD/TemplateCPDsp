@@ -27,6 +27,7 @@
     { "src": "/api/academy-admin-data/planning/save", "dest": "/api/academy-router?action=scheduled-session-save" },
     { "src": "/api/academy-admin-data/planning/action", "dest": "/api/academy-router?action=scheduled-session-action" },
     { "src": "/api/academy-schedule-response", "dest": "/api/academy-router?action=scheduled-response-sync" },
+    { "src": "/api/academy-schedule-reminders", "dest": "/api/academy-router?action=schedule-reminders" },
     { "src": "/api/academy-admin-data/recruitment/decision", "dest": "/api/academy-router?action=recruitment-decision" },
     { "src": "/api/academy-admin-data/recruitment/tickets", "dest": "/api/academy-router?action=recruitment-tickets" },
     { "src": "/api/academy-admin-data/recruitment/ticket", "dest": "/api/academy-router?action=recruitment-ticket" },
