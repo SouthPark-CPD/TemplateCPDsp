@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Journal d’activité — Police Academy</title>
+  <link rel="icon" href="../assets/cpd-seal.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="activite.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/academy-admin/"><img src="../assets/cpd-seal.png" alt=""><div><strong>Police Academy</strong><span>Espace instructeur</span></div></a>
+    <nav class="admin-nav" aria-label="Navigation principale"><a href="/academy-admin/">Tableau de bord</a><a href="/academy-admin/effectifs.html">Effectifs</a><a href="/academy-admin/recrutements.html">Recrutement</a><a class="active" href="/academy-admin/activite.html">Activité</a></nav>
+    <div class="identity"><div><span>Connecté en tant que</span><strong id="instructor-name">Instructeur</strong></div><a href="/api/academy-admin-auth/logout">Déconnexion</a></div>
+  </header>
+
+  <main>
+    <section class="page-heading">
+      <div><p>Traçabilité Academy</p><h1>Journal d’activité</h1><span>Consultez les actions réalisées dans les dossiers et le recrutement.</span></div>
+      <div class="quick-stats"><div><strong id="today-count">—</strong><span>Aujourd’hui</span></div><div><strong id="month-count">—</strong><span>30 jours</span></div><div><strong id="actor-count">—</strong><span>Instructeurs</span></div></div>
+    </section>
+
+    <section class="activity-panel">
+      <div class="panel-head">
+        <div><p>Historique</p><h2>Dernières actions</h2></div>
+        <div class="filters">
+          <label><span>Rechercher</span><input id="activity-search" type="search" placeholder="Agent, candidat ou action…"></label>
+          <label><span>Instructeur</span><select id="actor-filter"><option value="">Tous</option></select></label>
+          <label><span>Catégorie</span><select id="type-filter"><option value="">Toutes</option><option value="agent">Dossiers</option><option value="training">Formations</option><option value="recruitment">Recrutement</option></select></label>
+          <label><span>Période</span><select id="period-filter"><option value="all">Toutes</option><option value="today">Aujourd’hui</option><option value="7">7 jours</option><option value="30" selected>30 jours</option></select></label>
+        </div>
+      </div>
+      <p id="activity-message" class="message">Chargement du journal d’activité…</p>
+      <div id="activity-list" class="activity-list" hidden></div>
+    </section>
+  </main>
+  <script src="activite.js"></script>
+</body>
+</html>

@@ -309,6 +309,24 @@ async function syncAgentCompletion(sql, discordId) {
   `;
 }
 
+async function writeActivityLog(sql, session, entry) {
+  try {
+    const actorName = session.user.globalName || session.user.username || "Instructeur";
+    await sql`
+      INSERT INTO academy_activity_log (
+        actor_discord_id, actor_name, action_type, target_type,
+        target_id, target_name, details, created_at
+      ) VALUES (
+        ${session.user.id}, ${actorName}, ${entry.actionType}, ${entry.targetType},
+        ${entry.targetId || null}, ${entry.targetName || null},
+        ${JSON.stringify(entry.details || {})}::jsonb, NOW()
+      )
+    `;
+  } catch (error) {
+    console.error("Academy activity log write failed", error);
+  }
+}
+
 async function instructorAccess(req, res) {
   const access = await validateSession(req, false);
   if (!access.ok) {
@@ -496,6 +514,49 @@ async function trainingOverview(req, res) {
   } catch (error) {
     console.error("Academy training overview failed", error);
     const code = error.status === 403 ? "discord_members_forbidden" : "training_overview_unavailable";
+    return res.status(500).json({ ok: false, code });
+  }
+}
+
+async function activityLog(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = await sql`
+      SELECT id, actor_discord_id, actor_name, action_type, target_type,
+        target_id, target_name, details, created_at
+      FROM academy_activity_log
+      ORDER BY created_at DESC
+      LIMIT 300
+    `;
+    const instructors = [...new Map(rows.map(row => [row.actor_discord_id, {
+      discordId: row.actor_discord_id,
+      name: row.actor_name
+    }])).values()].sort((a, b) => a.name.localeCompare(b.name, "fr"));
+    return res.status(200).json({
+      ok: true,
+      instructor: session.user,
+      instructors,
+      entries: rows.map(row => ({
+        id: String(row.id),
+        actorDiscordId: row.actor_discord_id,
+        actorName: row.actor_name,
+        actionType: row.action_type,
+        targetType: row.target_type,
+        targetId: row.target_id || "",
+        targetName: row.target_name || "",
+        details: row.details || {},
+        createdAt: row.created_at
+      }))
+    });
+  } catch (error) {
+    console.error("Academy activity log read failed", error);
+    const code = error.code === "42P01" ? "activity_table_missing" : "activity_unavailable";
     return res.status(500).json({ ok: false, code });
   }
 }
@@ -758,6 +819,13 @@ async function saveAgentFile(req, res) {
         updated_at = NOW()
       RETURNING updated_at
     `;
+    await writeActivityLog(sql, session, {
+      actionType: "agent_file_updated",
+      targetType: "agent",
+      targetId: discordId,
+      targetName: rpName || agent.displayName,
+      details: { academyStatus, matricule, hasGeneralNote: Boolean(generalNote) }
+    });
     return res.status(200).json({ ok: true, updatedAt: saved.updated_at });
   } catch (error) {
     console.error("Academy agent file save failed", error);
@@ -814,6 +882,16 @@ async function createTraining(req, res) {
       RETURNING id
     `;
     await syncAgentCompletion(sql, discordId);
+    await writeActivityLog(sql, session, {
+      actionType: "training_created",
+      targetType: "agent",
+      targetId: discordId,
+      targetName: agent.displayName,
+      details: {
+        trainingId: String(created.id), trainingType, trainingDate,
+        result, score: rawScore
+      }
+    });
     return res.status(201).json({ ok: true, id: String(created.id) });
   } catch (error) {
     console.error("Academy training creation failed", error);
@@ -875,6 +953,13 @@ async function updateTraining(req, res) {
     `;
     if (!rows.length) return res.status(404).json({ ok: false, code: "training_not_found" });
     await syncAgentCompletion(sql, discordId);
+    await writeActivityLog(sql, session, {
+      actionType: "training_updated",
+      targetType: "agent",
+      targetId: discordId,
+      targetName: agent.displayName,
+      details: { trainingId: id, trainingType, trainingDate, result, score: rawScore }
+    });
     return res.status(200).json({ ok: true, id: String(rows[0].id), updatedAt: rows[0].updated_at });
   } catch (error) {
     console.error("Academy training update failed", error);
@@ -926,6 +1011,13 @@ async function archiveTraining(req, res) {
         `;
     if (!rows.length) return res.status(404).json({ ok: false, code: "training_not_found" });
     await syncAgentCompletion(sql, discordId);
+    await writeActivityLog(sql, session, {
+      actionType: archived ? "training_archived" : "training_restored",
+      targetType: "agent",
+      targetId: discordId,
+      targetName: agent.displayName,
+      details: { trainingId: id }
+    });
     return res.status(200).json({ ok: true, archived });
   } catch (error) {
     console.error("Academy training archive failed", error);
@@ -1052,9 +1144,16 @@ async function saveRecruitmentDecision(req, res) {
       UPDATE academy_recruitment_tickets
       SET recruitment_decision = ${decision}, updated_at = NOW()
       WHERE application_id = ${applicationId}
-      RETURNING application_id, recruitment_decision, updated_at
+      RETURNING application_id, candidate_name, recruitment_decision, updated_at
     `;
     if (!rows.length) return res.status(404).json({ ok: false, code: "recruitment_ticket_not_found" });
+    await writeActivityLog(sql, session, {
+      actionType: "recruitment_decision_updated",
+      targetType: "recruitment",
+      targetId: applicationId,
+      targetName: rows[0].candidate_name || applicationId,
+      details: { decision }
+    });
     return res.status(200).json({
       ok: true,
       applicationId: rows[0].application_id,
@@ -1160,6 +1259,7 @@ module.exports = async function handler(req, res) {
     case "database-check": return databaseCheck(req, res);
     case "agents": return agentsList(req, res);
     case "training-overview": return trainingOverview(req, res);
+    case "activity": return activityLog(req, res);
     case "dashboard": return academyDashboard(req, res);
     case "agent": return agentDetail(req, res);
     case "agent-save": return saveAgentFile(req, res);
