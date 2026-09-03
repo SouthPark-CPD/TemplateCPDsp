@@ -674,7 +674,12 @@ async function createTraining(req, res) {
     return res.status(201).json({ ok: true, id: String(created.id) });
   } catch (error) {
     console.error("Academy training creation failed", error);
-    return res.status(500).json({ ok: false, code: "training_creation_failed" });
+    const code = error.code === "23502"
+      ? "optional_fields_not_nullable"
+      : error.code === "23514"
+        ? "training_result_constraint"
+        : "training_creation_failed";
+    return res.status(500).json({ ok: false, code });
   }
 }
 
@@ -729,7 +734,12 @@ async function updateTraining(req, res) {
     return res.status(200).json({ ok: true, id: String(rows[0].id), updatedAt: rows[0].updated_at });
   } catch (error) {
     console.error("Academy training update failed", error);
-    return res.status(500).json({ ok: false, code: "training_update_failed" });
+    const code = error.code === "23502"
+      ? "optional_fields_not_nullable"
+      : error.code === "23514"
+        ? "training_result_constraint"
+        : "training_update_failed";
+    return res.status(500).json({ ok: false, code });
   }
 }
 

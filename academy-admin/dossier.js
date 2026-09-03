@@ -329,7 +329,14 @@ elements.trainingForm.addEventListener("submit", async event => {
     showNotice(isEditing ? "La formation a bien été modifiée." : "La formation a bien été ajoutée à l’historique.");
     await loadDossier();
   } catch (error) {
-    if (error.message !== "unauthorized") showNotice("Impossible d’ajouter cette formation. Vérifiez les champs puis réessayez.", "error");
+    if (error.message !== "unauthorized") {
+      const messages = {
+        optional_fields_not_nullable: "La base Neon considère encore certains champs facultatifs comme obligatoires. Exécutez le correctif SQL fourni.",
+        training_result_constraint: "La contrainte du statut dans Neon n’est pas à jour. Exécutez le correctif SQL du statut.",
+        invalid_training: "Vérifiez le module, la date et le résultat sélectionnés."
+      };
+      showNotice(messages[error.message] || "Impossible d’enregistrer cette formation pour le moment.", "error");
+    }
   } finally {
     elements.saveTraining.disabled = false;
     elements.saveTraining.textContent = editingTrainingId ? "Enregistrer les modifications" : "Ajouter à l’historique";

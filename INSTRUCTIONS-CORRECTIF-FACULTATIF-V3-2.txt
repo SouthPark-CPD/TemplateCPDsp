@@ -1,0 +1,12 @@
+CORRECTIF V3.2 — CHAMPS DE FORMATION FACULTATIFS
+
+1. Ouvrez Vercel > Storage > votre base Neon > Query.
+2. Copiez tout le contenu de SQL-CHAMPS-FORMATION-FACULTATIFS.sql.
+3. Exécutez cette requête une seule fois.
+4. Importez ensuite les dossiers api et academy-admin du pack dans GitHub.
+5. Confirmez le remplacement des deux fichiers existants.
+6. Attendez que le déploiement Vercel affiche Ready.
+7. Rechargez le dossier agent avec Ctrl + F5.
+
+Test : sélectionnez uniquement un module, une date et un résultat, puis enregistrez.
+La note, les points forts, les axes d’amélioration et le commentaire peuvent rester vides.
