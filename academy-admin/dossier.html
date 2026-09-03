@@ -36,7 +36,10 @@
           <h1 id="agent-name">Agent</h1>
           <div class="badges"><span id="agent-rank" class="rank">—</span><span id="agent-discord" class="discord-id">—</span></div>
         </div>
-        <div class="hero-stat"><span>Formations</span><strong id="training-count">0</strong></div>
+        <div class="hero-tools">
+          <div class="hero-stat"><span>Formations</span><strong id="training-count">0</strong></div>
+          <button id="print-dossier" class="print-button" type="button" disabled>Générer la fiche PDF</button>
+        </div>
       </section>
 
       <div id="notice" class="notice" role="status" hidden></div>
@@ -133,6 +136,7 @@
       </details>
     </div>
   </main>
+  <section id="print-sheet" class="print-sheet" aria-hidden="true"></section>
   <script src="dossier.js"></script>
 </body>
 </html>

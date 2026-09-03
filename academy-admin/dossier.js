@@ -35,11 +35,14 @@ const elements = {
   pathPercentage: document.querySelector("#path-percentage"),
   pathSummary: document.querySelector("#path-summary"),
   pathProgress: document.querySelector("#path-progress"),
-  pathModules: document.querySelector("#path-modules")
+  pathModules: document.querySelector("#path-modules"),
+  printButton: document.querySelector("#print-dossier"),
+  printSheet: document.querySelector("#print-sheet")
 };
 
 let editingTrainingId = null;
 let trainingRecords = new Map();
+let activeTrainingRecords = [];
 
 const resultLabels = {
   planifiee: "Planifiée",
@@ -158,7 +161,75 @@ function renderPath(trainings) {
   }).join("");
 }
 
+function buildPrintSheet() {
+  const latestByModule = new Map();
+  activeTrainingRecords.forEach(training => {
+    if (standardModules.includes(training.trainingType) && !latestByModule.has(training.trainingType)) {
+      latestByModule.set(training.trainingType, training);
+    }
+  });
+  const validated = standardModules.filter(module => canonicalResult(latestByModule.get(module)?.result) === "valide").length;
+  const percentage = Math.round((validated / standardModules.length) * 100);
+  const generatedAt = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(new Date());
+  const statusText = elements.status.options[elements.status.selectedIndex]?.text || "—";
+  const instructors = [...new Set(activeTrainingRecords.map(training => training.instructorName).filter(Boolean))];
+  const moduleRows = standardModules.map((module, index) => {
+    const training = latestByModule.get(module);
+    const result = canonicalResult(training?.result || "non_commence");
+    return `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${escapeHtml(module)}</td>
+        <td><span class="print-result print-${escapeHtml(result)}">${escapeHtml(resultLabels[result] || "Non commencé")}</span></td>
+        <td>${training ? escapeHtml(formatDate(training.trainingDate)) : "—"}</td>
+      </tr>
+    `;
+  }).join("");
+  const history = activeTrainingRecords.length
+    ? activeTrainingRecords.map(training => `
+        <article class="print-training">
+          <header><div><span>${escapeHtml(formatDate(training.trainingDate))}</span><h3>${escapeHtml(training.trainingType)}</h3></div><strong>${escapeHtml(resultLabels[canonicalResult(training.result)] || training.result)}${training.score !== null ? ` · ${Number(training.score)}/100` : ""}</strong></header>
+          ${training.strengths ? `<section><b>Points forts</b><p>${escapeHtml(training.strengths)}</p></section>` : ""}
+          ${training.improvements ? `<section><b>Axes d’amélioration</b><p>${escapeHtml(training.improvements)}</p></section>` : ""}
+          ${training.comment ? `<section><b>Commentaire</b><p>${escapeHtml(training.comment)}</p></section>` : ""}
+          <footer>Instructeur : ${escapeHtml(training.instructorName)} · Enregistré le ${escapeHtml(formatDate(training.createdAt, true))}</footer>
+        </article>
+      `).join("")
+    : '<p class="print-empty">Aucune formation enregistrée.</p>';
+
+  elements.printSheet.innerHTML = `
+    <header class="print-header">
+      <img src="../assets/cpd-seal.png" alt="">
+      <div><p>Chicago Police Department</p><h1>Fiche de suivi — Police Academy</h1><span>Document généré le ${escapeHtml(generatedAt)}</span></div>
+    </header>
+    <section class="print-identity">
+      <div><span>Agent</span><strong>${escapeHtml(elements.rpName.value.trim() || elements.name.textContent)}</strong></div>
+      <div><span>Grade</span><strong>${escapeHtml(elements.rank.textContent)}</strong></div>
+      <div><span>Matricule</span><strong>${escapeHtml(elements.matricule.value.trim() || "Non renseigné")}</strong></div>
+      <div><span>Statut Academy</span><strong>${escapeHtml(statusText)}</strong></div>
+    </section>
+    <section class="print-progress">
+      <div><h2>Progression du parcours</h2><strong>${percentage} %</strong></div>
+      <p>${validated} module${validated > 1 ? "s" : ""} validé${validated > 1 ? "s" : ""} sur ${standardModules.length}</p>
+    </section>
+    <section class="print-section">
+      <h2>Parcours standard</h2>
+      <table><thead><tr><th>N°</th><th>Module</th><th>Résultat</th><th>Date</th></tr></thead><tbody>${moduleRows}</tbody></table>
+    </section>
+    <section class="print-section">
+      <h2>Note générale</h2>
+      <p class="print-note">${escapeHtml(elements.generalNote.value.trim() || "Aucune note générale renseignée.")}</p>
+    </section>
+    <section class="print-section print-history">
+      <h2>Historique des formations</h2>
+      ${history}
+    </section>
+    <footer class="print-footer"><span>Instructeurs intervenus : ${escapeHtml(instructors.join(", ") || "Aucun")}</span><span>Police Academy · Document interne</span></footer>
+  `;
+}
+
 function renderHistory(trainings, archivedTrainings = []) {
+  activeTrainingRecords = trainings;
   trainingRecords = new Map([...trainings, ...archivedTrainings].map(training => [training.id, training]));
   elements.count.textContent = String(trainings.length);
   elements.historyEmpty.hidden = trainings.length > 0;
@@ -169,6 +240,7 @@ function renderHistory(trainings, archivedTrainings = []) {
   elements.archiveHistory.hidden = archivedTrainings.length === 0;
   elements.archiveHistory.innerHTML = archivedTrainings.map(training => trainingCard(training, true)).join("");
   renderPath(trainings);
+  elements.printButton.disabled = false;
 }
 
 function updateCustomTrainingField() {
@@ -345,6 +417,13 @@ elements.trainingForm.addEventListener("submit", async event => {
 
 elements.cancelTrainingEdit.addEventListener("click", resetTrainingForm);
 elements.trainingType.addEventListener("change", updateCustomTrainingField);
+elements.printButton.addEventListener("click", () => {
+  buildPrintSheet();
+  const previousTitle = document.title;
+  document.title = `Fiche Academy - ${elements.rpName.value.trim() || elements.name.textContent}`;
+  window.print();
+  document.title = previousTitle;
+});
 
 elements.pathModules.addEventListener("click", event => {
   const button = event.target.closest("[data-module]");

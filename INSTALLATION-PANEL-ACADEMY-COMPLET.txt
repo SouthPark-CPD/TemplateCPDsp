@@ -39,6 +39,7 @@ CONTENU DU PACK
 - Ajout, modification, archivage et restauration des formations
 - Demandes de recrutement et archives des tickets Discord
 - Journal des actions effectuées par les instructeurs
+- Génération d’une fiche agent imprimable ou enregistrable en PDF
 - Configuration Vercel et dépendances nécessaires
 - Correctifs SQL fournis séparément
 
