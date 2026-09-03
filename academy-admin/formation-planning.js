@@ -137,7 +137,7 @@
     elements.save.textContent = "Enregistrer les modifications";
     elements.cancelEdit.hidden = false;
     renderAgents();
-    window.openFormationTab?.("planning");
+    window.openFormationTab?.("create");
     elements.form.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 

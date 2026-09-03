@@ -1277,9 +1277,8 @@ async function trainingSessions(req, res) {
       WHERE records.archived_at IS NULL
       GROUP BY records.training_type, records.training_date, records.instructor_discord_id,
         records.instructor_name, records.created_at
-      HAVING COUNT(*) > 1
       ORDER BY session_created_at DESC
-      LIMIT 20
+      LIMIT 100
     `;
     return res.status(200).json({
       ok: true,

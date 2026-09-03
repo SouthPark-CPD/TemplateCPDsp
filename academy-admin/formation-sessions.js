@@ -95,7 +95,7 @@
 
   async function loadHistory() {
     try { const data = await api("/api/academy-admin-data/training-sessions"); renderHistory(data.sessions || []); }
-    catch (error) { if (error.message !== "unauthorized") group.history.innerHTML = '<p class="group-empty">Impossible de charger les sessions récentes.</p>'; }
+    catch (error) { if (error.message !== "unauthorized") group.history.innerHTML = '<p class="group-empty">Impossible de charger l’historique des formations.</p>'; }
   }
 
   async function initialize() {

@@ -19,7 +19,8 @@
   }
 
   function openTab(tab = "create", mode = "individual", update = true) {
-    const safeTab = ["create", "templates", "planning", "history"].includes(tab) ? tab : "create";
+    const requestedTab = tab === "planning" ? "create" : tab;
+    const safeTab = ["create", "templates", "history"].includes(requestedTab) ? requestedTab : "create";
     tabs.forEach(button => button.classList.toggle("active", button.dataset.formationTab === safeTab));
     views.forEach(view => { view.hidden = view.dataset.formationView !== safeTab; });
     if (safeTab === "create") openMode(mode, false);

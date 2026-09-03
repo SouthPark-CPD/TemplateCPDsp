@@ -10,12 +10,13 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="evaluations.css">
   <link rel="stylesheet" href="formation.css">
+  <link rel="stylesheet" href="academy-header.css">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="/academy-admin/"><img src="../assets/cpd-seal.png" alt=""><div><strong>Police Academy</strong><span>Espace instructeur</span></div></a>
-    <nav class="admin-nav" aria-label="Navigation principale"><a href="/mdt/index.html">MDT</a><a href="/academy-admin/">Tableau de bord</a><a href="/academy-admin/effectifs.html">Effectifs</a><a class="active" href="/academy-admin/evaluations.html">Formation</a><a href="/academy-admin/recrutements.html">Recrutement</a><a href="/academy-admin/activite.html">Activité</a></nav>
-    <div class="identity"><div><span>Connecté en tant que</span><strong id="instructor-name">Instructeur</strong></div><a href="/api/academy-admin-auth/logout">Déconnexion</a></div>
+    <nav class="admin-nav" aria-label="Navigation principale"><a href="/academy-admin/">Tableau de bord</a><a href="/academy-admin/effectifs.html">Effectifs</a><a class="active" href="/academy-admin/evaluations.html">Formation</a></nav>
+    <div class="identity"><div><span>Connecté en tant que</span><strong id="instructor-name">Instructeur</strong></div><div class="header-actions"><a class="utility" href="/mdt/index.html">MDT</a><a class="utility" href="/academy-admin/recrutements.html">Tickets nouvelles recrues</a><a class="logout" href="/api/academy-admin-auth/logout">Déconnexion</a></div></div>
   </header>
 
   <main>
@@ -25,10 +26,9 @@
     </section>
 
     <nav class="formation-tabs" aria-label="Sections du centre de formation">
-      <button class="active" type="button" data-formation-tab="create"><span>01</span>Nouvelle formation</button>
-      <button type="button" data-formation-tab="templates"><span>02</span>Grilles et modèles</button>
-      <button type="button" data-formation-tab="planning"><span>03</span>Planning</button>
-      <button type="button" data-formation-tab="history"><span>04</span>Historique collectif</button>
+      <button class="active" type="button" data-formation-tab="create"><span>01</span>Planifier une formation</button>
+      <button type="button" data-formation-tab="templates"><span>02</span>Liste des formations</button>
+      <button type="button" data-formation-tab="history"><span>03</span>Historique des formations</button>
     </nav>
 
     <div id="notice" class="notice" hidden></div>
@@ -36,6 +36,33 @@
 
     <div id="page-content" hidden>
       <section class="formation-view" data-formation-view="create">
+        <div class="planning-layout">
+          <article class="panel planning-editor">
+            <div class="panel-head"><div><p>Nouvelle convocation</p><h2 id="planning-editor-title">Planifier une formation</h2></div><span id="planning-selection-count">0 sélectionné</span></div>
+            <form id="planning-form">
+              <input id="planning-id" type="hidden">
+              <div class="planning-fields">
+                <label><span>Formation *</span><select id="planning-template" required><option value="">Sélectionner une formation…</option></select></label>
+                <label><span>Date et heure *</span><input id="planning-start" type="datetime-local" required></label>
+                <label><span>Lieu</span><input id="planning-location" maxlength="160" placeholder="Ex. Centre de formation CPD"></label>
+                <label class="full"><span>Informations complémentaires</span><textarea id="planning-notes" rows="3" maxlength="1000" placeholder="Consignes, tenue ou matériel nécessaire…"></textarea></label>
+              </div>
+              <label class="planning-reminder-toggle"><input id="planning-reminders" type="checkbox" checked><span><strong>Rappels automatiques</strong><small>Relance uniquement les agents sans réponse, 24 h puis 1 h avant la séance.</small></span></label>
+              <div class="planning-participants-head"><div><span>Participants *</span><small>De 1 à 12 agents</small></div><input id="planning-agent-search" type="search" placeholder="Rechercher un agent…"></div>
+              <div id="planning-agents" class="planning-agents"></div>
+              <div class="planning-form-actions"><button id="planning-cancel-edit" class="secondary-button" type="button" hidden>Annuler la modification</button><button id="planning-save" class="primary-button" type="submit">Planifier et envoyer sur Discord</button></div>
+            </form>
+          </article>
+
+          <article class="panel planning-list-panel">
+            <div class="panel-head"><div><p>Agenda Academy</p><h2>Formations planifiées</h2></div><button id="planning-refresh" type="button">Actualiser</button></div>
+            <div class="planning-filters"><select id="planning-status-filter"><option value="upcoming">À venir</option><option value="scheduled">Toutes les planifiées</option><option value="completed">Terminées</option><option value="cancelled">Annulées</option><option value="all">Toutes</option></select></div>
+            <div id="planning-list" class="planning-list"></div>
+            <p id="planning-empty" class="group-empty" hidden>Aucune formation dans cette catégorie.</p>
+          </article>
+        </div>
+
+        <div class="formation-section-heading"><div><p>Saisie directe</p><h2>Enregistrer une formation réalisée</h2></div><span>Utilisez cette partie pour saisir immédiatement les résultats d’une formation individuelle ou collective.</span></div>
         <div class="mode-picker" role="group" aria-label="Type de formation">
           <button class="active" type="button" data-formation-mode="individual"><strong>Formation individuelle</strong><span>Une grille détaillée pour un agent</span></button>
           <button type="button" data-formation-mode="group"><strong>Session collective</strong><span>Une formation pour plusieurs agents</span></button>
@@ -95,46 +122,18 @@
 
       <section class="formation-view" data-formation-view="templates" hidden>
         <article class="panel library-panel full-library">
-          <div class="panel-head"><div><p>Bibliothèque pédagogique</p><h2>Grilles et modèles disponibles</h2></div><span id="template-count">0</span></div>
+          <div class="panel-head"><div><p>Catalogue pédagogique</p><h2>Liste des formations</h2></div><span id="template-count">0</span></div>
           <div class="library-tools"><input id="template-search" type="search" placeholder="Rechercher une grille…"><select id="template-filter"><option value="active">Actives</option><option value="all">Toutes</option><option value="inactive">Désactivées</option></select></div>
           <div id="starter-box" class="starter-box" hidden><strong>Bibliothèque vide</strong><p>Installez des modèles modifiables pour démarrer rapidement.</p><button id="install-starters" type="button">Installer les grilles conseillées</button></div>
           <div id="template-list" class="template-list"></div>
         </article>
       </section>
 
-      <section class="formation-view" data-formation-view="planning" hidden>
-        <div class="planning-layout">
-          <article class="panel planning-editor">
-            <div class="panel-head"><div><p>Nouvelle convocation</p><h2 id="planning-editor-title">Planifier une formation</h2></div><span id="planning-selection-count">0 sélectionné</span></div>
-            <form id="planning-form">
-              <input id="planning-id" type="hidden">
-              <div class="planning-fields">
-                <label><span>Formation *</span><select id="planning-template" required><option value="">Sélectionner une formation…</option></select></label>
-                <label><span>Date et heure *</span><input id="planning-start" type="datetime-local" required></label>
-                <label><span>Lieu</span><input id="planning-location" maxlength="160" placeholder="Ex. Centre de formation CPD"></label>
-                <label class="full"><span>Informations complémentaires</span><textarea id="planning-notes" rows="3" maxlength="1000" placeholder="Consignes, tenue ou matériel nécessaire…"></textarea></label>
-              </div>
-              <label class="planning-reminder-toggle"><input id="planning-reminders" type="checkbox" checked><span><strong>Rappels automatiques</strong><small>Relance uniquement les agents sans réponse, 24 h puis 1 h avant la séance.</small></span></label>
-              <div class="planning-participants-head"><div><span>Participants *</span><small>De 1 à 12 agents</small></div><input id="planning-agent-search" type="search" placeholder="Rechercher un agent…"></div>
-              <div id="planning-agents" class="planning-agents"></div>
-              <div class="planning-form-actions"><button id="planning-cancel-edit" class="secondary-button" type="button" hidden>Annuler la modification</button><button id="planning-save" class="primary-button" type="submit">Planifier et envoyer sur Discord</button></div>
-            </form>
-          </article>
-
-          <article class="panel planning-list-panel">
-            <div class="panel-head"><div><p>Agenda Academy</p><h2>Formations planifiées</h2></div><button id="planning-refresh" type="button">Actualiser</button></div>
-            <div class="planning-filters"><select id="planning-status-filter"><option value="upcoming">À venir</option><option value="scheduled">Toutes les planifiées</option><option value="completed">Terminées</option><option value="cancelled">Annulées</option><option value="all">Toutes</option></select></div>
-            <div id="planning-list" class="planning-list"></div>
-            <p id="planning-empty" class="group-empty" hidden>Aucune formation dans cette catégorie.</p>
-          </article>
-        </div>
-      </section>
-
       <section class="formation-view" data-formation-view="history" hidden>
         <article class="panel group-history-panel">
-          <div class="panel-head"><div><p>Historique</p><h2>Sessions collectives récentes</h2></div><button id="group-refresh-history" type="button">Actualiser</button></div>
+          <div class="panel-head"><div><p>Historique général</p><h2>Ensemble des formations enregistrées</h2></div><button id="group-refresh-history" type="button">Actualiser</button></div>
           <div id="group-history-list" class="group-history-list"></div>
-          <p id="group-history-empty" class="group-empty" hidden>Aucune session collective enregistrée.</p>
+          <p id="group-history-empty" class="group-empty" hidden>Aucune formation enregistrée.</p>
         </article>
       </section>
     </div>
