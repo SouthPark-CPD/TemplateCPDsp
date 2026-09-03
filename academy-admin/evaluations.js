@@ -2,12 +2,15 @@ const $ = selector => document.querySelector(selector);
 const els = {
   message: $("#page-message"), content: $("#page-content"), notice: $("#notice"), instructor: $("#instructor-name"),
   agent: $("#evaluation-agent"), template: $("#evaluation-template"), date: $("#evaluation-date"), form: $("#evaluation-form"),
+  agentField: $("#evaluation-agent-field"), dateField: $("#evaluation-date-field"), scoreStrip: $("#score-strip"),
   empty: $("#evaluation-empty"), sheet: $("#evaluation-sheet"), criteriaSheet: $("#criteria-sheet"), answered: $("#answered-count"),
   score: $("#calculated-score"), suggested: $("#suggested-result"), result: $("#evaluation-result"), comment: $("#evaluation-comment"),
+  commentField: $("#general-comment-field"), finalDecision: $("#final-decision"),
   draft: $("#draft-state"), list: $("#template-list"), count: $("#template-count"), search: $("#template-search"), filter: $("#template-filter"),
   starter: $("#starter-box"), installStarters: $("#install-starters"), newTemplate: $("#new-template"), dialog: $("#template-dialog"),
   templateForm: $("#template-form"), templateId: $("#template-id"), templateName: $("#template-name"), category: $("#template-category"),
   description: $("#template-description"), criteriaEditor: $("#criteria-editor"), addCriterion: $("#add-criterion"),
+  editorHelp: $("#editor-help"),
   editorKicker: $("#editor-kicker"), editorTitle: $("#editor-title"), closeEditor: $("#close-editor"), cancelEditor: $("#cancel-editor")
 };
 
@@ -71,8 +74,9 @@ function addCriterion(item){els.criteriaEditor.append(criterionEditorRow(item));
 function openEditor(template=null){
   els.templateForm.reset();els.criteriaEditor.innerHTML="";els.templateId.value=template?.id||"";els.templateName.value=template?.name||"";els.category.value=template?.category||"formation";els.description.value=template?.description||"";
   els.editorKicker.textContent=template?"Modification":"Nouvelle grille";els.editorTitle.textContent=template?"Modifier la formation":"Créer une formation";
-  (template?.criteria?.length?template.criteria:[{}]).forEach(addCriterion);els.dialog.showModal();
+  (template?.criteria?.length?template.criteria:[{}]).forEach(addCriterion);updateEditorMode();els.dialog.showModal();
 }
+function updateEditorMode(){const guide=els.category.value==="entretien";els.criteriaEditor.classList.toggle("guide-mode",guide);els.editorHelp.textContent=guide?"Ajoutez uniquement les questions à lire au candidat. Aucun résultat et aucune réponse ne seront demandés pendant l’entretien.":"Regroupez les critères par section. Un critère critique non acquis entraîne automatiquement une proposition « Non validée ».";}
 function templatePayload(){return {id:els.templateId.value||undefined,name:els.templateName.value.trim(),category:els.category.value,description:els.description.value.trim(),criteria:[...els.criteriaEditor.querySelectorAll(".criterion-editor-row")].map(row=>({section:row.querySelector(".criterion-section").value.trim(),label:row.querySelector(".criterion-label").value.trim(),type:row.querySelector(".criterion-type").value,weight:Number(row.querySelector(".criterion-weight").value),critical:row.querySelector(".criterion-critical").checked,guidance:row.querySelector(".criterion-guidance").value.trim()})).filter(item=>item.label)};}
 
 function renderLibrary(){
@@ -89,6 +93,14 @@ function currentTemplate(){return templates.find(t=>t.id===els.template.value);}
 function renderEvaluation(){
   const template=currentTemplate();els.empty.hidden=Boolean(template);els.sheet.hidden=!template;if(!template)return;
   const sections=new Map();template.criteria.forEach(c=>{if(!sections.has(c.section))sections.set(c.section,[]);sections.get(c.section).push(c);});
+  const guideOnly=template.category==="entretien";
+  els.agentField.hidden=guideOnly;els.dateField.hidden=guideOnly;els.agent.required=!guideOnly;els.date.required=!guideOnly;
+  els.scoreStrip.hidden=guideOnly;els.commentField.hidden=guideOnly;els.finalDecision.hidden=guideOnly;
+  if(guideOnly){
+    els.criteriaSheet.innerHTML=`<article class="question-guide"><header><p>Guide d’entretien</p><h3>${escapeHtml(template.name)}</h3></header>${[...sections].map(([section,criteria])=>`<section class="guide-section"><h4>${escapeHtml(section)}</h4><ol class="guide-questions">${criteria.map(c=>`<li><div><strong>${escapeHtml(c.label)}</strong>${c.guidance?`<small>Repère formateur : ${escapeHtml(c.guidance)}</small>`:""}</div></li>`).join("")}</ol></section>`).join("")}</article>`;
+    els.draft.textContent="Guide de lecture · aucune réponse enregistrée";
+    return;
+  }
   els.criteriaSheet.innerHTML=[...sections].map(([section,criteria])=>`<section class="criteria-section"><h3>${escapeHtml(section)}</h3>${criteria.map(c=>`<div class="evaluation-criterion" data-id="${c.id}" data-weight="${c.weight}" data-critical="${c.critical}"><div class="criterion-question"><strong>${escapeHtml(c.label)}</strong>${c.critical?'<span class="critical-badge">Critique</span>':""}</div>${c.guidance?`<p class="criterion-guidance">Repère instructeur : ${escapeHtml(c.guidance)}</p>`:""}<div class="rating-row">${[["acquis","Acquis"],["partiel","Partiel"],["non_acquis","Non acquis"],["non_evalue","Non évalué"]].map(([value,label])=>`<label><input type="radio" name="rating-${c.id}" value="${value}" ${value==="non_evalue"?"checked":""}><span>${label}</span></label>`).join("")}</div><input class="criterion-note" maxlength="1000" placeholder="Note sur ce critère (facultatif)"></div>`).join("")}</section>`).join("");
   resultWasManuallyChanged=false;updateScore();restoreDraft();
 }
@@ -103,6 +115,7 @@ async function load(){
 }
 
 els.newTemplate.addEventListener("click",()=>openEditor());els.addCriterion.addEventListener("click",()=>addCriterion());els.closeEditor.addEventListener("click",()=>els.dialog.close());els.cancelEditor.addEventListener("click",()=>els.dialog.close());
+els.category.addEventListener("change",updateEditorMode);
 els.templateForm.addEventListener("submit",async event=>{event.preventDefault();const payload=templatePayload();if(!payload.criteria.length&&!confirm("Cette formation ne contient aucun critère. Voulez-vous quand même l’enregistrer ?"))return;try{await api("/api/academy-admin-data/training-template/save",{method:"POST",body:JSON.stringify(payload)});els.dialog.close();showNotice(payload.id?"La grille a été mise à jour.":"La nouvelle formation est disponible dans les dossiers agents.");await load();}catch(error){showNotice("Impossible d’enregistrer cette grille. Vérifiez les champs.","error");}});
 els.list.addEventListener("click",async event=>{const button=event.target.closest("button[data-action]");if(!button)return;const template=templates.find(t=>t.id===button.closest("[data-id]").dataset.id);if(!template)return;const action=button.dataset.action;if(action==="use"){els.template.value=template.id;renderEvaluation();scrollTo({top:0,behavior:"smooth"});}if(action==="edit")openEditor(template);if(action==="duplicate")openEditor({...template,id:"",name:`Copie de ${template.name}`});if(action==="toggle"){try{await api("/api/academy-admin-data/training-template/toggle",{method:"POST",body:JSON.stringify({id:template.id,active:!template.active})});await load();showNotice(template.active?"La grille a été désactivée.":"La grille a été réactivée.");}catch{showNotice("Impossible de modifier l’état de la grille.","error");}}});
 els.search.addEventListener("input",renderLibrary);els.filter.addEventListener("change",renderLibrary);els.template.addEventListener("change",renderEvaluation);els.criteriaSheet.addEventListener("change",updateScore);els.criteriaSheet.addEventListener("input",saveDraft);els.agent.addEventListener("change",saveDraft);els.date.addEventListener("change",saveDraft);els.comment.addEventListener("input",saveDraft);els.result.addEventListener("change",()=>{resultWasManuallyChanged=true;saveDraft();});

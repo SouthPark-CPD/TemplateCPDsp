@@ -32,20 +32,20 @@
           <div class="panel-head"><div><p>Session en cours</p><h2>Évaluer un agent</h2></div><span id="draft-state">Brouillon automatique</span></div>
           <form id="evaluation-form">
             <div class="evaluation-selectors">
-              <label><span>Agent *</span><select id="evaluation-agent" required><option value="">Sélectionner un agent</option></select></label>
+              <label id="evaluation-agent-field"><span>Agent *</span><select id="evaluation-agent" required><option value="">Sélectionner un agent</option></select></label>
               <label><span>Grille *</span><select id="evaluation-template" required><option value="">Sélectionner une grille</option></select></label>
-              <label><span>Date *</span><input id="evaluation-date" type="date" required></label>
+              <label id="evaluation-date-field"><span>Date *</span><input id="evaluation-date" type="date" required></label>
             </div>
             <div id="evaluation-empty" class="empty-state">Sélectionnez une grille pour afficher ses questions et critères.</div>
             <div id="evaluation-sheet" hidden>
-              <div class="score-strip">
+              <div id="score-strip" class="score-strip">
                 <div><span>Progression</span><strong id="answered-count">0 / 0</strong></div>
                 <div><span>Note calculée</span><strong id="calculated-score">—</strong></div>
                 <div><span>Résultat proposé</span><strong id="suggested-result">—</strong></div>
               </div>
               <div id="criteria-sheet"></div>
-              <label class="general-comment"><span>Observation générale <small>(facultatif)</small></span><textarea id="evaluation-comment" rows="4" maxlength="5000" placeholder="Déroulement de la séance, contexte ou éléments complémentaires…"></textarea></label>
-              <div class="final-decision">
+              <label id="general-comment-field" class="general-comment"><span>Observation générale <small>(facultatif)</small></span><textarea id="evaluation-comment" rows="4" maxlength="5000" placeholder="Déroulement de la séance, contexte ou éléments complémentaires…"></textarea></label>
+              <div id="final-decision" class="final-decision">
                 <label><span>Décision enregistrée *</span><select id="evaluation-result"><option value="planifiee">Planifiée / incomplète</option><option value="valide">Validée</option><option value="a_revoir">À revoir</option><option value="non_valide">Non validée</option></select></label>
                 <button class="primary-button" type="submit">Enregistrer dans le dossier</button>
               </div>
@@ -70,11 +70,11 @@
         <input id="template-id" type="hidden">
         <div class="template-fields">
           <label><span>Nom de la formation *</span><input id="template-name" maxlength="120" required placeholder="Ex. Évaluation physique initiale"></label>
-          <label><span>Catégorie *</span><select id="template-category"><option value="formation">Formation générale</option><option value="entretien">Entretien</option><option value="physique">Aptitude physique</option><option value="connaissances">Connaissances</option><option value="terrain">Mise en situation</option><option value="finale">Évaluation finale</option></select></label>
+          <label><span>Catégorie *</span><select id="template-category"><option value="formation">Formation générale</option><option value="entretien">Entretien — questions à lire</option><option value="physique">Aptitude physique</option><option value="connaissances">Connaissances</option><option value="terrain">Mise en situation</option><option value="finale">Évaluation finale</option></select></label>
           <label class="full"><span>Description</span><textarea id="template-description" rows="2" maxlength="3000" placeholder="Objectif et conditions de cette évaluation…"></textarea></label>
         </div>
         <div class="criteria-editor-head"><div><p>Contenu de la grille</p><h3>Questions et critères</h3></div><button id="add-criterion" type="button">+ Ajouter un critère</button></div>
-        <p class="editor-help">Regroupez les critères par section. Un critère critique non acquis entraîne automatiquement une proposition « Non validée ».</p>
+        <p id="editor-help" class="editor-help">Regroupez les critères par section. Un critère critique non acquis entraîne automatiquement une proposition « Non validée ».</p>
         <div id="criteria-editor" class="criteria-editor"></div>
       </div>
       <footer><button id="cancel-editor" class="secondary-button" type="button">Annuler</button><button class="primary-button" type="submit">Enregistrer la grille</button></footer>
