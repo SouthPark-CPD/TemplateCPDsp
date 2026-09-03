@@ -1,0 +1,31 @@
+MISE À JOUR — PARCOURS DE FORMATION V3
+
+ÉTAPE 1 — CORRIGER LE STATUT « VALIDÉE » DANS NEON
+
+1. Ouvrez Vercel > Storage > votre base Neon > Query.
+2. Ouvrez le fichier SQL-CORRECTION-STATUT-VALIDE.sql fourni dans ce pack.
+3. Copiez la totalité de son contenu dans l’éditeur Neon.
+4. Exécutez la requête en une seule fois.
+
+Le bloc DO est une commande SQL unique : il ne provoque pas l’erreur
+« cannot insert multiple commands into a prepared statement ».
+
+ÉTAPE 2 — METTRE LE SITE À JOUR
+
+1. Importez les dossiers api et academy-admin à la racine du dépôt GitHub.
+2. Confirmez le remplacement des fichiers existants.
+3. Validez le commit sur la branche main.
+4. Attendez que Vercel affiche Ready.
+5. Rechargez la page avec Ctrl + F5.
+
+ÉTAPE 3 — TEST RAPIDE
+
+1. Ouvrez un dossier agent.
+2. Sélectionnez un module.
+3. Laissez les observations facultatives vides.
+4. Choisissez Validée et enregistrez.
+5. Vérifiez que le module devient vert et que la progression augmente.
+
+Aucune nouvelle variable Vercel n’est nécessaire.
+Aucune modification du bot Discord n’est nécessaire.
+Aucune nouvelle table n’est créée.

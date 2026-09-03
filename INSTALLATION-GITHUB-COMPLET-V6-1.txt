@@ -1,0 +1,53 @@
+CHICAGO POLICE DEPARTMENT — DÉPÔT GITHUB COMPLET V6.1
+
+Cette archive contient le site complet et non un simple correctif :
+- page d’accueil générale ;
+- formulaire public de recrutement ;
+- authentification Discord des candidats ;
+- authentification Discord des policiers pendant 30 jours ;
+- portail agent avec choix MDT / Police Academy ;
+- MDT complet ;
+- panel instructeur Police Academy complet ;
+- formations et grilles administrables ;
+- dossiers agents et suivi des formations ;
+- gestion et archives des tickets de recrutement ;
+- API Vercel, configuration, serveur et scripts SQL.
+
+REMISE EN PLACE DANS GITHUB
+
+1. Téléchargez et décompressez l’archive.
+
+2. Ouvrez le dépôt GitHub :
+   SouthPark-CPD/TemplateCPDsp
+
+3. Téléversez le CONTENU du dossier décompressé à la racine du dépôt.
+   Le fichier index.html doit être directement visible à la racine de GitHub.
+   Il ne doit pas se trouver dans un sous-dossier supplémentaire.
+
+4. Confirmez le remplacement des fichiers portant le même nom.
+   Il n’est pas nécessaire de supprimer tout le dépôt avant le téléversement.
+
+5. Validez le commit puis attendez que Vercel affiche le statut Ready.
+
+6. Testez dans cet ordre :
+   - https://template-cp-dsp.vercel.app/
+   - bouton Visiteur vers /public/application.html
+   - bouton Policier vers /mdt/portail.html après connexion
+   - ouverture du MDT
+   - ouverture du panel Academy avec le rôle Instructor
+
+BASE DE DONNÉES
+
+Si les scripts SQL des étapes précédentes ont déjà été exécutés avec succès,
+ne les relancez pas. Le remplacement des fichiers GitHub ne supprime aucune
+donnée présente dans Neon.
+
+VARIABLES VERCEL
+
+Le remplacement des fichiers GitHub ne supprime pas les variables configurées
+dans Vercel. Aucune nouvelle variable n’est demandée par cette version.
+
+BOT DISCORD
+
+Le bot Discord n’est pas inclus dans cette archive : son hébergement reste
+indépendant et aucune modification supplémentaire n’est nécessaire ici.

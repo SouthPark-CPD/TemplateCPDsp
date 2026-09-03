@@ -54,3 +54,22 @@ Lire l'historique des messages
 Le token ne doit jamais être ajouté au dépôt GitHub. Après l'ajout ou la modification d'une variable Vercel, un nouveau déploiement est nécessaire.
 
 Après ajout ou modification des variables Vercel, lancer un nouveau déploiement pour les appliquer.
+
+## Gestion des tickets V2
+
+Chaque nouveau ticket contient maintenant le bouton `Clore le ticket`.
+
+Le bot `CPD - Administration Center` traite ensuite les boutons :
+
+```text
+Clore le ticket
+Rouvrir le ticket
+Supprimer définitivement
+Confirmer ou annuler la suppression
+```
+
+Cette gestion est assurée par la version V2 du bot. Le bot doit donc être mis à jour avant de tester une nouvelle candidature. Aucun endpoint d'interactions Discord ne doit être configuré sur Vercel.
+
+Au démarrage, le bot V2 ajoute aussi automatiquement un panneau de gestion aux anciens tickets du portail qui n'en possèdent pas encore.
+
+Les identifiants des boutons ne doivent pas être modifiés séparément dans le site ou dans le bot.

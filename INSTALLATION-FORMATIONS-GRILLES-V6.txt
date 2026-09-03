@@ -1,0 +1,45 @@
+POLICE ACADEMY — INSTALLATION FORMATIONS ET GRILLES V6
+
+Important : effectuez les étapes dans cet ordre.
+
+1. Dans Vercel > Storage > Neon > Query, exécutez séparément le contenu de :
+   - SQL-GRILLES-1-MODELES.sql
+   - SQL-GRILLES-2-CRITERES.sql
+   - SQL-GRILLES-3-EVALUATIONS.sql
+   - SQL-GRILLES-4-INDEX.sql
+
+   Ne collez pas les quatre requêtes ensemble. Neon peut afficher
+   « cannot insert multiple commands into a prepared statement ».
+
+2. Dans GitHub, téléversez tous les fichiers de l’archive à la racine du dépôt.
+   Confirmez le remplacement des fichiers existants et conservez les dossiers :
+   api/, academy-admin/ et les fichiers SQL à la racine.
+
+3. Attendez que le déploiement Vercel passe au statut Ready.
+
+4. Ouvrez :
+   https://template-cp-dsp.vercel.app/academy-admin/evaluations.html
+
+5. Lors de la première ouverture, cliquez sur :
+   « Installer les grilles conseillées ».
+
+   Quatre modèles modifiables seront créés :
+   - Entretien d’entrée Police Academy
+   - Évaluation physique initiale
+   - Connaissances réglementaires
+   - Mise en situation opérationnelle
+
+   La grille « Entretien d’entrée Police Academy » est un guide de lecture :
+   elle affiche uniquement les questions à poser, sans note et sans réponse
+   à enregistrer. Les autres catégories conservent la notation complète.
+
+6. Vérification rapide :
+   - créez ou modifiez une grille ;
+   - ouvrez Effectifs puis le dossier d’un agent ;
+   - vérifiez que la formation apparaît dans « Module de formation » ;
+   - revenez dans Formations, réalisez une évaluation de test ;
+   - vérifiez que celle-ci apparaît dans l’historique de l’agent.
+
+Aucune nouvelle variable Vercel n’est nécessaire.
+Aucune modification du bot Discord n’est nécessaire.
+Aucune nouvelle fonction API Vercel n’a été ajoutée.

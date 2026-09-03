@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CPD // Organigramme</title>
+
+<link
+  rel="icon"
+  type="image/png"
+  href="Seal_of_the_Chicago_Police_Department.png"
+>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+
+:root{
+
+  --bg:#0b0f14;
+  --bg-panel:#11161d;
+  --bg-panel-2:#151b23;
+  --bg-dark:#0c1015;
+
+  --line:#232b35;
+
+  --steel:#4a6fa5;
+  --steel-dim:#2c3d54;
+
+  --gold:#c9a227;
+  --gold-dim:#725d16;
+
+  --text:#dfe4e8;
+  --text-dim:#7c8894;
+
+  --amber:#e0a13a;
+  --red:#c94b4b;
+  --green:#4caf6f;
+
+  --font-display:'Oswald','Arial Narrow',sans-serif;
+  --font-mono:'IBM Plex Mono','Consolas',monospace;
+
+}
+
+
+*{
+  box-sizing:border-box;
+}
+
+
+html{
+  scroll-behavior:smooth;
+}
+
+
+html,
+body{
+  margin:0;
+  padding:0;
+}
+
+
+body{
+
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(74,111,165,0.10),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(201,162,39,0.06),
+      transparent 45%
+    ),
+    var(--bg);
+
+  color:var(--text);
+
+  font-family:var(--font-mono);
+
+  min-height:100vh;
+
+  padding-bottom:60px;
+
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+
+}
+
+
+input,
+textarea{
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
+  user-select:text;
+}
+
+
+/* ==========================================================
+   MAIN
+========================================================== */
+
+main{
+
+  max-width:1200px;
+
+  margin:0 auto;
+
+  padding:30px 32px 0;
+
+}
+
+
+/* ==========================================================
+   PANELS
+========================================================== */
+
+.panel{
+
+  background:var(--bg-panel-2);
+
+  border:1px solid var(--steel-dim);
+
+  border-top:2px solid var(--gold);
+
+  margin-bottom:24px;
+
+}
+
+
+.panel-head{
+
+  padding:28px;
+
+  border-bottom:1px solid var(--line);
+
+}
+
+
+.panel-title{
+
+  font-family:var(--font-display);
+
+  font-size:22px;
+
+  letter-spacing:1.5px;
+
+  text-transform:uppercase;
+
+}
+
+
+.panel-desc{
+
+  font-size:12px;
+
+  color:var(--text-dim);
+
+  margin-top:7px;
+
+  line-height:1.6;
+
+}
+
+
+/* ==========================================================
+   ORGANIGRAMME IMAGE
+========================================================== */
+
+.organigramme-wrap{
+
+  padding:24px;
+
+}
+
+
+.organigramme-image-container{
+
+  position:relative;
+
+  width:100%;
+
+  overflow:hidden;
+
+  background:#090d12;
+
+  border:1px solid var(--line);
+
+  cursor:zoom-in;
+
+}
+
+
+.organigramme-image{
+
+  display:block;
+
+  width:100%;
+
+  height:auto;
+
+  max-height:750px;
+
+  object-fit:contain;
+
+  transition:transform .2s ease;
+
+}
+
+
+.organigramme-image-container:hover .organigramme-image{
+
+  filter:brightness(1.04);
+
+}
+
+
+.organigramme-hint{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  gap:15px;
+
+  margin-top:12px;
+
+  font-size:10px;
+
+  color:var(--text-dim);
+
+  letter-spacing:.8px;
+
+}
+
+
+.organigramme-hint span:last-child{
+
+  color:var(--gold);
+
+}
+
+
+/* ==========================================================
+   DIVISIONS
+========================================================== */
+
+.divisions{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:14px;
+
+  padding:24px;
+
+  align-items:start;
+
+}
+
+
+.division{
+
+  background:var(--bg-panel-2);
+
+  border:1px solid var(--steel-dim);
+
+  transition:
+    border-color .2s,
+    background .2s;
+
+  min-width:0;
+
+}
+
+
+.division:hover{
+
+  border-color:var(--steel);
+
+  background:#171e27;
+
+}
+
+
+.division-header{
+
+  width:100%;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:15px;
+
+  padding:18px;
+
+  border:0;
+
+  background:transparent;
+
+  color:var(--text);
+
+  font-family:var(--font-mono);
+
+  text-align:left;
+
+  cursor:pointer;
+
+}
+
+
+.division-header:hover{
+
+  background:rgba(74,111,165,0.04);
+
+}
+
+
+.division-icon{
+
+  width:42px;
+
+  height:42px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  border:1px solid var(--gold-dim);
+
+  color:var(--gold);
+
+  background:rgba(201,162,39,0.04);
+
+  font-family:var(--font-display);
+
+  font-size:16px;
+
+  flex:0 0 auto;
+
+}
+
+
+.division-info{
+
+  flex:1;
+
+  min-width:0;
+
+}
+
+
+.division-name{
+
+  font-family:var(--font-display);
+
+  font-size:16px;
+
+  letter-spacing:1.2px;
+
+  text-transform:uppercase;
+
+  color:var(--text);
+
+}
+
+
+.division-lead{
+
+  margin-top:4px;
+
+  font-size:9.5px;
+
+  letter-spacing:1px;
+
+  color:var(--amber);
+
+  text-transform:uppercase;
+
+}
+
+
+.division-description{
+
+  margin-top:5px;
+
+  font-size:10.5px;
+
+  color:var(--text-dim);
+
+  line-height:1.5;
+
+}
+
+
+.division-count{
+
+  font-size:9px;
+
+  letter-spacing:1px;
+
+  padding:5px 8px;
+
+  border:1px solid var(--steel);
+
+  color:var(--steel);
+
+  white-space:nowrap;
+
+}
+
+
+.division-arrow{
+
+  color:var(--gold);
+
+  font-size:18px;
+
+  transition:transform .25s ease;
+
+}
+
+
+.division.open .division-arrow{
+
+  transform:rotate(180deg);
+
+}
+
+
+/* ==========================================================
+   UNIT CONTAINER
+========================================================== */
+
+.units-wrapper{
+
+  display:grid;
+
+  grid-template-rows:0fr;
+
+  transition:grid-template-rows .3s ease;
+
+}
+
+
+.division.open .units-wrapper{
+
+  grid-template-rows:1fr;
+
+}
+
+
+.units-inner{
+
+  overflow:hidden;
+
+}
+
+
+.units{
+
+  padding:0 18px 18px;
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:8px;
+
+}
+
+
+.unit{
+
+  padding:12px;
+
+  background:var(--bg-dark);
+
+  border:1px solid var(--line);
+
+  transition:
+    border-color .15s,
+    background .15s;
+
+}
+
+
+.unit:hover{
+
+  border-color:var(--steel-dim);
+
+  background:#10171f;
+
+}
+
+
+.unit-name{
+
+  color:var(--gold);
+
+  font-family:var(--font-display);
+
+  font-size:12px;
+
+  letter-spacing:.8px;
+
+  text-transform:uppercase;
+
+}
+
+
+.unit-desc{
+
+  margin-top:5px;
+
+  font-size:10.5px;
+
+  line-height:1.55;
+
+  color:var(--text-dim);
+
+}
+
+
+/* ==========================================================
+   MODAL IMAGE
+========================================================== */
+
+.image-modal{
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:9999;
+
+  display:none;
+
+  align-items:center;
+
+  justify-content:center;
+
+  background:rgba(0,0,0,.94);
+
+  padding:30px;
+
+}
+
+
+.image-modal.open{
+
+  display:flex;
+
+}
+
+
+.modal-content{
+
+  position:relative;
+
+  width:100%;
+
+  height:100%;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  overflow:hidden;
+
+  cursor:grab;
+
+}
+
+
+.modal-content.grabbing{
+
+  cursor:grabbing;
+
+}
+
+
+.modal-image{
+
+  max-width:none;
+
+  max-height:none;
+
+  width:auto;
+
+  height:auto;
+
+  transform-origin:center center;
+
+  user-select:none;
+
+  pointer-events:none;
+
+}
+
+
+.modal-close{
+
+  position:absolute;
+
+  top:18px;
+
+  right:22px;
+
+  z-index:10;
+
+  width:42px;
+
+  height:42px;
+
+  border:1px solid var(--gold);
+
+  background:rgba(11,15,20,.9);
+
+  color:var(--gold);
+
+  font-size:22px;
+
+  cursor:pointer;
+
+}
+
+
+.modal-close:hover{
+
+  background:var(--gold);
+
+  color:#0b0f14;
+
+}
+
+
+.zoom-controls{
+
+  position:absolute;
+
+  bottom:22px;
+
+  left:50%;
+
+  transform:translateX(-50%);
+
+  z-index:10;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:6px;
+
+  padding:7px;
+
+  background:rgba(11,15,20,.92);
+
+  border:1px solid var(--steel-dim);
+
+}
+
+
+.zoom-button{
+
+  width:38px;
+
+  height:34px;
+
+  border:1px solid var(--steel);
+
+  background:transparent;
+
+  color:var(--steel);
+
+  font-family:var(--font-mono);
+
+  font-size:17px;
+
+  cursor:pointer;
+
+}
+
+
+.zoom-button:hover{
+
+  background:var(--steel);
+
+  color:#0b0f14;
+
+}
+
+
+.zoom-level{
+
+  min-width:65px;
+
+  text-align:center;
+
+  font-size:10px;
+
+  color:var(--text-dim);
+
+  letter-spacing:1px;
+
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+footer{
+
+  max-width:1200px;
+
+  margin:0 auto;
+
+  padding:0 32px;
+
+  font-size:10.5px;
+
+  color:var(--text-dim);
+
+  letter-spacing:1px;
+
+  text-align:center;
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media(max-width:800px){
+
+  .divisions{
+
+    grid-template-columns:1fr;
+
+  }
+
+}
+
+
+@media(max-width:700px){
+
+  main{
+
+    padding:25px 16px 0;
+
+  }
+
+
+  .panel-head{
+
+    padding:20px;
+
+  }
+
+
+  .organigramme-wrap{
+
+    padding:15px;
+
+  }
+
+
+  .organigramme-hint{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+  }
+
+
+  .divisions{
+
+    padding:15px;
+
+  }
+
+
+  .division-header{
+
+    padding:15px;
+
+  }
+
+
+  .division-description{
+
+    font-size:10px;
+
+  }
+
+
+  .units{
+
+    grid-template-columns:1fr;
+
+    padding:0 15px 15px;
+
+  }
+
+
+  .image-modal{
+
+    padding:10px;
+
+  }
+
+
+  .modal-close{
+
+    top:10px;
+
+    right:10px;
+
+  }
+
+}
+
+
+</style>
+
+<link rel="stylesheet" href="mdt-v5.css">
+
+</head>
+
+
+<body>
+
+
+<!-- ==========================================================
+     HEADER NAV.JS
+========================================================== -->
+
+<div id="site-header"></div>
+
+
+<!-- ==========================================================
+     MAIN
+========================================================== -->
+
+<main>
+
+
+  <!-- ========================================================
+       ORGANIGRAMME
+  ========================================================= -->
+
+  <section class="panel">
+
+    <div class="panel-head">
+
+      <div class="panel-title">
+        Organigramme
+      </div>
+
+      <div class="panel-desc">
+        Structure hiérarchique et organisation générale du Chicago Police Department.
+        Cliquez sur l'organigramme pour l'ouvrir en plein écran et utiliser le zoom.
+      </div>
+
+    </div>
+
+
+    <div class="organigramme-wrap">
+
+      <div
+        class="organigramme-image-container"
+        id="imageContainer"
+        title="Cliquer pour agrandir"
+      >
+
+        <img
+          src="organigramme.webp"
+          alt="Organigramme du Chicago Police Department"
+          class="organigramme-image"
+          id="organigrammeImage"
+        >
+
+      </div>
+
+
+      <div class="organigramme-hint">
+
+        <span>
+          Cliquez sur l'image pour l'agrandir
+        </span>
+
+        <span>
+          ZOOM DISPONIBLE
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================================================
+       DIVISIONS
+  ========================================================= -->
+
+  <section class="panel">
+
+    <div class="panel-head">
+
+      <div class="panel-title">
+        Divisions et unités
+      </div>
+
+      <div class="panel-desc">
+        Organisation des différentes divisions et unités opérationnelles du Chicago Police Department.
+        Cliquez sur une division pour afficher les unités qui la composent.
+      </div>
+
+    </div>
+
+
+    <div
+      class="divisions"
+      id="divisions"
+    ></div>
+
+  </section>
+
+
+</main>
+
+
+<!-- ==========================================================
+     MODAL IMAGE
+========================================================== -->
+
+<div
+  class="image-modal"
+  id="imageModal"
+  aria-hidden="true"
+>
+
+  <button
+    class="modal-close"
+    id="modalClose"
+    type="button"
+    title="Fermer"
+  >
+    ×
+  </button>
+
+
+  <div
+    class="modal-content"
+    id="modalContent"
+  >
+
+    <img
+      src="organigramme.webp"
+      alt="Organigramme du Chicago Police Department"
+      class="modal-image"
+      id="modalImage"
+    >
+
+  </div>
+
+
+  <div class="zoom-controls">
+
+    <button
+      class="zoom-button"
+      id="zoomOut"
+      type="button"
+    >
+      −
+    </button>
+
+
+    <div
+      class="zoom-level"
+      id="zoomLevel"
+    >
+      100%
+    </div>
+
+
+    <button
+      class="zoom-button"
+      id="zoomIn"
+      type="button"
+    >
+      +
+    </button>
+
+
+    <button
+      class="zoom-button"
+      id="zoomReset"
+      type="button"
+      title="Réinitialiser"
+    >
+      ↺
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- ==========================================================
+     FOOTER
+========================================================== -->
+
+<footer>
+
+  SYSTÈME INTERNE DU CPD —
+  ORGANIGRAMME ET UNITÉS —
+  USAGE EN JEU UNIQUEMENT — NE PAS DIFFUSER HORS DU SERVEUR
+
+</footer>
+
+
+<!-- ==========================================================
+     CONFIGURATION NAVIGATION
+========================================================== -->
+
+<script>
+
+const PAGE_CONFIG = {
+
+  subtitle:
+    "Organigramme et unités opérationnelles",
+
+  currentPage:
+    "organigramme.html",
+
+  docCode:
+    "CPD-ORG-001",
+
+  version:
+    "2.0"
+
+};
+
+</script>
+
+
+<!-- ==========================================================
+     NAVIGATION COMMUNE
+========================================================== -->
+
+<script src="nav-v5.js"></script>
+
+
+<!-- ==========================================================
+     JAVASCRIPT DE LA PAGE
+========================================================== -->
+
+<script>
+
+
+/* ==========================================================
+   DONNÉES
+========================================================== */
+
+let divisions = [];
+
+const container =
+  document.getElementById("divisions");
+
+
+/* ==========================================================
+   CHARGEMENT DES DONNÉES
+========================================================== */
+
+async function loadData(){
+
+  try{
+
+    const response =
+      await fetch(
+        "data-cpd.js?_=" +
+        Date.now()
+      );
+
+
+    if(!response.ok){
+
+      throw new Error(
+        "Impossible de charger data-cpd.js"
+      );
+
+    }
+
+
+    const text =
+      await response.text();
+
+
+    const script =
+      document.createElement("script");
+
+
+    script.textContent =
+      text;
+
+
+    document.head.appendChild(
+      script
+    );
+
+
+    divisions =
+      window.CPD_DATA || [];
+
+
+    renderDivisions();
+
+  }
+
+  catch(err){
+
+    console.error(
+      "Erreur chargement données :",
+      err
+    );
+
+
+    container.innerHTML = `
+
+      <div class="unit">
+
+        <div class="unit-name">
+          Erreur de chargement
+        </div>
+
+        <div class="unit-desc">
+          Impossible de charger les données
+          depuis data-cpd.js.
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* ==========================================================
+   ESCAPE HTML
+========================================================== */
+
+function escapeHtml(value){
+
+  const div =
+    document.createElement("div");
+
+
+  div.textContent =
+    value == null
+    ? ""
+    : String(value);
+
+
+  return div.innerHTML;
+
+}
+
+
+/* ==========================================================
+   AFFICHAGE DES DIVISIONS
+========================================================== */
+
+function renderDivisions(){
+
+  container.innerHTML = "";
+
+
+  if(
+    !Array.isArray(divisions) ||
+    divisions.length === 0
+  ){
+
+    container.innerHTML = `
+
+      <div class="unit">
+
+        <div class="unit-name">
+          Aucune division
+        </div>
+
+        <div class="unit-desc">
+          Aucune donnée disponible.
+        </div>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  divisions.forEach(
+    (division) => {
+
+
+      const card =
+        document.createElement("section");
+
+
+      card.className =
+        "division";
+
+
+      const units =
+        Array.isArray(division.units)
+        ? division.units
+        : [];
+
+
+      card.innerHTML = `
+
+        <button
+          class="division-header"
+          type="button"
+        >
+
+          <div class="division-icon">
+            ${escapeHtml(
+              division.short || "—"
+            )}
+          </div>
+
+
+          <div class="division-info">
+
+            <div class="division-name">
+              ${escapeHtml(
+                division.name || "Division"
+              )}
+            </div>
+
+
+            <div class="division-lead">
+              LEAD :
+              ${escapeHtml(
+                division.lead || "—"
+              )}
+            </div>
+
+
+            <div class="division-description">
+              ${escapeHtml(
+                division.description || ""
+              )}
+            </div>
+
+          </div>
+
+
+          <div class="division-count">
+            ${units.length}
+            UNITÉS
+          </div>
+
+
+          <div class="division-arrow">
+            ▼
+          </div>
+
+        </button>
+
+
+        <div class="units-wrapper">
+
+          <div class="units-inner">
+
+            <div class="units">
+
+              ${
+                units.length > 0
+
+                ?
+
+                units.map(
+                  unit => `
+
+                    <div class="unit">
+
+                      <div class="unit-name">
+                        ${escapeHtml(
+                          unit.name || "Unité"
+                        )}
+                      </div>
+
+                      <div class="unit-desc">
+                        ${escapeHtml(
+                          unit.desc || ""
+                        )}
+                      </div>
+
+                    </div>
+
+                  `
+                ).join("")
+
+                :
+
+                `
+
+                  <div class="unit">
+
+                    <div class="unit-name">
+                      Aucune unité
+                    </div>
+
+                    <div class="unit-desc">
+                      Aucune unité n'est actuellement
+                      renseignée pour cette division.
+                    </div>
+
+                  </div>
+
+                `
+
+              }
+
+            </div>
+
+          </div>
+
+        </div>
+
+      `;
+
+
+      const button =
+        card.querySelector(
+          ".division-header"
+        );
+
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          card.classList.toggle(
+            "open"
+          );
+
+        }
+      );
+
+
+      container.appendChild(
+        card
+      );
+
+    }
+  );
+
+}
+
+
+/* ==========================================================
+   ZOOM IMAGE
+========================================================== */
+
+const imageContainer =
+  document.getElementById(
+    "imageContainer"
+  );
+
+
+const imageModal =
+  document.getElementById(
+    "imageModal"
+  );
+
+
+const modalContent =
+  document.getElementById(
+    "modalContent"
+  );
+
+
+const modalImage =
+  document.getElementById(
+    "modalImage"
+  );
+
+
+const modalClose =
+  document.getElementById(
+    "modalClose"
+  );
+
+
+const zoomIn =
+  document.getElementById(
+    "zoomIn"
+  );
+
+
+const zoomOut =
+  document.getElementById(
+    "zoomOut"
+  );
+
+
+const zoomReset =
+  document.getElementById(
+    "zoomReset"
+  );
+
+
+const zoomLevel =
+  document.getElementById(
+    "zoomLevel"
+  );
+
+
+let zoom =
+  1;
+
+
+let positionX =
+  0;
+
+
+let positionY =
+  0;
+
+
+let isDragging =
+  false;
+
+
+let startX =
+  0;
+
+
+let startY =
+  0;
+
+
+/* ==========================================================
+   APPLICATION DU ZOOM
+========================================================== */
+
+function updateZoom(){
+
+  modalImage.style.transform =
+    `translate(${positionX}px, ${positionY}px) scale(${zoom})`;
+
+
+  zoomLevel.textContent =
+    Math.round(zoom * 100) + "%";
+
+}
+
+
+/* ==========================================================
+   RESET
+========================================================== */
+
+function resetZoom(){
+
+  zoom =
+    1;
+
+  positionX =
+    0;
+
+  positionY =
+    0;
+
+  updateZoom();
+
+}
+
+
+/* ==========================================================
+   OUVERTURE
+========================================================== */
+
+function openImageModal(){
+
+  imageModal.classList.add(
+    "open"
+  );
+
+
+  imageModal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+
+  document.body.style.overflow =
+    "hidden";
+
+
+  resetZoom();
+
+}
+
+
+/* ==========================================================
+   FERMETURE
+========================================================== */
+
+function closeImageModal(){
+
+  imageModal.classList.remove(
+    "open"
+  );
+
+
+  imageModal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+
+  document.body.style.overflow =
+    "";
+
+}
+
+
+/* ==========================================================
+   CLIC IMAGE
+========================================================== */
+
+imageContainer.addEventListener(
+  "click",
+  openImageModal
+);
+
+
+modalClose.addEventListener(
+  "click",
+  closeImageModal
+);
+
+
+/* ==========================================================
+   BOUTONS ZOOM
+========================================================== */
+
+zoomIn.addEventListener(
+  "click",
+  (event) => {
+
+    event.stopPropagation();
+
+
+    zoom =
+      Math.min(
+        zoom + 0.25,
+        5
+      );
+
+
+    updateZoom();
+
+  }
+);
+
+
+zoomOut.addEventListener(
+  "click",
+  (event) => {
+
+    event.stopPropagation();
+
+
+    zoom =
+      Math.max(
+        zoom - 0.25,
+        0.25
+      );
+
+
+    updateZoom();
+
+  }
+);
+
+
+zoomReset.addEventListener(
+  "click",
+  (event) => {
+
+    event.stopPropagation();
+
+
+    resetZoom();
+
+  }
+);
+
+
+/* ==========================================================
+   ZOOM MOLETTE
+========================================================== */
+
+modalContent.addEventListener(
+  "wheel",
+  (event) => {
+
+    event.preventDefault();
+
+
+    if(event.deltaY < 0){
+
+      zoom =
+        Math.min(
+          zoom + 0.15,
+          5
+        );
+
+    }
+
+    else{
+
+      zoom =
+        Math.max(
+          zoom - 0.15,
+          0.25
+        );
+
+    }
+
+
+    updateZoom();
+
+  },
+  {
+    passive:false
+  }
+);
+
+
+/* ==========================================================
+   DEPLACEMENT DE L'IMAGE
+========================================================== */
+
+modalContent.addEventListener(
+  "mousedown",
+  (event) => {
+
+    if(event.button !== 0){
+      return;
+    }
+
+
+    isDragging =
+      true;
+
+
+    startX =
+      event.clientX -
+      positionX;
+
+
+    startY =
+      event.clientY -
+      positionY;
+
+
+    modalContent.classList.add(
+      "grabbing"
+    );
+
+  }
+);
+
+
+window.addEventListener(
+  "mousemove",
+  (event) => {
+
+    if(!isDragging){
+      return;
+    }
+
+
+    positionX =
+      event.clientX -
+      startX;
+
+
+    positionY =
+      event.clientY -
+      startY;
+
+
+    updateZoom();
+
+  }
+);
+
+
+window.addEventListener(
+  "mouseup",
+  () => {
+
+    isDragging =
+      false;
+
+
+    modalContent.classList.remove(
+      "grabbing"
+    );
+
+  }
+);
+
+
+/* ==========================================================
+   DOUBLE CLIC = ZOOM
+========================================================== */
+
+modalContent.addEventListener(
+  "dblclick",
+  (event) => {
+
+    event.preventDefault();
+
+
+    if(zoom === 1){
+
+      zoom =
+        2;
+
+    }
+
+    else{
+
+      resetZoom();
+
+    }
+
+
+    updateZoom();
+
+  }
+);
+
+
+/* ==========================================================
+   ESC = FERMER
+========================================================== */
+
+document.addEventListener(
+  "keydown",
+  (event) => {
+
+    if(
+      event.key === "Escape" &&
+      imageModal.classList.contains("open")
+    ){
+
+      closeImageModal();
+
+    }
+
+  }
+);
+
+
+/* ==========================================================
+   INIT
+========================================================== */
+
+loadData();
+
+
+/* ==========================================================
+   PROTECTION
+========================================================== */
+
+document.addEventListener(
+  "contextmenu",
+  function(e){
+
+    e.preventDefault();
+
+  }
+);
+
+
+document.addEventListener(
+  "keydown",
+  function(e){
+
+    const key =
+      e.key.toUpperCase();
+
+
+    if(key === "F12"){
+
+      e.preventDefault();
+
+      return;
+
+    }
+
+
+    if(
+      (e.ctrlKey || e.metaKey) &&
+      ["U","S","I","J"].includes(key)
+    ){
+
+      e.preventDefault();
+
+    }
+
+
+    if(
+      (e.ctrlKey || e.metaKey) &&
+      e.shiftKey &&
+      ["I","J","C"].includes(key)
+    ){
+
+      e.preventDefault();
+
+    }
+
+  }
+);
+
+
+document.addEventListener(
+  "dragstart",
+  function(e){
+
+    e.preventDefault();
+
+  }
+);
+
+
+document.addEventListener(
+  "copy",
+  function(e){
+
+    e.preventDefault();
+
+  }
+);
+
+</script>
+
+
+</body>
+
+</html>

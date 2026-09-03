@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CPD // Tenues</title>
+
+<link
+  rel="icon"
+  type="image/png"
+  href="Seal_of_the_Chicago_Police_Department.png"
+>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+
+  --bg:#0b0f14;
+  --bg-panel:#11161d;
+  --bg-panel-2:#151b23;
+  --bg-dark:#0c1015;
+
+  --line:#232b35;
+
+  --steel:#4a6fa5;
+  --steel-dim:#2c3d54;
+
+  --gold:#c9a227;
+
+  --text:#dfe4e8;
+  --text-dim:#7c8894;
+
+  --amber:#e0a13a;
+  --red:#c94b4b;
+  --green:#4caf6f;
+
+  --font-display:'Oswald','Arial Narrow',sans-serif;
+  --font-mono:'IBM Plex Mono','Consolas',monospace;
+
+}
+
+
+*{
+  box-sizing:border-box;
+}
+
+
+html{
+  scroll-behavior:smooth;
+}
+
+
+html,
+body{
+  margin:0;
+  padding:0;
+}
+
+
+body{
+
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(74,111,165,0.10),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(201,162,39,0.06),
+      transparent 45%
+    ),
+    var(--bg);
+
+  color:var(--text);
+
+  font-family:var(--font-mono);
+
+  min-height:100vh;
+
+  padding-bottom:60px;
+
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+
+}
+
+
+img{
+  -webkit-user-drag:none;
+}
+
+
+/* ==========================================================
+   MAIN
+========================================================== */
+
+main{
+
+  max-width:1100px;
+
+  margin:0 auto;
+
+  padding:0 32px;
+
+}
+
+
+/* ==========================================================
+   PANELS
+========================================================== */
+
+.panel{
+
+  background:var(--bg-panel-2);
+
+  border:1px solid var(--steel-dim);
+
+  border-top:2px solid var(--gold);
+
+  margin-top:24px;
+
+}
+
+
+.panel-head{
+
+  padding:28px;
+
+  border-bottom:1px solid var(--line);
+
+}
+
+
+.panel-title{
+
+  font-family:var(--font-display);
+
+  font-size:22px;
+
+  letter-spacing:1.5px;
+
+  text-transform:uppercase;
+
+  color:var(--text);
+
+}
+
+
+.panel-desc{
+
+  font-size:12px;
+
+  color:var(--text-dim);
+
+  margin-top:7px;
+
+  line-height:1.6;
+
+}
+
+
+/* ==========================================================
+   SECTIONS
+========================================================== */
+
+.section{
+
+  padding:12px 28px 28px;
+
+}
+
+
+.section + .section{
+
+  padding-top:0;
+
+}
+
+
+.section-title{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+  font-family:var(--font-display);
+
+  font-size:16px;
+
+  letter-spacing:1.5px;
+
+  text-transform:uppercase;
+
+  color:var(--gold);
+
+  padding:18px 0 12px;
+
+  margin-bottom:4px;
+
+  border-bottom:1px solid var(--line);
+
+}
+
+
+.section-title .icon{
+
+  font-size:18px;
+
+}
+
+
+.section-desc{
+
+  color:var(--text-dim);
+
+  font-size:11px;
+
+  line-height:1.6;
+
+  margin:12px 0 16px;
+
+}
+
+
+/* ==========================================================
+   TENUE CARDS
+========================================================== */
+
+.uniform-grid{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:14px;
+
+}
+
+
+.uniform-card{
+
+  border:1px solid var(--line);
+
+  background:var(--bg-dark);
+
+  transition:
+    border-color .15s,
+    transform .15s,
+    background .15s;
+
+}
+
+
+.uniform-card:hover{
+
+  border-color:var(--steel-dim);
+
+  background:#0e1319;
+
+  transform:translateY(-2px);
+
+}
+
+
+.uniform-card-header{
+
+  padding:15px 17px;
+
+  border-bottom:1px solid var(--line);
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:12px;
+
+  background:rgba(74,111,165,0.04);
+
+}
+
+
+.uniform-card-title{
+
+  font-family:var(--font-display);
+
+  font-size:14px;
+
+  letter-spacing:1px;
+
+  text-transform:uppercase;
+
+  color:var(--text);
+
+}
+
+
+.uniform-card-badge{
+
+  font-size:9px;
+
+  letter-spacing:1px;
+
+  text-transform:uppercase;
+
+  color:var(--gold);
+
+  border:1px solid var(--gold);
+
+  padding:5px 8px;
+
+  white-space:nowrap;
+
+}
+
+
+.uniform-card-body{
+
+  padding:14px;
+
+}
+
+
+/* ==========================================================
+   IMAGE
+========================================================== */
+
+.uniform-image{
+
+  width:100%;
+
+  display:block;
+
+  max-height:650px;
+
+  object-fit:contain;
+
+  background:#080b0f;
+
+  border:1px solid var(--steel-dim);
+
+  cursor:zoom-in;
+
+  transition:
+    border-color .15s,
+    opacity .15s;
+
+}
+
+
+.uniform-image:hover{
+
+  border-color:var(--gold);
+
+  opacity:.94;
+
+}
+
+
+.image-caption{
+
+  margin-top:9px;
+
+  font-size:10px;
+
+  line-height:1.5;
+
+  color:var(--text-dim);
+
+  text-align:center;
+
+}
+
+
+/* ==========================================================
+   LIGHTBOX
+========================================================== */
+
+.image-lightbox{
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:99999;
+
+  background:rgba(0,0,0,.94);
+
+  display:none;
+
+  align-items:center;
+
+  justify-content:center;
+
+  padding:30px;
+
+  cursor:zoom-out;
+
+}
+
+
+.image-lightbox.active{
+
+  display:flex;
+
+}
+
+
+.image-lightbox img{
+
+  max-width:95vw;
+
+  max-height:95vh;
+
+  width:auto;
+
+  height:auto;
+
+  object-fit:contain;
+
+  border:1px solid var(--gold);
+
+  box-shadow:
+    0 0 50px rgba(0,0,0,.8);
+
+  cursor:default;
+
+}
+
+
+.image-lightbox-close{
+
+  position:absolute;
+
+  top:18px;
+
+  right:25px;
+
+  color:var(--gold);
+
+  font-size:34px;
+
+  cursor:pointer;
+
+  z-index:2;
+
+}
+
+
+/* ==========================================================
+   NOTICE
+========================================================== */
+
+.notice{
+
+  border-left:3px solid var(--gold);
+
+  background:rgba(201,162,39,0.05);
+
+  padding:14px 16px;
+
+  margin:20px 28px;
+
+}
+
+
+.notice-title{
+
+  color:var(--gold);
+
+  font-family:var(--font-display);
+
+  letter-spacing:1px;
+
+  text-transform:uppercase;
+
+  font-size:12px;
+
+  margin-bottom:5px;
+
+}
+
+
+.notice p{
+
+  font-size:11.5px;
+
+  color:var(--text-dim);
+
+  line-height:1.6;
+
+  margin:0;
+
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+footer{
+
+  max-width:1100px;
+
+  margin:0 auto;
+
+  padding:20px 32px 0;
+
+  font-size:10.5px;
+
+  color:var(--text-dim);
+
+  letter-spacing:1px;
+
+  text-align:center;
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media(max-width:700px){
+
+  main{
+
+    padding:0 16px;
+
+  }
+
+
+  .panel-head{
+
+    padding:20px;
+
+  }
+
+
+  .section{
+
+    padding:10px 14px 20px;
+
+  }
+
+
+  .uniform-grid{
+
+    grid-template-columns:1fr;
+
+  }
+
+
+  .uniform-card-header{
+
+    align-items:flex-start;
+
+    flex-direction:column;
+
+  }
+
+
+  .uniform-card-badge{
+
+    width:100%;
+
+    text-align:center;
+
+  }
+
+
+  .notice{
+
+    margin:18px 14px;
+
+  }
+
+
+  .image-lightbox{
+
+    padding:15px;
+
+  }
+
+}
+
+
+/* ==========================================================
+   REDUCED MOTION
+========================================================== */
+
+@media(prefers-reduced-motion:reduce){
+
+  *,
+  *::before,
+  *::after{
+
+    scroll-behavior:auto !important;
+
+    transition:none !important;
+
+  }
+
+}
+
+</style>
+
+<link rel="stylesheet" href="mdt-v5.css">
+
+</head>
+
+
+<body>
+
+
+<!-- ==========================================================
+     HEADER NAV.JS
+========================================================== -->
+
+<div id="site-header"></div>
+
+
+<!-- ==========================================================
+     MAIN
+========================================================== -->
+
+<main>
+
+  <div class="panel">
+
+    <div class="panel-head">
+
+      <div class="panel-title">
+        Tenues réglementaires
+      </div>
+
+      <div class="panel-desc">
+        Référentiel officiel des tenues autorisées selon le grade et le niveau de responsabilité.
+      </div>
+
+    </div>
+
+
+    <!-- ======================================================
+         TENUES RÉGLEMENTAIRES
+    ======================================================= -->
+
+    <section class="section">
+
+      <div class="section-title">
+
+        <span class="icon">
+          🎽
+        </span>
+
+        Tenues réglementaires
+
+      </div>
+
+
+      <div class="section-desc">
+
+        Tenues utilisées dans le cadre du service courant.
+
+      </div>
+
+
+      <div
+        class="uniform-grid"
+        id="reglementaires"
+      ></div>
+
+    </section>
+
+
+    <!-- ======================================================
+         TENUES DE CÉRÉMONIE
+    ======================================================= -->
+
+    <section class="section">
+
+      <div class="section-title">
+
+        <span class="icon">
+          🎖️
+        </span>
+
+        Tenues de cérémonie
+
+      </div>
+
+
+      <div class="section-desc">
+
+        Tenues utilisées lors des cérémonies et événements officiels du département.
+
+      </div>
+
+
+      <div
+        class="uniform-grid"
+        id="ceremonies"
+      ></div>
+
+    </section>
+
+  </div>
+
+</main>
+
+
+<!-- ==========================================================
+     FOOTER
+========================================================== -->
+
+<footer>
+
+  SYSTÈME INTERNE DU CPD — TENUES —
+
+  USAGE INTERNE UNIQUEMENT — NE PAS DIFFUSER
+
+</footer>
+
+
+<!-- ==========================================================
+     LIGHTBOX
+========================================================== -->
+
+<div
+  class="image-lightbox"
+  id="imageLightbox"
+  onclick="closeLightbox(event)"
+>
+
+  <div
+    class="image-lightbox-close"
+    onclick="closeLightbox(event)"
+  >
+    ×
+  </div>
+
+
+  <img
+    id="lightboxImage"
+    src=""
+    alt=""
+    onclick="event.stopPropagation()"
+  >
+
+</div>
+
+
+<!-- ==========================================================
+     CONFIGURATION NAVIGATION
+========================================================== -->
+
+<script>
+
+const PAGE_CONFIG = {
+
+  subtitle:
+    "Tenues — Référentiel réglementaire",
+
+  currentPage:
+    "tenues-vehicules.html",
+
+  docCode:
+    "CPD-TPL-002",
+
+  version:
+    "3.0"
+
+};
+
+</script>
+
+
+<!-- ==========================================================
+     NAVIGATION COMMUNE
+========================================================== -->
+
+<script src="nav-v5.js"></script>
+
+
+<!-- ==========================================================
+     JAVASCRIPT DE LA PAGE
+========================================================== -->
+
+<script>
+
+
+/* ==========================================================
+   DONNÉES
+   Chargées depuis data-tenues.js
+========================================================== */
+
+let uniforms = [];
+
+
+/* ==========================================================
+   CHARGEMENT DATA-TENUES.JS
+========================================================== */
+
+function loadData(){
+
+  return new Promise((resolve,reject)=>{
+
+    window.CPD_DATA = undefined;
+
+
+    const script =
+      document.createElement("script");
+
+
+    script.src =
+      "data-tenues.js?v=" +
+      Date.now();
+
+
+    script.async =
+      false;
+
+
+    script.onload =
+      function(){
+
+        if(
+          !Array.isArray(
+            window.CPD_DATA
+          )
+        ){
+
+          reject(
+            new Error(
+              "window.CPD_DATA n'est pas un tableau."
+            )
+          );
+
+          return;
+
+        }
+
+
+        uniforms =
+          window.CPD_DATA;
+
+
+        resolve();
+
+      };
+
+
+    script.onerror =
+      function(){
+
+        reject(
+          new Error(
+            "Impossible de charger data-tenues.js."
+          )
+        );
+
+      };
+
+
+    document.head.appendChild(
+      script
+    );
+
+  });
+
+}
+
+
+/* ==========================================================
+   ESCAPE HTML
+========================================================== */
+
+function escapeHtml(value){
+
+  return String(value)
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#39;"
+    );
+
+}
+
+
+/* ==========================================================
+   RENDU D'UNE CARTE
+========================================================== */
+
+function createUniformCard(item){
+
+  if(!item){
+
+    return "";
+
+  }
+
+
+  const title =
+    item.title || "";
+
+
+  const badge =
+    item.badge || "";
+
+
+  const image =
+    item.image || "";
+
+
+  const caption =
+    item.caption || "";
+
+
+  return `
+
+    <article class="uniform-card">
+
+      <div class="uniform-card-header">
+
+        <div class="uniform-card-title">
+
+          ${escapeHtml(title)}
+
+        </div>
+
+
+        ${
+          badge
+
+          ?
+
+          `
+
+            <div class="uniform-card-badge">
+
+              ${escapeHtml(badge)}
+
+            </div>
+
+          `
+
+          :
+
+          ""
+
+        }
+
+      </div>
+
+
+      <div class="uniform-card-body">
+
+        ${
+          image
+
+          ?
+
+          `
+
+            <img
+
+              class="uniform-image"
+
+              src="${escapeHtml(image)}"
+
+              alt="${escapeHtml(title)}"
+
+              loading="lazy"
+
+              decoding="async"
+
+              onclick="openLightbox(this)"
+
+              onerror="imageError(this)"
+
+            >
+
+          `
+
+          :
+
+          `
+
+            <div
+              class="notice"
+              style="margin:0;"
+            >
+
+              <div class="notice-title">
+
+                Image non renseignée
+
+              </div>
+
+
+              <p>
+
+                Ajoutez le chemin de l'image dans
+                <code>data-tenues.js</code>.
+
+              </p>
+
+            </div>
+
+          `
+
+        }
+
+
+        ${
+          caption
+
+          ?
+
+          `
+
+            <div class="image-caption">
+
+              ${escapeHtml(caption)}
+
+            </div>
+
+          `
+
+          :
+
+          ""
+
+        }
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+
+
+/* ==========================================================
+   RENDU
+========================================================== */
+
+function render(){
+
+  const reglementaires =
+    document.getElementById(
+      "reglementaires"
+    );
+
+
+  const ceremonies =
+    document.getElementById(
+      "ceremonies"
+    );
+
+
+  reglementaires.innerHTML =
+    "";
+
+
+  ceremonies.innerHTML =
+    "";
+
+
+  uniforms.forEach(
+    item => {
+
+      if(
+        item.category ===
+        "reglementaire"
+      ){
+
+        reglementaires.innerHTML +=
+          createUniformCard(item);
+
+      }
+
+
+      if(
+        item.category ===
+        "ceremonie"
+      ){
+
+        ceremonies.innerHTML +=
+          createUniformCard(item);
+
+      }
+
+    }
+  );
+
+
+  if(
+    !reglementaires.innerHTML
+  ){
+
+    reglementaires.innerHTML = `
+
+      <div class="notice">
+
+        <div class="notice-title">
+
+          Aucune tenue
+
+        </div>
+
+
+        <p>
+
+          Aucune tenue réglementaire
+          n'est actuellement renseignée.
+
+        </p>
+
+      </div>
+
+    `;
+
+  }
+
+
+  if(
+    !ceremonies.innerHTML
+  ){
+
+    ceremonies.innerHTML = `
+
+      <div class="notice">
+
+        <div class="notice-title">
+
+          Aucune tenue
+
+        </div>
+
+
+        <p>
+
+          Aucune tenue de cérémonie
+          n'est actuellement renseignée.
+
+        </p>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* ==========================================================
+   LIGHTBOX
+========================================================== */
+
+function openLightbox(img){
+
+  if(
+    !img ||
+    !img.src
+  ){
+
+    return;
+
+  }
+
+
+  const lightbox =
+    document.getElementById(
+      "imageLightbox"
+    );
+
+
+  const lightboxImage =
+    document.getElementById(
+      "lightboxImage"
+    );
+
+
+  lightboxImage.src =
+    img.src;
+
+
+  lightboxImage.alt =
+    img.alt || "";
+
+
+  lightbox.classList.add(
+    "active"
+  );
+
+}
+
+
+function closeLightbox(event){
+
+  if(
+    event &&
+    event.target &&
+    event.target.id ===
+      "lightboxImage"
+  ){
+
+    return;
+
+  }
+
+
+  document
+    .getElementById(
+      "imageLightbox"
+    )
+    .classList.remove(
+      "active"
+    );
+
+}
+
+
+document.addEventListener(
+  "keydown",
+  function(event){
+
+    if(
+      event.key ===
+      "Escape"
+    ){
+
+      document
+        .getElementById(
+          "imageLightbox"
+        )
+        .classList.remove(
+          "active"
+        );
+
+    }
+
+  }
+);
+
+
+/* ==========================================================
+   ERREUR IMAGE
+========================================================== */
+
+function imageError(img){
+
+  if(!img){
+
+    return;
+
+  }
+
+
+  img.style.display =
+    "none";
+
+
+  const container =
+    img.closest(
+      ".uniform-card-body"
+    );
+
+
+  if(!container){
+
+    return;
+
+  }
+
+
+  const notice =
+    document.createElement(
+      "div"
+    );
+
+
+  notice.className =
+    "notice";
+
+
+  notice.style.margin =
+    "0";
+
+
+  notice.innerHTML = `
+
+    <div class="notice-title">
+
+      Image indisponible
+
+    </div>
+
+
+    <p>
+
+      Vérifiez le chemin de l'image dans
+      <code>data-tenues.js</code>.
+
+    </p>
+
+  `;
+
+
+  container.insertBefore(
+    notice,
+    container.firstChild
+  );
+
+}
+
+
+/* ==========================================================
+   INITIALISATION
+========================================================== */
+
+loadData()
+
+  .then(
+    function(){
+
+      console.log(
+        "CPD — Données des tenues prêtes."
+      );
+
+
+      render();
+
+    }
+  )
+
+  .catch(
+    function(error){
+
+      console.error(
+        "CPD — Erreur :",
+        error
+      );
+
+
+      document.getElementById(
+        "reglementaires"
+      ).innerHTML = `
+
+        <div class="notice">
+
+          <div class="notice-title">
+
+            Erreur de chargement
+
+          </div>
+
+
+          <p>
+
+            ${escapeHtml(
+              error.message
+            )}
+
+          </p>
+
+        </div>
+
+      `;
+
+    }
+  );
+
+
+/* ==========================================================
+   PROTECTION ANTI-COPIE
+========================================================== */
+
+document.addEventListener(
+  "contextmenu",
+  function(event){
+
+    event.preventDefault();
+
+  }
+);
+
+
+document.addEventListener(
+  "keydown",
+  function(event){
+
+    const key =
+      event.key.toUpperCase();
+
+
+    if(
+      key === "F12"
+    ){
+
+      event.preventDefault();
+
+      return;
+
+    }
+
+
+    if(
+      (event.ctrlKey ||
+       event.metaKey) &&
+      ["U","S","I","J"].includes(
+        key
+      )
+    ){
+
+      event.preventDefault();
+
+      return;
+
+    }
+
+
+    if(
+      (event.ctrlKey ||
+       event.metaKey) &&
+      event.shiftKey &&
+      ["I","J","C"].includes(
+        key
+      )
+    ){
+
+      event.preventDefault();
+
+    }
+
+  }
+);
+
+
+document.addEventListener(
+  "dragstart",
+  function(event){
+
+    event.preventDefault();
+
+  }
+);
+
+
+document.addEventListener(
+  "copy",
+  function(event){
+
+    event.preventDefault();
+
+  }
+);
+
+</script>
+
+</body>
+
+</html>

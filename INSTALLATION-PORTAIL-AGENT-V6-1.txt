@@ -1,0 +1,38 @@
+POLICE ACADEMY — PORTAIL AGENT V6.1
+
+Cette archive est cumulative : elle contient également la page Formations et
+grilles de la V6.
+
+1. Si les quatre scripts SQL de la V6 ont déjà été exécutés dans Neon,
+   ne les exécutez pas une deuxième fois et passez directement à l’étape 3.
+
+2. Sinon, dans Vercel > Storage > Neon > Query, exécutez séparément :
+   - SQL-GRILLES-1-MODELES.sql
+   - SQL-GRILLES-2-CRITERES.sql
+   - SQL-GRILLES-3-EVALUATIONS.sql
+   - SQL-GRILLES-4-INDEX.sql
+
+3. Téléversez tout le contenu de l’archive à la racine du dépôt GitHub.
+   Confirmez le remplacement des fichiers existants en conservant les dossiers.
+
+4. Attendez le statut Ready du déploiement Vercel.
+
+5. Vérifiez le parcours public :
+   https://template-cp-dsp.vercel.app/
+   Le bouton visiteur doit ouvrir directement :
+   /public/application.html
+
+6. Vérifiez le parcours policier :
+   - cliquez sur « Je suis policier » ;
+   - connectez-vous avec Discord si nécessaire ;
+   - le site doit ouvrir /mdt/portail.html ;
+   - le MDT est disponible pour tous les policiers autorisés ;
+   - Police Academy est disponible uniquement avec le rôle Instructor.
+
+La session policière et la session Academy restent valides pendant 30 jours.
+Un Instructor connecté côté policier n’a pas besoin de refaire une connexion
+Discord pour ouvrir le panel Academy.
+
+Aucune nouvelle variable Vercel n’est nécessaire.
+Aucune modification du bot Discord n’est nécessaire.
+Le projet reste à 12 fonctions API.
