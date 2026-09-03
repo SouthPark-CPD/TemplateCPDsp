@@ -8,6 +8,7 @@ const errors={
   login_required:"Connectez-vous pour accéder au MDT.",
   invalid_session:"Votre session n’est plus valide. Merci de vous reconnecter.",
   session_expired:"Votre session a expiré. Merci de vous reconnecter.",
+  oauth_failed:"La tentative de connexion a expiré ou a déjà été utilisée. Cliquez de nouveau sur le bouton Discord.",
   discord_unavailable:"Discord est momentanément indisponible. Merci de réessayer.",
   config:"Le service de connexion n’est pas encore correctement configuré."
 };

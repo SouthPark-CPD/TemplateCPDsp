@@ -3,6 +3,7 @@ const { env, siteUrl, createStateCookie } = require("../../server/auth");
 
 module.exports = function handler(req, res) {
   if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "no-store, max-age=0");
   try {
     const state = crypto.randomBytes(24).toString("base64url");
     const params = new URLSearchParams({

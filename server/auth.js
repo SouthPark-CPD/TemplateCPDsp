@@ -9,6 +9,8 @@ const GUILD_ID = "1408092767963451615";
 const ROLE_ID = "1408092768026365974";
 const ACADEMY_GUILD_ID = "1538858756354473984";
 const INSTRUCTOR_ROLE_ID = "1538858756371386400";
+const DISCORD_MAX_ATTEMPTS = 2;
+const DISCORD_REQUEST_TIMEOUT = 3500;
 
 function env() {
   const clientId = process.env.DISCORD_CLIENT_ID;
@@ -90,15 +92,51 @@ function clearStateCookie() {
   return cookie(STATE_COOKIE_NAME, "", 0);
 }
 
+function wait(delay) {
+  return new Promise(resolve => setTimeout(resolve, delay));
+}
+
+function retryDelay(response, detail, attempt) {
+  const headerDelay = Number(
+    response.headers.get("retry-after") || response.headers.get("x-ratelimit-reset-after")
+  );
+  let bodyDelay = 0;
+  try {
+    bodyDelay = Number(JSON.parse(detail).retry_after || 0);
+  } catch {}
+
+  const seconds = Number.isFinite(headerDelay) && headerDelay > 0 ? headerDelay : bodyDelay;
+  return Math.min(1500, Math.max(250, seconds > 0 ? seconds * 1000 : 350 * (attempt + 1)));
+}
+
 async function discordRequest(url, options = {}) {
-  const response = await fetch(url, options);
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    const error = new Error(`Discord API ${response.status}: ${detail.slice(0, 200)}`);
-    error.status = response.status;
-    throw error;
+  let lastError;
+
+  for (let attempt = 0; attempt < DISCORD_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const requestOptions = {
+        ...options,
+        signal: options.signal || AbortSignal.timeout(DISCORD_REQUEST_TIMEOUT)
+      };
+      const response = await fetch(url, requestOptions);
+      if (response.ok) return response.json();
+
+      const detail = await response.text().catch(() => "");
+      const error = new Error(`Discord API ${response.status}: ${detail.slice(0, 200)}`);
+      error.status = response.status;
+      lastError = error;
+
+      const retryable = response.status === 429 || response.status >= 500;
+      if (!retryable || attempt === DISCORD_MAX_ATTEMPTS - 1) throw error;
+      await wait(retryDelay(response, detail, attempt));
+    } catch (error) {
+      lastError = error;
+      if (error.status || attempt === DISCORD_MAX_ATTEMPTS - 1) throw error;
+      await wait(350 * (attempt + 1));
+    }
   }
-  return response.json();
+
+  throw lastError || new Error("Discord indisponible");
 }
 
 async function exchangeCode(req, code) {
