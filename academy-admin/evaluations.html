@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Formations et grilles — Police Academy</title>
+  <link rel="icon" href="../assets/cpd-seal.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="evaluations.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/academy-admin/"><img src="../assets/cpd-seal.png" alt=""><div><strong>Police Academy</strong><span>Espace instructeur</span></div></a>
+    <nav class="admin-nav" aria-label="Navigation principale"><a href="/academy-admin/">Tableau de bord</a><a href="/academy-admin/effectifs.html">Effectifs</a><a class="active" href="/academy-admin/evaluations.html">Formations</a><a href="/academy-admin/recrutements.html">Recrutement</a><a href="/academy-admin/activite.html">Activité</a></nav>
+    <div class="identity"><div><span>Connecté en tant que</span><strong id="instructor-name">Instructeur</strong></div><a href="/api/academy-admin-auth/logout">Déconnexion</a></div>
+  </header>
+
+  <main>
+    <section class="page-heading">
+      <div><p>Centre pédagogique</p><h1>Formations et grilles</h1><span>Préparez vos supports, conduisez une évaluation et enregistrez-la dans le dossier de l’agent.</span></div>
+      <button id="new-template" class="primary-button" type="button">Créer une grille</button>
+    </section>
+
+    <div id="notice" class="notice" hidden></div>
+    <p id="page-message" class="message">Chargement du centre d’évaluation…</p>
+
+    <div id="page-content" hidden>
+      <section class="workspace-grid">
+        <article class="panel evaluation-panel">
+          <div class="panel-head"><div><p>Session en cours</p><h2>Évaluer un agent</h2></div><span id="draft-state">Brouillon automatique</span></div>
+          <form id="evaluation-form">
+            <div class="evaluation-selectors">
+              <label><span>Agent *</span><select id="evaluation-agent" required><option value="">Sélectionner un agent</option></select></label>
+              <label><span>Grille *</span><select id="evaluation-template" required><option value="">Sélectionner une grille</option></select></label>
+              <label><span>Date *</span><input id="evaluation-date" type="date" required></label>
+            </div>
+            <div id="evaluation-empty" class="empty-state">Sélectionnez une grille pour afficher ses questions et critères.</div>
+            <div id="evaluation-sheet" hidden>
+              <div class="score-strip">
+                <div><span>Progression</span><strong id="answered-count">0 / 0</strong></div>
+                <div><span>Note calculée</span><strong id="calculated-score">—</strong></div>
+                <div><span>Résultat proposé</span><strong id="suggested-result">—</strong></div>
+              </div>
+              <div id="criteria-sheet"></div>
+              <label class="general-comment"><span>Observation générale <small>(facultatif)</small></span><textarea id="evaluation-comment" rows="4" maxlength="5000" placeholder="Déroulement de la séance, contexte ou éléments complémentaires…"></textarea></label>
+              <div class="final-decision">
+                <label><span>Décision enregistrée *</span><select id="evaluation-result"><option value="planifiee">Planifiée / incomplète</option><option value="valide">Validée</option><option value="a_revoir">À revoir</option><option value="non_valide">Non validée</option></select></label>
+                <button class="primary-button" type="submit">Enregistrer dans le dossier</button>
+              </div>
+            </div>
+          </form>
+        </article>
+
+        <aside class="panel library-panel">
+          <div class="panel-head"><div><p>Bibliothèque</p><h2>Grilles disponibles</h2></div><span id="template-count">0</span></div>
+          <div class="library-tools"><input id="template-search" type="search" placeholder="Rechercher une grille…"><select id="template-filter"><option value="active">Actives</option><option value="all">Toutes</option><option value="inactive">Désactivées</option></select></div>
+          <div id="starter-box" class="starter-box" hidden><strong>Bibliothèque vide</strong><p>Installez des modèles modifiables pour démarrer rapidement.</p><button id="install-starters" type="button">Installer les grilles conseillées</button></div>
+          <div id="template-list" class="template-list"></div>
+        </aside>
+      </section>
+    </div>
+  </main>
+
+  <dialog id="template-dialog">
+    <form id="template-form" class="dialog-shell">
+      <header><div><p id="editor-kicker">Nouvelle grille</p><h2 id="editor-title">Créer une formation</h2></div><button id="close-editor" type="button" aria-label="Fermer">×</button></header>
+      <div class="dialog-body">
+        <input id="template-id" type="hidden">
+        <div class="template-fields">
+          <label><span>Nom de la formation *</span><input id="template-name" maxlength="120" required placeholder="Ex. Évaluation physique initiale"></label>
+          <label><span>Catégorie *</span><select id="template-category"><option value="formation">Formation générale</option><option value="entretien">Entretien</option><option value="physique">Aptitude physique</option><option value="connaissances">Connaissances</option><option value="terrain">Mise en situation</option><option value="finale">Évaluation finale</option></select></label>
+          <label class="full"><span>Description</span><textarea id="template-description" rows="2" maxlength="3000" placeholder="Objectif et conditions de cette évaluation…"></textarea></label>
+        </div>
+        <div class="criteria-editor-head"><div><p>Contenu de la grille</p><h3>Questions et critères</h3></div><button id="add-criterion" type="button">+ Ajouter un critère</button></div>
+        <p class="editor-help">Regroupez les critères par section. Un critère critique non acquis entraîne automatiquement une proposition « Non validée ».</p>
+        <div id="criteria-editor" class="criteria-editor"></div>
+      </div>
+      <footer><button id="cancel-editor" class="secondary-button" type="button">Annuler</button><button class="primary-button" type="submit">Enregistrer la grille</button></footer>
+    </form>
+  </dialog>
+
+  <script src="evaluations.js"></script>
+</body>
+</html>

@@ -17,7 +17,11 @@ const actionLabels = {
   training_updated: "Formation modifiée",
   training_archived: "Formation archivée",
   training_restored: "Formation restaurée",
-  recruitment_decision_updated: "Décision de recrutement modifiée"
+  recruitment_decision_updated: "Décision de recrutement modifiée",
+  template_created: "Grille de formation créée",
+  template_updated: "Grille de formation modifiée",
+  template_activated: "Grille de formation activée",
+  template_deactivated: "Grille de formation désactivée"
 };
 
 const resultLabels = {
@@ -61,6 +65,7 @@ function formatDate(value) {
 
 function category(entry) {
   if (entry.actionType.startsWith("training_")) return "training";
+  if (entry.actionType.startsWith("template_")) return "training";
   if (entry.actionType.startsWith("recruitment_")) return "recruitment";
   return "agent";
 }
@@ -97,6 +102,7 @@ function targetLink(entry) {
     return `/academy-admin/dossier.html?id=${encodeURIComponent(entry.targetId)}`;
   }
   if (entry.targetType === "recruitment") return "/academy-admin/recrutements.html";
+  if (entry.targetType === "template") return "/academy-admin/evaluations.html";
   return "";
 }
 

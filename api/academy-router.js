@@ -58,6 +58,8 @@ const ACADEMY_STATUSES = new Set(["a_former", "en_formation", "termine", "suspen
 const TRAINING_RESULTS = new Set(["planifiee", "valide", "a_revoir", "non_valide"]);
 const TICKET_STATUSES = new Set(["active", "closed", "deleted"]);
 const RECRUITMENT_DECISIONS = new Set(["pending", "accepted", "refused", "withdrawn"]);
+const TEMPLATE_CATEGORIES = new Set(["formation", "entretien", "physique", "connaissances", "terrain", "finale"]);
+const CRITERION_TYPES = new Set(["question", "observation", "physique", "pratique", "connaissance"]);
 
 function actionFromRequest(req) {
   return Array.isArray(req.query.action)
@@ -275,6 +277,171 @@ function normalizeTrainingResult(value) {
   return result === "validee" ? "valide" : result;
 }
 
+function evaluationPayload(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const templateId = String(value.templateId || "");
+  const templateName = textField(value.templateName, 120);
+  const criteria = Array.isArray(value.criteria) ? value.criteria.slice(0, 100).map(item => ({
+    criterionId: String(item?.criterionId || "").slice(0, 30),
+    section: textField(item?.section, 100),
+    label: textField(item?.label, 300),
+    rating: ["acquis", "partiel", "non_acquis", "non_evalue"].includes(item?.rating)
+      ? item.rating : "non_evalue",
+    weight: Math.min(10, Math.max(1, Number(item?.weight) || 1)),
+    critical: item?.critical === true,
+    note: textField(item?.note, 1000)
+  })).filter(item => item.label) : [];
+  if (!/^\d+$/.test(templateId) || !templateName || !criteria.length) return null;
+  return {
+    version: 1,
+    templateId,
+    templateName,
+    score: Number.isInteger(value.score) ? Math.min(100, Math.max(0, value.score)) : null,
+    suggestedResult: TRAINING_RESULTS.has(normalizeTrainingResult(value.suggestedResult))
+      ? normalizeTrainingResult(value.suggestedResult) : null,
+    criteria
+  };
+}
+
+function mapTemplate(row, criteria = []) {
+  return {
+    id: String(row.id),
+    name: row.name,
+    category: row.category,
+    description: row.description || "",
+    active: row.is_active,
+    sortOrder: Number(row.sort_order || 0),
+    createdByName: row.created_by_name || "",
+    updatedByName: row.updated_by_name || "",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    criteria
+  };
+}
+
+async function trainingTemplates(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const [templates, criteria] = await Promise.all([
+      sql`SELECT id, name, category, description, is_active, sort_order,
+        created_by_name, updated_by_name, created_at, updated_at
+        FROM academy_training_templates ORDER BY sort_order, name`,
+      sql`SELECT id, template_id, section_name, label, guidance, criterion_type,
+        weight, is_critical, sort_order
+        FROM academy_evaluation_criteria ORDER BY template_id, sort_order, id`
+    ]);
+    const byTemplate = new Map();
+    criteria.forEach(row => {
+      const key = String(row.template_id);
+      if (!byTemplate.has(key)) byTemplate.set(key, []);
+      byTemplate.get(key).push({
+        id: String(row.id), section: row.section_name, label: row.label,
+        guidance: row.guidance || "", type: row.criterion_type,
+        weight: Number(row.weight), critical: row.is_critical,
+        sortOrder: Number(row.sort_order || 0)
+      });
+    });
+    return res.status(200).json({
+      ok: true,
+      templates: templates.map(row => mapTemplate(row, byTemplate.get(String(row.id)) || []))
+    });
+  } catch (error) {
+    console.error("Academy templates read failed", error);
+    return res.status(500).json({ ok: false, code: error.code === "42P01" ? "templates_table_missing" : "templates_unavailable" });
+  }
+}
+
+async function saveTrainingTemplate(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const id = body.id ? String(body.id) : "";
+  const name = textField(body.name, 120);
+  const category = String(body.category || "formation");
+  const description = textField(body.description, 3000);
+  const sortOrder = Math.min(10000, Math.max(0, Number(body.sortOrder) || 0));
+  const criteria = Array.isArray(body.criteria) ? body.criteria.slice(0, 100).map((item, index) => ({
+    section: textField(item?.section, 100) || "Évaluation",
+    label: textField(item?.label, 300),
+    guidance: textField(item?.guidance, 2000),
+    type: CRITERION_TYPES.has(item?.type) ? item.type : "observation",
+    weight: Math.min(10, Math.max(1, Number(item?.weight) || 1)),
+    critical: item?.critical === true,
+    sortOrder: index
+  })).filter(item => item.label) : [];
+  if ((id && !/^\d+$/.test(id)) || !name || !TEMPLATE_CATEGORIES.has(category)) {
+    return res.status(400).json({ ok: false, code: "invalid_template" });
+  }
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const actorName = session.user.globalName || session.user.username;
+    let templateId = id;
+    if (id) {
+      const rows = await sql`UPDATE academy_training_templates SET name=${name}, category=${category},
+        description=${description || null}, sort_order=${sortOrder}, updated_by_discord_id=${session.user.id},
+        updated_by_name=${actorName}, updated_at=NOW() WHERE id=${id} RETURNING id`;
+      if (!rows.length) return res.status(404).json({ ok: false, code: "template_not_found" });
+      await sql`DELETE FROM academy_evaluation_criteria WHERE template_id=${id}`;
+    } else {
+      const [created] = await sql`INSERT INTO academy_training_templates
+        (name, category, description, sort_order, created_by_discord_id, created_by_name,
+        updated_by_discord_id, updated_by_name) VALUES
+        (${name}, ${category}, ${description || null}, ${sortOrder}, ${session.user.id}, ${actorName},
+        ${session.user.id}, ${actorName}) RETURNING id`;
+      templateId = String(created.id);
+    }
+    for (const criterion of criteria) {
+      await sql`INSERT INTO academy_evaluation_criteria
+        (template_id, section_name, label, guidance, criterion_type, weight, is_critical, sort_order)
+        VALUES (${templateId}, ${criterion.section}, ${criterion.label}, ${criterion.guidance || null},
+        ${criterion.type}, ${criterion.weight}, ${criterion.critical}, ${criterion.sortOrder})`;
+    }
+    await writeActivityLog(sql, session, {
+      actionType: id ? "template_updated" : "template_created",
+      targetType: "template", targetId: templateId, targetName: name,
+      details: { category, criteriaCount: criteria.length }
+    });
+    return res.status(id ? 200 : 201).json({ ok: true, id: templateId });
+  } catch (error) {
+    console.error("Academy template save failed", error);
+    return res.status(500).json({ ok: false, code: error.code === "42P01" ? "templates_table_missing" : "template_save_failed" });
+  }
+}
+
+async function toggleTrainingTemplate(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const session = await instructorAccess(req, res);
+  if (!session) return;
+  const body = readJsonBody(req);
+  const id = String(body?.id || "");
+  if (!/^\d+$/.test(id) || typeof body?.active !== "boolean") return res.status(400).json({ ok: false, code: "invalid_template_toggle" });
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const rows = await sql`UPDATE academy_training_templates SET is_active=${body.active},
+      updated_by_discord_id=${session.user.id}, updated_by_name=${session.user.globalName || session.user.username},
+      updated_at=NOW() WHERE id=${id} RETURNING id, name`;
+    if (!rows.length) return res.status(404).json({ ok: false, code: "template_not_found" });
+    await writeActivityLog(sql, session, {
+      actionType: body.active ? "template_activated" : "template_deactivated",
+      targetType: "template", targetId: id, targetName: rows[0].name, details: {}
+    });
+    return res.status(200).json({ ok: true, id, active: body.active });
+  } catch (error) {
+    console.error("Academy template toggle failed", error);
+    return res.status(500).json({ ok: false, code: "template_toggle_failed" });
+  }
+}
+
 async function syncAgentCompletion(sql, discordId) {
   const rows = await sql`
     SELECT training_type, result, training_date, created_at
@@ -410,6 +577,7 @@ async function agentsList(req, res) {
 
     return res.status(200).json({
       ok: true,
+      instructor: session.user,
       total: agents.length,
       ranks: CPD_RANKS.map(rank => rank.name),
       agents
@@ -718,7 +886,7 @@ async function agentDetail(req, res) {
         SELECT id, training_type, training_date, result, score, comment,
           strengths, improvements, instructor_discord_id, instructor_name,
           created_at, updated_at, archived_at, archived_by_discord_id,
-          updated_by_discord_id, updated_by_name
+          updated_by_discord_id, updated_by_name, evaluation_data
         FROM academy_training_records
         WHERE agent_discord_id = ${discordId}
         ORDER BY training_date DESC, created_at DESC
@@ -752,7 +920,8 @@ async function agentDetail(req, res) {
         createdAt: training.created_at,
         updatedAt: training.updated_at,
         updatedByDiscordId: training.updated_by_discord_id || null,
-        updatedByName: training.updated_by_name || ""
+        updatedByName: training.updated_by_name || "",
+        evaluationData: training.evaluation_data || null
       })),
       archivedTrainings: trainings.filter(training => training.archived_at).map(training => ({
         id: String(training.id),
@@ -770,7 +939,8 @@ async function agentDetail(req, res) {
         archivedAt: training.archived_at,
         archivedByDiscordId: training.archived_by_discord_id || null,
         updatedByDiscordId: training.updated_by_discord_id || null,
-        updatedByName: training.updated_by_name || ""
+        updatedByName: training.updated_by_name || "",
+        evaluationData: training.evaluation_data || null
       }))
     });
   } catch (error) {
@@ -852,9 +1022,11 @@ async function createTraining(req, res) {
   const rawScore = body.score === "" || body.score === null || body.score === undefined
     ? null
     : Number(body.score);
+  const evaluation = body.evaluationData ? evaluationPayload(body.evaluationData) : null;
 
   if (!validDiscordId(discordId) || !trainingType || !validDate(trainingDate)
-    || !TRAINING_RESULTS.has(result) || (rawScore !== null && (!Number.isInteger(rawScore) || rawScore < 0 || rawScore > 100))) {
+    || !TRAINING_RESULTS.has(result) || (body.evaluationData && !evaluation)
+    || (rawScore !== null && (!Number.isInteger(rawScore) || rawScore < 0 || rawScore > 100))) {
     return res.status(400).json({ ok: false, code: "invalid_training" });
   }
 
@@ -862,6 +1034,13 @@ async function createTraining(req, res) {
     const agent = await eligibleAgent(discordId);
     if (!agent) return res.status(404).json({ ok: false, code: "agent_not_eligible" });
     const sql = neon(process.env.DATABASE_URL);
+    if (evaluation) {
+      const templates = await sql`SELECT name FROM academy_training_templates
+        WHERE id=${evaluation.templateId} AND is_active=TRUE LIMIT 1`;
+      if (!templates.length || templates[0].name !== trainingType) {
+        return res.status(400).json({ ok: false, code: "evaluation_template_unavailable" });
+      }
+    }
     await sql`
       INSERT INTO academy_agent_files (
         discord_id, academy_status, updated_by_discord_id, created_at, updated_at
@@ -872,12 +1051,13 @@ async function createTraining(req, res) {
       INSERT INTO academy_training_records (
         agent_discord_id, training_type, training_date, result, score, comment,
         strengths, improvements, instructor_discord_id, instructor_name,
-        created_at, updated_at, updated_by_discord_id, updated_by_name
+        created_at, updated_at, updated_by_discord_id, updated_by_name, evaluation_data
       ) VALUES (
         ${discordId}, ${trainingType}, ${trainingDate}, ${result}, ${rawScore},
         ${comment || null}, ${strengths || null}, ${improvements || null},
         ${session.user.id}, ${session.user.globalName || session.user.username}, NOW(), NOW(),
-        ${session.user.id}, ${session.user.globalName || session.user.username}
+        ${session.user.id}, ${session.user.globalName || session.user.username},
+        ${evaluation ? JSON.stringify(evaluation) : null}::jsonb
       )
       RETURNING id
     `;
@@ -889,7 +1069,7 @@ async function createTraining(req, res) {
       targetName: agent.displayName,
       details: {
         trainingId: String(created.id), trainingType, trainingDate,
-        result, score: rawScore
+        result, score: rawScore, evaluatedWithGrid: Boolean(evaluation)
       }
     });
     return res.status(201).json({ ok: true, id: String(created.id) });
@@ -1261,6 +1441,9 @@ module.exports = async function handler(req, res) {
     case "training-overview": return trainingOverview(req, res);
     case "activity": return activityLog(req, res);
     case "dashboard": return academyDashboard(req, res);
+    case "training-templates": return trainingTemplates(req, res);
+    case "training-template-save": return saveTrainingTemplate(req, res);
+    case "training-template-toggle": return toggleTrainingTemplate(req, res);
     case "agent": return agentDetail(req, res);
     case "agent-save": return saveAgentFile(req, res);
     case "training-create": return createTraining(req, res);

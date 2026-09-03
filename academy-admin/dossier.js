@@ -43,6 +43,7 @@ const elements = {
 let editingTrainingId = null;
 let trainingRecords = new Map();
 let activeTrainingRecords = [];
+let predefinedTrainingNames = new Set();
 
 const resultLabels = {
   planifiee: "Planifiée",
@@ -62,6 +63,7 @@ const standardModules = [
   "Rédaction de rapports",
   "Évaluation finale"
 ];
+predefinedTrainingNames = new Set(standardModules);
 
 function canonicalResult(result) {
   return result === "validee" ? "valide" : result;
@@ -122,6 +124,7 @@ function trainingCard(training, archived = false) {
         ${training.improvements ? `<section><h4>Axes d’amélioration</h4><p>${escapeHtml(training.improvements)}</p></section>` : ""}
         ${training.comment ? `<section class="full"><h4>Commentaire</h4><p>${escapeHtml(training.comment)}</p></section>` : ""}
       </div>
+      ${training.evaluationData?.criteria?.length ? `<details class="evaluation-details"><summary>Consulter la grille d’évaluation (${training.evaluationData.criteria.filter(item => item.rating !== "non_evalue").length}/${training.evaluationData.criteria.length})</summary><div>${training.evaluationData.criteria.map(item => `<p><strong>${escapeHtml(item.label)}</strong><span>${escapeHtml({acquis:"Acquis",partiel:"Partiel",non_acquis:"Non acquis",non_evalue:"Non évalué"}[item.rating] || item.rating)}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</span></p>`).join("")}</div></details>` : ""}
       <footer>Ajouté par ${escapeHtml(training.instructorName)} · ${escapeHtml(formatDate(training.createdAt, true))}${updateText}</footer>
       <div class="training-actions">
         ${archived
@@ -269,7 +272,7 @@ function editTraining(id) {
   const training = trainingRecords.get(id);
   if (!training) return;
   editingTrainingId = id;
-  if (standardModules.includes(training.trainingType)) {
+  if (predefinedTrainingNames.has(training.trainingType)) {
     elements.trainingType.value = training.trainingType;
     elements.customTraining.value = "";
   } else {
@@ -313,7 +316,19 @@ async function loadDossier() {
     return;
   }
   try {
-    const data = await api(`/api/academy-admin-data/agent?id=${encodeURIComponent(discordId)}`);
+    const [data, templateData] = await Promise.all([
+      api(`/api/academy-admin-data/agent?id=${encodeURIComponent(discordId)}`),
+      api("/api/academy-admin-data/training-templates").catch(() => ({ templates: [] }))
+    ]);
+    const activeTemplates = templateData.templates.filter(template => template.active);
+    predefinedTrainingNames = new Set([...standardModules, ...activeTemplates.map(template => template.name)]);
+    const selectedValue = elements.trainingType.value;
+    elements.trainingType.innerHTML = '<option value="">Sélectionner un module</option>'
+      + standardModules.map(module => `<option value="${escapeHtml(module)}">${escapeHtml(module)}</option>`).join("")
+      + (activeTemplates.length ? '<optgroup label="Formations Academy personnalisées">'
+        + activeTemplates.filter(template => !standardModules.includes(template.name)).map(template => `<option value="${escapeHtml(template.name)}">${escapeHtml(template.name)}</option>`).join("") + '</optgroup>' : "")
+      + '<option value="__custom__">Autre formation…</option>';
+    if ([...elements.trainingType.options].some(option => option.value === selectedValue)) elements.trainingType.value = selectedValue;
     elements.avatar.src = data.agent.avatar;
     elements.avatar.alt = `Avatar de ${data.agent.displayName}`;
     elements.name.textContent = data.file.rpName || data.agent.displayName;
