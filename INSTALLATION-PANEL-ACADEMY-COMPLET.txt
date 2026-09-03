@@ -17,11 +17,8 @@ https://template-cp-dsp.vercel.app/academy-auth/login.html
 Tableau de bord :
 https://template-cp-dsp.vercel.app/academy-admin/
 
-Effectifs :
+Effectifs et suivi global des formations :
 https://template-cp-dsp.vercel.app/academy-admin/effectifs.html
-
-Suivi global des formations :
-https://template-cp-dsp.vercel.app/academy-admin/suivi.html
 
 Recrutement :
 https://template-cp-dsp.vercel.app/academy-admin/recrutements.html
@@ -33,7 +30,7 @@ CONTENU DU PACK
 - Liste des effectifs récupérés depuis Discord
 - Dossiers individuels des agents
 - Parcours standard de huit modules
-- Vue globale de la progression de tous les agents
+- Vue globale de la progression directement intégrée aux effectifs
 - Filtres par état, grade, progression et alertes
 - Passage automatique à Formation terminée après validation des huit modules
 - Ajout, modification, archivage et restauration des formations

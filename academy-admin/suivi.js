@@ -7,6 +7,7 @@ const elements = {
   search: document.getElementById("agent-search"),
   status: document.getElementById("status-filter"),
   rank: document.getElementById("rank-filter"),
+  sort: document.getElementById("sort-filter"),
   message: document.getElementById("overview-message"),
   list: document.getElementById("overview-list")
 };
@@ -58,6 +59,32 @@ function moduleDots(modules) {
   `).join("");
 }
 
+function dateValue(value) {
+  if (!value) return null;
+  const time = new Date(value).getTime();
+  return Number.isNaN(time) ? null : time;
+}
+
+function compareAgents(a, b, criterion) {
+  if (criterion === "progress_asc") return a.percentage - b.percentage || a.displayName.localeCompare(b.displayName, "fr");
+  if (criterion === "progress_desc") return b.percentage - a.percentage || a.displayName.localeCompare(b.displayName, "fr");
+  if (criterion === "rank_desc") return b.rankLevel - a.rankLevel || a.displayName.localeCompare(b.displayName, "fr");
+  if (criterion === "rank_asc") return a.rankLevel - b.rankLevel || a.displayName.localeCompare(b.displayName, "fr");
+  if (criterion === "name_asc") return (a.rpName || a.displayName).localeCompare(b.rpName || b.displayName, "fr");
+  if (criterion === "recent_desc" || criterion === "recent_asc") {
+    const dateA = dateValue(a.lastTrainingDate);
+    const dateB = dateValue(b.lastTrainingDate);
+    if (dateA === null && dateB === null) return a.displayName.localeCompare(b.displayName, "fr");
+    if (dateA === null) return 1;
+    if (dateB === null) return -1;
+    return criterion === "recent_desc" ? dateB - dateA : dateA - dateB;
+  }
+  const priorities = { review: 0, in_progress: 1, not_started: 2, suspended: 3, completed: 4 };
+  return priorities[agentState(a)] - priorities[agentState(b)]
+    || a.percentage - b.percentage
+    || a.displayName.localeCompare(b.displayName, "fr");
+}
+
 function render() {
   const query = elements.search.value.trim().toLocaleLowerCase("fr");
   const selectedStatus = elements.status.value;
@@ -67,7 +94,7 @@ function render() {
     return (!query || haystack.includes(query))
       && (!selectedStatus || agentState(agent) === selectedStatus)
       && (!selectedRank || agent.rank === selectedRank);
-  });
+  }).sort((a, b) => compareAgents(a, b, elements.sort.value));
 
   if (!filtered.length) {
     elements.list.hidden = true;
@@ -80,7 +107,7 @@ function render() {
   elements.list.hidden = false;
   elements.list.innerHTML = filtered.map(agent => {
     const state = agentState(agent);
-    const remaining = Math.max(0, 8 - Number(agent.validatedCount || 0));
+    const remaining = Math.max(0, agent.modules.length - Number(agent.validatedCount || 0));
     const details = agent.reviewCount > 0
       ? `${agent.reviewCount} module${agent.reviewCount > 1 ? "s" : ""} à revoir`
       : agent.failedCount > 0
@@ -142,4 +169,5 @@ async function initialize() {
 elements.search.addEventListener("input", render);
 elements.status.addEventListener("change", render);
 elements.rank.addEventListener("change", render);
+elements.sort.addEventListener("change", render);
 initialize();
