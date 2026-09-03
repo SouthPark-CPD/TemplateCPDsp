@@ -175,6 +175,7 @@ function updateCustomTrainingField() {
   const custom = elements.trainingType.value === "__custom__";
   elements.customTrainingField.hidden = !custom;
   elements.customTraining.required = custom;
+  elements.customTraining.disabled = !custom;
   if (custom) elements.customTraining.focus();
 }
 
@@ -184,6 +185,7 @@ function resetTrainingForm() {
   elements.trainingDate.valueAsDate = new Date();
   elements.customTrainingField.hidden = true;
   elements.customTraining.required = false;
+  elements.customTraining.disabled = true;
   elements.optionalFields.open = false;
   elements.trainingFormKicker.textContent = "Nouvelle entrée";
   elements.trainingFormTitle.textContent = "Ajouter une formation";

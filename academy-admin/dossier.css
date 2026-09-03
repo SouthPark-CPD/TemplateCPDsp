@@ -1,5 +1,5 @@
 :root{--ink:#eef5fb;--muted:#9fb3c6;--gold:#e6bd63;--green:#7bd5a0;--red:#f0a0a0;--blue:#8bc2f1;--line:rgba(190,218,243,.18);--panel:rgba(8,29,49,.72)}
-*{box-sizing:border-box}
+*{box-sizing:border-box}[hidden]{display:none!important}
 html{color-scheme:dark}
 body{min-height:100vh;margin:0;padding:18px 24px 60px;color:var(--ink);font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 10% 2%,rgba(64,135,207,.22),transparent 31rem),radial-gradient(circle at 82% 92%,rgba(230,189,99,.08),transparent 30rem),linear-gradient(145deg,#061522,#081c2e 56%,#061522)}
 .topbar{display:flex;width:min(1220px,100%);min-height:76px;margin:auto;padding:10px 12px 10px 16px;align-items:center;justify-content:space-between;border:1px solid rgba(210,231,250,.2);border-radius:20px;background:linear-gradient(125deg,rgba(255,255,255,.11),rgba(255,255,255,.025)),rgba(7,27,46,.72);box-shadow:inset 0 1px rgba(255,255,255,.14),0 18px 48px rgba(0,8,17,.3);backdrop-filter:blur(24px)}
