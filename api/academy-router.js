@@ -99,7 +99,7 @@ async function discordCallback(req, res) {
       return res.redirect(302, "/academy-auth/denied.html");
     }
 
-    res.setHeader("Set-Cookie", [clearStateCookie(), sessionCookie(newSession(user, tokens))]);
+    res.setHeader("Set-Cookie", [clearStateCookie(), sessionCookie(newSession(user, tokens, member))]);
     return res.redirect(302, "/academy-admin/");
   } catch (error) {
     res.setHeader("Set-Cookie", [clearStateCookie(), clearSessionCookie()]);

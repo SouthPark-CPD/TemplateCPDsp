@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
       return res.redirect(302, "/auth/denied.html?reason=role");
     }
 
-    res.setHeader("Set-Cookie", [clearStateCookie(), sessionCookie(newSession(user, tokens))]);
+    res.setHeader("Set-Cookie", [clearStateCookie(), sessionCookie(newSession(user, tokens, member))]);
     return res.redirect(302, "/mdt/portail.html");
   } catch (error) {
     res.setHeader("Set-Cookie", clearStateCookie());

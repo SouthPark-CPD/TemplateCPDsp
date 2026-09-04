@@ -184,20 +184,21 @@ function hasInstructorRole(member) {
   return Array.isArray(member.roles) && member.roles.includes(INSTRUCTOR_ROLE_ID);
 }
 
-function newSession(user, tokens) {
+function newSession(user, tokens, member = null) {
   const now = Math.floor(Date.now() / 1000);
   return {
     v: 1,
     user: {
       id: user.id,
       username: user.username,
-      globalName: user.global_name || user.username,
+      globalName: member?.nick || user.global_name || user.username,
       avatar: user.avatar || null
     },
     accessToken: tokens.access_token,
     refreshToken: tokens.refresh_token,
     tokenExp: now + Number(tokens.expires_in || 604800),
     roleCheckedAt: now,
+    academyNameResolved: true,
     exp: now + SESSION_MAX_AGE
   };
 }
@@ -231,11 +232,15 @@ async function validateSession(req, forceRoleCheck = false) {
   }
 
   const checkedAt = source === "police" ? session.academyRoleCheckedAt : session.roleCheckedAt;
-  const roleCheckDue = forceRoleCheck || !checkedAt || now - checkedAt >= ROLE_CHECK_INTERVAL;
+  const roleCheckDue = forceRoleCheck || session.academyNameResolved !== true || !checkedAt || now - checkedAt >= ROLE_CHECK_INTERVAL;
   if (roleCheckDue) {
     try {
       const member = await getAcademyMember(session.accessToken, session.user?.id);
       if (!hasInstructorRole(member)) return { ok: false, reason: "missing_role" };
+      const academyName = member.nick || member.user?.global_name || member.user?.username || session.user.globalName;
+      if (source === "police") session.user.academyGlobalName = academyName;
+      else session.user.globalName = academyName;
+      session.academyNameResolved = true;
       if (source === "police") session.academyRoleCheckedAt = now;
       else session.roleCheckedAt = now;
       changed = true;
@@ -250,12 +255,15 @@ async function validateSession(req, forceRoleCheck = false) {
     }
   }
 
-  return { ok: true, session, changed, source };
+  const displaySession = source === "police" && session.user.academyGlobalName
+    ? { ...session, user: { ...session.user, globalName: session.user.academyGlobalName } }
+    : session;
+  return { ok: true, session: displaySession, storedSession: session, changed, source };
 }
 
 function validatedSessionCookie(result) {
   return result.source === "police"
-    ? policeAuth.sessionCookie(result.session)
+    ? policeAuth.sessionCookie(result.storedSession || result.session)
     : sessionCookie(result.session);
 }
 

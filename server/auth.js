@@ -200,15 +200,16 @@ function hasInstructorRole(member) {
   return Array.isArray(member.roles) && member.roles.includes(INSTRUCTOR_ROLE_ID);
 }
 
-function newSession(user, tokens) {
+function newSession(user, tokens, member = null) {
   const now = Math.floor(Date.now() / 1000);
   return {
     v: 1,
-    user: { id: user.id, username: user.username, globalName: user.global_name || user.username, avatar: user.avatar || null },
+    user: { id: user.id, username: user.username, globalName: member?.nick || user.global_name || user.username, avatar: user.avatar || null },
     accessToken: tokens.access_token,
     refreshToken: tokens.refresh_token,
     tokenExp: now + Number(tokens.expires_in || 604800),
     roleCheckedAt: now,
+    cpdNameResolved: true,
     exp: now + SESSION_MAX_AGE
   };
 }
@@ -233,11 +234,13 @@ async function validateSession(req, forceRoleCheck = false) {
     }
   }
 
-  const roleCheckDue = forceRoleCheck || !session.roleCheckedAt || now - session.roleCheckedAt >= ROLE_CHECK_INTERVAL;
+  const roleCheckDue = forceRoleCheck || session.cpdNameResolved !== true || !session.roleCheckedAt || now - session.roleCheckedAt >= ROLE_CHECK_INTERVAL;
   if (roleCheckDue) {
     try {
       const member = await getGuildMember(session.accessToken);
       if (!hasRequiredRole(member)) return { ok: false, reason: "missing_role" };
+      session.user.globalName = member.nick || member.user?.global_name || member.user?.username || session.user.globalName;
+      session.cpdNameResolved = true;
       session.roleCheckedAt = now;
       changed = true;
     } catch (error) {
