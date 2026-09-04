@@ -1,4 +1,4 @@
-const { exchangeCode, getUser, consumeState, clearStateCookie, sessionCookie } = require("../../server/candidate-auth");
+const { exchangeCode, getUser, joinAcademyGuild, consumeState, clearStateCookie, sessionCookie } = require("../../server/candidate-auth");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).end();
@@ -10,10 +10,12 @@ module.exports = async function handler(req, res) {
   try {
     const tokens = await exchangeCode(req, code);
     const user = await getUser(tokens.access_token);
+    await joinAcademyGuild(tokens.access_token, user.id);
     res.setHeader("Set-Cookie", [clearStateCookie(), sessionCookie(user)]);
     return res.redirect(302, "/public/application.html");
-  } catch {
+  } catch (error) {
+    console.error("Candidate Discord authorization failed", error);
     res.setHeader("Set-Cookie", clearStateCookie());
-    return res.redirect(302, "/public/application.html?auth_error=discord");
+    return res.redirect(302, "/public/application.html?auth_error=join");
   }
 };

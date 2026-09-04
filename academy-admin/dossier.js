@@ -58,17 +58,7 @@ const resultLabels = {
   non_valide: "Non validée"
 };
 
-const standardModules = [
-  "Intégration et règlement",
-  "Communications radio",
-  "Contrôle routier",
-  "Procédure d’interpellation",
-  "Usage de la force",
-  "Conduite opérationnelle",
-  "Rédaction de rapports",
-  "Évaluation finale"
-];
-predefinedTrainingNames = new Set(standardModules);
+let standardModules = [];
 
 function canonicalResult(result) {
   return result === "validee" ? "valide" : result;
@@ -151,7 +141,7 @@ function renderPath(trainings) {
     const result = canonicalResult(latestByModule.get(module)?.result);
     return result === "valide";
   }).length;
-  const percentage = Math.round((validated / standardModules.length) * 100);
+  const percentage = standardModules.length ? Math.round((validated / standardModules.length) * 100) : 0;
   elements.pathPercentage.textContent = `${percentage} %`;
   elements.pathSummary.textContent = `${validated} module${validated > 1 ? "s" : ""} validé${validated > 1 ? "s" : ""} sur ${standardModules.length}`;
   elements.pathProgress.style.width = `${percentage}%`;
@@ -177,7 +167,7 @@ function buildPrintSheet() {
     }
   });
   const validated = standardModules.filter(module => canonicalResult(latestByModule.get(module)?.result) === "valide").length;
-  const percentage = Math.round((validated / standardModules.length) * 100);
+  const percentage = standardModules.length ? Math.round((validated / standardModules.length) * 100) : 0;
   const generatedAt = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(new Date());
   const statusText = elements.status.options[elements.status.selectedIndex]?.text || "—";
   const instructors = [...new Set(activeTrainingRecords.map(training => training.instructorName).filter(Boolean))];
@@ -326,12 +316,11 @@ async function loadDossier() {
       api("/api/academy-admin-data/training-templates").catch(() => ({ templates: [] }))
     ]);
     const activeTemplates = templateData.templates.filter(template => template.active);
-    predefinedTrainingNames = new Set([...standardModules, ...activeTemplates.map(template => template.name)]);
+    standardModules = activeTemplates.map(template => template.name);
+    predefinedTrainingNames = new Set(standardModules);
     const selectedValue = elements.trainingType.value;
     elements.trainingType.innerHTML = '<option value="">Sélectionner un module</option>'
       + standardModules.map(module => `<option value="${escapeHtml(module)}">${escapeHtml(module)}</option>`).join("")
-      + (activeTemplates.length ? '<optgroup label="Formations Academy personnalisées">'
-        + activeTemplates.filter(template => !standardModules.includes(template.name)).map(template => `<option value="${escapeHtml(template.name)}">${escapeHtml(template.name)}</option>`).join("") + '</optgroup>' : "")
       + '<option value="__custom__">Autre formation…</option>';
     if ([...elements.trainingType.options].some(option => option.value === selectedValue)) elements.trainingType.value = selectedValue;
     elements.avatar.src = data.agent.avatar;

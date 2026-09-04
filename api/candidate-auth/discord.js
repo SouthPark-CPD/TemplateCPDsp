@@ -8,7 +8,7 @@ module.exports = function handler(req, res) {
       client_id: env().clientId,
       response_type: "code",
       redirect_uri: `${siteUrl(req)}/api/candidate-auth/callback`,
-      scope: "identify",
+      scope: "identify guilds.join",
       state
     });
     res.setHeader("Set-Cookie", stateCookie(state));

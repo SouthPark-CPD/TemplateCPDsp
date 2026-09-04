@@ -20,6 +20,7 @@
     const profile = document.querySelector("#candidate-profile");
     const error = document.querySelector("#auth-error");
     const reason = new URLSearchParams(location.search).get("auth_error");
+    const resumeSubmission = localStorage.getItem(`${key}_resume_step`) === "4";
 
     try {
       const response = await fetch("/api/candidate-auth/session", { credentials: "same-origin", cache: "no-store" });
@@ -45,17 +46,19 @@
           cancelled: "La connexion Discord a été annulée.",
           invalid_state: "La tentative de connexion a expiré. Veuillez recommencer.",
           discord: "Discord n'a pas pu confirmer votre identité. Veuillez réessayer.",
+          join: "Discord n'a pas pu vous ajouter au serveur Police Academy. Veuillez autoriser l'accès puis réessayer.",
           config: "La connexion Discord n'est pas encore configurée."
         };
         error.textContent = messages[reason] || "La connexion n'a pas pu aboutir.";
         error.classList.remove("hidden");
       }
     } finally {
-      if (localStorage.getItem(`${key}_resume_step`) === "4" || reason) {
+      if (resumeSubmission || reason) {
         localStorage.removeItem(`${key}_resume_step`);
         if (sessionStorage.getItem(`${key}_accuracy`) === "1") form.elements.accuracy.checked = true;
         sessionStorage.removeItem(`${key}_accuracy`);
         show(4);
+        if (resumeSubmission && candidateUser) sendApplication();
       }
     }
   }
@@ -186,14 +189,21 @@
         return;
       }
       if (response.status === 409 && result.channelUrl) {
-        window.location.assign(`success.html?id=${encodeURIComponent(result.applicationId)}&ticket=${encodeURIComponent(result.channelUrl)}&existing=1`);
+        window.location.assign(result.channelUrl);
+        return;
+      }
+      if (response.status === 403 && result.code === "academy_membership_required") {
+        save();
+        localStorage.setItem(`${key}_resume_step`, "4");
+        sessionStorage.setItem(`${key}_accuracy`, "1");
+        window.location.assign("/api/candidate-auth/discord");
         return;
       }
       if (!response.ok || !result.ok) throw new Error(result.code || "internal_error");
       localStorage.removeItem(key);
       localStorage.removeItem(`${key}_resume_step`);
       sessionStorage.removeItem(`${key}_accuracy`);
-      window.location.assign(`success.html?id=${encodeURIComponent(result.applicationId)}&ticket=${encodeURIComponent(result.channelUrl)}`);
+      window.location.assign(result.channelUrl);
     } catch (error) {
       submissionError(error.message === "Failed to fetch" ? "network_error" : error.message);
       submit.disabled = false;

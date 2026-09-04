@@ -37,17 +37,6 @@ const CPD_RANKS = [
   { id: "1505210763499798750", name: "Capitaine", level: 10 }
 ];
 
-const STANDARD_TRAINING_MODULES = [
-  "Intégration et règlement",
-  "Communications radio",
-  "Contrôle routier",
-  "Procédure d’interpellation",
-  "Usage de la force",
-  "Conduite opérationnelle",
-  "Rédaction de rapports",
-  "Évaluation finale"
-];
-
 const EXCLUDED_HIGH_RANKS = new Set([
   "1505209645764055100",
   "1530139558333907014",
@@ -451,7 +440,18 @@ async function toggleTrainingTemplate(req, res) {
   }
 }
 
+async function getActiveTrainingModules(sql) {
+  const rows = await sql`
+    SELECT name
+    FROM academy_training_templates
+    WHERE is_active = TRUE
+    ORDER BY sort_order, name
+  `;
+  return rows.map(row => row.name);
+}
+
 async function syncAgentCompletion(sql, discordId) {
+  const modules = await getActiveTrainingModules(sql);
   const rows = await sql`
     SELECT training_type, result, training_date, created_at
     FROM academy_training_records
@@ -460,11 +460,11 @@ async function syncAgentCompletion(sql, discordId) {
   `;
   const latestByModule = new Map();
   rows.forEach(row => {
-    if (STANDARD_TRAINING_MODULES.includes(row.training_type) && !latestByModule.has(row.training_type)) {
+    if (modules.includes(row.training_type) && !latestByModule.has(row.training_type)) {
       latestByModule.set(row.training_type, normalizeTrainingResult(row.result));
     }
   });
-  const completed = STANDARD_TRAINING_MODULES.every(module => latestByModule.get(module) === "valide");
+  const completed = modules.length > 0 && modules.every(module => latestByModule.get(module) === "valide");
   const fallbackStatus = rows.length ? "en_formation" : "a_former";
   await sql`
     UPDATE academy_agent_files
@@ -607,7 +607,7 @@ async function trainingOverview(req, res) {
 
   try {
     const sql = neon(process.env.DATABASE_URL);
-    const [members, storedFiles, trainingRows] = await Promise.all([
+    const [members, storedFiles, trainingRows, activeModules] = await Promise.all([
       getAllCpdMembers(),
       getStoredAgentSummaries(),
       sql`
@@ -615,7 +615,8 @@ async function trainingOverview(req, res) {
         FROM academy_training_records
         WHERE archived_at IS NULL
         ORDER BY training_date DESC, created_at DESC
-      `
+      `,
+      getActiveTrainingModules(sql)
     ]);
 
     const rowsByAgent = new Map();
@@ -632,11 +633,11 @@ async function trainingOverview(req, res) {
         const rows = rowsByAgent.get(agent.discordId) || [];
         const latestByModule = new Map();
         rows.forEach(row => {
-          if (STANDARD_TRAINING_MODULES.includes(row.training_type) && !latestByModule.has(row.training_type)) {
+          if (activeModules.includes(row.training_type) && !latestByModule.has(row.training_type)) {
             latestByModule.set(row.training_type, normalizeTrainingResult(row.result));
           }
         });
-        const modules = STANDARD_TRAINING_MODULES.map(name => ({
+        const modules = activeModules.map(name => ({
           name,
           result: latestByModule.get(name) || "non_commence"
         }));
@@ -645,7 +646,7 @@ async function trainingOverview(req, res) {
         const failedCount = modules.filter(module => module.result === "non_valide").length;
         const plannedCount = modules.filter(module => module.result === "planifiee").length;
         const missingCount = modules.filter(module => module.result === "non_commence").length;
-        const calculatedCompleted = validatedCount === STANDARD_TRAINING_MODULES.length;
+        const calculatedCompleted = activeModules.length > 0 && validatedCount === activeModules.length;
         const academyStatus = file?.academy_status === "suspendu"
           ? "suspendu"
           : calculatedCompleted
@@ -662,7 +663,7 @@ async function trainingOverview(req, res) {
           failedCount,
           plannedCount,
           missingCount,
-          percentage: Math.round((validatedCount / STANDARD_TRAINING_MODULES.length) * 100),
+          percentage: activeModules.length ? Math.round((validatedCount / activeModules.length) * 100) : 0,
           lastTrainingDate: rows[0]?.training_date || null,
           modules
         };
@@ -677,7 +678,7 @@ async function trainingOverview(req, res) {
     return res.status(200).json({
       ok: true,
       instructor: session.user,
-      modules: STANDARD_TRAINING_MODULES,
+      modules: activeModules,
       ranks: CPD_RANKS.map(rank => rank.name),
       summary: {
         total: agents.length,

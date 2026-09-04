@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 
 const DISCORD_API = "https://discord.com/api/v10";
+const ACADEMY_GUILD_ID = "1538858756354473984";
 const SESSION_COOKIE = "cpd_candidate_session";
 const STATE_COOKIE = "cpd_candidate_oauth_state";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
@@ -108,4 +109,15 @@ async function getUser(accessToken) {
   return discordRequest(`${DISCORD_API}/users/@me`, { headers: { Authorization: `Bearer ${accessToken}` } });
 }
 
-module.exports = { env, siteUrl, createState, stateCookie, consumeState, clearStateCookie, sessionCookie, clearSessionCookie, readSession, exchangeCode, getUser };
+async function joinAcademyGuild(accessToken, userId) {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  if (!botToken) throw new Error("Bot Discord non configuré");
+  const response = await fetch(`${DISCORD_API}/guilds/${ACADEMY_GUILD_ID}/members/${userId}`, {
+    method: "PUT",
+    headers: { Authorization: `Bot ${botToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ access_token: accessToken })
+  });
+  if (!response.ok && response.status !== 204) throw new Error(`Discord guild join ${response.status}`);
+}
+
+module.exports = { env, siteUrl, createState, stateCookie, consumeState, clearStateCookie, sessionCookie, clearSessionCookie, readSession, exchangeCode, getUser, joinAcademyGuild };
