@@ -1,0 +1,17 @@
+Ajoutez les photos dans ce dossier avec exactement ces noms :
+
+officier-i.webp
+officier-ii-iii-mc.webp
+officier-ii-iii-ml.webp
+fto-mc.webp
+fto-ml.webp
+sergeant-i.webp
+sergeant-ii.webp
+lieutenant-i-ii-mc.webp
+lieutenant-i-ii-ml.webp
+capitaine-mc.webp
+capitaine-ml.webp
+
+Formats conseillés : WEBP ou PNG, portrait, même cadrage pour toutes les tenues.
+Pour utiliser un autre nom ou une URL hébergée, modifiez simplement la propriété
+« src » correspondante dans mdt/data-tenues.js.
