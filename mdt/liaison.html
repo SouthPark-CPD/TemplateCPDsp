@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Dépôt de plainte — Liaison gouvernement</title>
+  <link rel="stylesheet" href="/mdt/liaison.css?v=1">
+</head>
+<body>
+  <main class="liaison-page">
+    <header class="liaison-head">
+      <div><p class="eyebrow">LIAISON GOUVERNEMENT</p><h1>Dépôt de plainte</h1><p class="intro">Créez un signalement complet. Il sera transmis automatiquement au forum gouvernemental pour suivi.</p></div>
+      <div class="secure-pill">● Transmission sécurisée</div>
+    </header>
+    <form id="complaint-form" class="complaint-form" novalidate>
+      <section class="form-card"><h2>Informations du dossier</h2><div class="form-grid">
+        <label>Objet du dépôt<input id="complaint-subject" name="subject" maxlength="120" placeholder="Ex. Vol de véhicule" required></label>
+        <label>Nom du plaignant<input id="complaint-complainant" name="complainant" maxlength="120" placeholder="Nom RP / matricule"></label>
+        <label>Date et heure<input id="complaint-date" name="date" type="datetime-local"></label>
+        <label>Lieu des faits<input id="complaint-location" name="location" maxlength="180" placeholder="Adresse ou zone"></label>
+        <label class="span-2">Personnes impliquées<input id="complaint-involved" name="involved" maxlength="500" placeholder="Noms, matricules ou descriptions"></label>
+        <label class="span-2">Témoins<input id="complaint-witnesses" name="witnesses" maxlength="500" placeholder="Noms ou coordonnées (facultatif)"></label>
+      </div></section>
+      <section class="form-card"><h2>Récit des faits</h2><label>Description détaillée<textarea id="complaint-description" name="description" rows="8" maxlength="5000" placeholder="Décrivez les faits dans l'ordre chronologique…" required></textarea></label><div class="form-foot"><span id="description-count">0 / 5000</span><button id="submit-complaint" class="primary" type="submit">Déposer la plainte</button></div></section>
+    </form>
+    <div id="complaint-status" class="status" role="status" aria-live="polite" hidden></div>
+  </main>
+  <script src="/mdt/liaison.js?v=1"></script>
+</body>
+</html>

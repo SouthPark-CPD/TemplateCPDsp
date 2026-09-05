@@ -18,11 +18,13 @@ const {
   validateSession,
   validatedSessionCookie
 } = require("../server/academy-admin-auth");
+const { validateSession: validatePoliceSession, sessionCookie: policeSessionCookie, clearSessionCookie: policeClearSessionCookie } = require("../server/auth");
 
 const DISCORD_API = "https://discord.com/api/v10";
 const CPD_GUILD_ID = "1408092767963451615";
 const CPD_MEMBER_ROLE_ID = "1408092768026365974";
 const CPD_CONVOCATION_CHANNEL_ID = "1538526645135347763";
+const GOVERNMENT_COMPLAINT_FORUM_ID = "1473895325197406328";
 
 const CPD_RANKS = [
   { id: "1408092768043270224", name: "Officier I", level: 1 },
@@ -114,7 +116,7 @@ async function sessionStatus(req, res) {
   res.setHeader("Cache-Control", "no-store");
   const result = await validateSession(req, false);
   if (!result.ok) {
-    res.setHeader("Set-Cookie", clearSessionCookie());
+    res.setHeader("Set-Cookie", policeClearSessionCookie());
     return res.status(401).json({ authenticated: false, reason: result.reason });
   }
   if (result.changed) res.setHeader("Set-Cookie", validatedSessionCookie(result));
@@ -261,6 +263,61 @@ function validSyncSecret(req) {
 
 function textField(value, maxLength) {
   return String(value || "").trim().slice(0, maxLength);
+}
+
+function complaintText(value, maxLength, fallback = "Non renseigné") {
+  const text = textField(value, maxLength).replace(/@/g, "＠");
+  return text || fallback;
+}
+
+async function createGovernmentComplaint(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ ok: false, code: "method_not_allowed" });
+  const access = await validatePoliceSession(req, false);
+  if (!access.ok) {
+    res.setHeader("Set-Cookie", policeClearSessionCookie());
+    return res.status(401).json({ ok: false, code: access.reason });
+  }
+  if (access.changed) res.setHeader("Set-Cookie", policeSessionCookie(access.session));
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const subject = complaintText(body.subject, 90, "Dépôt de plainte");
+  const complainant = complaintText(body.complainant, 120);
+  const date = complaintText(body.date, 40);
+  const location = complaintText(body.location, 160);
+  const involved = complaintText(body.involved, 500);
+  const witnesses = complaintText(body.witnesses, 500);
+  const description = complaintText(body.description, 4000);
+  if (description === "Non renseigné") return res.status(400).json({ ok: false, code: "description_required" });
+  const complaintId = `PL-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 900 + 100)}`;
+  const author = access.session.user?.globalName || access.session.user?.username || "Agent CPD";
+  const content = [
+    `## ${complaintId} — ${subject}`,
+    `**Déposée par :** ${complaintText(author, 100)}`,
+    `**Date et heure des faits :** ${date}`,
+    `**Lieu :** ${location}`,
+    `**Plaignant :** ${complainant}`,
+    `**Personnes impliquées :** ${involved}`,
+    `**Témoins :** ${witnesses}`,
+    "",
+    "### Description des faits",
+    description,
+    "",
+    `*Dépôt créé depuis le MDT · ${new Date().toLocaleString("fr-FR", { timeZone: "UTC" })} UTC*`
+  ].join("\n").slice(0, 1900);
+  try {
+    const thread = await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads`, {
+      method: "POST",
+      body: {
+        name: `${complaintId} · ${subject}`.slice(0, 100),
+        auto_archive_duration: 10080,
+        message: { content, allowed_mentions: { parse: [] } }
+      }
+    });
+    return res.status(201).json({ ok: true, complaintId, threadId: thread?.id || null, url: thread?.id ? `https://discord.com/channels/${CPD_GUILD_ID}/${thread.id}` : null });
+  } catch (error) {
+    console.error("Government complaint creation failed", { status: error.status || 0, type: error.name || "Error" });
+    return res.status(error.status === 403 ? 403 : 502).json({ ok: false, code: error.status === 403 ? "forum_forbidden" : "discord_unavailable" });
+  }
 }
 
 function validDiscordId(value) {
@@ -2042,6 +2099,7 @@ module.exports = async function handler(req, res) {
     case "recruitment-ticket": return recruitmentTicketDetail(req, res);
     case "recruitment-decision": return saveRecruitmentDecision(req, res);
     case "ticket-sync": return syncRecruitmentTicket(req, res);
+    case "government-complaint-create": return createGovernmentComplaint(req, res);
     default: return res.status(404).json({ ok: false, code: "route_not_found" });
   }
 };
