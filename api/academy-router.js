@@ -317,7 +317,8 @@ async function createGovernmentComplaint(req, res) {
         message: { content, allowed_mentions: { parse: [] } }
       }
     });
-    return res.status(201).json({ ok: true, complaintId, threadId: thread?.id || null, url: thread?.id ? `https://discord.com/channels/${CPD_GUILD_ID}/${thread.id}` : null });
+    let attachmentsUploaded=true;const files=Array.isArray(body.attachments)?body.attachments.slice(0,3):[];if(files.length&&thread?.id){try{await discordBotUpload(`/channels/${thread.id}/messages`,`Pièces jointes du dépôt ${complaintId}`,files)}catch(error){attachmentsUploaded=false;console.error("Government complaint attachments failed",error.code||error.status||error.message)}}
+    return res.status(201).json({ ok: true, complaintId, threadId: thread?.id || null, attachmentsUploaded, url: thread?.id ? `https://discord.com/channels/${CPD_GUILD_ID}/${thread.id}` : null });
   } catch (error) {
     console.error("Government complaint creation failed", { status: error.status || 0, type: error.name || "Error" });
     return res.status(error.status === 403 ? 403 : 502).json({ ok: false, code: error.status === 403 ? "forum_forbidden" : "discord_unavailable" });
@@ -336,16 +337,31 @@ async function governmentComplaints(req, res) {
     const tags = Object.fromEntries((forum.available_tags || []).map(t=>[t.id,t.name]));
     const threads = [...(active.threads||[]).filter(t=>String(t.parent_id||"")===GOVERNMENT_COMPLAINT_FORUM_ID), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,updatedAt:t.thread_metadata?.archive_timestamp||t.created_at,lastMessageId:t.last_message_id||null,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${CPD_GUILD_ID}/${t.id}`}));
     const id=String(req.query.threadId||"");
-    if(id){const thread=await discordBotRequest(`/channels/${id}`);const messages=await discordBotRequest(`/channels/${id}/messages?limit=100`);return res.json({ok:true,thread,messages,tags});}
-    return res.json({ok:true,threads,tags,archiveError});
+    if(id){const thread=await discordBotRequest(`/channels/${id}`);const messages=await discordBotRequest(`/channels/${id}/messages?limit=100`);return res.json({ok:true,thread,messages,tags,availableTags:forum.available_tags||[]});}
+    return res.json({ok:true,threads,tags,availableTags:forum.available_tags||[],archiveError});
   } catch(error){console.error("Government forum read failed",{stage,status:error.status||0,message:error.message});return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"forum_read_forbidden":"discord_unavailable",status:error.status||0,stage,channel:GOVERNMENT_COMPLAINT_FORUM_ID});}
+}
+
+async function discordBotUpload(path, content, files) {
+  const token=process.env.DISCORD_BOT_TOKEN;if(!token)throw new Error("DISCORD_BOT_TOKEN manquant");const form=new FormData();form.append("payload_json",JSON.stringify({content,allowed_mentions:{parse:[]}}));let total=0;
+  files.forEach((file,index)=>{const name=String(file?.name||`piece-${index+1}`).slice(0,120).replace(/[\\/]/g,"_");const type=String(file?.type||"application/octet-stream");const raw=String(file?.data||"").replace(/^data:[^;]+;base64,/ ,"");const buffer=Buffer.from(raw,"base64");total+=buffer.length;if(!buffer.length||buffer.length>3*1024*1024||total>8*1024*1024)throw Object.assign(new Error("file_too_large"),{code:"file_too_large"});form.append(`files[${index}]`,new Blob([buffer],{type}),name)});
+  const response=await fetch(`${DISCORD_API}${path}`,{method:"POST",headers:{Authorization:`Bot ${token}`},body:form});if(!response.ok){const error=new Error(`Discord API ${response.status}`);error.status=response.status;throw error}return response.json();
 }
 
 async function governmentComplaintMessage(req, res) {
   const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});
   const body=readJsonBody(req), threadId=String(body?.threadId||""), content=complaintText(body?.message,1800,"");
-  if(!/^\d{17,20}$/.test(threadId)||!content)return res.status(400).json({ok:false,code:"message_required"});
-  try { const thread=await discordBotRequest(`/channels/${threadId}`); if(String(thread?.parent_id||"")!==GOVERNMENT_COMPLAINT_FORUM_ID)return res.status(403).json({ok:false,code:"thread_forbidden"}); const agent=access.session.user?.globalName||access.session.user?.username||"Agent CPD"; const message=await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:`**${complaintText(agent,100)}**\n${content}`,allowed_mentions:{parse:[]}}}); return res.status(201).json({ok:true,messageId:message?.id||null}); }
+  const files=Array.isArray(body?.attachments)?body.attachments.slice(0,3):[];
+  if(!/^\d{17,20}$/.test(threadId)||(!content&&!files.length))return res.status(400).json({ok:false,code:"message_required"});
+  try { const thread=await discordBotRequest(`/channels/${threadId}`); if(String(thread?.parent_id||"")!==GOVERNMENT_COMPLAINT_FORUM_ID)return res.status(403).json({ok:false,code:"thread_forbidden"}); if(thread.thread_metadata?.archived)await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{archived:false}}); const agent=access.session.user?.globalName||access.session.user?.username||"Agent CPD"; const text=`**${complaintText(agent,100)}**${content?`\n${content}`:""}`; const message=files.length?await discordBotUpload(`/channels/${threadId}/messages`,text,files):await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[]}}}); return res.status(201).json({ok:true,messageId:message?.id||null}); }
+  catch(error){return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"thread_forbidden":"discord_unavailable"});}
+}
+
+async function updateGovernmentComplaint(req, res) {
+  const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});
+  const body=readJsonBody(req),threadId=String(body?.threadId||""),ids=Array.isArray(body?.appliedTags)?body.appliedTags.map(String).slice(0,20):[];
+  if(!/^\d{17,20}$/.test(threadId))return res.status(400).json({ok:false,code:"thread_required"});
+  try { const forum=await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}`);const valid=new Set((forum.available_tags||[]).map(t=>String(t.id)));if(ids.some(id=>!valid.has(id)))return res.status(400).json({ok:false,code:"invalid_tag"});const thread=await discordBotRequest(`/channels/${threadId}`);if(String(thread?.parent_id||"")!==GOVERNMENT_COMPLAINT_FORUM_ID)return res.status(403).json({ok:false,code:"thread_forbidden"});if(thread.thread_metadata?.archived)await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{archived:false}});await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{applied_tags:ids}});const agent=access.session.user?.globalName||access.session.user?.username||"Agent CPD";const names=(forum.available_tags||[]).filter(t=>ids.includes(String(t.id))).map(t=>t.name).join(", ")||"Sans tag";await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:`**Historique MDT**\n${complaintText(agent,100)} a modifié le statut/tags : ${complaintText(names,250)}`,allowed_mentions:{parse:[]}}});return res.json({ok:true,appliedTags:ids}); }
   catch(error){return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"thread_forbidden":"discord_unavailable"});}
 }
 
@@ -2128,7 +2144,7 @@ module.exports = async function handler(req, res) {
     case "recruitment-ticket": return recruitmentTicketDetail(req, res);
     case "recruitment-decision": return saveRecruitmentDecision(req, res);
     case "ticket-sync": return syncRecruitmentTicket(req, res);
-    case "government-complaint-create": { if(req.method === "GET") return governmentComplaints(req,res); const body=readJsonBody(req); if(req.method === "POST" && body && (body.threadId || body.message)) return governmentComplaintMessage(req,res); return createGovernmentComplaint(req,res); }
+    case "government-complaint-create": { if(req.method === "GET") return governmentComplaints(req,res); const body=readJsonBody(req); if(req.method === "POST" && body?.action === "update") return updateGovernmentComplaint(req,res); if(req.method === "POST" && body && (body.threadId || body.message)) return governmentComplaintMessage(req,res); return createGovernmentComplaint(req,res); }
     default: return res.status(404).json({ ok: false, code: "route_not_found" });
   }
 };
