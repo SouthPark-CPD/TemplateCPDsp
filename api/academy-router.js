@@ -330,11 +330,11 @@ async function governmentComplaints(req, res) {
   let stage="forum";
   try {
     let forum={available_tags:[]}; try { forum=await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}`); } catch(e) { console.warn("Government forum metadata unavailable",e.status||e.message); }
-    stage="active"; const active = await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads/active`);
+    stage="active"; const active = await discordBotRequest(`/guilds/${CPD_GUILD_ID}/threads/active`);
     const archivedThreads=[]; let before="";
     let archiveError=null; try { for(let page=0;page<100;page++) { const suffix=before?`&before=${encodeURIComponent(before)}`:""; const batch=await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads/archived/public?limit=100${suffix}`); archivedThreads.push(...(batch.threads||[])); if(!batch.has_more||!(batch.threads||[]).length) break; before=batch.threads[batch.threads.length-1].thread_metadata?.archive_timestamp||batch.threads[batch.threads.length-1].id; } } catch(e) { archiveError=e.status||"unknown"; }
     const tags = Object.fromEntries((forum.available_tags || []).map(t=>[t.id,t.name]));
-    const threads = [...(active.threads||[]), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${CPD_GUILD_ID}/${t.id}`}));
+    const threads = [...(active.threads||[]).filter(t=>String(t.parent_id||"")===GOVERNMENT_COMPLAINT_FORUM_ID), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${CPD_GUILD_ID}/${t.id}`}));
     const id=String(req.query.threadId||"");
     if(id){const thread=await discordBotRequest(`/channels/${id}`);const messages=await discordBotRequest(`/channels/${id}/messages?limit=100`);return res.json({ok:true,thread,messages,tags});}
     return res.json({ok:true,threads,tags,archiveError});
