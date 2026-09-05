@@ -21,11 +21,6 @@
 
 ========================================================== */
 
-const tabletStyle = document.createElement("link");
-tabletStyle.rel = "stylesheet";
-tabletStyle.href = new URL("tablet-ui.css?v=1", document.currentScript.src).href;
-document.head.appendChild(tabletStyle);
-
 
 /* ==========================================================
    LIENS DE NAVIGATION
