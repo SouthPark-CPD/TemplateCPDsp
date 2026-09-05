@@ -3,7 +3,7 @@
  const R=CPDRoutes,origin=location.origin,frame=document.getElementById('module-frame');
  const message=document.getElementById('shell-message'),retry=document.getElementById('retry-session'),paMenu=document.getElementById('pa-menu');
  const mdt=[['rapide','Accès rapide','grid'],['procedures','Procédures','book'],['radio','Radio','radio'],['reglement','Règlement','list'],['tenues','Tenues','users'],['organigramme','Organigramme','chart']];
- const pa=[['pa','Tableau de bord','grid'],['agents','Tous les agents','users'],['suivi','Suivi pédagogique','chart'],['formations','Formations','book'],['recrutements','Recrutements','inbox'],['activite','Historique','clock']];
+ const pa=[['pa','Tableau de bord','grid'],['suivi','Suivi pédagogique','chart'],['formations','Formations','book'],['recrutements','Recrutements','inbox'],['activite','Historique','clock']];
  const paths={grid:'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',users:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M16 3a4 4 0 0 1 0 8 M22 21v-2a4 4 0 0 0-3-3.87 M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0',chart:'M4 4v16h16 M8 16v-4 M12 16V8 M16 16V5',book:'M12 5v16 M12 5C8 2 4 3 2 4v16c4-2 7-1 10 1 3-2 6-3 10-1V4c-4-2-7-1-10 1',inbox:'M3 4h18v16H3z M3 13h5l2 3h4l2-3h5',clock:'M12 8v5l3 2 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',radio:'M5 9h14v12H5z M8 3v6 M8 13h8 M8 17h2',list:'M8 6h13 M8 12h13 M8 18h13 M3 6h1 M3 12h1 M3 18h1'};
  const icon=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${paths[k]}"/></svg>`;
  let authorized=false,ready=false,current=null,timer;
