@@ -15,6 +15,14 @@ const elements = {
 
 const statusLabels = { new: "Nouvelle", to_contact: "À contacter", contacted: "Contactée", scheduled: "Convoquée", processed: "Traitée", archived: "Archivée" };
 const decisionLabels = { pending: "En attente", accepted: "Acceptée", refused: "Refusée", withdrawn: "Abandon" };
+const kanbanColumns = [
+  { status: "new", title: "Nouvelles", hint: "À consulter" },
+  { status: "to_contact", title: "À contacter", hint: "Premier appel" },
+  { status: "contacted", title: "Contactées", hint: "Échange effectué" },
+  { status: "scheduled", title: "Convoquées", hint: "Prochaine PA" },
+  { status: "processed", title: "Traitées", hint: "Décision prise" },
+  { status: "archived", title: "Archives", hint: "Dossiers terminés" }
+];
 const formLabels = {
   firstName: "Prénom RP", lastName: "Nom RP", age: "Âge RP", phone: "Téléphone en jeu",
   policeExperience: "Expérience dans la police RP", experience: "Expérience RP",
@@ -34,6 +42,16 @@ function formatDate(value) {
   return Number.isNaN(date.getTime()) ? "—" : new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
+function relativeDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Date inconnue";
+  const seconds = Math.round((date.getTime() - Date.now()) / 1000);
+  const formatter = new Intl.RelativeTimeFormat("fr-FR", { numeric: "auto" });
+  if (Math.abs(seconds) < 3600) return formatter.format(Math.round(seconds / 60), "minute");
+  if (Math.abs(seconds) < 86400) return formatter.format(Math.round(seconds / 3600), "hour");
+  return formatter.format(Math.round(seconds / 86400), "day");
+}
+
 async function api(url, options = {}) {
   const response = await fetch(url, { credentials: "same-origin", cache: "no-store", ...options, headers: { "Content-Type": "application/json", ...(options.headers || {}) } });
   const data = await response.json().catch(() => ({}));
@@ -51,22 +69,34 @@ function renderTickets() {
     const haystack = `${ticket.applicationId} ${ticket.candidateName} ${ticket.phone} ${ticket.assignedInstructorName || ""}`.toLocaleLowerCase("fr");
     return (!query || haystack.includes(query)) && (!elements.status.value || ticket.status === elements.status.value) && (!elements.decision.value || ticket.recruitmentDecision === elements.decision.value);
   });
-  if (!filtered.length) {
-    elements.list.hidden = true;
-    elements.message.hidden = false;
-    elements.message.textContent = "Aucune candidature ne correspond aux filtres sélectionnés.";
-    return;
-  }
-  elements.message.hidden = true;
+  elements.message.hidden = filtered.length > 0;
+  elements.message.textContent = "Aucune candidature ne correspond aux filtres sélectionnés.";
   elements.list.hidden = false;
-  elements.list.innerHTML = filtered.map(ticket => `
-    <article class="ticket-card">
-      <div class="ticket-id"><span>${escapeHtml(ticket.applicationId)}</span><small>${escapeHtml(formatDate(ticket.createdAt))}</small></div>
-      <div class="candidate"><h3>${escapeHtml(ticket.candidateName)}</h3><p>Tél. · ${escapeHtml(ticket.phone || "Non renseigné")}</p></div>
-      <span class="status status-${escapeHtml(ticket.status)}">${escapeHtml(statusLabels[ticket.status] || ticket.status)}</span>
-      <span class="decision decision-${escapeHtml(ticket.recruitmentDecision)}">${escapeHtml(decisionLabels[ticket.recruitmentDecision] || ticket.recruitmentDecision)}</span>
-      <div class="ticket-actions"><button type="button" data-ticket-id="${escapeHtml(ticket.applicationId)}">Consulter</button></div>
-    </article>`).join("");
+  const visibleColumns = elements.status.value
+    ? kanbanColumns.filter(column => column.status === elements.status.value)
+    : kanbanColumns;
+  elements.list.innerHTML = visibleColumns.map(column => {
+    const cards = filtered.filter(ticket => ticket.status === column.status);
+    return `
+      <section class="kanban-column column-${column.status}">
+        <header class="kanban-head">
+          <span class="column-dot" aria-hidden="true"></span>
+          <div><h3>${escapeHtml(column.title)}</h3><small>${escapeHtml(column.hint)}</small></div>
+          <strong>${cards.length}</strong>
+        </header>
+        <div class="kanban-cards">
+          ${cards.length ? cards.map(ticket => `
+            <button class="kanban-card" type="button" data-ticket-id="${escapeHtml(ticket.applicationId)}">
+              <span class="kanban-meta"><b>${escapeHtml(ticket.applicationId)}</b><time title="${escapeHtml(formatDate(ticket.createdAt))}">${escapeHtml(relativeDate(ticket.createdAt))}</time></span>
+              <strong>${escapeHtml(ticket.candidateName)}</strong>
+              <span class="kanban-phone">☎ ${escapeHtml(ticket.phone || "Non renseigné")}</span>
+              <span class="kanban-owner">${ticket.assignedInstructorName ? `Responsable · ${escapeHtml(ticket.assignedInstructorName)}` : "Non attribuée"}</span>
+              ${ticket.recruitmentDecision !== "pending" ? `<span class="decision decision-${escapeHtml(ticket.recruitmentDecision)}">${escapeHtml(decisionLabels[ticket.recruitmentDecision])}</span>` : ""}
+              <span class="kanban-open">Consulter le dossier <b>→</b></span>
+            </button>`).join("") : '<p class="kanban-empty">Aucune candidature</p>'}
+        </div>
+      </section>`;
+  }).join("");
 }
 
 function renderFormData(formData) {
