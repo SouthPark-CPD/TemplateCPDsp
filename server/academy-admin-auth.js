@@ -1,6 +1,5 @@
 const crypto = require("node:crypto");
 const policeAuth = require("./auth");
-
 const COOKIE_NAME = "cpd_academy_admin_session";
 const STATE_COOKIE_NAME = "cpd_academy_admin_oauth_state";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
@@ -71,7 +70,13 @@ function clearSessionCookie() {
 }
 
 function clearAllSessionCookies() {
-  return [clearSessionCookie(), policeAuth.clearSessionCookie()];
+  // policeAuth efface maintenant deux cookies (Discord classique + FiveM).
+  // On aplatit la liste pour garder un header Set-Cookie valide.
+  const policeCookies = policeAuth.clearSessionCookie();
+  return [
+    clearSessionCookie(),
+    ...(Array.isArray(policeCookies) ? policeCookies : [policeCookies])
+  ];
 }
 
 function readSession(req) {
@@ -109,7 +114,6 @@ async function discordRequest(url, options = {}) {
         signal: options.signal || AbortSignal.timeout(DISCORD_REQUEST_TIMEOUT)
       });
       if (response.ok) return response.json();
-
       const detail = await response.text().catch(() => "");
       const error = new Error(`Discord API ${response.status}`);
       error.status = response.status;
@@ -117,7 +121,6 @@ async function discordRequest(url, options = {}) {
 
       const retryable = response.status === 429 || response.status >= 500;
       if (!retryable || attempt === DISCORD_MAX_ATTEMPTS - 1) throw error;
-
       let retryAfter = Number(response.headers.get("retry-after") || 0);
       try {
         retryAfter ||= Number(JSON.parse(detail).retry_after || 0);
@@ -217,7 +220,12 @@ async function validateSession(req, forceRoleCheck = false) {
   }
 
   const now = Math.floor(Date.now() / 1000);
-  if (!session.accessToken || !session.refreshToken) return { ok: false, reason: "invalid_session" };
+
+  // Une session police issue de FiveM n'a volontairement aucun access/refresh token
+  // OAuth utilisateur. Elle a deja ete validee par policeAuth avec le bot Discord.
+  if (source === "academy" && (!session.accessToken || !session.refreshToken)) {
+    return { ok: false, reason: "invalid_session" };
+  }
 
   if (source === "academy" && session.tokenExp <= now + 60) {
     try {
