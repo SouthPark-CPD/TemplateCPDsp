@@ -1883,7 +1883,8 @@ async function saveRecruitmentDecision(req, res) {
   const applicationId = String(body.applicationId || "").toUpperCase();
   const decision = String(body.decision || "");
   const status = String(body.status || "");
-  const internalNote = textField(body.internalNote, 5000);
+  const hasInternalNote = Object.prototype.hasOwnProperty.call(body, "internalNote");
+  const internalNote = hasInternalNote ? textField(body.internalNote, 5000) : null;
   if (!/^PA-\d{1,20}$/.test(applicationId) || !RECRUITMENT_DECISIONS.has(decision) || !RECRUITMENT_STATUSES.has(status)) {
     return res.status(400).json({ ok: false, code: "invalid_recruitment_decision" });
   }
@@ -1894,7 +1895,8 @@ async function saveRecruitmentDecision(req, res) {
     const instructorName = session.user.globalName || session.user.username;
     const rows = await sql`
       UPDATE academy_recruitment_applications
-      SET decision = ${decision}, status = ${status}, internal_note = ${internalNote || null},
+      SET decision = ${decision}, status = ${status},
+        internal_note = CASE WHEN ${hasInternalNote} THEN ${internalNote || null} ELSE internal_note END,
         assigned_instructor_id = CASE WHEN ${status} = 'new' THEN assigned_instructor_id ELSE ${session.user.id} END,
         assigned_instructor_name = CASE WHEN ${status} = 'new' THEN assigned_instructor_name ELSE ${instructorName} END,
         updated_at = NOW()
