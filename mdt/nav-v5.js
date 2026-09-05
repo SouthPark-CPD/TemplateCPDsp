@@ -314,6 +314,14 @@ function getCurrentPage(){
 
 function renderSiteHeader(){
 
+  if(!document.querySelector('link[data-tablet-ui="mdt"]')){
+    const tabletStyles = document.createElement("link");
+    tabletStyles.rel = "stylesheet";
+    tabletStyles.href = "tablet-app.css?v=2";
+    tabletStyles.dataset.tabletUi = "mdt";
+    document.head.appendChild(tabletStyles);
+  }
+
   const container =
     document.getElementById("site-header");
 
@@ -509,6 +517,11 @@ function renderSiteHeader(){
         </nav>
       </div>
 
+      <div class="mdt-system-strip">
+        <span><i aria-hidden="true"></i> CPD Secure</span>
+        <span id="nav-clock"></span>
+      </div>
+
     </header>
 
     <button class="nav-overlay" type="button" aria-label="Fermer la navigation"></button>
@@ -590,3 +603,128 @@ setInterval(
   updateNavClock,
   15000
 );
+
+/* ==========================================================
+   CPD COMMAND — SHELL TABLETTE
+   Transforme les pages documentaires en application NUI.
+========================================================== */
+
+const COMMAND_ICONS = {
+  "index.html":"⌂",
+  "code.html":"⌁",
+  "reglement.html":"≡",
+  "tenues-vehicules.html":"♙",
+  "organigramme.html":"⌘",
+  "acces-rapide.html":"⚡",
+  "portail.html":"◎"
+};
+
+function buildCommandShell(){
+  if(document.querySelector(".command-app")) return;
+
+  const config = window.PAGE_CONFIG || {};
+  const currentPage = config.currentPage ? cleanFileName(config.currentPage) : getCurrentPage();
+  const legacyHeader = document.getElementById("site-header");
+  const search = document.body.querySelector(":scope > .search-container");
+  const categories = document.body.querySelector(":scope > #categories");
+  const main = document.body.querySelector(":scope > main");
+  const quickAccess = document.body.querySelector(":scope > .qr-wrap");
+  const footer = document.body.querySelector(":scope > footer");
+
+  const app = document.createElement("div");
+  app.className = "command-app";
+  app.innerHTML = `
+    <div class="command-statusbar">
+      <span id="command-clock">--:--</span>
+      <span class="command-status-center">CPD COMMAND <i></i> RÉSEAU SÉCURISÉ</span>
+      <span class="command-device-status"><b>▮▮▮</b><b>⌁</b><em>100</em></span>
+    </div>
+    <header class="command-topbar">
+      <div class="command-brand">
+        ${BRAND_MARKUP}
+        <div><strong>Chicago Police Department</strong><span>Command · Mobile Data Terminal</span></div>
+      </div>
+      <div class="command-page-identity">
+        <small>${escapeCommandText(config.docCode || "CPD · INTERNE")}</small>
+        <strong>${escapeCommandText(commandPageTitle(currentPage))}</strong>
+      </div>
+      <div class="command-user">
+        <div><span>Session active</span><strong id="command-user-name">Agent CPD</strong></div>
+        <span class="command-avatar" id="command-avatar">CPD</span>
+      </div>
+    </header>
+    <div class="command-layout">
+      <aside class="command-sidebar">
+        <nav class="command-nav" aria-label="Modules du MDT">
+          ${NAV_LINKS.filter(link => !link.logout && !link.external).map(link => {
+            const file = cleanFileName(link.href);
+            const active = file === currentPage ? " active" : "";
+            return `<a class="command-nav-item${active}${link.quick ? " quick" : ""}" href="${link.href}"><i>${COMMAND_ICONS[file] || "•"}</i><span>${escapeCommandText(link.label)}</span>${link.quick ? "<b>PRIORITÉ</b>" : ""}</a>`;
+          }).join("")}
+        </nav>
+        <div class="command-sidebar-footer">
+          <a href="https://guidejuridiquesp.netlify.app/" target="_blank" rel="noopener"><i>↗</i><span>Guide juridique</span></a>
+          <a class="danger" href="/api/auth/logout"><i>↪</i><span>Déconnexion</span></a>
+        </div>
+      </aside>
+      <section class="command-workspace">
+        <header class="command-toolbar">
+          <div><small>ESPACE DE TRAVAIL</small><h1>${escapeCommandText(commandPageTitle(currentPage))}</h1></div>
+          <div class="command-toolbar-slot"></div>
+        </header>
+        <div class="command-subnav"></div>
+        <div class="command-content"></div>
+      </section>
+    </div>`;
+
+  document.body.insertBefore(app, document.body.firstChild);
+  legacyHeader?.setAttribute("hidden", "");
+  footer?.setAttribute("hidden", "");
+
+  const toolbarSlot = app.querySelector(".command-toolbar-slot");
+  const subnav = app.querySelector(".command-subnav");
+  const content = app.querySelector(".command-content");
+  if(search) toolbarSlot.appendChild(search);
+  if(categories) subnav.appendChild(categories);
+  else subnav.hidden = true;
+  if(main) content.appendChild(main);
+  else if(quickAccess) content.appendChild(quickAccess);
+
+  const tick = () => {
+    const now = new Date();
+    const node = document.getElementById("command-clock");
+    if(node) node.textContent = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+  };
+  tick();
+  setInterval(tick,15000);
+
+  fetch("/api/auth/session",{credentials:"same-origin",cache:"no-store"})
+    .then(response => response.ok ? response.json() : null)
+    .then(data => {
+      const name = data?.user?.globalName || data?.user?.username;
+      if(!name) return;
+      const nameNode = document.getElementById("command-user-name");
+      const avatarNode = document.getElementById("command-avatar");
+      if(nameNode) nameNode.textContent = name;
+      if(avatarNode) avatarNode.textContent = name.split(/\s+/).slice(0,2).map(part => part[0]).join("").toUpperCase();
+    }).catch(()=>{});
+}
+
+function commandPageTitle(page){
+  return ({
+    "index.html":"Procédures",
+    "code.html":"Communications radio",
+    "reglement.html":"Règlement intérieur",
+    "tenues-vehicules.html":"Tenues réglementaires",
+    "organigramme.html":"Organisation du CPD",
+    "acces-rapide.html":"Accès rapide",
+    "portail.html":"Portail agent"
+  })[page] || "Mobile Data Terminal";
+}
+
+function escapeCommandText(value){
+  return String(value ?? "").replace(/[&<>'"]/g, character => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[character]);
+}
+
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded",buildCommandShell);
+else buildCommandShell();
