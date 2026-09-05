@@ -286,13 +286,17 @@ async function createGovernmentComplaint(req, res) {
   const location = complaintText(body.location, 160);
   const involved = complaintText(body.involved, 500);
   const witnesses = complaintText(body.witnesses, 500);
+  const authorFirstName = complaintText(body.authorFirstName, 80);
+  const authorLastName = complaintText(body.authorLastName, 80);
+  const authorBadge = complaintText(body.authorBadge, 30);
   const description = complaintText(body.description, 4000);
   if (description === "Non renseigné") return res.status(400).json({ ok: false, code: "description_required" });
   const complaintId = `PL-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 900 + 100)}`;
   const author = access.session.user?.globalName || access.session.user?.username || "Agent CPD";
   const content = [
     `## ${complaintId} — ${subject}`,
-    `**Déposée par :** ${complaintText(author, 100)}`,
+    `**Rédacteur :** ${authorFirstName} ${authorLastName} · Matricule ${authorBadge}`,
+    `**Compte connecté :** ${complaintText(author, 100)}`,
     `**Date et heure des faits :** ${date}`,
     `**Lieu :** ${location}`,
     `**Plaignant :** ${complainant}`,
@@ -318,6 +322,21 @@ async function createGovernmentComplaint(req, res) {
     console.error("Government complaint creation failed", { status: error.status || 0, type: error.name || "Error" });
     return res.status(error.status === 403 ? 403 : 502).json({ ok: false, code: error.status === 403 ? "forum_forbidden" : "discord_unavailable" });
   }
+}
+
+async function governmentComplaints(req, res) {
+  const access = await validatePoliceSession(req, false);
+  if (!access.ok) return res.status(401).json({ ok:false, code:access.reason });
+  try {
+    const forum = await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}`);
+    const active = await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads/active`);
+    const archived = await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads/archived/public?limit=100`);
+    const tags = Object.fromEntries((forum.available_tags || []).map(t=>[t.id,t.name]));
+    const threads = [...(active.threads||[]), ...(archived.threads||[])].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${CPD_GUILD_ID}/${t.id}`}));
+    const id=String(req.query.threadId||"");
+    if(id){const thread=await discordBotRequest(`/channels/${id}`);const messages=await discordBotRequest(`/channels/${id}/messages?limit=100`);return res.json({ok:true,thread,messages,tags});}
+    return res.json({ok:true,threads,tags});
+  } catch(error){return res.status(502).json({ok:false,code:"discord_unavailable"});}
 }
 
 function validDiscordId(value) {
@@ -2099,7 +2118,7 @@ module.exports = async function handler(req, res) {
     case "recruitment-ticket": return recruitmentTicketDetail(req, res);
     case "recruitment-decision": return saveRecruitmentDecision(req, res);
     case "ticket-sync": return syncRecruitmentTicket(req, res);
-    case "government-complaint-create": return createGovernmentComplaint(req, res);
+    case "government-complaint-create": return req.method === "GET" ? governmentComplaints(req, res) : createGovernmentComplaint(req, res);
     default: return res.status(404).json({ ok: false, code: "route_not_found" });
   }
 };
