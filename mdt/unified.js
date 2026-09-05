@@ -20,7 +20,7 @@
   current=route;const item=[...mdt,...liaison,...pa].find(x=>x[0]===route.view);
   const title=item?.[1]||(route.view==='dossier'?'Dossier agent':'Sessions de formation');
   document.getElementById('view-title').textContent=title;frame.title=title;
-  document.getElementById('section-name').textContent=route.academy?'Police Academy':'MDT';
+  document.getElementById('section-name').textContent=route.academy?'Police Academy':(route.view==='liaison'?'Liaison gouvernement':'MDT');
   document.querySelectorAll('[data-view]').forEach(a=>{if(a.dataset.view===route.view||(route.view==='dossier'&&a.dataset.view==='agents'))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   if(route.academy)paMenu.open=true;
  }
