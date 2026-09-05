@@ -11,11 +11,20 @@
     history.replaceState(null, "", `${url.pathname}${url.search}`);
   }
 
+  const planned = document.getElementById("formation-planned");
+  const oneshot = document.getElementById("formation-oneshot");
+  const initialParams = new URLSearchParams(location.search);
+  // A scheduled session still opens its existing result form with its schedule id intact.
+  if (initialParams.has("schedule")) {
+    document.getElementById("oneshot-label").textContent = "Résultats de la formation planifiée";
+    document.getElementById("oneshot-help").textContent = "Enregistrer les résultats des participants dans leurs dossiers";
+  }
+
   function openMode(mode = "individual", update = true) {
     const safeMode = mode === "group" ? "group" : "individual";
     modes.forEach(button => button.classList.toggle("active", button.dataset.formationMode === safeMode));
     panels.forEach(panel => { panel.hidden = panel.dataset.modePanel !== safeMode; });
-    if (update) updateUrl("create", safeMode);
+    if (update) { oneshot.open = true; updateUrl("create", safeMode); }
   }
 
   function openTab(tab = "create", mode = "individual", update = true) {
@@ -23,9 +32,16 @@
     const safeTab = ["create", "templates", "history"].includes(requestedTab) ? requestedTab : "create";
     tabs.forEach(button => button.classList.toggle("active", button.dataset.formationTab === safeTab));
     views.forEach(view => { view.hidden = view.dataset.formationView !== safeTab; });
-    if (safeTab === "create") openMode(mode, false);
+    if (safeTab === "create") {
+      openMode(mode, false);
+      if (update) {
+        // Existing planning edit uses one argument; catalogue "use" supplies a mode.
+        if (arguments.length >= 2 || tab === "oneshot") oneshot.open = true;
+        else planned.open = true;
+      }
+    }
     if (update) updateUrl(safeTab, mode);
-    scrollTo({ top: 0, behavior: "smooth" });
+    if (update) document.querySelector(".tablet-scroll")?.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   tabs.forEach(button => button.addEventListener("click", () => openTab(button.dataset.formationTab)));
@@ -34,4 +50,6 @@
 
   const params = new URLSearchParams(location.search);
   openTab(params.get("tab") || "create", params.get("mode") || "individual", false);
+  if (params.has("schedule") || params.has("agent") || params.has("template") || params.has("mode")) oneshot.open = true;
+  else if (params.get("tab") === "planning") planned.open = true;
 })();

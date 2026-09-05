@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="formation.css">
   <link rel="stylesheet" href="academy-header.css">
 <link rel="stylesheet" href="tablet-app.css?v=lb3-final">
+<link rel="stylesheet" href="formation-disclosures.css?v=1">
 </head>
 <body>
   <header class="topbar">
@@ -27,7 +28,7 @@
     </section>
 
     <nav class="formation-tabs" aria-label="Sections du centre de formation">
-      <button class="active" type="button" data-formation-tab="create"><span>01</span>Planifier une formation</button>
+      <button class="active" type="button" data-formation-tab="create"><span>01</span>Organiser une session</button>
       <button type="button" data-formation-tab="templates"><span>02</span>Liste des formations</button>
       <button type="button" data-formation-tab="history"><span>03</span>Historique des formations</button>
     </nav>
@@ -37,6 +38,9 @@
 
     <div id="page-content" hidden>
       <section class="formation-view" data-formation-view="create">
+        <details class="formation-disclosure" id="formation-planned">
+          <summary><span class="formation-disclosure-icon" aria-hidden="true">01</span><span><strong>Planifier avec convocation</strong><small>Convocations Discord, rappels et suivi des présences</small></span></summary>
+          <div class="formation-disclosure-content">
         <div class="planning-layout">
           <article class="panel planning-editor">
             <div class="panel-head"><div><p>Nouvelle convocation</p><h2 id="planning-editor-title">Planifier une formation</h2></div><span id="planning-selection-count">0 sélectionné</span></div>
@@ -63,7 +67,12 @@
           </article>
         </div>
 
-        <div class="formation-section-heading"><div><p>Saisie directe</p><h2>Enregistrer une formation réalisée</h2></div><span>Utilisez cette partie pour saisir immédiatement les résultats d’une formation individuelle ou collective.</span></div>
+          </div>
+        </details>
+        <details class="formation-disclosure" id="formation-oneshot">
+          <summary><span class="formation-disclosure-icon" aria-hidden="true">02</span><span><strong id="oneshot-label">Enregistrer une formation réalisée</strong><small id="oneshot-help">Sans convocation · Résultats enregistrés dans le dossier d’un ou plusieurs agents</small></span></summary>
+          <div class="formation-disclosure-content">
+        <div class="formation-section-heading"><div><p>Saisie directe</p><h2>Enregistrer les résultats</h2></div><span>Utilisez cette partie pour saisir immédiatement les résultats d’une formation individuelle ou collective.</span></div>
         <div class="mode-picker" role="group" aria-label="Type de formation">
           <button class="active" type="button" data-formation-mode="individual"><strong>Formation individuelle</strong><span>Une grille détaillée pour un agent</span></button>
           <button type="button" data-formation-mode="group"><strong>Session collective</strong><span>Une formation pour plusieurs agents</span></button>
@@ -119,6 +128,8 @@
             <div class="group-submit-actions"><span class="group-counter"><strong id="group-selected-count">0</strong> sélectionné</span><button id="group-save-session" type="submit" disabled>Enregistrer la session</button></div>
           </section>
         </form>
+          </div>
+        </details>
       </section>
 
       <section class="formation-view" data-formation-view="templates" hidden>
@@ -169,7 +180,7 @@
     </form>
   </dialog>
 
-  <script src="formation-tabs.js"></script>
+  <script src="formation-tabs.js?v=two-modes1"></script>
   <script src="evaluations.js"></script>
   <script src="formation-sessions.js"></script>
   <script src="formation-planning.js"></script>
