@@ -4,6 +4,26 @@ const {
   verifyFiveMServerSecret, issueFiveMTicket, FIVEM_TICKET_MAX_AGE,
   verifyFiveMTicket, getGuildMemberById, hasRequiredRole, newFiveMSession
 } = require("../../server/auth");
+const { neon } = require("@neondatabase/serverless");
+
+async function academyRecruitmentSummary() {
+  if (!process.env.DATABASE_URL) return null;
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    const [row] = await sql`
+      SELECT
+        COUNT(*) FILTER (WHERE status = 'new')::INTEGER AS new_count,
+        COUNT(*) FILTER (WHERE status = 'to_contact')::INTEGER AS to_contact_count
+      FROM academy_recruitment_applications
+    `;
+    const newCount = Number(row?.new_count || 0);
+    const toContactCount = Number(row?.to_contact_count || 0);
+    return { newCount, toContactCount, pendingCount: newCount + toContactCount };
+  } catch (error) {
+    console.error("Academy recruitment summary unavailable", { code: error.code || "unknown" });
+    return null;
+  }
+}
 
 function readBody(req) {
   if (req.body && typeof req.body === "object") return req.body;
@@ -126,8 +146,9 @@ async function normalSession(req, res) {
     }
   }
 
+  const academySummary = academyAccess ? await academyRecruitmentSummary() : null;
   if (result.changed) res.setHeader("Set-Cookie", sessionCookie(result.session));
-  return res.status(200).json({ authenticated: true, user: result.session.user, academyAccess });
+  return res.status(200).json({ authenticated: true, user: result.session.user, academyAccess, academySummary });
 }
 
 module.exports = async function handler(req, res) {

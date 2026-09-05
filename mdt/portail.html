@@ -28,6 +28,13 @@
 
     <p id="portal-message" class="message">Vérification de vos accès…</p>
 
+    <a id="academy-summary" class="academy-summary" href="/academy-admin/recrutements.html" hidden>
+      <span class="summary-mark" aria-hidden="true">PA</span>
+      <span class="summary-copy"><small>Suivi Police Academy</small><strong id="academy-summary-title">Aucune candidature en attente</strong><span id="academy-summary-detail">Toutes les nouvelles demandes ont été prises en charge.</span></span>
+      <span class="summary-count" id="academy-summary-count">0</span>
+      <span class="summary-action">Voir les candidatures <b>→</b></span>
+    </a>
+
     <section id="portal-content" class="access-grid" hidden>
       <a class="access-card mdt-card" href="/mdt/index.html">
         <span class="card-index">01</span>
@@ -38,6 +45,7 @@
 
       <a id="academy-card" class="access-card academy-card" href="/academy-admin/" hidden>
         <span class="card-index">02</span>
+        <span id="academy-card-badge" class="academy-card-badge" hidden>0</span>
         <span class="card-icon academy-icon" aria-hidden="true">PA</span>
         <span class="card-copy"><small>Accès instructeur</small><strong>Police Academy</strong><span>Effectifs, dossiers de formation, grilles d’évaluation et recrutement.</span></span>
         <span class="card-action">Ouvrir le panel Academy <b>→</b></span>
