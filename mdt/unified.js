@@ -15,6 +15,7 @@
  const navToggle=document.getElementById('nav-toggle');
  navToggle.addEventListener('click',()=>{const collapsed=document.body.classList.toggle('nav-collapsed');navToggle.setAttribute('aria-expanded',String(!collapsed));navToggle.setAttribute('aria-label',collapsed?'Afficher le menu':'Réduire le menu');});
  function refreshBadge(){if(!authorized)return;fetch('/api/auth/session',{credentials:'same-origin',cache:'no-store'}).then(r=>r.ok?r.json():null).then(data=>{const badge=document.getElementById('pa-count');if(!badge||!data?.academyAccess)return;const count=Number(data.academySummary?.newCount||0);badge.textContent=String(count);badge.hidden=count<=0;}).catch(()=>{});}
+ function refreshLiaisonBadge(){fetch('/api/liaison/complaints',{credentials:'same-origin',cache:'no-store'}).then(r=>r.ok?r.json():null).then(data=>{const badge=document.getElementById('liaison-count');if(!badge||!data?.threads)return;const seen=JSON.parse(localStorage.getItem('liaisonSeen')||'{}');if(localStorage.getItem('liaisonBaseline')!=='1'){data.threads.forEach(t=>{if(t.lastMessageId)seen[t.id]=t.lastMessageId;});localStorage.setItem('liaisonSeen',JSON.stringify(seen));localStorage.setItem('liaisonBaseline','1');}const count=data.threads.filter(t=>t.lastMessageId&&seen[t.id]!==t.lastMessageId).length;badge.textContent=String(count);badge.hidden=count<=0;}).catch(()=>{});}
  function displayRoute(route){
   current=route;const item=[...mdt,...liaison,...pa].find(x=>x[0]===route.view);
   const title=item?.[1]||(route.view==='dossier'?'Dossier agent':'Sessions de formation');
@@ -73,13 +74,13 @@
    else document.getElementById('pa-links').replaceChildren();
    document.getElementById('agent-name').textContent=data.user?.globalName||data.user?.username||'Agent CPD';
    let route=R.fromShell(location.href,origin);if(route.academy&&!authorized){route=R.resolve(R.routes.procedures,origin);history.replaceState(null,'',R.shellUrl(route,origin));}
-   navigate(route,false);
+   refreshLiaisonBadge();navigate(route,false);
   }catch{message.textContent='Impossible de vérifier vos accès. Réessayez.';message.hidden=false;retry.hidden=false;}
   finally{retry.disabled=false;}
  }
  retry.addEventListener('click',()=>ready&&current?navigate(current,false):session());
- addEventListener('message',e=>{if(e.origin===origin&&e.data?.type==='academy-recruitment-updated')refreshBadge();});
- setInterval(refreshBadge,15000);
+ addEventListener('message',e=>{if(e.origin!==origin)return;if(e.data?.type==='academy-recruitment-updated')refreshBadge();if(e.data?.type==='liaison-updated')refreshLiaisonBadge();});
+ setInterval(()=>{refreshBadge();refreshLiaisonBadge();},15000);
  addEventListener('popstate',()=>navigate(R.fromShell(location.href,origin),false));
  session();
 })();

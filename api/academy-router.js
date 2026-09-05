@@ -334,11 +334,19 @@ async function governmentComplaints(req, res) {
     const archivedThreads=[]; let before="";
     let archiveError=null; try { for(let page=0;page<100;page++) { const suffix=before?`&before=${encodeURIComponent(before)}`:""; const batch=await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads/archived/public?limit=100${suffix}`); archivedThreads.push(...(batch.threads||[])); if(!batch.has_more||!(batch.threads||[]).length) break; before=batch.threads[batch.threads.length-1].thread_metadata?.archive_timestamp||batch.threads[batch.threads.length-1].id; } } catch(e) { archiveError=e.status||"unknown"; }
     const tags = Object.fromEntries((forum.available_tags || []).map(t=>[t.id,t.name]));
-    const threads = [...(active.threads||[]).filter(t=>String(t.parent_id||"")===GOVERNMENT_COMPLAINT_FORUM_ID), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${CPD_GUILD_ID}/${t.id}`}));
+    const threads = [...(active.threads||[]).filter(t=>String(t.parent_id||"")===GOVERNMENT_COMPLAINT_FORUM_ID), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,updatedAt:t.thread_metadata?.archive_timestamp||t.created_at,lastMessageId:t.last_message_id||null,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${CPD_GUILD_ID}/${t.id}`}));
     const id=String(req.query.threadId||"");
     if(id){const thread=await discordBotRequest(`/channels/${id}`);const messages=await discordBotRequest(`/channels/${id}/messages?limit=100`);return res.json({ok:true,thread,messages,tags});}
     return res.json({ok:true,threads,tags,archiveError});
   } catch(error){console.error("Government forum read failed",{stage,status:error.status||0,message:error.message});return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"forum_read_forbidden":"discord_unavailable",status:error.status||0,stage,channel:GOVERNMENT_COMPLAINT_FORUM_ID});}
+}
+
+async function governmentComplaintMessage(req, res) {
+  const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});
+  const body=readJsonBody(req), threadId=String(body?.threadId||""), content=complaintText(body?.message,1800,"");
+  if(!/^\d{17,20}$/.test(threadId)||!content)return res.status(400).json({ok:false,code:"message_required"});
+  try { const thread=await discordBotRequest(`/channels/${threadId}`); if(String(thread?.parent_id||"")!==GOVERNMENT_COMPLAINT_FORUM_ID)return res.status(403).json({ok:false,code:"thread_forbidden"}); const agent=access.session.user?.globalName||access.session.user?.username||"Agent CPD"; const message=await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:`**${complaintText(agent,100)}**\n${content}`,allowed_mentions:{parse:[]}}}); return res.status(201).json({ok:true,messageId:message?.id||null}); }
+  catch(error){return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"thread_forbidden":"discord_unavailable"});}
 }
 
 function validDiscordId(value) {
@@ -2120,7 +2128,7 @@ module.exports = async function handler(req, res) {
     case "recruitment-ticket": return recruitmentTicketDetail(req, res);
     case "recruitment-decision": return saveRecruitmentDecision(req, res);
     case "ticket-sync": return syncRecruitmentTicket(req, res);
-    case "government-complaint-create": return req.method === "GET" ? governmentComplaints(req, res) : createGovernmentComplaint(req, res);
+    case "government-complaint-create": { if(req.method === "GET") return governmentComplaints(req,res); const body=readJsonBody(req); if(req.method === "POST" && body && (body.threadId || body.message)) return governmentComplaintMessage(req,res); return createGovernmentComplaint(req,res); }
     default: return res.status(404).json({ ok: false, code: "route_not_found" });
   }
 };
