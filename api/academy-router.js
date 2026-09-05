@@ -331,13 +331,13 @@ async function governmentComplaints(req, res) {
     const forum = await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}`);
     const active = await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads/active`);
     const archivedThreads=[]; let before="";
-    for(let page=0;page<100;page++) { const suffix=before?`&before=${encodeURIComponent(before)}`:""; const batch=await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads/archived/public?limit=100${suffix}`); archivedThreads.push(...(batch.threads||[])); if(!batch.has_more||!(batch.threads||[]).length) break; before=batch.threads[batch.threads.length-1].thread_metadata?.archive_timestamp||batch.threads[batch.threads.length-1].id; }
+    let archiveError=null; try { for(let page=0;page<100;page++) { const suffix=before?`&before=${encodeURIComponent(before)}`:""; const batch=await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads/archived/public?limit=100${suffix}`); archivedThreads.push(...(batch.threads||[])); if(!batch.has_more||!(batch.threads||[]).length) break; before=batch.threads[batch.threads.length-1].thread_metadata?.archive_timestamp||batch.threads[batch.threads.length-1].id; } } catch(e) { archiveError=e.status||"unknown"; }
     const tags = Object.fromEntries((forum.available_tags || []).map(t=>[t.id,t.name]));
     const threads = [...(active.threads||[]), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${CPD_GUILD_ID}/${t.id}`}));
     const id=String(req.query.threadId||"");
     if(id){const thread=await discordBotRequest(`/channels/${id}`);const messages=await discordBotRequest(`/channels/${id}/messages?limit=100`);return res.json({ok:true,thread,messages,tags});}
-    return res.json({ok:true,threads,tags});
-  } catch(error){return res.status(502).json({ok:false,code:"discord_unavailable"});}
+    return res.json({ok:true,threads,tags,archiveError});
+  } catch(error){console.error("Government forum read failed",error.status||error.message);return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"forum_read_forbidden":"discord_unavailable",status:error.status||0});}
 }
 
 function validDiscordId(value) {
