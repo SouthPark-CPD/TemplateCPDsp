@@ -5,7 +5,7 @@
  function resolve(value,origin){
   const u=new URL(value,origin);if(u.origin!==origin)return null;
   if(u.pathname==='/academy-admin/'||u.pathname==='/academy-admin')u.pathname=routes.pa;
-  if(u.pathname==='/academy-admin/suivi.html')u.pathname=routes.suivi;
+  if(u.pathname==='/academy-admin/suivi.html'||u.pathname==='/academy-admin/effectifs.html')u.pathname=routes.suivi;
   const view=Object.keys(routes).find(k=>routes[k]===u.pathname);if(!view)return null;
   return {view,url:u.pathname+u.search+u.hash,academy:u.pathname.startsWith('/academy-admin/')};
  }

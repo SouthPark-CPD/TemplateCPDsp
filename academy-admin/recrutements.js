@@ -192,6 +192,7 @@ elements.saveDecision.addEventListener("click", async () => {
     elements.detailStatus.className = `status status-${data.ticket.status}`;
     elements.detailActor.textContent = data.ticket.assignedInstructorName || "Non attribuée";
     elements.saveDecision.textContent = "Suivi enregistré";
+    if (window.parent !== window) window.parent.postMessage({ type: "academy-recruitment-updated" }, window.location.origin);
   } catch (error) {
     if (error.message !== "unauthorized") elements.saveDecision.textContent = "Échec — réessayer";
   } finally {
