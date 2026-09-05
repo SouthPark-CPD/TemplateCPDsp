@@ -6,8 +6,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>CPD // Guide radio</title>
-<link rel="icon" type="image/png" href="Seal_of_the_Chicago_Police_Department.png">
+<title>CPD // Procédures</title>
+
+<link
+  rel="icon"
+  type="image/png"
+  href="Seal_of_the_Chicago_Police_Department.png">
+
 <style>
 
   :root{
@@ -30,18 +35,23 @@
     --font-mono:'IBM Plex Mono','Consolas',monospace;
   }
 
+
   *{
     box-sizing:border-box;
   }
+
 
   html{
     scroll-behavior:smooth;
   }
 
-  html,body{
+
+  html,
+  body{
     margin:0;
     padding:0;
   }
+
 
   body{
     background:
@@ -58,8 +68,11 @@
       var(--bg);
 
     color:var(--text);
+
     font-family:var(--font-mono);
+
     min-height:100vh;
+
     padding-bottom:60px;
 
     -webkit-user-select:none;
@@ -68,14 +81,16 @@
     user-select:none;
   }
 
-  .search-box, input, textarea{
+
+  .search-box,
+  input,
+  textarea{
     -webkit-user-select:text;
     -moz-user-select:text;
     -ms-user-select:text;
     user-select:text;
   }
 
-  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
   /* ==========================================================
      SEARCH
@@ -83,67 +98,103 @@
 
   .search-container{
     position:relative;
+
     max-width:1100px;
+
     margin:24px auto 0;
+
     padding:0 32px;
   }
 
+
   .search-box{
     width:100%;
+
     background:var(--bg-dark);
+
     border:1px solid var(--steel-dim);
+
     color:var(--text);
+
     padding:15px 18px;
+
     font-family:var(--font-mono);
+
     font-size:13px;
+
     outline:none;
+
     transition:border-color .15s;
   }
+
 
   .search-box:focus{
     border-color:var(--gold);
   }
 
+
   .search-box::placeholder{
     color:var(--text-dim);
   }
 
+
   /* ==========================================================
-     NAVIGATION CATÉGORIES
+     NAVIGATION — CATÉGORIES INTERNES
   ========================================================== */
 
   nav{
     max-width:1100px;
+
     margin:22px auto 0;
+
     padding:0 32px;
+
     display:flex;
+
     gap:2px;
+
     flex-wrap:wrap;
   }
 
+
   nav button{
     font-family:var(--font-display);
+
     background:var(--bg-panel);
+
     border:1px solid var(--line);
+
     color:var(--text-dim);
+
     padding:12px 17px;
+
     font-size:12px;
+
     letter-spacing:1.2px;
+
     text-transform:uppercase;
+
     cursor:pointer;
+
     transition:all .15s;
   }
 
+
   nav button:hover{
     color:var(--text);
+
     border-color:var(--steel-dim);
   }
 
+
   nav button.active{
     color:var(--gold);
+
     background:var(--bg-panel-2);
+
     border-color:var(--steel-dim);
   }
+
 
   /* ==========================================================
      MAIN
@@ -151,145 +202,255 @@
 
   main{
     max-width:1100px;
+
     margin:0 auto;
+
     padding:0 32px;
   }
 
+
   .panel{
     background:var(--bg-panel-2);
+
     border:1px solid var(--steel-dim);
+
     border-top:2px solid var(--gold);
+
     margin-top:0;
   }
 
+
   .panel-head{
     padding:28px;
+
     border-bottom:1px solid var(--line);
   }
+
 
   .panel-title{
     font-family:var(--font-display);
+
     font-size:22px;
+
     letter-spacing:1.5px;
+
     text-transform:uppercase;
+
     color:var(--text);
   }
+
 
   .panel-desc{
     font-size:12px;
+
     color:var(--text-dim);
+
     margin-top:7px;
+
     line-height:1.6;
   }
 
+
   .article-count{
     margin-top:12px;
+
     font-size:10px;
+
     color:var(--amber);
+
     letter-spacing:1px;
   }
 
+
   /* ==========================================================
-     CODES RADIO
+     PROCÉDURES
   ========================================================== */
 
-  .codes{
+  .Procédures{
     padding:12px 28px 28px;
   }
 
-  .cat-block{
+
+  .Procedure{
     border:1px solid var(--line);
+
     background:var(--bg-dark);
+
     margin-top:14px;
+
     transition:
       border-color .15s,
+      transform .15s,
       background .15s;
   }
 
-  .cat-block:hover{
+
+  .Procedure:hover{
     border-color:var(--steel-dim);
+
     background:#0e141b;
+
+    transform:translateY(-1px);
   }
 
-  .cat-head{
+
+  .Procedure-header{
     display:flex;
+
+    justify-content:space-between;
+
     align-items:center;
+
     gap:15px;
+
     padding:15px 18px;
+
     border-bottom:1px solid var(--line);
+
     background:rgba(74,111,165,0.04);
   }
 
-  .cat-title{
-    flex:1;
-    font-family:var(--font-display);
-    font-size:15px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:var(--text);
-  }
 
-  .cat-count{
-    font-size:9px;
-    letter-spacing:1px;
-    padding:5px 8px;
-    border:1px solid var(--steel);
-    color:var(--steel);
-    white-space:nowrap;
-  }
-
-  .code-grid{
-    display:grid;
-
-    grid-template-columns:
-      repeat(
-        auto-fill,
-        minmax(300px,1fr)
-      );
-
-    gap:0;
-  }
-
-  .code-card{
-    display:flex;
-    align-items:flex-start;
-    gap:15px;
-    padding:15px 18px;
-    border-bottom:1px solid var(--line);
-    border-right:1px solid var(--line);
-    min-height:70px;
-    transition:
-      background .15s,
-      border-color .15s;
-  }
-
-  .code-card:hover{
-    background:#111820;
-  }
-
-  .code-tag{
-    font-family:var(--font-display);
-    font-size:15px;
-    font-weight:700;
+  .Procedure-number{
     color:var(--gold);
-    min-width:75px;
-    white-space:nowrap;
-    letter-spacing:.5px;
+
+    font-size:11px;
+
+    letter-spacing:1px;
+
+    min-width:65px;
   }
 
-  .code-desc{
-    font-size:11.5px;
-    line-height:1.65;
+
+  .Procedure-title{
+    flex:1;
+
+    font-family:var(--font-display);
+
+    font-size:15px;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+
     color:var(--text);
   }
 
-  .code-card.urgent{
-    border-left:3px solid var(--red);
+
+  .Procedure-type{
+    font-size:9px;
+
+    letter-spacing:1px;
+
+    padding:5px 8px;
+
+    border:1px solid;
+
+    white-space:nowrap;
+
+    color:var(--steel);
+
+    border-color:var(--steel);
   }
 
-  .code-card.urgent .code-tag{
-    color:var(--red);
+
+  .Procedure-body{
+    padding:18px;
+
+    font-size:12px;
+
+    line-height:1.75;
+
+    color:var(--text);
   }
+
+
+  .Procedure-body p{
+    margin:0 0 12px;
+  }
+
+
+  .Procedure-body p:last-child{
+    margin-bottom:0;
+  }
+
+
+  /* ==========================================================
+     BUTTONS
+  ========================================================== */
+
+  .Procedure-actions{
+    display:flex;
+
+    gap:8px;
+
+    flex-wrap:wrap;
+
+    margin-top:16px;
+  }
+
+
+  .Procedure-button{
+    display:inline-block;
+
+    padding:10px 15px;
+
+    border:1px solid var(--steel);
+
+    background:transparent;
+
+    color:var(--steel);
+
+    font-family:var(--font-mono);
+
+    font-size:10.5px;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+
+    text-decoration:none;
+
+    cursor:pointer;
+
+    transition:all .15s;
+  }
+
+
+  .Procedure-button:hover{
+    background:var(--steel);
+
+    color:#0b0f14;
+  }
+
+
+  .Procedure-button.gold{
+    border-color:var(--gold);
+
+    color:var(--gold);
+  }
+
+
+  .Procedure-button.gold:hover{
+    background:var(--gold);
+
+    color:#0b0f14;
+  }
+
+
+  .Procedure-button.green{
+    border-color:var(--green);
+
+    color:var(--green);
+  }
+
+
+  .Procedure-button.green:hover{
+    background:var(--green);
+
+    color:#0b0f14;
+  }
+
 
   /* ==========================================================
      NOTICE
@@ -297,35 +458,53 @@
 
   .notice{
     border-left:3px solid var(--gold);
+
     background:rgba(201,162,39,0.05);
+
     padding:14px 16px;
+
     margin:15px 0;
-    font-size:12px;
-    line-height:1.6;
   }
+
+
+  .notice.blue{
+    border-left-color:var(--steel);
+
+    background:rgba(74,111,165,0.05);
+  }
+
+
+  .notice.green{
+    border-left-color:var(--green);
+
+    background:rgba(76,175,111,0.05);
+  }
+
 
   .notice-title{
     color:var(--gold);
+
     font-family:var(--font-display);
+
     letter-spacing:1px;
+
     text-transform:uppercase;
+
     font-size:12px;
+
     margin-bottom:5px;
   }
 
-  /* ==========================================================
-     EMPTY
-  ========================================================== */
 
-  .empty-msg{
-    display:none;
-    border-left:3px solid var(--amber);
-    background:rgba(224,161,58,0.05);
-    padding:16px;
-    margin-top:14px;
-    color:var(--text-dim);
-    font-size:12px;
+  .notice.blue .notice-title{
+    color:var(--steel);
   }
+
+
+  .notice.green .notice-title{
+    color:var(--green);
+  }
+
 
   /* ==========================================================
      FOOTER
@@ -333,13 +512,20 @@
 
   footer{
     max-width:1100px;
+
     margin:0 auto;
+
     padding:20px 32px 0;
+
     font-size:10.5px;
+
     color:var(--text-dim);
+
     letter-spacing:1px;
+
     text-align:center;
   }
+
 
   /* ==========================================================
      MOBILE
@@ -351,47 +537,62 @@
       padding:0 16px;
     }
 
+
     nav{
       padding:0 16px;
     }
+
 
     .search-container{
       padding:0 16px;
     }
 
+
     .panel-head{
       padding:20px;
     }
 
-    .codes{
+
+    .Procédures{
       padding:10px 15px 20px;
     }
 
-    .cat-head{
+
+    .Procedure-header{
       align-items:flex-start;
+
       flex-wrap:wrap;
     }
 
-    .cat-count{
+
+    .Procedure-number{
+      min-width:auto;
+    }
+
+
+    .Procedure-type{
       order:3;
+
       width:100%;
+
       text-align:center;
     }
 
-    .code-grid{
-      grid-template-columns:1fr;
+
+    .Procedure-body{
+      font-size:11.5px;
     }
 
-    .code-card{
-      border-right:none;
+
+    .Procedure-actions{
+      flex-direction:column;
     }
 
-    .code-tag{
-      min-width:65px;
-    }
 
-    .code-desc{
-      font-size:11px;
+    .Procedure-button{
+      width:100%;
+
+      text-align:center;
     }
 
   }
@@ -403,37 +604,52 @@
 <link rel="stylesheet" href="tablet-app.css?v=unified1">
 </head>
 
+
 <body>
 
-<!-- HEADER CENTRALISÉ -->
+
+<!-- ==========================================================
+     HEADER GLOBAL
+     Généré par nav.js
+========================================================== -->
 
 <div id="site-header"></div>
 
 
-<!-- RECHERCHE -->
+
+<!-- ==========================================================
+     RECHERCHE
+========================================================== -->
 
 <div class="search-container">
 
   <input
     type="text"
-    class="search-box"
     id="search"
-    placeholder="⌕ Rechercher un code ou un mot-clé : 10-4, poursuite, blessé..."
+    class="search-box"
+    placeholder="⌕ Rechercher une procédure : arrestation, rapport, contrôle, amende..."
     autocomplete="off">
 
 </div>
 
 
-<!-- CATÉGORIES -->
+
+<!-- ==========================================================
+     CATÉGORIES
+========================================================== -->
 
 <nav id="categories"></nav>
 
 
-<!-- MAIN -->
+
+<!-- ==========================================================
+     MAIN
+========================================================== -->
 
 <main>
 
   <div class="panel">
+
 
     <div class="panel-head">
 
@@ -441,97 +657,113 @@
         class="panel-title"
         id="panel-title">
 
-        Codes radio
+        Procédures générales
 
       </div>
+
 
       <div
         class="panel-desc"
         id="panel-desc">
 
-        Référentiel des codes radio, des niveaux de priorité, des situations criminelles et des formats de communication opérationnelle du CPD.
+        Documents et modèles opérationnels destinés aux membres du Chicago Police Department.
 
       </div>
+
 
       <div
         class="article-count"
         id="article-count">
 
-        00 CODES
+        00 Procédures
 
       </div>
 
     </div>
 
 
-    <div
-      class="codes"
-      id="content">
-
-    </div>
-
 
     <div
-      class="empty-msg"
-      id="empty-msg">
+      class="Procédures"
+      id="Procédures"></div>
 
-      Aucun code ne correspond à votre recherche.
-
-    </div>
 
   </div>
 
 </main>
 
 
-<!-- FOOTER -->
+
+<!-- ==========================================================
+     FOOTER
+========================================================== -->
 
 <footer>
 
-  SYSTÈME INTERNE DU CPD — GUIDE RADIO OPÉRATIONNEL —
-  USAGE EN JEU UNIQUEMENT — NE PAS DIFFUSER HORS DU SERVEUR
+  SYSTÈME INTERNE DU CPD — PROCÉDURES OPÉRATIONNELLES —
+  USAGE INTERNE UNIQUEMENT — NE PAS DIFFUSER
 
 </footer>
 
 
-<!-- CONFIGURATION DE LA PAGE -->
+
+<!-- ==========================================================
+     CONFIGURATION DE CETTE PAGE
+========================================================== -->
 
 <script>
 
 const PAGE_CONFIG = {
-  subtitle:"Guide radio — Codes & procédures de communication",
-  currentPage:"code.html",
-  docCode:"CPD-RAD-001",
-  version:"1.0"
+
+  subtitle:
+    "Procédures opérationnelles — Manuel CPD",
+
+  currentPage:
+    "procedures.html",
+
+  docCode:
+    "CPD-TPL-001",
+
+  version:
+    "1.0"
+
 };
 
 </script>
 
 
-<!-- NAVIGATION CENTRALISÉE -->
+
+<!-- ==========================================================
+     NAVIGATION GLOBALE
+========================================================== -->
 
 <script src="nav-v5.js?v=unified1"></script>
 
 
-<!-- JAVASCRIPT PROPRE À LA PAGE -->
+
+<!-- ==========================================================
+     JAVASCRIPT DE LA PAGE
+========================================================== -->
 
 <script>
 
-(function(){
 
 /* ==========================================================
    DONNÉES
-   Chargées dynamiquement depuis data-code.js
+
+   Chargées dynamiquement depuis data.js.
 ========================================================== */
 
 let categories = [];
 
 
+
 /* ==========================================================
-   VARIABLES
+   VARIABLE
 ========================================================== */
 
-let currentCategory = "statuts";
+let currentCategory = "general";
+
 
 
 /* ==========================================================
@@ -543,57 +775,80 @@ async function loadData(){
   try{
 
     const response =
-      await fetch("data-code.js?_=" + Date.now());
+      await fetch(
+        "data.js?_=" + Date.now()
+      );
+
 
     const text =
       await response.text();
 
+
+    /*
+       data.js définit CPD_DATA.
+    */
+
     const script =
       document.createElement("script");
+
 
     script.textContent =
       text;
 
+
     document.head.appendChild(script);
+
 
     categories =
       window.CPD_DATA || [];
+
 
     render();
 
   }catch(err){
 
-    console.error("Erreur data-code.js :", err);
+    console.error(
+      "Erreur de chargement de data.js :",
+      err
+    );
 
-    document.getElementById("content").innerHTML = `
 
-      <div class="notice">
+    document
+      .getElementById("Procédures")
+      .innerHTML = `
 
-        <div class="notice-title">
-          Erreur de chargement
+        <div class="notice">
+
+          <div class="notice-title">
+            Erreur de chargement
+          </div>
+
+          Impossible de charger les données
+          (data.js). Vérifiez que le site est bien
+          hébergé en ligne (http/https) et non ouvert
+          en local.
+
         </div>
 
-        Impossible de charger les données (data-code.js).
-        Vérifiez que le site est bien hébergé en ligne
-        (http/https) et non ouvert en local.
-
-      </div>
-
-    `;
+      `;
 
   }
 
 }
 
 
+
 /* ==========================================================
-   NAVIGATION CATÉGORIES
+   CATÉGORIES
 ========================================================== */
 
 function renderCategories(){
 
   const nav =
-    document.getElementById("categories");
+    document.getElementById(
+      "categories"
+    );
+
 
   nav.innerHTML = "";
 
@@ -601,16 +856,23 @@ function renderCategories(){
   categories.forEach(category => {
 
     const button =
-      document.createElement("button");
+      document.createElement(
+        "button"
+      );
 
 
     button.textContent =
       category.label;
 
 
-    if(category.id === currentCategory){
+    if(
+      category.id ===
+      currentCategory
+    ){
 
-      button.classList.add("active");
+      button.classList.add(
+        "active"
+      );
 
     }
 
@@ -620,8 +882,11 @@ function renderCategories(){
       currentCategory =
         category.id;
 
-      document.getElementById("search").value =
-        "";
+
+      document
+        .getElementById("search")
+        .value = "";
+
 
       render();
 
@@ -629,7 +894,9 @@ function renderCategories(){
       window.scrollTo({
 
         top:
-          document.querySelector("nav").offsetTop - 10,
+          document
+            .querySelector("nav")
+            .offsetTop - 10,
 
         behavior:"smooth"
 
@@ -638,11 +905,14 @@ function renderCategories(){
     };
 
 
-    nav.appendChild(button);
+    nav.appendChild(
+      button
+    );
 
   });
 
 }
+
 
 
 /* ==========================================================
@@ -653,7 +923,9 @@ function render(){
 
   const category =
     categories.find(
-      c => c.id === currentCategory
+      c =>
+        c.id ===
+        currentCategory
     );
 
 
@@ -664,24 +936,26 @@ function render(){
   }
 
 
-  document.getElementById("panel-title")
+  document
+    .getElementById("panel-title")
     .textContent =
       category.label;
 
 
-  document.getElementById("panel-desc")
+  document
+    .getElementById("panel-desc")
     .textContent =
       category.desc;
 
 
-  document.getElementById("article-count")
+  document
+    .getElementById("article-count")
     .textContent =
-      `${String(category.codes.length).padStart(2,"0")} CODES`;
+      `${String(category.Procédures.length).padStart(2,"0")} Procédures`;
 
 
-  renderCodes(
-    category.codes,
-    category.urgent || false
+  renderProcédures(
+    category.Procédures
   );
 
 
@@ -690,88 +964,150 @@ function render(){
 }
 
 
+
 /* ==========================================================
-   AFFICHAGE DES CODES
+   PROCÉDURES
 ========================================================== */
 
-function renderCodes(
-  codes,
-  urgent = false
+function renderProcédures(
+  Procédures
 ){
 
   const container =
-    document.getElementById("content");
-
-  const empty =
-    document.getElementById("empty-msg");
-
-
-  container.innerHTML =
-    "";
-
-  empty.style.display =
-    "none";
+    document.getElementById(
+      "Procédures"
+    );
 
 
-  if(codes.length === 0){
+  container.innerHTML = "";
 
-    empty.style.display =
-      "block";
+
+  if(
+    Procédures.length === 0
+  ){
+
+    container.innerHTML = `
+
+      <div class="notice">
+
+        <div class="notice-title">
+          Aucun résultat
+        </div>
+
+        Aucune procédure ne correspond
+        à votre recherche.
+
+      </div>
+
+    `;
 
     return;
 
   }
 
 
-  const block =
-    document.createElement("div");
+  Procédures.forEach(
+    Procedure => {
 
-  block.className =
-    "cat-block";
-
-
-  block.innerHTML = `
-
-    <div class="cat-head">
-
-      <div class="cat-title">
-        Référentiel
-      </div>
-
-      <div class="cat-count">
-        ${codes.length}
-        CODE${codes.length > 1 ? "S" : ""}
-      </div>
-
-    </div>
+      const element =
+        document.createElement(
+          "article"
+        );
 
 
-    <div class="code-grid">
+      element.className =
+        "Procedure";
 
-      ${codes.map(([tag,desc]) => `
 
-        <div class="code-card${urgent ? " urgent" : ""}">
+      element.innerHTML = `
 
-          <div class="code-tag">
-            ${tag}
+        <div class="Procedure-header">
+
+          <div class="Procedure-number">
+
+            TPL. ${Procedure.number}
+
           </div>
 
-          <div class="code-desc">
-            ${desc}
+
+          <div class="Procedure-title">
+
+            ${Procedure.title}
+
+          </div>
+
+
+          <div class="Procedure-type">
+
+            ${Procedure.type}
+
           </div>
 
         </div>
 
-      `).join("")}
 
-    </div>
+        <div class="Procedure-body">
 
-  `;
+          <p>
+
+            ${Procedure.description}
+
+          </p>
 
 
-  container.appendChild(block);
+          <div class="Procedure-actions">
+
+            <a
+              class="Procedure-button gold"
+              href="${Procedure.file}">
+
+              📄 Ouvrir la procédure
+
+            </a>
+
+          </div>
+
+        </div>
+
+      `;
+
+
+      container.appendChild(
+        element
+      );
+
+    }
+  );
 
 }
+
+
+
+/* ==========================================================
+   IMPRESSION
+========================================================== */
+
+function openPrint(file){
+
+  const win =
+    window.open(
+      file,
+      "_blank"
+    );
+
+
+  if(win){
+
+    win.onload = () => {
+
+      win.print();
+
+    };
+
+  }
+
+}
+
 
 
 /* ==========================================================
@@ -802,139 +1138,77 @@ document
       const results = [];
 
 
-      categories.forEach(category => {
+      categories.forEach(
+        category => {
 
-        category.codes.forEach(code => {
+          category.Procédures.forEach(
+            Procedure => {
 
-          const tag =
-            code[0];
+              const searchable = (
 
-          const desc =
-            code[1];
+                category.label +
+                " " +
+                category.desc +
+                " " +
+                Procedure.title +
+                " " +
+                Procedure.type +
+                " " +
+                Procedure.description
 
-
-          const searchable = (
-
-            category.label +
-            " " +
-            category.desc +
-            " " +
-            tag +
-            " " +
-            desc
-
-          ).toLowerCase();
+              ).toLowerCase();
 
 
-          if(searchable.includes(query)){
+              if(
+                searchable.includes(
+                  query
+                )
+              ){
 
-            results.push({
+                results.push(
+                  Procedure
+                );
 
-              code,
+              }
 
-              urgent:
-                category.urgent || false
+            }
+          );
 
-            });
-
-          }
-
-        });
-
-      });
+        }
+      );
 
 
-      document.getElementById("panel-title")
+      document
+        .getElementById(
+          "panel-title"
+        )
         .textContent =
           "Résultats de recherche";
 
 
-      document.getElementById("panel-desc")
+      document
+        .getElementById(
+          "panel-desc"
+        )
         .textContent =
           `Recherche globale : "${this.value}"`;
 
 
-      document.getElementById("article-count")
+      document
+        .getElementById(
+          "article-count"
+        )
         .textContent =
           `${String(results.length).padStart(2,"0")} RÉSULTAT(S)`;
 
 
-      const container =
-        document.getElementById("content");
-
-
-      const empty =
-        document.getElementById("empty-msg");
-
-
-      container.innerHTML =
-        "";
-
-
-      if(results.length === 0){
-
-        empty.style.display =
-          "block";
-
-        return;
-
-      }
-
-
-      empty.style.display =
-        "none";
-
-
-      const block =
-        document.createElement("div");
-
-      block.className =
-        "cat-block";
-
-
-      block.innerHTML = `
-
-        <div class="cat-head">
-
-          <div class="cat-title">
-            Résultats
-          </div>
-
-          <div class="cat-count">
-            ${results.length}
-            CODE${results.length > 1 ? "S" : ""}
-          </div>
-
-        </div>
-
-
-        <div class="code-grid">
-
-          ${results.map(result => `
-
-            <div class="code-card${result.urgent ? " urgent" : ""}">
-
-              <div class="code-tag">
-                ${result.code[0]}
-              </div>
-
-              <div class="code-desc">
-                ${result.code[1]}
-              </div>
-
-            </div>
-
-          `).join("")}
-
-        </div>
-
-      `;
-
-
-      container.appendChild(block);
+      renderProcédures(
+        results
+      );
 
     }
   );
+
 
 
 /* ==========================================================
@@ -942,6 +1216,7 @@ document
 ========================================================== */
 
 loadData();
+
 
 
 /* ==========================================================
@@ -966,6 +1241,10 @@ document.addEventListener(
       e.key.toUpperCase();
 
 
+    /*
+       F12
+    */
+
     if(key === "F12"){
 
       e.preventDefault();
@@ -974,6 +1253,10 @@ document.addEventListener(
 
     }
 
+
+    /*
+       Ctrl/Cmd + U, S, I, J
+    */
 
     if(
       (e.ctrlKey || e.metaKey) &&
@@ -986,6 +1269,10 @@ document.addEventListener(
 
     }
 
+
+    /*
+       Ctrl/Cmd + Shift + I/J/C
+    */
 
     if(
       (e.ctrlKey || e.metaKey) &&
@@ -1022,9 +1309,8 @@ document.addEventListener(
   }
 );
 
-})();
-
 </script>
+
 
 </body>
 

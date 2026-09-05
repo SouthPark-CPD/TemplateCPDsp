@@ -10,6 +10,9 @@
  function start(){
   if(document.querySelector('.tablet-shell'))return;
   document.body.classList.add('tablet-ui');
+  let embedded=false;
+  try{embedded=parent!==window && parent.location.origin===location.origin && parent.CPDUnifiedShell===true;}catch{}
+  if(embedded)document.body.classList.add('unified-embedded');
   const root=document.createElement('div');root.className='tablet-shell';
   const title=file==='dossier.html'?'Dossier agent':(links.find(x=>x[0]===file)||links[0])[1];
   root.innerHTML=`<aside class="tablet-nav"><a class="tablet-brand" href="/mdt/portail.html"><img src="/assets/cpd-seal.png" alt="CPD"><span>CHICAGO<small>POLICE DEPARTMENT</small></span></a><div class="tablet-module">${academy?'POLICE ACADEMY':'MOBILE DATA TERMINAL'}</div><nav aria-label="Navigation">${links.map(([url,name,key])=>`<a href="${url}" aria-label="${name}" title="${name}" ${url===file?'aria-current="page"':''}>${icon(key)}<span>${name}</span></a>`).join('')}</nav><nav class="tablet-bottom"><a href="/mdt/portail.html">${icon('grid')}<span>Changer d’espace</span></a>${academy?'<a href="/mdt/index.html">'+icon('book')+'<span>Ouvrir le MDT</span></a>':'<a href="https://guidejuridiquesp.netlify.app/" target="_blank" rel="noopener">'+icon('book')+'<span>Guide juridique ↗</span></a>'}<a href="${academy?'/api/academy-admin-auth/logout':'/api/auth/logout'}">${icon('users')}<span>Déconnexion</span></a></nav></aside><section class="tablet-work"><header class="tablet-bar"><div><span>${academy?'Police Academy':'MDT'}</span><h1>${title}</h1></div><div class="tablet-account"><span id="tablet-name">${academy?'Instructeur':'Agent CPD'}</span></div></header><div class="tablet-search"></div><div class="tablet-tabs"></div><div class="tablet-scroll" tabindex="0" aria-label="Contenu défilant"></div></section>`;
@@ -24,7 +27,7 @@
   if(academy){
    const name=document.querySelector('#instructor-name');
    if(name){const sync=()=>document.querySelector('#tablet-name').textContent=name.textContent;sync();new MutationObserver(sync).observe(name,{childList:true,subtree:true,characterData:true});}
-  }else fetch('/api/auth/session',{credentials:'same-origin',cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{const n=d?.user?.globalName||d?.user?.username;if(n)document.querySelector('#tablet-name').textContent=n;}).catch(()=>{});
+  }else if(!embedded) fetch('/api/auth/session',{credentials:'same-origin',cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{const n=d?.user?.globalName||d?.user?.username;if(n)document.querySelector('#tablet-name').textContent=n;}).catch(()=>{});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
