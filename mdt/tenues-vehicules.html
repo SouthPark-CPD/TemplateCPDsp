@@ -50,6 +50,7 @@
     const uniforms=window.CPD_UNIFORMS||[],ceremonies=window.CPD_CEREMONIAL_UNIFORMS||[];
     document.querySelector("#uniform-count").textContent=`${uniforms.length} grades`;
     document.querySelector("#uniform-list").innerHTML=uniforms.map(item=>card(item)).join("");
+    document.querySelectorAll("#uniform-list .uniform-card").forEach(cardElement=>{const details=document.createElement("details");details.className="uniform-accordion";const header=cardElement.querySelector(".uniform-card-head");const body=cardElement.querySelector(".uniform-card-body");const summary=document.createElement("summary");summary.className="uniform-card-head";summary.innerHTML=header.innerHTML;details.append(summary,body);cardElement.replaceWith(details)});
     document.querySelector("#ceremony-list").innerHTML=ceremonies.map(item=>card(item,false)).join("");
     document.querySelectorAll(".uniform-photo img").forEach(img=>{img.addEventListener("error",()=>{const figure=img.closest("figure");figure.classList.add("photo-missing");figure.innerHTML=`<div><b>Photo à ajouter</b><small>${escapeHtml(img.getAttribute("src"))}</small></div>`});img.addEventListener("click",()=>{document.querySelector("#lightbox img").src=img.src;document.querySelector("#lightbox").classList.add("open")})});
     const lightbox=document.querySelector("#lightbox");lightbox.addEventListener("click",()=>lightbox.classList.remove("open"));document.addEventListener("keydown",event=>{if(event.key==="Escape")lightbox.classList.remove("open")});
