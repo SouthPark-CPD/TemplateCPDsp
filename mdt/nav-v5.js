@@ -314,6 +314,14 @@ function getCurrentPage(){
 
 function renderSiteHeader(){
 
+  if(!document.querySelector('link[data-tablet-ui="mdt"]')){
+    const tabletStyles = document.createElement("link");
+    tabletStyles.rel = "stylesheet";
+    tabletStyles.href = "tablet-app.css?v=1";
+    tabletStyles.dataset.tabletUi = "mdt";
+    document.head.appendChild(tabletStyles);
+  }
+
   const container =
     document.getElementById("site-header");
 
@@ -507,6 +515,11 @@ function renderSiteHeader(){
         <nav class="header-actions" id="mdt-navigation" aria-label="Navigation principale">
           ${linksHtml}
         </nav>
+      </div>
+
+      <div class="mdt-system-strip">
+        <span><i aria-hidden="true"></i> CPD Secure</span>
+        <span id="nav-clock"></span>
       </div>
 
     </header>
