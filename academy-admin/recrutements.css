@@ -7,3 +7,15 @@ dialog{width:min(920px,calc(100% - 24px));max-height:92vh;padding:0;color:var(--
 @media(max-width:1000px){.directory-head{align-items:stretch;flex-direction:column}.filters,.filters label,.filters input,.filters select{width:100%}.ticket-card{grid-template-columns:110px minmax(160px,1fr) 90px 100px}.ticket-actions{grid-column:1/-1}.ticket-summary{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){body{padding:10px 10px 40px}.topbar{flex-wrap:wrap}.brand span{display:none}.admin-nav{order:3;width:100%;overflow-x:auto}.admin-nav a{flex:none;text-align:center}.hero{padding:30px 22px}main{margin-top:24px}.status-grid{grid-template-columns:1fr 1fr}.directory{padding:21px 14px}.filters{flex-direction:column}.ticket-card{grid-template-columns:1fr 1fr}.candidate{grid-column:1/-1}.ticket-actions{justify-content:stretch}.ticket-actions>*{flex:1;text-align:center}.dialog-shell{padding:18px 13px}.ticket-summary,.form-data{grid-template-columns:1fr}.decision-panel{align-items:stretch;flex-direction:column}.message-entry header{flex-direction:column}}
 @media(min-width:1001px){.ticket-summary{grid-template-columns:repeat(4,minmax(0,1fr))}.ticket-summary>div>strong{overflow-wrap:anywhere}.ticket-summary>a{grid-column:1/-1;border:1px solid rgba(139,194,241,.18);border-radius:10px;background:rgba(139,194,241,.05);text-align:center}}
+
+/* Candidatures en jeu */
+.status-new,.status-to_contact,.decision-pending{color:#f1ce79;background:rgba(230,189,99,.07)}
+.status-contacted,.status-scheduled{color:#9fd2ff;background:rgba(72,153,219,.1)}
+.status-processed,.decision-accepted{color:#9ce0b7;background:rgba(71,169,111,.09)}
+.status-archived,.decision-withdrawn{color:#becbd7;background:rgba(255,255,255,.04)}
+.decision-refused{color:#f4adad;background:rgba(207,71,71,.08)}
+.ticket-summary>button{min-height:42px;padding:0 12px;color:var(--blue);border:1px solid rgba(139,194,241,.2);border-radius:10px;background:rgba(139,194,241,.06);font-weight:700;cursor:pointer}
+.decision-panel{flex-wrap:wrap}
+.decision-panel .internal-note{flex-basis:100%}
+.decision-panel textarea{min-height:82px;padding:10px 11px;color:var(--ink);border:1px solid var(--line);border-radius:9px;outline:none;background:#0a2136;font:500 .75rem 'DM Sans',sans-serif;resize:vertical}
+@media(min-width:1001px){.ticket-summary>button{grid-column:1/-1}}

@@ -126,7 +126,7 @@ function renderDashboard(data) {
   setText("metric-review", data.metrics.toReview);
   setText("metric-without", `${data.metrics.withoutTraining} sans formation`);
   setText("metric-tickets", data.recruitment.active);
-  setText("metric-archives", `${data.recruitment.archived} archives`);
+  setText("metric-archives", `${data.recruitment.archived} archivées`);
   setText("recruitment-active", data.recruitment.active);
   setText("recruitment-closed", data.recruitment.closed);
   setText("recruitment-archived", data.recruitment.archived);

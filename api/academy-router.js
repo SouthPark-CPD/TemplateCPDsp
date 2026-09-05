@@ -50,6 +50,7 @@ const ACADEMY_STATUSES = new Set(["a_former", "en_formation", "termine", "suspen
 const TRAINING_RESULTS = new Set(["planifiee", "valide", "a_revoir", "non_valide"]);
 const TICKET_STATUSES = new Set(["active", "closed", "deleted"]);
 const RECRUITMENT_DECISIONS = new Set(["pending", "accepted", "refused", "withdrawn"]);
+const RECRUITMENT_STATUSES = new Set(["new", "to_contact", "contacted", "scheduled", "processed", "archived"]);
 const TEMPLATE_CATEGORIES = new Set(["formation", "entretien", "physique", "connaissances", "terrain", "finale"]);
 const CRITERION_TYPES = new Set(["question", "observation", "physique", "pratique", "connaissance"]);
 
@@ -138,9 +139,10 @@ async function databaseCheck(req, res) {
     const [result] = await sql`
       SELECT
         to_regclass('public.academy_agent_files') IS NOT NULL AS agent_files_ready,
-        to_regclass('public.academy_training_records') IS NOT NULL AS training_records_ready
+        to_regclass('public.academy_training_records') IS NOT NULL AS training_records_ready,
+        to_regclass('public.academy_recruitment_applications') IS NOT NULL AS recruitment_applications_ready
     `;
-    const ready = Boolean(result?.agent_files_ready && result?.training_records_ready);
+    const ready = Boolean(result?.agent_files_ready && result?.training_records_ready && result?.recruitment_applications_ready);
     return res.status(ready ? 200 : 503).json({
       ok: ready,
       database: "connected",
@@ -780,10 +782,10 @@ async function academyDashboard(req, res) {
       `,
       sql`
         SELECT COUNT(*)::INTEGER AS total,
-          COUNT(*) FILTER (WHERE ticket_status = 'active')::INTEGER AS active,
-          COUNT(*) FILTER (WHERE ticket_status = 'closed')::INTEGER AS closed,
-          COUNT(*) FILTER (WHERE ticket_status = 'deleted')::INTEGER AS archived
-        FROM academy_recruitment_tickets
+          COUNT(*) FILTER (WHERE status NOT IN ('processed', 'archived'))::INTEGER AS active,
+          COUNT(*) FILTER (WHERE status = 'processed')::INTEGER AS closed,
+          COUNT(*) FILTER (WHERE status = 'archived')::INTEGER AS archived
+        FROM academy_recruitment_applications
       `
     ]);
 
@@ -1790,33 +1792,23 @@ async function recruitmentTickets(req, res) {
   try {
     const sql = neon(process.env.DATABASE_URL);
     const rows = await sql`
-      SELECT application_id, channel_id, channel_name, candidate_discord_id,
-        candidate_name, ticket_status, recruitment_decision, created_at,
-        closed_at, closed_by_name, deleted_at, deleted_by_name, updated_at,
-        CASE
-          WHEN transcript IS NULL THEN 0
-          ELSE COALESCE(jsonb_array_length(transcript->'messages'), 0)
-        END AS message_count
-      FROM academy_recruitment_tickets
+      SELECT id, first_name, last_name, phone, status, decision,
+        assigned_instructor_name, discord_message_id, created_at, updated_at
+      FROM academy_recruitment_applications
       ORDER BY created_at DESC
     `;
     return res.status(200).json({
       ok: true,
       tickets: rows.map(row => ({
-        applicationId: row.application_id,
-        channelId: row.channel_id,
-        channelName: row.channel_name || "",
-        candidateDiscordId: row.candidate_discord_id,
-        candidateName: row.candidate_name,
-        ticketStatus: row.ticket_status,
-        recruitmentDecision: row.recruitment_decision,
+        applicationId: `PA-${String(row.id).padStart(6, "0")}`,
+        candidateName: `${row.first_name} ${row.last_name}`,
+        phone: row.phone,
+        status: row.status,
+        recruitmentDecision: row.decision,
+        assignedInstructorName: row.assigned_instructor_name || "",
+        notificationSent: Boolean(row.discord_message_id),
         createdAt: row.created_at,
-        closedAt: row.closed_at,
-        closedByName: row.closed_by_name || "",
-        deletedAt: row.deleted_at,
-        deletedByName: row.deleted_by_name || "",
-        updatedAt: row.updated_at,
-        messageCount: Number(row.message_count || 0)
+        updatedAt: row.updated_at
       }))
     });
   } catch (error) {
@@ -1833,19 +1825,20 @@ async function recruitmentTicketDetail(req, res) {
   if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
 
   const applicationId = Array.isArray(req.query.id) ? req.query.id[0] : String(req.query.id || "");
-  if (!/^PA-\d{4,20}$/i.test(applicationId)) {
+  if (!/^PA-\d{1,20}$/i.test(applicationId)) {
     return res.status(400).json({ ok: false, code: "invalid_application_id" });
   }
 
   try {
     const sql = neon(process.env.DATABASE_URL);
+    const numericId = applicationId.replace(/^PA-/i, "").replace(/^0+/, "") || "0";
     const rows = await sql`
-      SELECT application_id, channel_id, channel_name, candidate_discord_id,
-        candidate_name, ticket_status, recruitment_decision, form_data,
-        transcript, created_at, closed_at, closed_by_discord_id, closed_by_name,
-        deleted_at, deleted_by_discord_id, deleted_by_name, updated_at
-      FROM academy_recruitment_tickets
-      WHERE application_id = ${applicationId.toUpperCase()}
+      SELECT id, first_name, last_name, age, phone, police_experience,
+        experience, availability, motivation, qualities, status, decision,
+        assigned_instructor_id, assigned_instructor_name, internal_note,
+        discord_channel_id, discord_message_id, created_at, updated_at
+      FROM academy_recruitment_applications
+      WHERE id = ${numericId}
       LIMIT 1
     `;
     if (!rows.length) return res.status(404).json({ ok: false, code: "recruitment_ticket_not_found" });
@@ -1853,22 +1846,22 @@ async function recruitmentTicketDetail(req, res) {
     return res.status(200).json({
       ok: true,
       ticket: {
-        applicationId: row.application_id,
-        channelId: row.channel_id,
-        channelName: row.channel_name || "",
-        candidateDiscordId: row.candidate_discord_id,
-        candidateName: row.candidate_name,
-        ticketStatus: row.ticket_status,
-        recruitmentDecision: row.recruitment_decision,
-        formData: row.form_data || null,
-        transcript: row.transcript || null,
+        applicationId: `PA-${String(row.id).padStart(6, "0")}`,
+        candidateName: `${row.first_name} ${row.last_name}`,
+        phone: row.phone,
+        status: row.status,
+        recruitmentDecision: row.decision,
+        assignedInstructorId: row.assigned_instructor_id || "",
+        assignedInstructorName: row.assigned_instructor_name || "",
+        internalNote: row.internal_note || "",
+        notificationSent: Boolean(row.discord_message_id),
+        formData: {
+          firstName: row.first_name, lastName: row.last_name, age: row.age,
+          phone: row.phone, policeExperience: row.police_experience,
+          experience: row.experience, availability: row.availability,
+          motivation: row.motivation, qualities: row.qualities
+        },
         createdAt: row.created_at,
-        closedAt: row.closed_at,
-        closedByDiscordId: row.closed_by_discord_id || null,
-        closedByName: row.closed_by_name || "",
-        deletedAt: row.deleted_at,
-        deletedByDiscordId: row.deleted_by_discord_id || null,
-        deletedByName: row.deleted_by_name || "",
         updatedAt: row.updated_at
       }
     });
@@ -1889,31 +1882,43 @@ async function saveRecruitmentDecision(req, res) {
   if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
   const applicationId = String(body.applicationId || "").toUpperCase();
   const decision = String(body.decision || "");
-  if (!/^PA-\d{4,20}$/.test(applicationId) || !RECRUITMENT_DECISIONS.has(decision)) {
+  const status = String(body.status || "");
+  const internalNote = textField(body.internalNote, 5000);
+  if (!/^PA-\d{1,20}$/.test(applicationId) || !RECRUITMENT_DECISIONS.has(decision) || !RECRUITMENT_STATUSES.has(status)) {
     return res.status(400).json({ ok: false, code: "invalid_recruitment_decision" });
   }
 
   try {
     const sql = neon(process.env.DATABASE_URL);
+    const numericId = applicationId.replace(/^PA-/, "").replace(/^0+/, "") || "0";
+    const instructorName = session.user.globalName || session.user.username;
     const rows = await sql`
-      UPDATE academy_recruitment_tickets
-      SET recruitment_decision = ${decision}, updated_at = NOW()
-      WHERE application_id = ${applicationId}
-      RETURNING application_id, candidate_name, recruitment_decision, updated_at
+      UPDATE academy_recruitment_applications
+      SET decision = ${decision}, status = ${status}, internal_note = ${internalNote || null},
+        assigned_instructor_id = CASE WHEN ${status} = 'new' THEN assigned_instructor_id ELSE ${session.user.id} END,
+        assigned_instructor_name = CASE WHEN ${status} = 'new' THEN assigned_instructor_name ELSE ${instructorName} END,
+        updated_at = NOW()
+      WHERE id = ${numericId}
+      RETURNING id, first_name, last_name, decision, status,
+        assigned_instructor_name, updated_at
     `;
     if (!rows.length) return res.status(404).json({ ok: false, code: "recruitment_ticket_not_found" });
     await writeActivityLog(sql, session, {
       actionType: "recruitment_decision_updated",
       targetType: "recruitment",
       targetId: applicationId,
-      targetName: rows[0].candidate_name || applicationId,
-      details: { decision }
+      targetName: `${rows[0].first_name} ${rows[0].last_name}`,
+      details: { decision, status }
     });
     return res.status(200).json({
       ok: true,
-      applicationId: rows[0].application_id,
-      decision: rows[0].recruitment_decision,
-      updatedAt: rows[0].updated_at,
+      ticket: {
+        applicationId: `PA-${String(rows[0].id).padStart(6, "0")}`,
+        recruitmentDecision: rows[0].decision,
+        status: rows[0].status,
+        assignedInstructorName: rows[0].assigned_instructor_name || "",
+        updatedAt: rows[0].updated_at
+      },
       updatedBy: session.user.globalName || session.user.username
     });
   } catch (error) {

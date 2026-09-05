@@ -1,6 +1,5 @@
-const { readSession } = require("../../server/candidate-auth");
-const { AcademyError, validateApplication, createApplicationTicket } = require("../../server/academy");
 const { neon } = require("@neondatabase/serverless");
+const { AcademyError, validateApplication, sendRecruitmentNotification } = require("../../server/academy");
 
 function bodyFromRequest(req) {
   if (req.body && typeof req.body === "object") return req.body;
@@ -10,75 +9,62 @@ function bodyFromRequest(req) {
   throw new AcademyError("invalid_json", 400);
 }
 
-async function storeRecruitmentTicket(user, application, ticket) {
-  if (!process.env.DATABASE_URL) return;
-  const sql = neon(process.env.DATABASE_URL);
-  const formData = JSON.stringify({
-    firstName: application.firstName,
-    lastName: application.lastName,
-    age: application.age,
-    playerId: application.playerId,
-    policeExperience: application.policeExperience,
-    experience: application.experience,
-    availability: application.availability,
-    motivation: application.motivation,
-    qualities: application.qualities,
-    discordUsername: user.username,
-    discordGlobalName: user.globalName || user.username
-  });
-  await sql`
-    INSERT INTO academy_recruitment_tickets (
-      application_id, channel_id, channel_name, candidate_discord_id,
-      candidate_name, ticket_status, recruitment_decision, form_data,
-      created_at, updated_at
-    ) VALUES (
-      ${ticket.applicationId}, ${ticket.channelId}, ${ticket.channelName}, ${user.id},
-      ${`${application.firstName} ${application.lastName}`}, 'active', 'pending',
-      ${formData}::jsonb, NOW(), NOW()
-    )
-    ON CONFLICT (application_id) DO UPDATE SET
-      channel_id = EXCLUDED.channel_id,
-      channel_name = EXCLUDED.channel_name,
-      candidate_discord_id = EXCLUDED.candidate_discord_id,
-      candidate_name = EXCLUDED.candidate_name,
-      ticket_status = 'active',
-      form_data = EXCLUDED.form_data,
-      updated_at = NOW()
-  `;
+function publicId(id) {
+  return `PA-${String(id).padStart(6, "0")}`;
 }
 
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") return res.status(405).json({ ok: false, code: "method_not_allowed" });
-
-  const contentLength = Number(req.headers["content-length"] || 0);
-  if (contentLength > 30000) return res.status(413).json({ ok: false, code: "payload_too_large" });
-
-  const session = readSession(req);
-  if (!session?.user?.id) return res.status(401).json({ ok: false, code: "candidate_login_required" });
+  if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
+  if (Number(req.headers["content-length"] || 0) > 30000) return res.status(413).json({ ok: false, code: "payload_too_large" });
 
   try {
     const application = validateApplication(bodyFromRequest(req));
-    const ticket = await createApplicationTicket(session.user, application);
+    const phoneNormalized = application.phone.replace(/\D/g, "");
+    const sql = neon(process.env.DATABASE_URL);
+    const existing = await sql`
+      SELECT id FROM academy_recruitment_applications
+      WHERE phone_normalized = ${phoneNormalized}
+        AND status NOT IN ('processed', 'archived')
+        AND created_at >= NOW() - INTERVAL '30 days'
+      ORDER BY created_at DESC LIMIT 1
+    `;
+    if (existing.length) {
+      return res.status(409).json({ ok: false, code: "active_application", applicationId: publicId(existing[0].id) });
+    }
+
+    const [created] = await sql`
+      INSERT INTO academy_recruitment_applications (
+        first_name, last_name, age, phone, phone_normalized, police_experience,
+        experience, availability, motivation, qualities, status, decision,
+        created_at, updated_at
+      ) VALUES (
+        ${application.firstName}, ${application.lastName}, ${application.age},
+        ${application.phone}, ${phoneNormalized}, ${application.policeExperience},
+        ${application.experience}, ${application.availability}, ${application.motivation},
+        ${application.qualities}, 'new', 'pending', NOW(), NOW()
+      ) RETURNING id
+    `;
+    const applicationId = publicId(created.id);
+
+    let notification = { sent: false };
     try {
-      await storeRecruitmentTicket(session.user, application, ticket);
-    } catch (databaseError) {
-      console.error("Academy ticket created but database tracking failed", databaseError);
-    }
-    return res.status(201).json({ ok: true, ...ticket });
-  } catch (error) {
-    if (error instanceof AcademyError) {
-      const response = { ok: false, code: error.code };
-      if (error.code === "active_application" && error.detail) {
-        try {
-          const existing = JSON.parse(error.detail);
-          response.applicationId = existing.applicationId;
-          response.channelUrl = `https://discord.com/channels/1538858756354473984/${existing.channelId}`;
-        } catch {}
+      notification = await sendRecruitmentNotification(applicationId, application);
+      if (notification.sent) {
+        await sql`UPDATE academy_recruitment_applications
+          SET discord_channel_id=${notification.channelId}, discord_message_id=${notification.messageId}, updated_at=NOW()
+          WHERE id=${created.id}`;
       }
-      return res.status(error.status).json(response);
+    } catch (error) {
+      console.error("Recruitment application saved but Discord notification failed", error);
     }
-    console.error("Academy submission failed", error);
-    return res.status(500).json({ ok: false, code: "internal_error" });
+
+    return res.status(201).json({ ok: true, applicationId, notificationSent: notification.sent === true });
+  } catch (error) {
+    if (error instanceof AcademyError) return res.status(error.status).json({ ok: false, code: error.code });
+    console.error("Recruitment application submission failed", error);
+    const code = error.code === "42P01" ? "database_not_ready" : "database_error";
+    return res.status(500).json({ ok: false, code });
   }
 };
