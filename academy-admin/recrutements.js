@@ -1,6 +1,6 @@
 const elements = {
   total: document.querySelector("#total-count"), newCount: document.querySelector("#active-count"),
-  processing: document.querySelector("#closed-count"), archived: document.querySelector("#deleted-count"),
+  processing: document.querySelector("#processing-count"), processed: document.querySelector("#processed-count"),
   search: document.querySelector("#ticket-search"), status: document.querySelector("#status-filter"),
   decision: document.querySelector("#decision-filter"), message: document.querySelector("#tickets-message"),
   list: document.querySelector("#tickets-list"), dialog: document.querySelector("#ticket-dialog"),
@@ -13,13 +13,13 @@ const elements = {
   saveDecision: document.querySelector("#save-decision"), formData: document.querySelector("#form-data")
 };
 
-const statusLabels = { new: "Nouvelle", to_contact: "À contacter", contacted: "Contactée", scheduled: "Convoquée", processed: "Traitée", archived: "Archivée" };
+const statusLabels = { new: "Nouvelle", to_contact: "À contacter", scheduled: "Convoquée", processed: "Traitée" };
 const decisionLabels = { pending: "En attente", accepted: "Acceptée", refused: "Refusée", withdrawn: "Abandon" };
 const kanbanColumns = [
   { status: "new", statuses: ["new"], title: "Nouvelles candidatures", hint: "À consulter" },
-  { status: "to_contact", statuses: ["to_contact", "contacted"], title: "À contacter", hint: "Prise de contact" },
+  { status: "to_contact", statuses: ["to_contact"], title: "À contacter", hint: "Prise de contact" },
   { status: "scheduled", statuses: ["scheduled"], title: "Convoqués", hint: "Prochaine PA" },
-  { status: "processed", statuses: ["processed", "archived"], title: "Traités", hint: "Décision ou archive" }
+  { status: "processed", statuses: ["processed"], title: "Traitées", hint: "Décision enregistrée" }
 ];
 const formLabels = {
   firstName: "Prénom RP", lastName: "Nom RP", age: "Âge RP", phone: "Téléphone en jeu",
@@ -29,7 +29,12 @@ const formLabels = {
 let tickets = [];
 let selectedApplicationId = null;
 let selectedPhone = "";
-let ignoreClickUntil = 0;
+
+function normalizeStatus(status) {
+  if (status === "contacted") return "to_contact";
+  if (status === "archived") return "processed";
+  return statusLabels[status] ? status : "new";
+}
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
@@ -77,7 +82,7 @@ function renderTickets() {
   elements.list.innerHTML = visibleColumns.map(column => {
     const cards = filtered.filter(ticket => column.statuses.includes(ticket.status));
     return `
-      <section class="kanban-column column-${column.status}" data-drop-status="${column.status}">
+      <section class="kanban-column column-${column.status}">
         <header class="kanban-head">
           <span class="column-dot" aria-hidden="true"></span>
           <div><h3>${escapeHtml(column.title)}</h3><small>${escapeHtml(column.hint)}</small></div>
@@ -85,7 +90,7 @@ function renderTickets() {
         </header>
         <div class="kanban-cards">
           ${cards.length ? cards.map(ticket => `
-            <button class="kanban-card" type="button" draggable="true" data-ticket-id="${escapeHtml(ticket.applicationId)}" data-current-status="${escapeHtml(ticket.status)}">
+            <button class="kanban-card" type="button" data-ticket-id="${escapeHtml(ticket.applicationId)}">
               <span class="kanban-meta"><b>${escapeHtml(ticket.applicationId)}</b><time title="${escapeHtml(formatDate(ticket.createdAt))}">${escapeHtml(relativeDate(ticket.createdAt))}</time></span>
               <strong>${escapeHtml(ticket.candidateName)}</strong>
               <span class="kanban-phone">☎ ${escapeHtml(ticket.phone || "Non renseigné")}</span>
@@ -120,7 +125,8 @@ async function openTicket(applicationId) {
     selectedPhone = ticket.phone || "";
     elements.detailApplicationId.textContent = ticket.applicationId;
     elements.detailCandidate.textContent = ticket.candidateName;
-    elements.detailStatus.textContent = statusLabels[ticket.status] || ticket.status;
+    ticket.status = normalizeStatus(ticket.status);
+    elements.detailStatus.textContent = statusLabels[ticket.status];
     elements.detailStatus.className = `status status-${ticket.status}`;
     elements.detailPhone.textContent = ticket.phone || "Non renseigné";
     elements.detailCreated.textContent = formatDate(ticket.createdAt);
@@ -139,14 +145,14 @@ async function openTicket(applicationId) {
 function updateCounters() {
   elements.total.textContent = String(tickets.length);
   elements.newCount.textContent = String(tickets.filter(ticket => ticket.status === "new").length);
-  elements.processing.textContent = String(tickets.filter(ticket => ["to_contact", "contacted", "scheduled"].includes(ticket.status)).length);
-  elements.archived.textContent = String(tickets.filter(ticket => ticket.status === "archived").length);
+  elements.processing.textContent = String(tickets.filter(ticket => ["to_contact", "scheduled"].includes(ticket.status)).length);
+  elements.processed.textContent = String(tickets.filter(ticket => ticket.status === "processed").length);
 }
 
 async function loadTickets() {
   try {
     const data = await api("/api/academy-admin-data/recruitment/tickets");
-    tickets = data.tickets;
+    tickets = data.tickets.map(ticket => ({ ...ticket, status: normalizeStatus(ticket.status) }));
     updateCounters();
     renderTickets();
   } catch (error) {
@@ -155,62 +161,8 @@ async function loadTickets() {
 }
 
 elements.list.addEventListener("click", event => {
-  if (Date.now() < ignoreClickUntil) return;
   const button = event.target.closest("[data-ticket-id]");
   if (button) openTicket(button.dataset.ticketId);
-});
-let draggedApplicationId = null;
-elements.list.addEventListener("dragstart", event => {
-  const card = event.target.closest(".kanban-card");
-  if (!card) return;
-  draggedApplicationId = card.dataset.ticketId;
-  card.classList.add("is-dragging");
-  event.dataTransfer.effectAllowed = "move";
-  event.dataTransfer.setData("text/plain", draggedApplicationId);
-});
-elements.list.addEventListener("dragend", event => {
-  event.target.closest(".kanban-card")?.classList.remove("is-dragging");
-  elements.list.querySelectorAll(".is-drag-over").forEach(column => column.classList.remove("is-drag-over"));
-  draggedApplicationId = null;
-  ignoreClickUntil = Date.now() + 250;
-});
-elements.list.addEventListener("dragover", event => {
-  const column = event.target.closest("[data-drop-status]");
-  if (!column || !draggedApplicationId) return;
-  event.preventDefault();
-  event.dataTransfer.dropEffect = "move";
-  elements.list.querySelectorAll(".is-drag-over").forEach(item => item.classList.toggle("is-drag-over", item === column));
-});
-elements.list.addEventListener("dragleave", event => {
-  const column = event.target.closest("[data-drop-status]");
-  if (column && !column.contains(event.relatedTarget)) column.classList.remove("is-drag-over");
-});
-elements.list.addEventListener("drop", async event => {
-  const column = event.target.closest("[data-drop-status]");
-  const applicationId = draggedApplicationId || event.dataTransfer.getData("text/plain");
-  if (!column || !applicationId) return;
-  event.preventDefault();
-  const ticket = tickets.find(item => item.applicationId === applicationId);
-  const status = column.dataset.dropStatus;
-  column.classList.remove("is-drag-over");
-  if (!ticket || ticket.status === status || (status === "to_contact" && ticket.status === "contacted") || (status === "processed" && ticket.status === "archived")) return;
-  const previousStatus = ticket.status;
-  ticket.status = status;
-  renderTickets();
-  try {
-    const data = await api("/api/academy-admin-data/recruitment/decision", {
-      method: "POST",
-      body: JSON.stringify({ applicationId, status, decision: ticket.recruitmentDecision })
-    });
-    Object.assign(ticket, data.ticket);
-    updateCounters();
-    renderTickets();
-  } catch (error) {
-    ticket.status = previousStatus;
-    updateCounters();
-    renderTickets();
-    if (error.message !== "unauthorized") alert("Le changement de colonne n’a pas pu être enregistré.");
-  }
 });
 elements.search.addEventListener("input", renderTickets);
 elements.status.addEventListener("change", renderTickets);

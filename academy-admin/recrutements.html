@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="recrutements.css?v=3">
+  <link rel="stylesheet" href="recrutements.css?v=4">
   <link rel="stylesheet" href="academy-header.css">
 </head>
 <body>
@@ -22,14 +22,14 @@
     <section class="hero">
       <p>Suivi des candidatures</p>
       <h1>Candidatures en jeu</h1>
-      <span>Faites glisser une carte pour changer son étape, ou ouvrez-la pour consulter et compléter son dossier.</span>
+      <span>Cliquez sur une carte pour consulter le dossier et mettre à jour son suivi.</span>
     </section>
 
     <section class="status-grid">
       <article><span>Total</span><strong id="total-count">—</strong></article>
       <article><span>Nouvelles</span><strong id="active-count">—</strong></article>
-      <article><span>En traitement</span><strong id="closed-count">—</strong></article>
-      <article><span>Archivées</span><strong id="deleted-count">—</strong></article>
+      <article><span>À traiter</span><strong id="processing-count">—</strong></article>
+      <article><span>Traitées</span><strong id="processed-count">—</strong></article>
     </section>
 
     <section class="directory">
@@ -37,7 +37,7 @@
         <div><p class="section-kicker">Vue Kanban</p><h2>Parcours des candidatures</h2></div>
         <div class="filters">
           <label><span>Rechercher</span><input id="ticket-search" type="search" placeholder="Numéro, candidat ou téléphone…"></label>
-          <label><span>Suivi</span><select id="status-filter"><option value="">Tous</option><option value="new">Nouvelle</option><option value="to_contact">À contacter</option><option value="contacted">Contactée</option><option value="scheduled">Convoquée</option><option value="processed">Traitée</option><option value="archived">Archivée</option></select></label>
+          <label><span>Suivi</span><select id="status-filter"><option value="">Tous</option><option value="new">Nouvelle</option><option value="to_contact">À contacter</option><option value="scheduled">Convoquée</option><option value="processed">Traitée</option></select></label>
           <label><span>Décision</span><select id="decision-filter"><option value="">Toutes</option><option value="pending">En attente</option><option value="accepted">Accepté</option><option value="refused">Refusé</option><option value="withdrawn">Abandon</option></select></label>
         </div>
       </div>
@@ -60,7 +60,7 @@
         </section>
 
         <section class="decision-panel">
-          <label><span>Suivi</span><select id="detail-followup"><option value="new">Nouvelle</option><option value="to_contact">À contacter</option><option value="contacted">Contactée</option><option value="scheduled">Convoquée</option><option value="processed">Traitée</option><option value="archived">Archivée</option></select></label>
+          <label><span>Suivi</span><select id="detail-followup"><option value="new">Nouvelle</option><option value="to_contact">À contacter</option><option value="scheduled">Convoquée</option><option value="processed">Traitée</option></select></label>
           <label><span>Décision</span><select id="detail-decision"><option value="pending">En attente</option><option value="accepted">Acceptée</option><option value="refused">Refusée</option><option value="withdrawn">Abandon</option></select></label>
           <label class="internal-note"><span>Note interne</span><textarea id="detail-note" maxlength="5000" rows="3" placeholder="Contact effectué, horaire proposé, informations utiles…"></textarea></label>
           <button id="save-decision" type="button">Enregistrer le suivi</button>
@@ -71,6 +71,6 @@
     </div>
   </dialog>
 
-  <script src="recrutements.js?v=3"></script>
+  <script src="recrutements.js?v=4"></script>
 </body>
 </html>
