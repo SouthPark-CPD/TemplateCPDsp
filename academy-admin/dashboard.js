@@ -61,6 +61,7 @@ function setText(id, value) {
 
 function renderAttention(items) {
   if (!items.length) return;
+  items = items.slice(0, 4);
   elements.attentionEmpty.hidden = true;
   elements.attentionList.hidden = false;
   elements.attentionList.innerHTML = items.map(item => `
@@ -75,6 +76,7 @@ function renderAttention(items) {
 
 function renderRecent(items) {
   if (!items.length) return;
+  items = items.slice(0, 4);
   elements.recentEmpty.hidden = true;
   elements.recentList.hidden = false;
   elements.recentList.innerHTML = items.map(item => {
@@ -92,6 +94,7 @@ function renderRecent(items) {
 
 function renderInstructorActivity(items) {
   if (!items.length) return;
+  items = items.slice(0, 4);
   const maximum = Math.max(...items.map(item => Number(item.trainingCount) || 0), 1);
   elements.instructorsEmpty.hidden = true;
   elements.instructorsList.hidden = false;
