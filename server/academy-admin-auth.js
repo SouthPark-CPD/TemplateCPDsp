@@ -186,13 +186,21 @@ async function getAcademyMember(accessToken, userId = "") {
   });
 }
 
+async function getDefaultAcademyMember(accessToken, userId = "") {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  if (botToken && /^\d{17,20}$/.test(String(userId))) {
+    return discordRequest(`${DISCORD_API}/guilds/${ACADEMY_GUILD_ID}/members/${userId}`, { headers: { Authorization: `Bot ${botToken}` } });
+  }
+  return discordRequest(`${DISCORD_API}/users/@me/guilds/${ACADEMY_GUILD_ID}/member`, { headers: { Authorization: `Bearer ${accessToken}` } });
+}
+
 function hasInstructorRole(member) {
   return Array.isArray(member.roles) && member.roles.includes(INSTRUCTOR_ROLE_ID);
 }
 
 async function hasConfiguredAcademyRole(member) {
   const { value: config, fallback } = await getConfig();
-  return fallback ? hasInstructorRole(member) : accessAllowed(member, config.access.academy);
+  return fallback ? hasInstructorRole(member) : (accessAllowed(member, config.access.academy) || hasInstructorRole(member));
 }
 
 function newSession(user, tokens, member = null) {
@@ -255,8 +263,19 @@ async function validateSession(req, forceRoleCheck = false) {
     || Number(session.academyAccessConfigVersion ?? -1) !== accessConfigVersion;
   if (roleCheckDue) {
     try {
-      const member = await getAcademyMember(session.accessToken, session.user?.id);
-      if (!await hasConfiguredAcademyRole(member)) return { ok: false, reason: "missing_role" };
+      let member;
+      let allowed = false;
+      try {
+        member = await getAcademyMember(session.accessToken, session.user?.id);
+        allowed = await hasConfiguredAcademyRole(member);
+      } catch (error) {
+        console.warn("Configured Academy access unavailable; using emergency role", { status: error.status || 0 });
+      }
+      if (!allowed) {
+        const emergencyMember = await getDefaultAcademyMember(session.accessToken, session.user?.id);
+        if (!hasInstructorRole(emergencyMember)) return { ok: false, reason: "missing_role" };
+        member = emergencyMember;
+      }
       const academyName = member.nick || member.user?.global_name || member.user?.username || session.user.globalName;
       if (source === "police") session.user.academyGlobalName = academyName;
       else session.user.globalName = academyName;
@@ -304,6 +323,7 @@ module.exports = {
   exchangeCode,
   getDiscordUser,
   getAcademyMember,
+  getDefaultAcademyMember,
   hasInstructorRole,
   hasConfiguredAcademyRole,
   newSession,

@@ -388,11 +388,23 @@ async function validateSession(req, forceRoleCheck = false) {
     || Number(session.accessConfigVersion ?? -1) !== accessConfigVersion;
   if (roleCheckDue) {
     try {
-      const member = authMode === "fivem"
-        ? await getConfiguredGuildMemberById(session.user.id)
-        : await getConfiguredGuildMember(session.accessToken);
-
-      if (!await hasConfiguredPoliceRole(member)) return { ok: false, reason: "missing_role" };
+      let member;
+      let allowed = false;
+      try {
+        member = authMode === "fivem"
+          ? await getConfiguredGuildMemberById(session.user.id)
+          : await getConfiguredGuildMember(session.accessToken);
+        allowed = await hasConfiguredPoliceRole(member);
+      } catch (error) {
+        console.warn("Configured police access unavailable; using emergency role", { status: error.status || 0 });
+      }
+      if (!allowed) {
+        const emergencyMember = authMode === "fivem"
+          ? await getGuildMemberById(session.user.id)
+          : await getGuildMember(session.accessToken);
+        if (!hasRequiredRole(emergencyMember)) return { ok: false, reason: "missing_role" };
+        member = emergencyMember;
+      }
       session.user.globalName = member.nick || member.user?.global_name || member.user?.username || session.user.globalName;
       session.user.username = member.user?.username || session.user.username;
       session.user.avatar = member.user?.avatar || session.user.avatar || null;

@@ -13,6 +13,7 @@ const {
   exchangeCode,
   getDiscordUser,
   getAcademyMember,
+  getDefaultAcademyMember,
   hasInstructorRole,
   hasConfiguredAcademyRole,
   newSession,
@@ -104,7 +105,7 @@ async function discordCallback(req, res) {
   try {
     const tokens = await exchangeCode(req, code);
     const user = await getDiscordUser(tokens.access_token);
-    const member = await getAcademyMember(tokens.access_token, user.id);
+    const member = await getDefaultAcademyMember(tokens.access_token, user.id);
 
     if (!await hasConfiguredAcademyRole(member)) {
       res.setHeader("Set-Cookie", [clearStateCookie(), clearSessionCookie()]);
