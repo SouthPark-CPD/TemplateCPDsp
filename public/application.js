@@ -2,21 +2,41 @@
   const form = document.querySelector("#academy-form");
   if (!form) return;
 
-  const draftKey = "cpd_academy_draft_v2";
+  const draftKey = "cpd_academy_draft_v3";
   const steps = [...document.querySelectorAll(".form-step")];
   const indicators = [...document.querySelectorAll("[data-indicator]")];
   const previous = document.querySelector("#previous");
   const next = document.querySelector("#next");
   const submit = document.querySelector("#submit");
   const submitError = document.querySelector("#submit-error");
+  const lastStep = steps.length;
   let current = 1;
 
   const labels = {
-    firstName: "Prénom RP", lastName: "Nom RP", age: "Âge RP",
-    phone: "Téléphone en jeu", policeExperience: "Expérience police RP",
-    experience: "Expérience RP", availability: "Disponibilités",
-    motivation: "Motivation", qualities: "Qualités d’un policier"
+    rpName: "Nom de famille et prénom RP", gender: "Genre",
+    birthDate: "Date de naissance", nationality: "Nationalité",
+    phone: "Téléphone en jeu", background: "Background & objectif",
+    additional: "Élément complémentaire", discordId: "ID Discord"
   };
+
+  function fieldValue(name) {
+    const field = form.elements[name];
+    if (!field) return "";
+    if (typeof field.length === "number" && field.length && field[0]?.type === "radio") {
+      return [...field].find(option => option.checked)?.value || "";
+    }
+    return String(field.value || "");
+  }
+
+  function setFieldValue(name, value) {
+    const field = form.elements[name];
+    if (!field) return;
+    if (typeof field.length === "number" && field.length && field[0]?.type === "radio") {
+      [...field].forEach(option => { option.checked = option.value === value; });
+      return;
+    }
+    field.value = value;
+  }
 
   function saveDraft() {
     const data = Object.fromEntries(new FormData(form));
@@ -27,33 +47,71 @@
   function restoreDraft() {
     try {
       const data = JSON.parse(localStorage.getItem(draftKey) || "{}");
-      Object.entries(data).forEach(([name, value]) => {
-        if (form.elements[name]) form.elements[name].value = value;
-      });
+      Object.entries(data).forEach(([name, value]) => setFieldValue(name, value));
     } catch { localStorage.removeItem(draftKey); }
   }
 
   function updateCounters() {
     document.querySelectorAll("[data-counter]").forEach(counter => {
       const field = form.elements[counter.dataset.counter];
-      counter.textContent = `${field.value.length} / ${field.maxLength}`;
+      if (field) counter.textContent = `${fieldValue(counter.dataset.counter).length} / ${field.maxLength}`;
     });
   }
 
+  function lineCount(value) {
+    return String(value || "").split("\n").map(line => line.trim()).filter(Boolean).length;
+  }
+
+  function setFieldError(field, message) {
+    field.classList.add("invalid");
+    const error = field.closest("label")?.querySelector("small");
+    if (error) error.textContent = message;
+  }
+
   function validateStep(number) {
-    const fields = [...steps[number - 1].querySelectorAll("input,select,textarea")];
+    const step = steps[number - 1];
     let valid = true;
-    fields.forEach(field => {
-      const error = field.closest("label")?.querySelector("small");
+    const controls = [...step.querySelectorAll("input:not([type=radio]):not([type=checkbox]),select,textarea")];
+    controls.forEach(field => {
       field.classList.remove("invalid");
+      const error = field.closest("label")?.querySelector("small");
       if (error) error.textContent = "";
       if (!field.checkValidity()) {
         valid = false;
-        field.classList.add("invalid");
-        if (error) error.textContent = field.validity.valueMissing ? "Ce champ est obligatoire." : "Veuillez vérifier ce champ.";
+        const message = field.validity.valueMissing
+          ? "Ce champ est obligatoire."
+          : field.validity.patternMismatch
+            ? "Utilisez le format demandé."
+            : field.validity.tooShort
+              ? `Écrivez au moins ${field.minLength} caractères.`
+              : "Veuillez vérifier ce champ.";
+        setFieldError(field, message);
+      }
+      if (field.dataset.minLines && field.value.trim() && lineCount(field.value) < Number(field.dataset.minLines)) {
+        valid = false;
+        setFieldError(field, `Votre réponse doit contenir au moins ${field.dataset.minLines} lignes.`);
       }
     });
-    fields.find(field => !field.checkValidity())?.focus();
+
+    [...step.querySelectorAll("input[type=checkbox]")].forEach(field => {
+      field.classList.remove("invalid");
+      if (!field.checkValidity()) {
+        valid = false;
+        field.classList.add("invalid");
+      }
+    });
+
+    const radioNames = [...new Set([...step.querySelectorAll("input[type=radio]")].map(field => field.name))];
+    radioNames.forEach(name => {
+      const radios = [...step.querySelectorAll(`input[type=radio][name="${name}"]`)];
+      const error = step.querySelector(`[data-error-for="${name}"]`);
+      const checked = radios.some(field => field.checked);
+      radios.forEach(field => field.classList.toggle("invalid", !checked));
+      if (error) error.textContent = checked ? "" : "Ce champ est obligatoire.";
+      if (!checked) valid = false;
+    });
+
+    if (!valid) step.querySelector(".invalid")?.focus();
     return valid;
   }
 
@@ -66,7 +124,7 @@
       const title = document.createElement("small");
       const content = document.createElement("p");
       title.textContent = label;
-      content.textContent = form.elements[name]?.value || "Non renseigné";
+      content.textContent = fieldValue(name) || (name === "additional" ? "Aucune information complémentaire." : "Non renseigné");
       item.append(title, content);
       box.append(item);
     });
@@ -80,23 +138,22 @@
       item.classList.toggle("complete", index + 1 < number);
     });
     previous.classList.toggle("hidden", number === 1);
-    next.classList.toggle("hidden", number === 4);
-    submit.classList.toggle("hidden", number !== 4);
-    if (number === 4) renderSummary();
+    next.classList.toggle("hidden", number === lastStep);
+    submit.classList.toggle("hidden", number !== lastStep);
+    if (number === lastStep) renderSummary();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function payload() {
     return {
-      firstName: form.elements.firstName.value,
-      lastName: form.elements.lastName.value,
-      age: Number(form.elements.age.value),
-      phone: form.elements.phone.value,
-      policeExperience: form.elements.policeExperience.value,
-      experience: form.elements.experience.value,
-      availability: form.elements.availability.value,
-      motivation: form.elements.motivation.value,
-      qualities: form.elements.qualities.value,
+      rpName: fieldValue("rpName"),
+      gender: fieldValue("gender"),
+      birthDate: fieldValue("birthDate"),
+      nationality: fieldValue("nationality"),
+      phone: fieldValue("phone"),
+      background: fieldValue("background"),
+      additional: fieldValue("additional"),
+      discordId: fieldValue("discordId"),
       accuracy: form.elements.accuracy.checked
     };
   }
@@ -119,8 +176,9 @@
       location.assign(`success.html?id=${encodeURIComponent(result.applicationId)}`);
     } catch (error) {
       const messages = {
-        invalid_application: "Vérifiez les informations saisies, notamment le numéro de téléphone.",
+        invalid_application: "Vérifiez le format de la date, de l’ID Discord et du numéro de téléphone.",
         database_not_configured: "Le service de candidature n’est pas encore configuré.",
+        database_not_ready: "Le service de candidature n’est pas encore prêt.",
         database_error: "La candidature n’a pas pu être enregistrée. Réessayez dans quelques instants."
       };
       submitError.textContent = messages[error.message] || "La candidature n’a pas pu être transmise. Réessayez.";
@@ -132,7 +190,8 @@
 
   restoreDraft(); updateCounters();
   form.addEventListener("input", () => { saveDraft(); updateCounters(); });
-  next.addEventListener("click", () => { if (validateStep(current)) showStep(current + 1); });
-  previous.addEventListener("click", () => showStep(current - 1));
+  form.addEventListener("change", () => { saveDraft(); updateCounters(); });
+  next.addEventListener("click", () => { if (validateStep(current)) showStep(Math.min(current + 1, lastStep)); });
+  previous.addEventListener("click", () => showStep(Math.max(current - 1, 1)));
   form.addEventListener("submit", event => { event.preventDefault(); if (validateStep(current)) sendApplication(); });
 })();

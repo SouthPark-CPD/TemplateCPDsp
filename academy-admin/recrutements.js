@@ -22,7 +22,10 @@ const kanbanColumns = [
   { status: "processed", statuses: ["processed"], title: "Traitées", hint: "Décision enregistrée" }
 ];
 const formLabels = {
-  firstName: "Prénom RP", lastName: "Nom RP", age: "Âge RP", phone: "Téléphone en jeu",
+  rpName: "Nom de famille et prénom RP", gender: "Genre", birthDate: "Date de naissance",
+  nationality: "Nationalité", phone: "Téléphone en jeu", background: "Background & objectif",
+  additional: "Élément complémentaire", discordId: "ID Discord",
+  firstName: "Prénom RP", lastName: "Nom RP", age: "Âge RP",
   policeExperience: "Expérience dans la police RP", experience: "Expérience RP",
   availability: "Disponibilités", motivation: "Motivations", qualities: "Qualités"
 };

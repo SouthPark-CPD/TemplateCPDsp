@@ -1,4 +1,9 @@
 const DISCORD_API = "https://discord.com/api/v10";
+const {
+  splitRpName,
+  ageFromBirthDate,
+  encodeModernFormData
+} = require("./application-form");
 const ACADEMY_GUILD_ID = "1538858756354473984";
 const APPLICATION_CATEGORY_ID = "1538858758116089927";
 const CHANNEL_TYPE_TEXT = 0;
@@ -54,8 +59,61 @@ function within(value, min, max) {
   return value.length >= min && value.length <= max;
 }
 
+function answerLineCount(value) {
+  return String(value || "").split("\n").map(line => line.trim()).filter(Boolean).length;
+}
+
+function isModernApplication(body) {
+  return body && ["rpName", "gender", "birthDate", "nationality", "background", "additional", "discordId"]
+    .some(key => Object.prototype.hasOwnProperty.call(body, key));
+}
+
 function validateApplication(body) {
+  if (isModernApplication(body)) {
+    const rpName = normalized(body.rpName);
+    const gender = normalized(body.gender);
+    const birthDate = normalized(body.birthDate);
+    const nationality = normalized(body.nationality);
+    const phone = normalized(body.phone);
+    const background = normalized(body.background);
+    const additional = normalized(body.additional);
+    const discordId = normalized(body.discordId);
+    const age = ageFromBirthDate(birthDate);
+    const names = splitRpName(rpName);
+    const storageAvailability = encodeModernFormData({ rpName, gender, birthDate, nationality, discordId });
+    const application = {
+      formVersion: 2,
+      rpName, gender, birthDate, nationality, phone, background, additional, discordId,
+      firstName: names.firstName,
+      lastName: names.lastName,
+      age: age ?? 0,
+      policeExperience: "Non",
+      experience: background,
+      availability: storageAvailability,
+      storageAvailability,
+      motivation: additional || "Aucune information complémentaire.",
+      qualities: `ID Discord : ${discordId}`,
+      accuracy: body.accuracy === true
+    };
+    const phoneValid = within(phone, 1, 30)
+      && /^[0-9+() .#xX-]+$/.test(phone)
+      && (/\d/.test(phone) || /x{3,}/i.test(phone));
+    const valid = within(rpName, 2, 80)
+      && ["Homme", "Femme"].includes(gender)
+      && /^\d{17,20}$/.test(discordId)
+      && age !== null && age >= 21 && age <= 80
+      && within(nationality, 2, 80)
+      && phoneValid
+      && within(background, 100, 5000)
+      && answerLineCount(background) >= 10
+      && within(additional, 0, 1800)
+      && application.accuracy;
+    if (!valid) throw new AcademyError("invalid_application", 400);
+    return application;
+  }
+
   const application = {
+    formVersion: 1,
     firstName: normalized(body.firstName),
     lastName: normalized(body.lastName),
     age: Number(body.age),
@@ -67,11 +125,12 @@ function validateApplication(body) {
     qualities: normalized(body.qualities),
     accuracy: body.accuracy === true
   };
+  application.storageAvailability = application.availability;
 
   const valid = within(application.firstName, 1, 40)
     && within(application.lastName, 1, 40)
     && Number.isInteger(application.age) && application.age >= 18 && application.age <= 80
-    && within(application.phone, 1, 30) && /^[0-9+() .#-]+$/.test(application.phone) && /\d/.test(application.phone)
+    && within(application.phone, 1, 30) && /^[0-9+() .#xX-]+$/.test(application.phone) && (/\d/.test(application.phone) || /x{3,}/i.test(application.phone))
     && ["Oui", "Non"].includes(application.policeExperience)
     && within(application.experience, 1, 1000)
     && within(application.availability, 1, 500)
@@ -86,25 +145,10 @@ function validateApplication(body) {
 async function sendRecruitmentNotification(applicationId, application) {
   const channelId = String(process.env.ACADEMY_RECRUITMENT_CHANNEL_ID || "");
   if (!/^\d{17,20}$/.test(channelId)) return { sent: false, reason: "channel_not_configured" };
-  const candidateName = `${application.firstName} ${application.lastName}`;
   const message = await discordRequest(`/channels/${channelId}/messages`, {
     method: "POST",
     body: JSON.stringify({
-      embeds: [{
-        title: `Nouvelle demande de recrutement · ${applicationId}`,
-        description: `Une nouvelle candidature en jeu vient d’être transmise par **${cleanDiscordText(candidateName)}**.`,
-        color: 0xd3aa56,
-        fields: [
-          { name: "Candidat RP", value: discordField(candidateName), inline: true },
-          { name: "Âge RP", value: String(application.age), inline: true },
-          { name: "Téléphone en jeu", value: `\`${discordField(application.phone)}\``, inline: true },
-          { name: "Expérience police RP", value: application.policeExperience, inline: true },
-          { name: "Disponibilités", value: discordField(application.availability), inline: false },
-          { name: "Motivation", value: discordField(application.motivation), inline: false }
-        ],
-        footer: { text: "Statut : Nouvelle · Consultez le panel Police Academy" },
-        timestamp: new Date().toISOString()
-      }],
+      embeds: applicationEmbeds(applicationId, null, application),
       allowed_mentions: { parse: [] }
     })
   });
@@ -120,7 +164,7 @@ function channelSlug(firstName, lastName, discordId) {
 }
 
 function avatarUrl(user) {
-  return user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128` : undefined;
+  return user?.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128` : undefined;
 }
 
 function cleanDiscordText(value) {
@@ -131,8 +175,40 @@ function discordField(value) {
   return cleanDiscordText(value).slice(0, 1024) || "Non renseigné";
 }
 
+function discordDescription(value) {
+  return cleanDiscordText(value).slice(0, 4096) || "Non renseigné";
+}
+
 function applicationEmbeds(applicationId, user, application) {
-  const displayName = user.globalName || user.username;
+  if (application?.formVersion === 2 || application?.rpName) {
+    const candidateName = application.rpName || `${application.firstName || ""} ${application.lastName || ""}`.trim();
+    const discordId = application.discordId || user?.id || "";
+    const source = user
+      ? `Candidature déposée depuis le portail Police Academy par **${cleanDiscordText(user.globalName || user.username || "Candidat")}**.`
+      : "Candidature déposée depuis le formulaire public Police Academy.";
+    return [
+      {
+        title: `Nouvelle candidature · ${applicationId}`,
+        description: source,
+        color: 0xd3aa56,
+        thumbnail: avatarUrl(user) ? { url: avatarUrl(user) } : undefined,
+        fields: [
+          { name: "Nom RP", value: discordField(candidateName), inline: true },
+          { name: "Genre", value: discordField(application.gender), inline: true },
+          { name: "Date de naissance", value: discordField(application.birthDate), inline: true },
+          { name: "Nationalité", value: discordField(application.nationality), inline: true },
+          { name: "Téléphone en jeu", value: discordField(application.phone), inline: true },
+          { name: "ID Discord", value: discordId ? `\`${discordField(discordId)}\`` : "Non renseigné", inline: true }
+        ],
+        footer: { text: "Statut : Nouvelle candidature · Panel Police Academy" },
+        timestamp: new Date().toISOString()
+      },
+      { title: "Background & objectif", description: discordDescription(application.background || application.experience), color: 0x183c60 },
+      { title: "Élément complémentaire", description: discordDescription(application.additional || application.motivation || "Aucun élément complémentaire."), color: 0x3c8fdc }
+    ];
+  }
+
+  const displayName = user?.globalName || user?.username || "Candidat";
   const color = 0x3c8fdc;
   return [
     {
@@ -143,7 +219,7 @@ function applicationEmbeds(applicationId, user, application) {
       fields: [
         { name: "Candidat RP", value: `${cleanDiscordText(application.firstName)} ${cleanDiscordText(application.lastName)}`, inline: true },
         { name: "Âge RP", value: String(application.age), inline: true },
-        { name: "Discord", value: `<@${user.id}>\n\`${user.id}\``, inline: true },
+        { name: "Discord", value: user?.id ? `<@${user.id}>\n\`${user.id}\`` : "Non renseigné", inline: true },
         { name: "Téléphone en jeu", value: cleanDiscordText(application.phone || "Non renseigné"), inline: true },
         { name: "Expérience police RP", value: application.policeExperience, inline: true },
         { name: "Disponibilités", value: cleanDiscordText(application.availability), inline: false }

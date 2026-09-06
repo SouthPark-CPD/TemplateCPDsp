@@ -42,7 +42,7 @@ module.exports = async function handler(req, res) {
       ) VALUES (
         ${application.firstName}, ${application.lastName}, ${application.age},
         ${application.phone}, ${phoneNormalized}, ${application.policeExperience},
-        ${application.experience}, ${application.availability}, ${application.motivation},
+        ${application.experience}, ${application.storageAvailability || application.availability}, ${application.motivation},
         ${application.qualities}, 'new', 'pending', NOW(), NOW()
       ) RETURNING id
     `;
