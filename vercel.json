@@ -6,7 +6,7 @@
       "includeFiles": "mdt/**"
     },
     "api/academy-admin.js": {
-      "includeFiles": ["academy-admin/**", "admin/**"]
+      "includeFiles": "{academy-admin,admin}/**"
     }
   },
   "routes": [
