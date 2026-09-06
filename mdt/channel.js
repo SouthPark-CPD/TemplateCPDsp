@@ -34,7 +34,7 @@
     return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(date);
   };
   const initials = (name) => String(name || "CPD").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "CPD";
-  const authorName = (author) => author?.global_name || author?.globalName || author?.username || "Agent CPD";
+  const authorName = (author) => author?.displayName || author?.display_name || author?.nick || author?.global_name || author?.globalName || author?.username || "Agent CPD";
   const avatarUrl = (author) => {
     if (!author?.id || !author?.avatar) return "";
     const extension = String(author.avatar).startsWith("a_") ? "gif" : "png";
