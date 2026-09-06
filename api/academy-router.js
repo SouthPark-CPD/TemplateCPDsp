@@ -447,12 +447,12 @@ async function liaisonMentionCandidates(req, res) {
     }
     const members = await getAllCpdMembers();
     const candidates = members
-      .filter(member => member?.user && !member.user.bot && Array.isArray(member.roles) && member.roles.includes(CPD_MEMBER_ROLE_ID))
+      .filter(member => member?.user && !member.user.bot)
       .map(member => {
-        const rank = highestRecognizedRank(member.roles) || { name: "Agent CPD", level: 0 };
+        const rank = highestRecognizedRank(Array.isArray(member.roles) ? member.roles : []) || { name: "Membre du serveur", level: 0 };
         return {
           id: String(member.user.id),
-          name: member.nick || member.user.global_name || member.user.username || "Agent CPD",
+          name: member.nick || member.user.global_name || member.user.username || "Membre du serveur",
           username: member.user.username || "",
           rank: rank.name,
           avatar: discordAvatar(member)

@@ -36,12 +36,12 @@
     };
     const updateSelected = () => {
       selectedNode.innerHTML = [...selected.values()].map((member) => `<span class="mention-chip"><span>@${escapeHtml(member.name)}</span><button type="button" data-remove-mention="${escapeHtml(member.id)}" aria-label="Retirer ${escapeHtml(member.name)}">×</button></span>`).join("");
-      countNode.textContent = selected.size ? `${selected.size} sélectionné${selected.size > 1 ? "s" : ""}` : "Aucun agent sélectionné";
+      countNode.textContent = selected.size ? `${selected.size} sélectionné${selected.size > 1 ? "s" : ""}` : "Aucun membre sélectionné";
     };
     const renderOptions = () => {
       const query = String(search.value || "").trim().toLocaleLowerCase("fr");
       const visible = candidates.filter((member) => !selected.has(member.id) && `${member.name} ${member.username} ${member.rank}`.toLocaleLowerCase("fr").includes(query)).slice(0, 25);
-      optionsNode.innerHTML = visible.length ? visible.map((member) => `<button type="button" class="mention-option" data-mention-id="${escapeHtml(member.id)}"><span class="mention-option-avatar">${member.avatar ? `<img src="${escapeHtml(member.avatar)}" alt="">` : escapeHtml(initials(member.name))}</span><span class="mention-option-name">${escapeHtml(member.name)}${member.username ? ` <small>@${escapeHtml(member.username)}</small>` : ""}</span><span class="mention-option-rank">${escapeHtml(member.rank || "Agent CPD")}</span></button>`).join("") : '<span class="mention-help">Aucun agent trouvé.</span>';
+      optionsNode.innerHTML = visible.length ? visible.map((member) => `<button type="button" class="mention-option" data-mention-id="${escapeHtml(member.id)}"><span class="mention-option-avatar">${member.avatar ? `<img src="${escapeHtml(member.avatar)}" alt="">` : escapeHtml(initials(member.name))}</span><span class="mention-option-name">${escapeHtml(member.name)}${member.username ? ` <small>@${escapeHtml(member.username)}</small>` : ""}</span><span class="mention-option-rank">${escapeHtml(member.rank || "Membre du serveur")}</span></button>`).join("") : '<span class="mention-help">Aucun membre trouvé.</span>';
     };
     const openOptions = async () => {
       clearTimeout(hideTimer);
