@@ -5,6 +5,7 @@ const {
   verifyFiveMTicket, getGuildMemberById, hasRequiredRole, newFiveMSession
 } = require("../../server/auth");
 const { neon } = require("@neondatabase/serverless");
+const { isControlPanelAdmin } = require("../../server/admin-config");
 
 async function academyRecruitmentSummary() {
   if (!process.env.DATABASE_URL) return null;
@@ -147,8 +148,9 @@ async function normalSession(req, res) {
   }
 
   const academySummary = academyAccess ? await academyRecruitmentSummary() : null;
+  const controlPanelAdmin = await isControlPanelAdmin(result.session.user?.id);
   if (result.changed) res.setHeader("Set-Cookie", sessionCookie(result.session));
-  return res.status(200).json({ authenticated: true, user: result.session.user, academyAccess, academySummary });
+  return res.status(200).json({ authenticated: true, user: result.session.user, academyAccess, academySummary, controlPanelAdmin });
 }
 
 module.exports = async function handler(req, res) {
