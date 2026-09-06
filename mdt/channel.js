@@ -13,6 +13,7 @@
   const fileList = document.getElementById("channel-file-list");
   const sendButton = document.getElementById("channel-send");
   const statusNode = document.getElementById("channel-compose-status");
+  const mentionPicker = window.CPDMentionPicker?.init(document.querySelector("[data-mention-picker]"));
   let messages = [];
   let nextBefore = "";
   let hasMore = false;
@@ -39,8 +40,10 @@
     const extension = String(author.avatar).startsWith("a_") ? "gif" : "png";
     return `https://cdn.discordapp.com/avatars/${encodeURIComponent(author.id)}/${encodeURIComponent(author.avatar)}.${extension}?size=64`;
   };
-  const renderText = (value) => {
-    const text = escapeHtml(value);
+  const renderText = (value, mentions = []) => {
+    const mentionMap = new Map((Array.isArray(mentions) ? mentions : []).map((member) => [String(member.id), `@${authorName(member)}`]));
+    const normalized = String(value ?? "").replace(/<@!?(\d+)>/g, (_, id) => mentionMap.get(id) || `@${id}`);
+    const text = escapeHtml(normalized);
     const withBold = text.replace(/\*\*([^*\n]{1,120})\*\*/g, "<strong>$1</strong>");
     return withBold.replace(/(https?:\/\/[^\s<]+)/g, (match) => {
       const url = safeUrl(match);
@@ -78,7 +81,7 @@
           if (!title && !description && !url && !image) return "";
           return `<div class="message-embed">${title ? `<strong>${title}</strong>` : ""}${description ? `<div>${description}</div>` : ""}${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : ""}${url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">Ouvrir le lien ↗</a>` : ""}</div>`;
         }).join("");
-        return `<article class="message-card"><div class="message-avatar">${avatar ? `<img src="${escapeHtml(avatar)}" alt="">` : escapeHtml(initials(author))}</div><div><div class="message-head"><span class="message-author">${escapeHtml(author)}</span><time class="message-time" datetime="${escapeHtml(message.timestamp || "")}">${escapeHtml(formatTime(message.timestamp))}</time></div>${message.content ? `<p class="message-content">${renderText(message.content)}</p>` : ""}${attachmentHtml || embedHtml ? `<div class="message-attachments">${attachmentHtml}${embedHtml}</div>` : ""}</div></article>`;
+        return `<article class="message-card"><div class="message-avatar">${avatar ? `<img src="${escapeHtml(avatar)}" alt="">` : escapeHtml(initials(author))}</div><div><div class="message-head"><span class="message-author">${escapeHtml(author)}</span><time class="message-time" datetime="${escapeHtml(message.timestamp || "")}">${escapeHtml(formatTime(message.timestamp))}</time></div>${message.content ? `<p class="message-content">${renderText(message.content, message.mentions)}</p>` : ""}${attachmentHtml || embedHtml ? `<div class="message-attachments">${attachmentHtml}${embedHtml}</div>` : ""}</div></article>`;
       }).join("");
       messagesNode.scrollTop = messagesNode.scrollHeight;
     }
@@ -143,7 +146,7 @@
     setStatus("Envoi en cours…");
     try {
       const attachments = await Promise.all(files.map(fileData));
-      const response = await fetch("/api/liaison/complaints", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ channelId, message: content, attachments }) });
+      const response = await fetch("/api/liaison/complaints", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ channelId, message: content, attachments, mentions: mentionPicker?.getIds() || [] }) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.ok) throw new Error(data.code || "discord_unavailable");
       messageInput.value = "";

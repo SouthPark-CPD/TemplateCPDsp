@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Liaison gouvernement — CPD</title>
-  <link rel="stylesheet" href="/mdt/channel.css?v=1">
+  <link rel="stylesheet" href="/mdt/channel.css?v=2">
+  <link rel="stylesheet" href="/mdt/mentions.css?v=1">
 </head>
 <body data-channel-id="1408092769079267379" data-channel-label="Liaison gouvernement">
   <main class="channel-page">
@@ -25,6 +26,12 @@
       <div id="channel-messages" class="channel-messages" aria-live="polite"><p class="channel-placeholder">Chargement des messages…</p></div>
       <button id="channel-more" class="secondary more" type="button" hidden>Charger les messages précédents</button>
       <form id="channel-composer" class="channel-composer" novalidate>
+        <div class="mention-picker" data-mention-picker>
+          <div class="mention-picker-head"><div><span class="detail-kicker">MENTIONS</span><strong>Notifier des agents</strong></div><span class="mention-count" data-mention-count>Aucun agent sélectionné</span></div>
+          <div class="mention-control"><input class="mention-search" data-mention-search type="search" autocomplete="off" placeholder="Rechercher un agent à notifier…"></div>
+          <div class="mention-selected" data-mention-selected></div><div class="mention-options" data-mention-options hidden></div>
+          <p class="mention-help" data-mention-help>Sélection facultative : les agents choisis recevront une mention Discord.</p>
+        </div>
         <label class="composer-field" for="channel-message"><span class="sr-only">Message</span><textarea id="channel-message" maxlength="1800" rows="2" placeholder="Écrire un message à la liaison gouvernement…"></textarea></label>
         <label class="channel-file" for="channel-files"><span aria-hidden="true">↥</span><span>Pièce jointe</span><input id="channel-files" type="file" multiple accept="image/*,video/*,audio/*,.pdf,.txt,.doc,.docx,.zip"></label>
         <button id="channel-send" class="primary" type="submit"><span aria-hidden="true">➤</span> Envoyer</button>
@@ -33,6 +40,7 @@
       </form>
     </section>
   </main>
-  <script src="/mdt/channel.js?v=1"></script>
+  <script src="/mdt/mentions.js?v=1"></script>
+  <script src="/mdt/channel.js?v=3"></script>
 </body>
 </html>
