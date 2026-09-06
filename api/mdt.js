@@ -1,6 +1,6 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
-const { validateSession, sessionCookie, clearSessionCookie } = require("../server/auth");
+const { validateSession, sessionCookie, clearSessionCookie, getConfiguredAccessMemberById, hasConfiguredGangRole } = require("../server/auth");
 
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
@@ -39,6 +39,15 @@ module.exports = async function handler(req, res) {
   }
 
   if (result.changed) res.setHeader("Set-Cookie", sessionCookie(result.session));
+
+  if (assetPath === "gang-unit.html") {
+    try {
+      const member = await getConfiguredAccessMemberById(result.session.user?.id, "gang");
+      if (!await hasConfiguredGangRole(member)) return res.status(403).end("Accès Gang Unit refusé");
+    } catch {
+      return res.status(403).end("Accès Gang Unit indisponible");
+    }
+  }
 
   const mdtRoot = path.resolve(process.cwd(), "mdt");
   const absolutePath = path.resolve(mdtRoot, assetPath);

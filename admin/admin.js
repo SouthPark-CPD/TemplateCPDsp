@@ -27,9 +27,19 @@
       { key: "formations", label: "Formations", icon: "book", enabled: true, sortOrder: 30 },
       { key: "recrutements", label: "Recrutements", icon: "inbox", enabled: true, sortOrder: 40 },
       { key: "activite", label: "Historique", icon: "clock", enabled: true, sortOrder: 50 }
+    ],
+    gangItems: [
+      { key: "gang-dashboard", label: "Vue d’ensemble", icon: "grid", enabled: true, sortOrder: 10 },
+      { key: "gang-map", label: "Carte tactique", icon: "chart", enabled: true, sortOrder: 20 },
+      { key: "gang-gangs", label: "Dossiers gangs & individus", icon: "users", enabled: true, sortOrder: 30 },
+      { key: "gang-intel", label: "Surveillance & renseignement", icon: "book", enabled: true, sortOrder: 40 },
+      { key: "gang-operations", label: "Opérations", icon: "radio", enabled: true, sortOrder: 50 }
     ]
   };
-  let state = { config: null, history: [], administrators: [], catalog: {}, meta: null, user: null, dirty: false };
+  let state = { config: null, history: [], administrators: [], catalog: {}, meta: null, user: null, dirty: false, gangAdminLoaded: false };
+  const gangType = value => ({ gang: "Gang", territory: "Territoire", marker: "Repère", individual: "Individu", report: "Rapport", operation: "Opération", watchlist: "Surveillance" }[value] || value || "Élément");
+  const gangAction = value => ({ territory_created: "Création d’un territoire", territory_updated: "Modification d’un territoire", marker_created: "Création d’un repère", marker_updated: "Modification d’un repère", gang_created: "Création d’un gang", gang_updated: "Modification d’un gang", individual_created: "Création d’un individu", individual_updated: "Modification d’un individu", report_created: "Création d’un rapport", operation_created: "Création d’une opération", operation_updated: "Modification d’une opération", watchlist_created: "Création d’une surveillance", watchlist_updated: "Modification d’une surveillance", entity_archived: "Archivage", entity_restored: "Restauration" }[value] || value || "Action");
+  const dateTime = value => { const parsed = new Date(value); return Number.isNaN(parsed.getTime()) ? "Date inconnue" : parsed.toLocaleString("fr-FR"); };
 
   function notice(message, error = false) {
     const element = $("#notice");
@@ -146,7 +156,7 @@
   }
 
   function renderAccess() {
-    const names = { police: "Connexion policier", academy: "Police Academy", admin: "Accès technique (secours)" };
+    const names = { police: "Connexion policier", academy: "Police Academy", gang: "Gang Unit", admin: "Accès technique (secours)" };
     $("#access-list").innerHTML = Object.entries(state.config.access || {}).map(([key, access]) =>
       '<article class="access-card" data-access="' + key + '"><h3>' + esc(names[key] || access.label) + "</h3>" +
       '<div class="field-grid"><label class="field">Serveur contrôlé<select data-f="guildKey">' + serverOptions(access.guildKey) + "</select></label>" +
@@ -181,7 +191,7 @@
     $("#department-name").value = ui.departmentName || "";
     $("#department-subtitle").value = ui.departmentSubtitle || "";
     $("#guide-url").value = ui.guideUrl || "";
-    ["mdt", "academy", "liaison"].forEach(key => {
+    ["mdt", "academy", "liaison", "gang"].forEach(key => {
       const card = $('[data-section="' + key + '"]');
       const section = sections[key] || {};
       card.querySelector('[data-f="label"]').value = section.label || "";
@@ -190,6 +200,7 @@
     });
     renderMenuEditor("mdt-menu-editor", "mdtItems");
     renderMenuEditor("academy-menu-editor", "academyItems");
+    renderMenuEditor("gang-menu-editor", "gangItems");
     const notifications = state.config.notifications || {};
     $("#show-badges").checked = notifications.showBadges !== false;
     $("#show-academy-badge").checked = notifications.showAcademyBadge !== false;
@@ -203,6 +214,10 @@
     const channels = liaison.channels || [];
     $("#complaint-key").innerHTML = channels.filter(channel => channel.type === "forum").map(channel =>
       '<option value="' + esc(channel.key) + '" ' + (channel.key === liaison.complaintKey ? "selected" : "") + ">" +
+      esc(channel.label) + " · " + esc(channel.channelId) + "</option>"
+    ).join("") || '<option value="">Aucun forum configuré</option>';
+    $("#prosecutor-key").innerHTML = channels.filter(channel => channel.type === "forum").map(channel =>
+      '<option value="' + esc(channel.key) + '" ' + (channel.key === liaison.prosecutorKey ? "selected" : "") + ">" +
       esc(channel.label) + " · " + esc(channel.channelId) + "</option>"
     ).join("") || '<option value="">Aucun forum configuré</option>';
     const limits = liaison.limits || {};
@@ -245,6 +260,22 @@
       new Date(history.createdAt).toLocaleString("fr-FR") + '</small></div><button class="button" data-restore="' +
       esc(history.id) + '" type="button">Restaurer</button></div>'
     ).join("") : '<p class="empty">Aucune ancienne version.</p>';
+  }
+
+  async function loadGangAdmin(force = false) {
+    if (state.gangAdminLoaded && !force) return;
+    $("#gang-admin-archives").innerHTML = '<p class="empty">Chargement des archives…</p>';
+    $("#gang-admin-activity").innerHTML = '<p class="empty">Chargement du journal…</p>';
+    try {
+      const data = await json("/api/admin/gang-unit-data");
+      $("#gang-admin-archives").innerHTML = (data.archives || []).map(item => '<div class="gang-admin-row"><div><strong>' + esc(item.name || "Sans nom") + '</strong><small>' + esc(gangType(item.type)) + ' · ' + esc(dateTime(item.archivedAt)) + '</small></div><button class="button" data-gang-restore-type="' + esc(item.type) + '" data-gang-restore-id="' + esc(item.id) + '" type="button">Restaurer</button></div>').join("") || '<p class="empty">Aucune archive Gang Unit.</p>';
+      $("#gang-admin-activity").innerHTML = (data.activity || []).map(item => '<div class="gang-admin-row"><div><strong>' + esc(gangAction(item.actionType)) + (item.targetName ? ' · ' + esc(item.targetName) : '') + '</strong><small>' + esc(item.actorName || "Agent") + ' · ' + esc(gangType(item.targetType)) + ' · ' + esc(dateTime(item.createdAt)) + '</small></div></div>').join("") || '<p class="empty">Le journal est vide.</p>';
+      state.gangAdminLoaded = true;
+    } catch (error) {
+      $("#gang-admin-archives").innerHTML = '<p class="empty">Archives indisponibles.</p>';
+      $("#gang-admin-activity").innerHTML = '<p class="empty">Journal indisponible.</p>';
+      notice("Impossible de charger la conservation Gang Unit : " + error.message, true);
+    }
   }
 
   function renderMeta() {
@@ -298,6 +329,7 @@
     config.liaison = { ...config.liaison };
     config.liaison.sectionLabel = $("#section-label").value;
     config.liaison.complaintKey = $("#complaint-key").value;
+    config.liaison.prosecutorKey = $("#prosecutor-key").value;
     config.liaison.limits = {
       messageMaxLength: Number($("#message-max-length").value),
       maxAttachments: Number($("#max-attachments").value),
@@ -351,7 +383,8 @@
       guideUrl: $("#guide-url").value,
       sections,
       mdtItems: collectMenuItems("mdtItems"),
-      academyItems: collectMenuItems("academyItems")
+      academyItems: collectMenuItems("academyItems"),
+      gangItems: collectMenuItems("gangItems")
     };
     config.notifications = {
       showBadges: $("#show-badges").checked,
@@ -519,6 +552,7 @@
     if (tab) {
       $$("[data-tab]").forEach(item => item.classList.toggle("active", item === tab));
       $$("[data-panel]").forEach(item => item.classList.toggle("active", item.dataset.panel === tab.dataset.tab));
+      if (tab.dataset.tab === "gang-admin") loadGangAdmin();
       return;
     }
     const action = event.target.closest("[data-action]")?.dataset.action;
@@ -526,8 +560,19 @@
     if (action === "reload" || action === "refresh") return load().catch(error => notice(error.message, true));
     if (action === "add-admin") return addAdmin();
     if (action === "diagnostic") return diagnostic();
+    if (action === "refresh-gang-admin") return loadGangAdmin(true);
     if (action === "add-server") return addServer();
     if (action === "add-channel") return addLiaison();
+    const gangRestore = event.target.closest("[data-gang-restore-id]");
+    if (gangRestore && confirm("Restaurer cet élément Gang Unit ?")) {
+      try {
+        await json("/api/admin/gang-unit-data", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: gangRestore.dataset.gangRestoreType, id: gangRestore.dataset.gangRestoreId }) });
+        state.gangAdminLoaded = false;
+        notice("Élément Gang Unit restauré.");
+        await loadGangAdmin(true);
+      } catch (error) { notice("Restauration impossible : " + error.message, true); }
+      return;
+    }
     const removeLiaison = event.target.closest("[data-remove-liaison]");
     if (removeLiaison) {
       if (!confirm("Supprimer cette liaison de la prochaine configuration ?")) return;

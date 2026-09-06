@@ -23,6 +23,7 @@ const {
 const { validateSession: validatePoliceSession, sessionCookie: policeSessionCookie, clearSessionCookie: policeClearSessionCookie } = require("../server/auth");
 const { decodeModernFormData } = require("../server/application-form");
 const { getConfig, saveConfig, listHistory, restoreConfig, sanitizeConfig, serverByKey, accessAllowed, publicLiaisonConfig, ownerDiscordId, isControlPanelAdmin, listAdminUsers, addAdminUser, removeAdminUser } = require("../server/admin-config");
+const { gangUnitData, gangUnitAdminData, saveTerritory, saveMarker, saveGang, saveIndividual, saveReport, saveOperation, saveWatchlist, archiveEntity } = require("../server/gang-unit");
 
 const DISCORD_API = "https://discord.com/api/v10";
 const CPD_GUILD_ID = "1408092767963451615";
@@ -374,12 +375,15 @@ async function liaisonRuntime() {
   const current = await getConfig();
   const channels = current.value.liaison.channels.filter(item => item.enabled);
   const complaintKey = String(current.value.liaison.complaintKey || "");
+  const prosecutorKey = String(current.value.liaison.prosecutorKey || "");
   const forum = channels.find(item => item.key === complaintKey && item.type === "forum")
     || channels.find(item => item.type === "forum")
     || current.value.liaison.channels.find(item => item.type === "forum");
+  const prosecutorForum = channels.find(item => item.key === prosecutorKey && item.type === "forum")
+    || current.value.liaison.channels.find(item => item.key === prosecutorKey && item.type === "forum");
   const byId = new Map(channels.map(item => [String(item.channelId), item]));
   const guildIdFor = channel => serverByKey(current.value, channel?.guildKey)?.guildId || CPD_GUILD_ID;
-  return { current, channels, forum, byId, guildIdFor };
+  return { current, channels, forum, prosecutorForum, byId, guildIdFor };
 }
 
 async function liaisonChannelAuthorized(session, runtime, channel) {
@@ -461,11 +465,60 @@ async function createGovernmentComplaint(req, res) {
   }
 }
 
-async function governmentComplaints(req, res) {
+async function createProsecutorRequest(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ ok: false, code: "method_not_allowed" });
+  const access = await validatePoliceSession(req, false);
+  if (!access.ok) { res.setHeader("Set-Cookie", policeClearSessionCookie()); return res.status(401).json({ ok: false, code: access.reason }); }
+  if (access.changed) res.setHeader("Set-Cookie", policeSessionCookie(access.session));
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const runtime = await liaisonRuntime(), forumConfig = runtime.prosecutorForum;
+  if (!forumConfig?.channelId || !forumConfig.canWrite) return res.status(403).json({ ok: false, code: "forum_write_disabled" });
+  if (!await liaisonChannelAuthorized(access.session, runtime, forumConfig)) return res.status(403).json({ ok: false, code: "liaison_access_denied" });
+  const rawSuspect = textField(body.suspect, 120), rawCharges = textField(body.charges, 500), rawAgent = textField(body.agent, 120), rawArrestReport = textField(body.arrestReport, 500);
+  const suspect = complaintText(rawSuspect, 120, "Suspect non renseigné"), charges = complaintText(rawCharges, 500, "Chefs d’accusation non renseignés"), arrestDate = textField(body.arrestDate, 10);
+  if (!rawSuspect || !rawCharges || !rawAgent || !rawArrestReport || !/^\d{4}-\d{2}-\d{2}$/.test(arrestDate) || Number.isNaN(Date.parse(`${arrestDate}T00:00:00Z`))) return res.status(400).json({ ok: false, code: "prosecutor_request_required_fields" });
+  const [year, month, day] = arrestDate.split("-"), titleDate = `${day}/${month}/${year}`;
+  const agent = complaintText(rawAgent, 120, "Agent non renseigné"), arrestReport = complaintText(rawArrestReport, 500, "Non renseigné"), annexReport = complaintText(body.annexReport, 500, "Non renseigné"), notes = complaintText(body.notes, 3000, "Aucune information complémentaire."), suspectPhone = complaintText(body.suspectPhone, 80, "Non renseigné"), lawyerPhone = complaintText(body.lawyerPhone, 80, "Non renseigné"), extraInformation = complaintText(body.extraInformation, 3000, "Aucune information supplémentaire.");
+  const mentions = normalizeMentionIds(body.mentions), safeMentions = forumConfig.canMention ? mentions : [];
+  const author = await resolveCpdDisplayName(access.session.user?.id, access.session.user?.globalName || access.session.user?.username || "Agent CPD");
+  const content = [
+    "## Demande de désignation d’un procureur",
+    "*À utiliser uniquement lorsqu’aucun procureur n’était disponible lors d’une arrestation pour crime ou crime fédéral.*",
+    safeMentions.length ? `**Personnes notifiées :** ${mentionMarkup(safeMentions)}` : "",
+    "",
+    "Bonjour, nous sollicitons la désignation d’un procureur pour la suite des procédures, compte tenu des chefs d’inculpation portés contre cet individu :",
+    `**Identité de l’individu :** ${suspect}`,
+    "",
+    "### Informations de l’affaire",
+    `**Date de l’arrestation :** ${titleDate}`,
+    `**Agent en charge de l’affaire :** ${agent}`,
+    `**Chef(s) d’accusation :** ${charges}`,
+    `**Rapport d’arrestation :** ${arrestReport}`,
+    `**Rapport annexe :** ${annexReport}`,
+    `**Notes complémentaires :** ${notes}`,
+    `**Numéro de téléphone du suspect :** ${suspectPhone}`,
+    `**Numéro de téléphone de son avocat :** ${lawyerPhone}`,
+    "",
+    "### Informations supplémentaires",
+    extraInformation,
+    "",
+    `*Demande créée depuis le MDT par ${complaintText(author, 100)} · ${new Date().toLocaleString("fr-FR", { timeZone: "UTC" })} UTC*`
+  ].filter(Boolean).join("\n").slice(0, 1900);
+  try {
+    const thread = await discordBotRequest(`/channels/${forumConfig.channelId}/threads`, { method: "POST", body: { name: `${titleDate} - ${suspect} - ${charges}`.slice(0, 100), auto_archive_duration: runtime.current.value.liaison.limits.forumAutoArchiveMinutes, message: { content, allowed_mentions: { parse: [], users: safeMentions } } } });
+    return res.status(201).json({ ok: true, threadId: thread?.id || null, url: thread?.id ? `https://discord.com/channels/${runtime.guildIdFor(forumConfig)}/${thread.id}` : null });
+  } catch (error) {
+    console.error("Prosecutor request creation failed", { status: error.status || 0, type: error.name || "Error" });
+    return res.status(error.status === 403 ? 403 : 502).json({ ok: false, code: error.status === 403 ? "forum_forbidden" : "discord_unavailable" });
+  }
+}
+
+async function governmentComplaints(req, res, forumKind = "complaints") {
   const access = await validatePoliceSession(req, false);
   if (!access.ok) return res.status(401).json({ ok:false, code:access.reason });
   const runtime = await liaisonRuntime();
-  const forumConfig = runtime.forum;
+  const forumConfig = forumKind === "prosecutor" ? runtime.prosecutorForum : runtime.forum;
   if (!forumConfig?.channelId || !forumConfig.canRead) return res.status(403).json({ok:false,code:"forum_read_disabled"});
   if (!await liaisonChannelAuthorized(access.session, runtime, forumConfig)) return res.status(403).json({ok:false,code:"liaison_access_denied"});
   const forumId = forumConfig.channelId;
@@ -477,9 +530,9 @@ async function governmentComplaints(req, res) {
     const archivedThreads=[]; let before="";
     let archiveError=null; try { for(let page=0;page<100;page++) { const suffix=before?`&before=${encodeURIComponent(before)}`:""; const batch=await discordBotRequest(`/channels/${forumId}/threads/archived/public?limit=100${suffix}`); archivedThreads.push(...(batch.threads||[])); if(!batch.has_more||!(batch.threads||[]).length) break; before=batch.threads[batch.threads.length-1].thread_metadata?.archive_timestamp||batch.threads[batch.threads.length-1].id; } } catch(e) { archiveError=e.status||"unknown"; }
     const tags = Object.fromEntries((forum.available_tags || []).map(t=>[t.id,t.name]));
-    const threads = [...(active.threads||[]).filter(t=>String(t.parent_id||"")===forumId), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,updatedAt:t.thread_metadata?.archive_timestamp||t.created_at,lastMessageId:t.last_message_id||null,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${guildId}/${t.id}`}));
+    const threads = [...(active.threads||[]).filter(t=>String(t.parent_id||"")===forumId), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.thread_metadata?.create_timestamp||t.created_at||null,updatedAt:t.thread_metadata?.archive_timestamp||t.thread_metadata?.create_timestamp||t.created_at||null,lastMessageId:t.last_message_id||null,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${guildId}/${t.id}`}));
     const id=String(req.query.threadId||"");
-    if(id){const thread=await discordBotRequest(`/channels/${id}`);const rawMessages=await discordBotRequest(`/channels/${id}/messages?limit=100`);const messages=await enrichDiscordMessages(rawMessages);const viewerId=String(access.session.user?.id||"");const viewerName=await resolveCpdDisplayName(viewerId,access.session.user?.globalName||access.session.user?.username||"Agent CPD");return res.json({ok:true,thread,messages,tags,availableTags:forum.available_tags||[],viewer:{id:viewerId,displayName:viewerName}});}
+    if(id){const thread=await discordBotRequest(`/channels/${id}`);if(String(thread?.parent_id||"")!==forumId)return res.status(403).json({ok:false,code:"thread_forbidden"});const rawMessages=await discordBotRequest(`/channels/${id}/messages?limit=100`);const messages=await enrichDiscordMessages(rawMessages);const viewerId=String(access.session.user?.id||"");const viewerName=await resolveCpdDisplayName(viewerId,access.session.user?.globalName||access.session.user?.username||"Agent CPD");return res.json({ok:true,thread,messages,tags,availableTags:forum.available_tags||[],viewer:{id:viewerId,displayName:viewerName}});}
     return res.json({ok:true,threads,tags,availableTags:forum.available_tags||[],archiveError});
   } catch(error){console.error("Government forum read failed",{stage,status:error.status||0,message:error.message});return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"forum_read_forbidden":"discord_unavailable",status:error.status||0,stage,channel:forumId});}
 }
@@ -2493,7 +2546,18 @@ module.exports = async function handler(req, res) {
     case "recruitment-ticket": return recruitmentTicketDetail(req, res);
     case "recruitment-decision": return saveRecruitmentDecision(req, res);
     case "ticket-sync": return syncRecruitmentTicket(req, res);
+    case "gang-unit-data": return gangUnitData(req, res);
+    case "gang-unit-admin-data": return gangUnitAdminData(req, res);
+    case "gang-unit-territory-save": return saveTerritory(req, res);
+    case "gang-unit-marker-save": return saveMarker(req, res);
+    case "gang-unit-gang-save": return saveGang(req, res);
+    case "gang-unit-individual-save": return saveIndividual(req, res);
+    case "gang-unit-report-save": return saveReport(req, res);
+    case "gang-unit-operation-save": return saveOperation(req, res);
+    case "gang-unit-watchlist-save": return saveWatchlist(req, res);
+    case "gang-unit-archive": return archiveEntity(req, res);
     case "government-complaint-create": { if(req.method === "GET" && String(req.query.configuration || "") === "1") return publicLiaisonSettings(req,res); if(req.method === "GET" && String(req.query.mentionCandidates || "") === "1") return liaisonMentionCandidates(req,res); if(req.method === "GET" && req.query.channelId) return liaisonChannelRead(req,res); if(req.method === "POST") { const body=readJsonBody(req); if(body?.channelId) return liaisonChannelSend(req,res); if(body?.action === "update") return updateGovernmentComplaint(req,res); if(body && (body.threadId || body.message)) return governmentComplaintMessage(req,res); } if(req.method === "GET") return governmentComplaints(req,res); return createGovernmentComplaint(req,res); }
+    case "prosecutor-request-create": return req.method === "GET" ? governmentComplaints(req, res, "prosecutor") : createProsecutorRequest(req, res);
     default: return res.status(404).json({ ok: false, code: "route_not_found" });
   }
 };

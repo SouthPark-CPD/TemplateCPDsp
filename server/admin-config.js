@@ -6,11 +6,13 @@ const DEFAULT_CONFIG = Object.freeze({
   access: {
     police: { label: "Connexion policier", guildKey: "cpd", roleIds: ["1408092768026365974"], userIds: [], mode: "any" },
     academy: { label: "Police Academy", guildKey: "academy", roleIds: ["1538858756371386400"], userIds: [], mode: "any" },
+    gang: { label: "Gang Unit", guildKey: "cpd", roleIds: [], userIds: [], mode: "any" },
     admin: { label: "Administration configuration", guildKey: "cpd", roleIds: [], userIds: [], mode: "any" }
   },
   liaison: {
     sectionLabel: "Liaison gouvernement",
     complaintKey: "complaints",
+    prosecutorKey: "prosecutor-requests",
     limits: {
       messageMaxLength: 1800,
       maxAttachments: 3,
@@ -20,9 +22,10 @@ const DEFAULT_CONFIG = Object.freeze({
     },
     channels: [
       { key: "complaints", label: "Dépôts de plainte", channelId: "1473895325197406328", guildKey: "cpd", type: "forum", icon: "inbox", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 10 },
+      { key: "prosecutor-requests", label: "Demandes procureur", channelId: "1543690746073186304", guildKey: "cpd", type: "forum", icon: "book", enabled: true, canRead: true, canWrite: true, canUpload: false, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 15 },
       { key: "doj", label: "Communication DOJ", channelId: "1489640064207032475", guildKey: "cpd", type: "text", icon: "radio", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 20 },
-      { key: "government", label: "Liaison gouvernement", channelId: "1408092769079267379", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 30 },
-      { key: "lawyer", label: "Liaison avocat", channelId: "1408092768848449646", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 40 }
+      { key: "government", label: "Communication gouvernement", channelId: "1408092769079267379", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 30 },
+      { key: "lawyer", label: "Communication avocat", channelId: "1408092768848449646", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 40 }
     ]
   },
   ui: {
@@ -33,7 +36,8 @@ const DEFAULT_CONFIG = Object.freeze({
     sections: {
       mdt: { label: "MDT", enabled: true, open: true },
       academy: { label: "Police Academy", enabled: true, open: true },
-      liaison: { label: "Liaison gouvernement", enabled: true, open: true }
+      liaison: { label: "Liaison gouvernement", enabled: true, open: true },
+      gang: { label: "Gang Unit", enabled: true, open: true }
     },
     mdtItems: [
       { key: "rapide", label: "Accès rapide", icon: "grid", enabled: true, sortOrder: 10 },
@@ -49,6 +53,13 @@ const DEFAULT_CONFIG = Object.freeze({
       { key: "formations", label: "Formations", icon: "book", enabled: true, sortOrder: 30 },
       { key: "recrutements", label: "Recrutements", icon: "inbox", enabled: true, sortOrder: 40 },
       { key: "activite", label: "Historique", icon: "clock", enabled: true, sortOrder: 50 }
+    ],
+    gangItems: [
+      { key: "gang-dashboard", label: "Vue d’ensemble", icon: "grid", enabled: true, sortOrder: 10 },
+      { key: "gang-map", label: "Carte tactique", icon: "chart", enabled: true, sortOrder: 20 },
+      { key: "gang-gangs", label: "Dossiers gangs & individus", icon: "users", enabled: true, sortOrder: 30 },
+      { key: "gang-intel", label: "Surveillance & renseignement", icon: "book", enabled: true, sortOrder: 40 },
+      { key: "gang-operations", label: "Opérations", icon: "radio", enabled: true, sortOrder: 50 }
     ]
   },
   notifications: {
@@ -104,6 +115,15 @@ function sanitizeMenuItems(input, fallback) {
   }).filter(Boolean).sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
+function sanitizeGangMenuItems(input, fallback) {
+  const allowed = new Set(fallback.map(item => item.key));
+  const source = Array.isArray(input) ? input.filter(item => allowed.has(String(item?.key || ""))) : fallback;
+  const sanitized = sanitizeMenuItems(source, fallback);
+  const existing = new Set(sanitized.map(item => item.key));
+  const added = fallback.filter(item => !existing.has(item.key)).map(item => ({ ...item }));
+  return [...sanitized, ...added].sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
 function cloneDefault() {
   return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 }
@@ -122,7 +142,7 @@ function sanitizeConfig(input) {
   const validServerKeys = new Set(servers.map(item => item.key));
 
   const access = {};
-  for (const name of ["police", "academy", "admin"]) {
+  for (const name of ["police", "academy", "gang", "admin"]) {
     const item = source.access?.[name] || fallback.access[name];
     const fallbackItem = fallback.access[name];
     const guildKey = validServerKeys.has(String(item.guildKey || ""))
@@ -142,9 +162,15 @@ function sanitizeConfig(input) {
     const key = slug(item?.key) || `liaison-${index + 1}`;
     if (channelKeys.has(key)) return null;
     channelKeys.add(key);
+    const storedLabel = shortText(item?.label, 90) || `Canal ${index + 1}`;
+    const label = key === "government" && storedLabel === "Liaison gouvernement"
+      ? "Communication gouvernement"
+      : key === "lawyer" && storedLabel === "Liaison avocat"
+        ? "Communication avocat"
+        : storedLabel;
     return {
       key,
-      label: shortText(item?.label, 90) || `Canal ${index + 1}`,
+      label,
       channelId: discordId(item?.channelId),
       guildKey: validServerKeys.has(String(item?.guildKey || "")) ? String(item.guildKey) : servers[0].key,
       type: item?.type === "forum" ? "forum" : "text",
@@ -160,6 +186,8 @@ function sanitizeConfig(input) {
     };
   }).filter(item => item && item.channelId);
 
+  const prosecutorFallback = fallback.liaison.channels.find(channel => channel.key === fallback.liaison.prosecutorKey);
+  if (prosecutorFallback && !channels.some(channel => channel.key === prosecutorFallback.key)) channels.push({ ...prosecutorFallback });
   const validChannelKeys = new Set(channels.map(item => item.key));
   const sourceLimits = source.liaison?.limits && typeof source.liaison.limits === "object" ? source.liaison.limits : {};
   const allowedArchiveDurations = new Set([60, 1440, 4320, 10080]);
@@ -174,7 +202,7 @@ function sanitizeConfig(input) {
   const fallbackUi = fallback.ui;
   const sourceSections = sourceUi.sections && typeof sourceUi.sections === "object" ? sourceUi.sections : {};
   const sections = {};
-  for (const key of ["mdt", "academy", "liaison"]) {
+  for (const key of ["mdt", "academy", "liaison", "gang"]) {
     const item = sourceSections[key] || fallbackUi.sections[key];
     sections[key] = {
       label: shortText(item.label, 70) || fallbackUi.sections[key].label,
@@ -199,6 +227,9 @@ function sanitizeConfig(input) {
       complaintKey: validChannelKeys.has(String(source.liaison?.complaintKey || ""))
         ? String(source.liaison.complaintKey)
         : defaultComplaintKey,
+      prosecutorKey: validChannelKeys.has(String(source.liaison?.prosecutorKey || ""))
+        ? String(source.liaison.prosecutorKey)
+        : fallback.liaison.prosecutorKey,
       limits: {
         messageMaxLength,
         maxAttachments,
@@ -215,7 +246,8 @@ function sanitizeConfig(input) {
       guideUrl: safeUrl(sourceUi.guideUrl, fallbackUi.guideUrl),
       sections,
       mdtItems: sanitizeMenuItems(sourceUi.mdtItems, fallbackUi.mdtItems),
-      academyItems: sanitizeMenuItems(sourceUi.academyItems, fallbackUi.academyItems)
+      academyItems: sanitizeMenuItems(sourceUi.academyItems, fallbackUi.academyItems),
+      gangItems: sanitizeGangMenuItems(sourceUi.gangItems, fallbackUi.gangItems)
     },
     notifications: {
       showBadges: boolean(sourceNotifications.showBadges, fallback.notifications.showBadges),
@@ -407,16 +439,13 @@ function accessAllowed(member, policy) {
 }
 
 function publicLiaisonConfig(config) {
-  let forumSeen = false;
+  const visibleForumKeys = new Set([config.liaison.complaintKey, config.liaison.prosecutorKey].filter(Boolean));
   return {
     sectionLabel: config.liaison.sectionLabel,
     limits: config.liaison.limits,
     channels: config.liaison.channels.filter(item => {
       if (!item.enabled || !item.canRead) return false;
-      if (item.type !== "forum") return true;
-      if (forumSeen) return false;
-      forumSeen = true;
-      return true;
+      return item.type !== "forum" || visibleForumKeys.has(item.key);
     }).map(item => ({
       key: item.key, label: item.label, channelId: item.channelId, type: item.type, icon: item.icon,
       canWrite: item.canWrite, canUpload: item.canUpload, canMention: item.canMention,

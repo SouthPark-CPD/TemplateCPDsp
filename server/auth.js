@@ -307,8 +307,24 @@ async function getConfiguredGuildMemberById(userId) {
   return discordRequest(`${DISCORD_API}/guilds/${guildId}/members/${userId}`, { headers: { Authorization: `Bot ${botToken}` } });
 }
 
+async function getConfiguredAccessMemberById(userId, accessKey) {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  if (!botToken) throw new Error("DISCORD_BOT_TOKEN manquant");
+  if (!/^\d{17,20}$/.test(String(userId || ""))) throw Object.assign(new Error("Discord ID invalide"), { status: 400 });
+  const { value: config, fallback } = await getConfig();
+  const policy = config.access?.[accessKey];
+  const guildId = fallback ? GUILD_ID : serverByKey(config, policy?.guildKey)?.guildId || GUILD_ID;
+  return discordRequest(`${DISCORD_API}/guilds/${guildId}/members/${userId}`, { headers: { Authorization: `Bot ${botToken}` } });
+}
+
 function hasInstructorRole(member) {
   return Array.isArray(member.roles) && member.roles.includes(INSTRUCTOR_ROLE_ID);
+}
+
+async function hasConfiguredGangRole(member) {
+  const { value: config, fallback } = await getConfig();
+  if (fallback) return false;
+  return accessAllowed(member, config.access.gang);
 }
 
 function newSession(user, tokens, member = null) {
@@ -429,7 +445,8 @@ module.exports = {
   env, siteUrl, createStateCookie, consumeState, clearStateCookie,
   sessionCookie, clearSessionCookie, exchangeCode, getDiscordUser,
   getGuildMember, getGuildMemberById, getAcademyMember, hasRequiredRole, hasInstructorRole,
-  getConfiguredGuildMember, getConfiguredGuildMemberById, hasConfiguredPoliceRole,
+  getConfiguredGuildMember, getConfiguredGuildMemberById, getConfiguredAccessMemberById, hasConfiguredPoliceRole,
+  hasConfiguredGangRole,
   newSession, newFiveMSession, validateSession,
   verifyFiveMServerSecret, issueFiveMTicket, verifyFiveMTicket
 };

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Demande procureur — CPD</title>
+  <link rel="stylesheet" href="/mdt/liaison.css?v=3">
+  <link rel="stylesheet" href="/mdt/chat-bubbles.css?v=1">
+  <link rel="stylesheet" href="/mdt/mentions.css?v=1">
+</head>
+<body>
+  <main class="liaison-page prosecutor-page">
+    <header class="liaison-hero">
+      <div class="hero-mark" aria-hidden="true">⚖</div>
+      <div class="hero-copy"><span class="eyebrow">CPD / LIAISON GOUVERNEMENT</span><h1>Demande procureur</h1><p>À utiliser uniquement lorsqu’aucun procureur n’était disponible pour une arrestation impliquant un crime ou crime fédéral.</p></div>
+      <div class="secure-pill"><span></span> Forum sécurisé</div>
+    </header>
+    <div class="liaison-tabs" role="tablist" aria-label="Demandes procureur">
+      <button class="tab active" type="button" role="tab" aria-selected="true" data-prosecutor-tab="create"><span class="tab-icon">＋</span>Nouvelle demande</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-prosecutor-tab="history"><span class="tab-icon">◷</span>Historique</button>
+    </div>
+    <form id="prosecutor-form" class="complaint-form" novalidate>
+      <section class="form-card dossier-card"><div class="card-heading"><div><span class="step">01</span><div><h2>Identification de l’affaire</h2><p>Ces éléments définissent le titre du fil Discord.</p></div></div><span class="required-note">Champs requis <b>*</b></span></div><div class="form-grid">
+        <label class="span-2">Identité du suspect <b>*</b><input name="suspect" maxlength="120" required placeholder="Nom et prénom RP"></label>
+        <label>Date de l’arrestation <b>*</b><input id="arrest-date" name="arrestDate" type="date" required></label>
+        <label>Agent en charge <b>*</b><input id="case-agent" name="agent" maxlength="120" required placeholder="Nom RP / matricule"></label>
+        <label class="span-2">Chef(s) d’accusation <b>*</b><textarea name="charges" maxlength="500" required placeholder="Ex. Meurtre au premier degré, possession illégale d’arme…"></textarea></label>
+        <label class="span-2">Rapport d’arrestation <b>*</b><input name="arrestReport" maxlength="500" required placeholder="Lien vers le rapport d’arrestation"></label>
+        <label class="span-2">Rapport annexe<input name="annexReport" maxlength="500" placeholder="Lien vers un rapport annexe ou autre rapport pertinent"></label>
+      </div></section>
+      <section class="form-card récit-card"><div class="card-heading"><div><span class="step">02</span><div><h2>Informations pour le procureur</h2><p>Le message est mis en forme automatiquement dans le forum.</p></div></div></div>
+        <label>Notes complémentaires <textarea name="notes" maxlength="3000" placeholder="Contexte utile concernant l’affaire, circonstances, urgence…"></textarea></label>
+        <div class="form-grid"><label>Numéro du suspect<input name="suspectPhone" maxlength="80" placeholder="Facultatif"></label><label>Numéro de l’avocat<input name="lawyerPhone" maxlength="80" placeholder="Uniquement si un avocat est intervenu"></label></div>
+        <label>Informations supplémentaires <textarea name="extraInformation" maxlength="3000" placeholder="Champ libre : tout élément utile à la désignation du procureur."></textarea></label>
+        <div class="mention-picker" data-mention-picker><div class="mention-picker-head"><div><span class="detail-kicker">MENTIONS</span><strong>Notifier des membres</strong></div><span class="mention-count" data-mention-count>Aucun membre sélectionné</span></div><div class="mention-control"><input class="mention-search" data-mention-search type="search" autocomplete="off" placeholder="Rechercher un membre à notifier…"></div><div class="mention-selected" data-mention-selected></div><div class="mention-options" data-mention-options hidden></div><p class="mention-help" data-mention-help>Sélection facultative : les membres choisis recevront une mention Discord.</p></div>
+        <div class="form-foot"><span>Le fil sera nommé : <strong id="thread-preview">00/00/0000 - Suspect - Chef d’accusation</strong></span><button id="submit-request" class="primary" type="submit"><span>Envoyer la demande</span><span class="button-arrow">→</span></button></div>
+      </section>
+    </form>
+    <section id="prosecutor-history" class="forum-view" hidden aria-label="Historique des demandes procureur">
+      <header class="list-toolbar">
+        <div><span class="detail-kicker">FORUM DISCORD</span><h2>Demandes existantes <span id="prosecutor-total"></span></h2></div>
+        <div class="toolbar-actions">
+          <label class="search-box"><span aria-hidden="true">⌕</span><input id="prosecutor-search" type="search" placeholder="Rechercher une demande…" autocomplete="off"></label>
+          <button id="prosecutor-refresh" class="secondary" type="button">Actualiser</button>
+        </div>
+      </header>
+      <div id="prosecutor-threads" class="threads"><p class="empty-state">Chargement des demandes…</p></div>
+      <article id="prosecutor-detail" class="thread-detail"><p class="empty-state">Sélectionnez une demande pour consulter son contenu.</p></article>
+    </section>
+    <div id="request-status" class="status" role="status" aria-live="polite" hidden></div>
+  </main>
+  <script src="/mdt/mentions.js?v=1"></script>
+  <script src="/mdt/prosecutor-request.js?v=3"></script>
+</body>
+</html>

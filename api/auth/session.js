@@ -2,7 +2,8 @@ const {
   validateSession, sessionCookie, clearSessionCookie,
   getAcademyMember, hasInstructorRole,
   verifyFiveMServerSecret, issueFiveMTicket, FIVEM_TICKET_MAX_AGE,
-  verifyFiveMTicket, getGuildMemberById, hasRequiredRole, newFiveMSession
+  verifyFiveMTicket, getGuildMemberById, hasRequiredRole, newFiveMSession,
+  getConfiguredAccessMemberById, hasConfiguredGangRole
 } = require("../../server/auth");
 const { neon } = require("@neondatabase/serverless");
 const { isControlPanelAdmin } = require("../../server/admin-config");
@@ -23,6 +24,15 @@ async function academyRecruitmentSummary() {
   } catch (error) {
     console.error("Academy recruitment summary unavailable", { code: error.code || "unknown" });
     return null;
+  }
+}
+
+async function gangUnitAccess(session) {
+  try {
+    const member = await getConfiguredAccessMemberById(session.user?.id, "gang");
+    return await hasConfiguredGangRole(member);
+  } catch {
+    return false;
   }
 }
 
@@ -148,9 +158,10 @@ async function normalSession(req, res) {
   }
 
   const academySummary = academyAccess ? await academyRecruitmentSummary() : null;
+  const gangAccess = await gangUnitAccess(result.session);
   const controlPanelAdmin = await isControlPanelAdmin(result.session.user?.id);
   if (result.changed) res.setHeader("Set-Cookie", sessionCookie(result.session));
-  return res.status(200).json({ authenticated: true, user: result.session.user, academyAccess, academySummary, controlPanelAdmin });
+  return res.status(200).json({ authenticated: true, user: result.session.user, academyAccess, academySummary, gangAccess, controlPanelAdmin });
 }
 
 module.exports = async function handler(req, res) {

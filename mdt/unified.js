@@ -8,6 +8,7 @@
   const mdtMenu = document.getElementById("mdt-menu");
   const paMenu = document.getElementById("pa-menu");
   const liaisonMenu = document.getElementById("liaison-menu");
+  const gangMenu = document.getElementById("gang-menu");
 
   const defaultMdt = [
     ["rapide", "Accès rapide", "grid"],
@@ -26,10 +27,12 @@
   ];
   const defaultLiaison = [
     ["liaison", "Dépôts de plainte", "inbox"],
+    ["prosecutor", "Demande procureur", "book"],
     ["doj", "Communication DOJ", "radio"],
-    ["liaison-gouv", "Liaison gouvernement", "users"],
-    ["avocat", "Liaison avocat", "users"]
+    ["liaison-gouv", "Communication gouvernement", "users"],
+    ["avocat", "Communication avocat", "users"]
   ];
+  const defaultGang = [["gang-dashboard", "Vue d’ensemble", "grid"], ["gang-map", "Carte tactique", "chart"], ["gang-gangs", "Dossiers gangs & individus", "users"], ["gang-intel", "Surveillance & renseignement", "book"], ["gang-operations", "Opérations", "radio"]];
   const defaultNavigation = {
     siteTitle: "MDT — Chicago Police Department",
     departmentName: "CHICAGO",
@@ -38,10 +41,12 @@
     sections: {
       mdt: { label: "MDT", enabled: true, open: true },
       academy: { label: "Police Academy", enabled: true, open: true },
-      liaison: { label: "Liaison gouvernement", enabled: true, open: true }
+      liaison: { label: "Liaison gouvernement", enabled: true, open: true },
+      gang: { label: "Gang Unit", enabled: true, open: true }
     },
     mdtItems: defaultMdt.map(([key, label, icon], index) => ({ key, label, icon, enabled: true, sortOrder: (index + 1) * 10 })),
-    academyItems: defaultAcademy.map(([key, label, icon], index) => ({ key, label, icon, enabled: true, sortOrder: (index + 1) * 10 }))
+    academyItems: defaultAcademy.map(([key, label, icon], index) => ({ key, label, icon, enabled: true, sortOrder: (index + 1) * 10 })),
+    gangItems: defaultGang.map(([key, label, icon], index) => ({ key, label, icon, enabled: true, sortOrder: (index + 1) * 10 }))
   };
   const paths = {
     grid: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
@@ -61,9 +66,11 @@
   let mdt = [...defaultMdt];
   let academy = [...defaultAcademy];
   let liaison = [...defaultLiaison];
+  let gang = [...defaultGang];
   let navigation = defaultNavigation;
   let notificationSettings = { showBadges: true, showAcademyBadge: true, showLiaisonBadge: true, refreshSeconds: 15 };
   let authorized = false;
+  let gangAuthorized = false;
   let ready = false;
   let current = null;
   let loadingTimer;
@@ -94,7 +101,7 @@
     const setting = navigation.sections?.[key] || {};
     const summary = element.querySelector("summary");
     if (summary?.firstChild) summary.firstChild.nodeValue = `${setting.label || fallbackLabel} `;
-    element.hidden = setting.enabled === false || (key === "academy" && !authorized);
+    element.hidden = setting.enabled === false || (key === "academy" && !authorized) || (key === "gang" && !gangAuthorized);
     element.open = setting.open !== false;
   }
 
@@ -111,11 +118,14 @@
     updateSection(mdtMenu, "mdt", "MDT");
     updateSection(paMenu, "academy", "Police Academy");
     updateSection(liaisonMenu, "liaison", "Liaison gouvernement");
+    updateSection(gangMenu, "gang", "Gang Unit");
     mdt = configuredItems(safeNavigation.mdtItems, defaultMdt);
     academy = configuredItems(safeNavigation.academyItems, defaultAcademy);
+    gang = configuredItems(safeNavigation.gangItems, defaultGang);
     renderLinks("mdt-links", mdt);
     renderLinks("pa-links", authorized ? academy : []);
     renderLinks("liaison-links", liaison);
+    renderLinks("gang-links", gangAuthorized ? gang : []);
   }
 
   function applyNotificationSettings(value) {
@@ -144,6 +154,7 @@
       navigation = data.liaison.navigation || defaultNavigation;
       applyNotificationSettings(data.liaison.notifications);
       liaison = data.liaison.channels.map(item => {
+        if (item.key === "prosecutor-requests") return ["prosecutor", item.label, item.icon || "book", "/mdt/prosecutor-request.html"];
         if (item.type === "forum") return ["liaison", item.label, item.icon || "inbox", "/mdt/liaison.html"];
         const legacy = { doj: "doj", government: "liaison-gouv", lawyer: "avocat" }[item.key];
         const view = legacy || `channel:${item.key}`;
@@ -211,15 +222,16 @@
 
   function displayRoute(route) {
     current = route;
-    const item = [...mdt, ...liaison, ...academy].find(entry => entry[0] === route.view);
+    const item = [...mdt, ...liaison, ...academy, ...gang].find(entry => entry[0] === route.view);
     const title = item?.[1] || (route.view === "dossier" ? "Dossier agent" : "Sessions de formation");
     document.getElementById("view-title").textContent = title;
     frame.title = title;
     const inAcademy = academy.some(entry => entry[0] === route.view);
     const inLiaison = liaison.some(entry => entry[0] === route.view);
+    const inGang = gang.some(entry => entry[0] === route.view);
     document.getElementById("section-name").textContent = inAcademy
       ? (navigation.sections?.academy?.label || "Police Academy")
-      : (inLiaison ? (navigation.sections?.liaison?.label || "Liaison gouvernement") : (navigation.sections?.mdt?.label || "MDT"));
+      : (inLiaison ? (navigation.sections?.liaison?.label || "Liaison gouvernement") : (inGang ? (navigation.sections?.gang?.label || "Gang Unit") : (navigation.sections?.mdt?.label || "MDT")));
     document.querySelectorAll("[data-view]").forEach(link => {
       if (link.dataset.view === route.view || (route.view === "dossier" && link.dataset.view === "agents")) link.setAttribute("aria-current", "page");
       else link.removeAttribute("aria-current");
@@ -227,12 +239,18 @@
     if (mdt.some(entry => entry[0] === route.view)) mdtMenu.open = true;
     if (inAcademy) paMenu.open = true;
     if (inLiaison) liaisonMenu.open = true;
+    if (inGang) gangMenu.open = true;
   }
 
   function navigate(route, push = true) {
     if (!ready || !route) return;
     if (route.academy && !authorized) {
       message.textContent = "L’accès à la Police Academy est réservé aux instructeurs.";
+      message.hidden = false;
+      return;
+    }
+    if (route.gang && !gangAuthorized) {
+      message.textContent = "L’accès à la Gang Unit est réservé aux agents habilités.";
       message.hidden = false;
       return;
     }
@@ -331,8 +349,10 @@
       const adminLink = document.getElementById("admin-link");
       if (adminLink) adminLink.hidden = data.controlPanelAdmin !== true;
       authorized = data.academyAccess === true;
+      gangAuthorized = data.gangAccess === true;
       ready = true;
       paMenu.hidden = !authorized;
+      gangMenu.hidden = !gangAuthorized;
       await loadLiaisonMenu();
       applyNavigation();
       if (authorized) {
@@ -349,6 +369,10 @@
       document.getElementById("agent-name").textContent = data.user?.globalName || data.user?.username || "Agent CPD";
       let route = R.fromShell(location.href, origin);
       if (route?.academy && (!authorized || navigation.sections?.academy?.enabled === false)) {
+        route = R.resolve(R.routes.procedures, origin);
+        history.replaceState(null, "", R.shellUrl(route, origin));
+      }
+      if (route?.gang && (!gangAuthorized || navigation.sections?.gang?.enabled === false)) {
         route = R.resolve(R.routes.procedures, origin);
         history.replaceState(null, "", R.shellUrl(route, origin));
       }
