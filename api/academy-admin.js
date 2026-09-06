@@ -1,6 +1,8 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { validateSession, validatedSessionCookie, clearSessionCookie } = require("../server/academy-admin-auth");
+const policeAuth = require("../server/auth");
+const { isControlPanelAdmin, ownerDiscordId } = require("../server/admin-config");
 
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -36,9 +38,10 @@ module.exports = async function handler(req, res) {
   const assetPath = requestedPath(req);
   if (!assetPath) return res.status(400).end("Requête incorrecte");
 
-  const result = await validateSession(req, false);
+  const adminPanel = String(req.query.admin_panel || "") === "1";
+  const result = adminPanel ? await policeAuth.validateSession(req, false) : await validateSession(req, false);
   if (!result.ok) {
-    res.setHeader("Set-Cookie", clearSessionCookie());
+    res.setHeader("Set-Cookie", adminPanel ? policeAuth.clearSessionCookie() : clearSessionCookie());
     const acceptsHtml = String(req.headers.accept || "").includes("text/html") || path.extname(assetPath) === ".html";
     if (acceptsHtml) {
       const destination = ["missing_role", "not_member"].includes(result.reason)
@@ -49,7 +52,11 @@ module.exports = async function handler(req, res) {
     return res.status(401).end("Accès non autorisé");
   }
 
-  if (result.changed) res.setHeader("Set-Cookie", validatedSessionCookie(result));
+  if (adminPanel) {
+    if (!ownerDiscordId()) return res.status(503).end("CPD_ADMIN_OWNER_ID non configuré");
+    if (!await isControlPanelAdmin(result.session.user?.id)) return res.status(403).end("Accès administrateur refusé");
+  }
+  if (result.changed) res.setHeader("Set-Cookie", adminPanel ? policeAuth.sessionCookie(result.session) : validatedSessionCookie(result));
 
   const adminRoot = path.resolve(process.cwd(), "academy-admin");
   const absolutePath = path.resolve(adminRoot, assetPath);

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Administration — CPD</title>
+  <link rel="icon" href="../../assets/cpd-seal.png">
+  <link rel="stylesheet" href="admin.css?v=2">
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="topbar">
+      <a class="brand" href="/mdt"><img src="../../assets/cpd-seal.png" alt=""><span><small>CPD ADMINISTRATION CENTER</small><strong>Panel de configuration</strong></span></a>
+      <div class="top-actions"><span id="actor-name">Connexion vérifiée</span><a class="quiet" href="/api/auth/logout">Se déconnecter</a></div>
+    </header>
+    <div id="notice" class="notice" hidden></div>
+    <main>
+      <section class="hero"><div><span class="eyebrow">ACCÈS PRIVÉ</span><h1>Administration du MDT</h1><p>Configure les serveurs, les liaisons et les accès Discord sans modifier le code.</p></div><div class="hero-meta"><span>Version active</span><strong id="version">—</strong><small id="updated">Chargement…</small></div></section>
+      <nav class="tabs" aria-label="Modules"><button class="active" data-tab="overview">Vue d’ensemble</button><button data-tab="liaisons">Liaisons Discord</button><button data-tab="access">Accès & rôles</button><button data-tab="diagnostic">Diagnostic</button><button data-tab="history">Historique</button></nav>
+
+      <section class="tab active" data-panel="overview"><div class="section-head"><div><span class="eyebrow">PILOTAGE</span><h2>État du système</h2><p>Un résumé rapide avant de publier une modification.</p></div><button class="button primary" data-action="refresh">Actualiser</button></div><div class="stats"><article><span>Serveurs configurés</span><strong id="stat-servers">—</strong></article><article><span>Liaisons actives</span><strong id="stat-liaisons">—</strong></article><article><span>Administrateurs</span><strong id="stat-admins">—</strong></article><article><span>Dernière version</span><strong id="stat-version">—</strong></article></div><div class="callout"><div class="callout-icon">✓</div><div><strong>Protection propriétaire active</strong><p>L’accès à cette adresse est réservé à l’ID défini dans <code>CPD_ADMIN_OWNER_ID</code> et aux IDs que tu ajoutes ci-dessous.</p></div></div></section>
+
+      <section class="tab" data-panel="liaisons"><div class="section-head"><div><span class="eyebrow">MODULE 1</span><h2>Liaisons Discord</h2><p>Chaque rubrique du MDT peut pointer vers un salon ou un forum choisi dans le catalogue réel du bot.</p></div><button class="button primary" data-action="add-channel">+ Ajouter une liaison</button></div><label class="field full">Nom de la section dans le MDT<input id="section-label" maxlength="80" placeholder="Liaison gouvernement"></label><div id="server-list" class="server-grid"></div><div id="liaison-list" class="cards"></div></section>
+
+      <section class="tab" data-panel="access"><div class="section-head"><div><span class="eyebrow">MODULE 2</span><h2>Accès & rôles</h2><p>Les connexions et les droits d’administration sont indépendants les uns des autres.</p></div></div><div id="access-list" class="access-grid"></div><div class="admin-users"><div class="subhead"><div><h3>Administrateurs du panel</h3><p>Le propriétaire reste protégé. Ajoute un ID Discord pour donner ou retirer l’accès.</p></div></div><div class="add-admin"><input id="admin-id" inputmode="numeric" maxlength="20" placeholder="ID Discord (17 à 20 chiffres)"><button class="button primary" data-action="add-admin">Ajouter l’accès</button></div><div id="admin-list"></div></div></section>
+
+      <section class="tab" data-panel="diagnostic"><div class="section-head"><div><span class="eyebrow">MODULE 3</span><h2>Diagnostic Discord</h2><p>Teste la configuration actuellement affichée avant de la publier.</p></div><button class="button primary" data-action="diagnostic">Lancer les tests</button></div><div class="diagnostic-summary"><article><span>Bot Discord</span><strong id="diag-bot">Non testé</strong></article><article><span>Base Neon</span><strong id="diag-db">Non testée</strong></article><article><span>Durée</span><strong id="diag-duration">—</strong></article></div><div id="diagnostic-results" class="diagnostic-results"><p class="empty">Aucun diagnostic lancé.</p></div></section>
+
+      <section class="tab" data-panel="history"><div class="section-head"><div><span class="eyebrow">MODULE 4</span><h2>Historique & restauration</h2><p>Chaque publication conserve la version précédente et son auteur.</p></div></div><div id="history-list" class="history-list"></div></section>
+    </main>
+    <footer class="savebar"><div><strong id="dirty">Aucune modification en attente</strong><small>Les changements seront appliqués à la prochaine requête du MDT.</small></div><input id="summary" maxlength="240" placeholder="Résumé de la modification"><button class="button quiet-button" data-action="reload">Annuler</button><button class="button primary" data-action="save">Publier les changements</button></footer>
+  </div>
+  <script src="admin.js?v=2"></script>
+</body>
+</html>

@@ -22,7 +22,7 @@ const {
 } = require("../server/academy-admin-auth");
 const { validateSession: validatePoliceSession, sessionCookie: policeSessionCookie, clearSessionCookie: policeClearSessionCookie } = require("../server/auth");
 const { decodeModernFormData } = require("../server/application-form");
-const { getConfig, saveConfig, listHistory, restoreConfig, sanitizeConfig, serverByKey, accessAllowed, publicLiaisonConfig } = require("../server/admin-config");
+const { getConfig, saveConfig, listHistory, restoreConfig, sanitizeConfig, serverByKey, accessAllowed, publicLiaisonConfig, ownerDiscordId, isControlPanelAdmin, listAdminUsers, addAdminUser, removeAdminUser } = require("../server/admin-config");
 
 const DISCORD_API = "https://discord.com/api/v10";
 const CPD_GUILD_ID = "1408092767963451615";
@@ -378,6 +378,20 @@ async function liaisonRuntime() {
   return { current, channels, forum, byId, guildIdFor };
 }
 
+async function liaisonChannelAuthorized(session, runtime, channel) {
+  const roleIds = Array.isArray(channel?.allowedRoleIds) ? channel.allowedRoleIds : [];
+  const userIds = Array.isArray(channel?.allowedUserIds) ? channel.allowedUserIds : [];
+  if (!roleIds.length && !userIds.length) return true;
+  const userId = String(session?.user?.id || "");
+  if (userIds.includes(userId)) return true;
+  try {
+    const member = await discordBotRequest(`/guilds/${runtime.guildIdFor(channel)}/members/${userId}`);
+    return roleIds.some(roleId => (member.roles || []).map(String).includes(String(roleId)));
+  } catch {
+    return false;
+  }
+}
+
 async function createGovernmentComplaint(req, res) {
   if (req.method !== "POST") return res.status(405).json({ ok: false, code: "method_not_allowed" });
   const access = await validatePoliceSession(req, false);
@@ -391,6 +405,7 @@ async function createGovernmentComplaint(req, res) {
   const runtime = await liaisonRuntime();
   const forumConfig = runtime.forum;
   if (!forumConfig?.channelId || !forumConfig.canWrite) return res.status(403).json({ ok: false, code: "forum_write_disabled" });
+  if (!await liaisonChannelAuthorized(access.session, runtime, forumConfig)) return res.status(403).json({ ok: false, code: "liaison_access_denied" });
   const forumId = forumConfig.channelId;
   const guildId = runtime.guildIdFor(forumConfig);
   const subject = complaintText(body.subject, 90, "Dépôt de plainte");
@@ -447,6 +462,7 @@ async function governmentComplaints(req, res) {
   const runtime = await liaisonRuntime();
   const forumConfig = runtime.forum;
   if (!forumConfig?.channelId || !forumConfig.canRead) return res.status(403).json({ok:false,code:"forum_read_disabled"});
+  if (!await liaisonChannelAuthorized(access.session, runtime, forumConfig)) return res.status(403).json({ok:false,code:"liaison_access_denied"});
   const forumId = forumConfig.channelId;
   const guildId = runtime.guildIdFor(forumConfig);
   let stage="forum";
@@ -475,7 +491,7 @@ async function governmentComplaintMessage(req, res) {
   const files=Array.isArray(body?.attachments)?body.attachments.slice(0,3):[];
   const mentions=normalizeMentionIds(body?.mentions);
   if(!/^\d{17,20}$/.test(threadId)||(!content&&!files.length))return res.status(400).json({ok:false,code:"message_required"});
-  const runtime=await liaisonRuntime(),forumConfig=runtime.forum;if(!forumConfig?.canWrite)return res.status(403).json({ok:false,code:"forum_write_disabled"});
+  const runtime=await liaisonRuntime(),forumConfig=runtime.forum;if(!forumConfig?.canWrite)return res.status(403).json({ok:false,code:"forum_write_disabled"});if(!await liaisonChannelAuthorized(access.session,runtime,forumConfig))return res.status(403).json({ok:false,code:"liaison_access_denied"});
   try { const thread=await discordBotRequest(`/channels/${threadId}`); if(String(thread?.parent_id||"")!==String(forumConfig.channelId))return res.status(403).json({ok:false,code:"thread_forbidden"}); if(thread.thread_metadata?.archived)await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{archived:false}}); const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD"); const text=`**${complaintText(agent,100)}**${mentions.length&&forumConfig.canMention?`\n${mentionMarkup(mentions)}`:""}${content?`\n${content}`:""}`; const safeMentions=forumConfig.canMention?mentions:[]; const safeFiles=forumConfig.canUpload?files:[]; const message=safeFiles.length?await discordBotUpload(`/channels/${threadId}/messages`,text,safeFiles,safeMentions):await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[],users:safeMentions}}}); return res.status(201).json({ok:true,messageId:message?.id||null}); }
   catch(error){return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"thread_forbidden":"discord_unavailable"});}
 }
@@ -484,14 +500,14 @@ async function updateGovernmentComplaint(req, res) {
   const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});
   const body=readJsonBody(req),threadId=String(body?.threadId||""),ids=Array.isArray(body?.appliedTags)?body.appliedTags.map(String).slice(0,20):[];
   if(!/^\d{17,20}$/.test(threadId))return res.status(400).json({ok:false,code:"thread_required"});
-  const runtime=await liaisonRuntime(),forumConfig=runtime.forum;if(!forumConfig?.canWrite)return res.status(403).json({ok:false,code:"forum_write_disabled"});
+  const runtime=await liaisonRuntime(),forumConfig=runtime.forum;if(!forumConfig?.canWrite)return res.status(403).json({ok:false,code:"forum_write_disabled"});if(!await liaisonChannelAuthorized(access.session,runtime,forumConfig))return res.status(403).json({ok:false,code:"liaison_access_denied"});
   try { const forum=await discordBotRequest(`/channels/${forumConfig.channelId}`);const valid=new Set((forum.available_tags||[]).map(t=>String(t.id)));if(ids.some(id=>!valid.has(id)))return res.status(400).json({ok:false,code:"invalid_tag"});const thread=await discordBotRequest(`/channels/${threadId}`);if(String(thread?.parent_id||"")!==String(forumConfig.channelId))return res.status(403).json({ok:false,code:"thread_forbidden"});if(thread.thread_metadata?.archived)await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{archived:false}});await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{applied_tags:ids}});const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD");const names=(forum.available_tags||[]).filter(t=>ids.includes(String(t.id))).map(t=>t.name).join(", ")||"Sans tag";await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:`**Historique MDT**\n${complaintText(agent,100)} a modifié le statut/tags : ${complaintText(names,250)}`,allowed_mentions:{parse:[]}}});return res.json({ok:true,appliedTags:ids}); }
   catch(error){return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"thread_forbidden":"discord_unavailable"});}
 }
 
 async function liaisonChannelRead(req, res) {
   const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});
-  const channelId=String(req.query.channelId||""); const runtime=await liaisonRuntime(),channelConfig=runtime.byId.get(channelId); if(!channelConfig||channelConfig.type!=="text"||!channelConfig.canRead)return res.status(400).json({ok:false,code:"channel_not_allowed"});
+  const channelId=String(req.query.channelId||""); const runtime=await liaisonRuntime(),channelConfig=runtime.byId.get(channelId); if(!channelConfig||channelConfig.type!=="text"||!channelConfig.canRead)return res.status(400).json({ok:false,code:"channel_not_allowed"});if(!await liaisonChannelAuthorized(access.session,runtime,channelConfig))return res.status(403).json({ok:false,code:"liaison_access_denied"});
   const requestedLimit=Number(req.query.limit||100); const limit=Number.isFinite(requestedLimit)?Math.min(100,Math.max(1,Math.floor(requestedLimit))):100; const before=String(req.query.before||"");
   try { const channel=await discordBotRequest(`/channels/${channelId}`);const suffix=before?`&before=${encodeURIComponent(before)}`:"";const rawMessages=await discordBotRequest(`/channels/${channelId}/messages?limit=${limit}${suffix}`);const messages=await enrichDiscordMessages(rawMessages);const viewerId=String(access.session.user?.id||"");const viewerName=await resolveCpdDisplayName(viewerId,access.session.user?.globalName||access.session.user?.username||"Agent CPD");return res.json({ok:true,channel:{id:channel.id,name:channel.name,type:channel.type},messages,hasMore:messages.length===limit,nextBefore:messages.length?messages[messages.length-1].id:null,viewer:{id:viewerId,displayName:viewerName}}); }
   catch(error){console.error("Liaison channel read failed",{channelId,status:error.status||0});return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"channel_forbidden":"discord_unavailable",status:error.status||0});}
@@ -531,7 +547,7 @@ async function liaisonMentionCandidates(req, res) {
 
 async function liaisonChannelSend(req, res) {
   const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});const body=readJsonBody(req),channelId=String(body?.channelId||"");const content=complaintText(body?.message,1800,"");const files=Array.isArray(body?.attachments)?body.attachments.slice(0,3):[];const mentions=normalizeMentionIds(body?.mentions);
-  const runtime=await liaisonRuntime(),channelConfig=runtime.byId.get(channelId);if(!channelConfig||channelConfig.type!=="text"||!channelConfig.canWrite||(!content&&!files.length))return res.status(400).json({ok:false,code:!channelConfig?"channel_not_allowed":!channelConfig.canWrite?"channel_write_disabled":"message_required"});
+  const runtime=await liaisonRuntime(),channelConfig=runtime.byId.get(channelId);if(!channelConfig||channelConfig.type!=="text"||!channelConfig.canWrite||(!content&&!files.length))return res.status(400).json({ok:false,code:!channelConfig?"channel_not_allowed":!channelConfig.canWrite?"channel_write_disabled":"message_required"});if(!await liaisonChannelAuthorized(access.session,runtime,channelConfig))return res.status(403).json({ok:false,code:"liaison_access_denied"});
   const safeMentions=channelConfig.canMention?mentions:[],safeFiles=channelConfig.canUpload?files:[];
   try { await discordBotRequest(`/channels/${channelId}`);const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD");const text=`**${complaintText(agent,100)}**${safeMentions.length?`\n${mentionMarkup(safeMentions)}`:""}${content?`\n${content}`:""}`;const message=safeFiles.length?await discordBotUpload(`/channels/${channelId}/messages`,text,safeFiles,safeMentions):await discordBotRequest(`/channels/${channelId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[],users:safeMentions}}});return res.status(201).json({ok:true,messageId:message?.id||null}); }
   catch(error){console.error("Liaison channel send failed",{channelId,status:error.status||0,code:error.code||""});return res.status(error.status===403?403:502).json({ok:false,code:error.code==="file_too_large"?"file_too_large":error.status===403?"channel_forbidden":"discord_unavailable"});}
@@ -791,22 +807,23 @@ async function instructorAccess(req, res) {
 }
 
 async function configurationAdminAccess(req, res) {
-  const session = await instructorAccess(req, res);
-  if (!session) return null;
-  const current = await getConfig({ fresh: true });
-  const policy = current.value.access.admin;
-  const server = serverByKey(current.value, policy.guildKey);
-  try {
-    const member = await discordBotRequest(`/guilds/${server.guildId}/members/${session.user.id}`);
-    if (!accessAllowed(member, policy)) {
-      res.status(403).json({ ok: false, code: "admin_role_required" });
-      return null;
-    }
-    return { session, current, member };
-  } catch (error) {
-    res.status(error.status === 404 ? 403 : 502).json({ ok: false, code: error.status === 404 ? "admin_role_required" : "discord_unavailable" });
+  const access = await validatePoliceSession(req, false);
+  if (!access.ok) {
+    res.setHeader("Set-Cookie", policeClearSessionCookie());
+    res.status(401).json({ ok: false, code: access.reason });
     return null;
   }
+  if (!ownerDiscordId()) {
+    res.status(503).json({ ok: false, code: "admin_owner_not_configured" });
+    return null;
+  }
+  if (!await isControlPanelAdmin(access.session.user?.id)) {
+    res.status(403).json({ ok: false, code: "admin_access_denied" });
+    return null;
+  }
+  const session = access.session;
+  const current = await getConfig({ fresh: true });
+  return { session, current };
 }
 
 async function publicLiaisonSettings(req, res) {
@@ -814,7 +831,14 @@ async function publicLiaisonSettings(req, res) {
   const access = await validatePoliceSession(req, false);
   if (!access.ok) return res.status(401).json({ ok: false, code: access.reason });
   const current = await getConfig();
-  return res.status(200).json({ ok: true, version: current.version, liaison: publicLiaisonConfig(current.value) });
+  const runtime = await liaisonRuntime();
+  const visible = publicLiaisonConfig(current.value);
+  const allowed = [];
+  for (const item of visible.channels) {
+    const full = runtime.channels.find(channel => channel.key === item.key);
+    if (full && await liaisonChannelAuthorized(access.session, runtime, full)) allowed.push(item);
+  }
+  return res.status(200).json({ ok: true, version: current.version, liaison: { ...visible, channels: allowed } });
 }
 
 async function adminConfiguration(req, res) {
@@ -823,12 +847,16 @@ async function adminConfiguration(req, res) {
   if (!admin) return;
   const actor = { id: admin.session.user.id, name: admin.session.user.globalName || admin.session.user.username || "Administrateur" };
   if (req.method === "GET") {
-    const history = await listHistory(60);
+    const [history, adminUsers] = await Promise.all([listHistory(100), listAdminUsers()]);
     return res.status(200).json({
       ok: true,
       config: admin.current.value,
       meta: { version: admin.current.version, updatedAt: admin.current.updatedAt, updatedByName: admin.current.updatedByName, fallback: admin.current.fallback },
       history: history.map(row => ({ id: String(row.id), version: Number(row.version), changedById: row.changed_by_id || "", changedByName: row.changed_by_name || "", summary: row.change_summary || "", createdAt: row.created_at })),
+      administrators: [
+        { discordId: ownerDiscordId(), displayName: actor.name, owner: true, active: true },
+        ...adminUsers.filter(row => row.is_active).map(row => ({ discordId: row.discord_id, displayName: row.display_name || row.discord_id, owner: false, active: true, addedByName: row.added_by_name || "", createdAt: row.created_at }))
+      ],
       user: { id: actor.id, displayName: actor.name }
     });
   }
@@ -840,11 +868,18 @@ async function adminConfiguration(req, res) {
       const saved = await restoreConfig(body.historyId, actor);
       return res.status(200).json({ ok: true, config: saved.value, meta: { version: saved.version, updatedAt: saved.updatedAt, updatedByName: saved.updatedByName } });
     }
+    if (body.operation === "add-admin") {
+      const discordId = String(body.discordId || "");
+      const user = await discordBotRequest(`/users/${discordId}`);
+      if (user?.bot) return res.status(400).json({ ok: false, code: "bot_cannot_be_admin" });
+      await addAdminUser({ id: discordId, displayName: user.global_name || user.username || discordId }, actor);
+      return res.status(200).json({ ok: true });
+    }
+    if (body.operation === "remove-admin") {
+      await removeAdminUser(body.discordId);
+      return res.status(200).json({ ok: true });
+    }
     const proposed = sanitizeConfig(body.config);
-    const adminPolicy = proposed.access.admin;
-    const adminServer = serverByKey(proposed, adminPolicy.guildKey);
-    const proposedMember = await discordBotRequest(`/guilds/${adminServer.guildId}/members/${actor.id}`);
-    if (!accessAllowed(proposedMember, adminPolicy)) return res.status(400).json({ ok: false, code: "admin_lockout" });
     const saved = await saveConfig(proposed, actor, textField(body.summary, 240) || "Configuration modifiée depuis le panel");
     liaisonMentionCache = { expires: 0, members: [] };
     cpdDisplayNameCache = { expires: 0, names: new Map() };
@@ -853,6 +888,37 @@ async function adminConfiguration(req, res) {
     console.error("Admin configuration save failed", { code: error.code || "unknown", status: error.status || 0 });
     const status = error.code === "history_not_found" ? 404 : error.code === "database_not_configured" ? 503 : 500;
     return res.status(status).json({ ok: false, code: error.code || "configuration_save_failed" });
+  }
+}
+
+async function adminDiscordCatalog(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const admin = await configurationAdminAccess(req, res);
+  if (!admin) return;
+  try {
+    const guilds = await discordBotRequest("/users/@me/guilds");
+    const publicGuilds = (Array.isArray(guilds) ? guilds : []).map(guild => ({ id: String(guild.id), name: guild.name || guild.id, icon: guild.icon || "" })).sort((a, b) => a.name.localeCompare(b.name, "fr"));
+    const guildId = String(req.query.guildId || "");
+    if (!guildId) return res.status(200).json({ ok: true, guilds: publicGuilds });
+    if (!publicGuilds.some(guild => guild.id === guildId)) return res.status(403).json({ ok: false, code: "guild_not_available" });
+    const [channels, roles] = await Promise.all([
+      discordBotRequest(`/guilds/${guildId}/channels`),
+      discordBotRequest(`/guilds/${guildId}/roles`)
+    ]);
+    const categoryNames = new Map((channels || []).filter(channel => channel.type === 4).map(channel => [String(channel.id), channel.name]));
+    return res.status(200).json({
+      ok: true,
+      guilds: publicGuilds,
+      channels: (channels || []).filter(channel => [0, 5, 15, 16].includes(channel.type)).map(channel => ({
+        id: String(channel.id), name: channel.name || channel.id, type: channel.type === 15 || channel.type === 16 ? "forum" : "text",
+        discordType: Number(channel.type), position: Number(channel.position || 0), parentId: String(channel.parent_id || ""), category: categoryNames.get(String(channel.parent_id || "")) || "Sans catégorie"
+      })).sort((a, b) => a.category.localeCompare(b.category, "fr") || a.position - b.position),
+      roles: (roles || []).filter(role => String(role.id) !== guildId).map(role => ({ id: String(role.id), name: role.name || role.id, color: Number(role.color || 0), position: Number(role.position || 0), managed: Boolean(role.managed) })).sort((a, b) => b.position - a.position)
+    });
+  } catch (error) {
+    console.error("Discord catalog failed", { status: error.status || 0 });
+    return res.status(error.status === 403 ? 403 : 502).json({ ok: false, code: error.status === 403 ? "discord_catalog_forbidden" : "discord_unavailable", status: error.status || 0 });
   }
 }
 
@@ -2396,6 +2462,7 @@ module.exports = async function handler(req, res) {
     case "database-check": return databaseCheck(req, res);
     case "admin-configuration": return adminConfiguration(req, res);
     case "admin-discord-diagnostic": return adminDiscordDiagnostic(req, res);
+    case "admin-discord-catalog": return adminDiscordCatalog(req, res);
     case "agents": return agentsList(req, res);
     case "training-overview": return trainingOverview(req, res);
     case "activity": return activityLog(req, res);

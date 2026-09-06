@@ -6,15 +6,15 @@ const DEFAULT_CONFIG = Object.freeze({
   access: {
     police: { label: "Connexion policier", guildKey: "cpd", roleIds: ["1408092768026365974"], userIds: [], mode: "any" },
     academy: { label: "Police Academy", guildKey: "academy", roleIds: ["1538858756371386400"], userIds: [], mode: "any" },
-    admin: { label: "Administration configuration", guildKey: "academy", roleIds: ["1538858756371386400"], userIds: [], mode: "any" }
+    admin: { label: "Administration configuration", guildKey: "cpd", roleIds: [], userIds: [], mode: "any" }
   },
   liaison: {
     sectionLabel: "Liaison gouvernement",
     channels: [
-      { key: "complaints", label: "Dépôts de plainte", channelId: "1473895325197406328", guildKey: "cpd", type: "forum", icon: "inbox", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, sortOrder: 10 },
-      { key: "doj", label: "Communication DOJ", channelId: "1489640064207032475", guildKey: "cpd", type: "text", icon: "radio", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, sortOrder: 20 },
-      { key: "government", label: "Liaison gouvernement", channelId: "1408092769079267379", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, sortOrder: 30 },
-      { key: "lawyer", label: "Liaison avocat", channelId: "1408092768848449646", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, sortOrder: 40 }
+      { key: "complaints", label: "Dépôts de plainte", channelId: "1473895325197406328", guildKey: "cpd", type: "forum", icon: "inbox", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 10 },
+      { key: "doj", label: "Communication DOJ", channelId: "1489640064207032475", guildKey: "cpd", type: "text", icon: "radio", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 20 },
+      { key: "government", label: "Liaison gouvernement", channelId: "1408092769079267379", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 30 },
+      { key: "lawyer", label: "Liaison avocat", channelId: "1408092768848449646", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 40 }
     ]
   }
 });
@@ -77,6 +77,8 @@ function sanitizeConfig(input) {
       canWrite: boolean(item?.canWrite),
       canUpload: boolean(item?.canUpload),
       canMention: boolean(item?.canMention),
+      allowedRoleIds: [...new Set((Array.isArray(item?.allowedRoleIds) ? item.allowedRoleIds : []).map(discordId).filter(Boolean))].slice(0, 30),
+      allowedUserIds: [...new Set((Array.isArray(item?.allowedUserIds) ? item.allowedUserIds : []).map(discordId).filter(Boolean))].slice(0, 30),
       sortOrder: Math.min(9999, Math.max(0, Number(item?.sortOrder) || (index + 1) * 10))
     };
   }).filter(item => item && item.channelId);
@@ -120,6 +122,15 @@ async function ensureSchema(sql) {
       )`;
       await sql`CREATE INDEX IF NOT EXISTS cpd_admin_config_history_key_created_idx
         ON cpd_admin_config_history(config_key, created_at DESC)`;
+      await sql`CREATE TABLE IF NOT EXISTS cpd_admin_users (
+        discord_id VARCHAR(32) PRIMARY KEY,
+        display_name VARCHAR(120),
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        added_by_id VARCHAR(32),
+        added_by_name VARCHAR(120),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`;
       await sql`INSERT INTO cpd_admin_config (config_key, version, config, updated_by_name)
         VALUES ('main', 1, ${JSON.stringify(DEFAULT_CONFIG)}::jsonb, 'Configuration initiale')
         ON CONFLICT (config_key) DO NOTHING`;
@@ -186,6 +197,56 @@ async function restoreConfig(historyId, actor) {
   return saveConfig(rows[0].config, actor, `Restauration de la version ${rows[0].version}`);
 }
 
+function ownerDiscordId() {
+  return discordId(process.env.CPD_ADMIN_OWNER_ID);
+}
+
+async function isControlPanelAdmin(userId) {
+  const id = discordId(userId);
+  if (!id) return false;
+  if (ownerDiscordId() && id === ownerDiscordId()) return true;
+  const sql = sqlClient();
+  if (!sql) return false;
+  try {
+    await ensureSchema(sql);
+    const rows = await sql`SELECT discord_id FROM cpd_admin_users WHERE discord_id=${id} AND is_active=TRUE LIMIT 1`;
+    return rows.length > 0;
+  } catch (error) {
+    console.error("Admin access lookup failed", { code: error.code || "unknown" });
+    return false;
+  }
+}
+
+async function listAdminUsers() {
+  const sql = sqlClient();
+  if (!sql) return [];
+  await ensureSchema(sql);
+  return sql`SELECT discord_id, display_name, is_active, added_by_id, added_by_name, created_at, updated_at
+    FROM cpd_admin_users ORDER BY created_at`;
+}
+
+async function addAdminUser(user, actor) {
+  const id = discordId(user?.id);
+  if (!id) throw Object.assign(new Error("ID Discord invalide"), { code: "invalid_discord_id" });
+  if (id === ownerDiscordId()) throw Object.assign(new Error("Le propriétaire possède déjà l’accès"), { code: "owner_already_admin" });
+  const sql = sqlClient();
+  if (!sql) throw Object.assign(new Error("DATABASE_URL manquant"), { code: "database_not_configured" });
+  await ensureSchema(sql);
+  await sql`INSERT INTO cpd_admin_users (discord_id, display_name, is_active, added_by_id, added_by_name, updated_at)
+    VALUES (${id}, ${shortText(user?.displayName, 120)}, TRUE, ${String(actor?.id || "")}, ${shortText(actor?.name, 120)}, NOW())
+    ON CONFLICT (discord_id) DO UPDATE SET display_name=EXCLUDED.display_name, is_active=TRUE,
+      added_by_id=EXCLUDED.added_by_id, added_by_name=EXCLUDED.added_by_name, updated_at=NOW()`;
+}
+
+async function removeAdminUser(userId) {
+  const id = discordId(userId);
+  if (!id || id === ownerDiscordId()) throw Object.assign(new Error("Administrateur protégé"), { code: "admin_protected" });
+  const sql = sqlClient();
+  if (!sql) throw Object.assign(new Error("DATABASE_URL manquant"), { code: "database_not_configured" });
+  await ensureSchema(sql);
+  await sql`UPDATE cpd_admin_users SET is_active=FALSE, updated_at=NOW() WHERE discord_id=${id}`;
+}
+
 function serverByKey(config, key) {
   return config.servers.find(item => item.key === key) || config.servers[0];
 }
@@ -217,4 +278,4 @@ function publicLiaisonConfig(config) {
   };
 }
 
-module.exports = { DEFAULT_CONFIG, sanitizeConfig, getConfig, saveConfig, listHistory, restoreConfig, serverByKey, accessAllowed, publicLiaisonConfig };
+module.exports = { DEFAULT_CONFIG, sanitizeConfig, getConfig, saveConfig, listHistory, restoreConfig, serverByKey, accessAllowed, publicLiaisonConfig, ownerDiscordId, isControlPanelAdmin, listAdminUsers, addAdminUser, removeAdminUser };
