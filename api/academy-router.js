@@ -373,7 +373,10 @@ function mentionMarkup(ids) {
 async function liaisonRuntime() {
   const current = await getConfig();
   const channels = current.value.liaison.channels.filter(item => item.enabled);
-  const forum = channels.find(item => item.type === "forum") || current.value.liaison.channels.find(item => item.type === "forum");
+  const complaintKey = String(current.value.liaison.complaintKey || "");
+  const forum = channels.find(item => item.key === complaintKey && item.type === "forum")
+    || channels.find(item => item.type === "forum")
+    || current.value.liaison.channels.find(item => item.type === "forum");
   const byId = new Map(channels.map(item => [String(item.channelId), item]));
   const guildIdFor = channel => serverByKey(current.value, channel?.guildKey)?.guildId || CPD_GUILD_ID;
   return { current, channels, forum, byId, guildIdFor };
@@ -409,6 +412,7 @@ async function createGovernmentComplaint(req, res) {
   if (!await liaisonChannelAuthorized(access.session, runtime, forumConfig)) return res.status(403).json({ ok: false, code: "liaison_access_denied" });
   const forumId = forumConfig.channelId;
   const guildId = runtime.guildIdFor(forumConfig);
+  const limits = runtime.current.value.liaison.limits;
   const subject = complaintText(body.subject, 90, "Dépôt de plainte");
   const complainant = complaintText(body.complainant, 120);
   const date = complaintText(body.date, 40);
@@ -418,7 +422,7 @@ async function createGovernmentComplaint(req, res) {
   const authorFirstName = complaintText(body.authorFirstName, 80);
   const authorLastName = complaintText(body.authorLastName, 80);
   const authorBadge = complaintText(body.authorBadge, 30);
-  const description = complaintText(body.description, 4000);
+  const description = complaintText(body.description, limits.messageMaxLength);
   const mentions = normalizeMentionIds(body.mentions);
   const safeMentions = forumConfig.canMention ? mentions : [];
   if (description === "Non renseigné") return res.status(400).json({ ok: false, code: "description_required" });
@@ -445,11 +449,11 @@ async function createGovernmentComplaint(req, res) {
       method: "POST",
       body: {
         name: `${complaintId} · ${subject}`.slice(0, 100),
-        auto_archive_duration: 10080,
+        auto_archive_duration: runtime.current.value.liaison.limits.forumAutoArchiveMinutes,
         message: { content, allowed_mentions: { parse: [], users: safeMentions } }
       }
     });
-    let attachmentsUploaded=true;const files=forumConfig.canUpload&&Array.isArray(body.attachments)?body.attachments.slice(0,3):[];if(files.length&&thread?.id){try{await discordBotUpload(`/channels/${thread.id}/messages`,`Pièces jointes du dépôt ${complaintId}`,files)}catch(error){attachmentsUploaded=false;console.error("Government complaint attachments failed",error.code||error.status||error.message)}}
+    let attachmentsUploaded=true;const files=forumConfig.canUpload&&Array.isArray(body.attachments)?body.attachments.slice(0,limits.maxAttachments):[];if(files.length&&thread?.id){try{await discordBotUpload(`/channels/${thread.id}/messages`,`Pièces jointes du dépôt ${complaintId}`,files,[],limits)}catch(error){attachmentsUploaded=false;console.error("Government complaint attachments failed",error.code||error.status||error.message)}}
     return res.status(201).json({ ok: true, complaintId, threadId: thread?.id || null, attachmentsUploaded, url: thread?.id ? `https://discord.com/channels/${guildId}/${thread.id}` : null });
   } catch (error) {
     console.error("Government complaint creation failed", { status: error.status || 0, type: error.name || "Error" });
@@ -480,20 +484,22 @@ async function governmentComplaints(req, res) {
   } catch(error){console.error("Government forum read failed",{stage,status:error.status||0,message:error.message});return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"forum_read_forbidden":"discord_unavailable",status:error.status||0,stage,channel:forumId});}
 }
 
-async function discordBotUpload(path, content, files, allowedUsers = []) {
-  const token=process.env.DISCORD_BOT_TOKEN;if(!token)throw new Error("DISCORD_BOT_TOKEN manquant");const form=new FormData();form.append("payload_json",JSON.stringify({content,allowed_mentions:{parse:[],users:normalizeMentionIds(allowedUsers)}}));let total=0;
-  files.forEach((file,index)=>{const name=String(file?.name||`piece-${index+1}`).slice(0,120).replace(/[\\/]/g,"_");const type=String(file?.type||"application/octet-stream");const raw=String(file?.data||"").replace(/^data:[^;]+;base64,/ ,"");const buffer=Buffer.from(raw,"base64");total+=buffer.length;if(!buffer.length||buffer.length>3*1024*1024||total>8*1024*1024)throw Object.assign(new Error("file_too_large"),{code:"file_too_large"});form.append(`files[${index}]`,new Blob([buffer],{type}),name)});
+async function discordBotUpload(path, content, files, allowedUsers = [], limits = {}) {
+  const token=process.env.DISCORD_BOT_TOKEN;if(!token)throw new Error("DISCORD_BOT_TOKEN manquant");const form=new FormData();form.append("payload_json",JSON.stringify({content,allowed_mentions:{parse:[],users:normalizeMentionIds(allowedUsers)}}));let total=0;const perFileLimit=Math.min(8,Math.max(1,Number(limits.maxAttachmentMb)||3))*1024*1024;const totalLimit=Math.min(20,Math.max(Number(limits.maxAttachmentMb)||3,Number(limits.maxTotalUploadMb)||8))*1024*1024;
+  files.forEach((file,index)=>{const name=String(file?.name||`piece-${index+1}`).slice(0,120).replace(/[\\/]/g,"_");const type=String(file?.type||"application/octet-stream");const raw=String(file?.data||"").replace(/^data:[^;]+;base64,/ ,"");const buffer=Buffer.from(raw,"base64");total+=buffer.length;if(!buffer.length||buffer.length>perFileLimit||total>totalLimit)throw Object.assign(new Error("file_too_large"),{code:"file_too_large"});form.append(`files[${index}]`,new Blob([buffer],{type}),name)});
   const response=await fetch(`${DISCORD_API}${path}`,{method:"POST",headers:{Authorization:`Bot ${token}`},body:form});if(!response.ok){const error=new Error(`Discord API ${response.status}`);error.status=response.status;throw error}return response.json();
 }
 
 async function governmentComplaintMessage(req, res) {
   const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});
-  const body=readJsonBody(req), threadId=String(body?.threadId||""), content=complaintText(body?.message,1800,"");
-  const files=Array.isArray(body?.attachments)?body.attachments.slice(0,3):[];
+  const body=readJsonBody(req), threadId=String(body?.threadId||"");
   const mentions=normalizeMentionIds(body?.mentions);
-  if(!/^\d{17,20}$/.test(threadId)||(!content&&!files.length))return res.status(400).json({ok:false,code:"message_required"});
-  const runtime=await liaisonRuntime(),forumConfig=runtime.forum;if(!forumConfig?.canWrite)return res.status(403).json({ok:false,code:"forum_write_disabled"});if(!await liaisonChannelAuthorized(access.session,runtime,forumConfig))return res.status(403).json({ok:false,code:"liaison_access_denied"});
-  try { const thread=await discordBotRequest(`/channels/${threadId}`); if(String(thread?.parent_id||"")!==String(forumConfig.channelId))return res.status(403).json({ok:false,code:"thread_forbidden"}); if(thread.thread_metadata?.archived)await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{archived:false}}); const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD"); const text=`**${complaintText(agent,100)}**${mentions.length&&forumConfig.canMention?`\n${mentionMarkup(mentions)}`:""}${content?`\n${content}`:""}`; const safeMentions=forumConfig.canMention?mentions:[]; const safeFiles=forumConfig.canUpload?files:[]; const message=safeFiles.length?await discordBotUpload(`/channels/${threadId}/messages`,text,safeFiles,safeMentions):await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[],users:safeMentions}}}); return res.status(201).json({ok:true,messageId:message?.id||null}); }
+  if(!/^\d{17,20}$/.test(threadId))return res.status(400).json({ok:false,code:"thread_required"});
+  const runtime=await liaisonRuntime(),forumConfig=runtime.forum,limits=runtime.current.value.liaison.limits,content=complaintText(body?.message,limits.messageMaxLength,"");
+  const files=Array.isArray(body?.attachments)?body.attachments.slice(0,limits.maxAttachments):[];
+  if(!content&&!files.length)return res.status(400).json({ok:false,code:"message_required"});
+  if(!forumConfig?.canWrite)return res.status(403).json({ok:false,code:"forum_write_disabled"});if(!await liaisonChannelAuthorized(access.session,runtime,forumConfig))return res.status(403).json({ok:false,code:"liaison_access_denied"});
+  try { const thread=await discordBotRequest(`/channels/${threadId}`); if(String(thread?.parent_id||"")!==String(forumConfig.channelId))return res.status(403).json({ok:false,code:"thread_forbidden"}); if(thread.thread_metadata?.archived)await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{archived:false}}); const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD"); const text=`**${complaintText(agent,100)}**${mentions.length&&forumConfig.canMention?`\n${mentionMarkup(mentions)}`:""}${content?`\n${content}`:""}`; const safeMentions=forumConfig.canMention?mentions:[]; const safeFiles=forumConfig.canUpload?files:[]; const message=safeFiles.length?await discordBotUpload(`/channels/${threadId}/messages`,text,safeFiles,safeMentions,limits):await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[],users:safeMentions}}}); return res.status(201).json({ok:true,messageId:message?.id||null}); }
   catch(error){return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"thread_forbidden":"discord_unavailable"});}
 }
 
@@ -547,10 +553,10 @@ async function liaisonMentionCandidates(req, res) {
 }
 
 async function liaisonChannelSend(req, res) {
-  const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});const body=readJsonBody(req),channelId=String(body?.channelId||"");const content=complaintText(body?.message,1800,"");const files=Array.isArray(body?.attachments)?body.attachments.slice(0,3):[];const mentions=normalizeMentionIds(body?.mentions);
-  const runtime=await liaisonRuntime(),channelConfig=runtime.byId.get(channelId);if(!channelConfig||channelConfig.type!=="text"||!channelConfig.canWrite||(!content&&!files.length))return res.status(400).json({ok:false,code:!channelConfig?"channel_not_allowed":!channelConfig.canWrite?"channel_write_disabled":"message_required"});if(!await liaisonChannelAuthorized(access.session,runtime,channelConfig))return res.status(403).json({ok:false,code:"liaison_access_denied"});
-  const safeMentions=channelConfig.canMention?mentions:[],safeFiles=channelConfig.canUpload?files:[];
-  try { await discordBotRequest(`/channels/${channelId}`);const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD");const text=`**${complaintText(agent,100)}**${safeMentions.length?`\n${mentionMarkup(safeMentions)}`:""}${content?`\n${content}`:""}`;const message=safeFiles.length?await discordBotUpload(`/channels/${channelId}/messages`,text,safeFiles,safeMentions):await discordBotRequest(`/channels/${channelId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[],users:safeMentions}}});return res.status(201).json({ok:true,messageId:message?.id||null}); }
+  const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});const body=readJsonBody(req),channelId=String(body?.channelId||"");const mentions=normalizeMentionIds(body?.mentions);
+  const runtime=await liaisonRuntime(),limits=runtime.current.value.liaison.limits,channelConfig=runtime.byId.get(channelId);if(!channelConfig||channelConfig.type!=="text"||!channelConfig.canWrite)return res.status(400).json({ok:false,code:!channelConfig?"channel_not_allowed":"channel_write_disabled"});const safeContent=complaintText(body?.message,limits.messageMaxLength,"");const safeFilesInput=Array.isArray(body?.attachments)?body.attachments.slice(0,limits.maxAttachments):[];if(!safeContent&&!safeFilesInput.length)return res.status(400).json({ok:false,code:"message_required"});if(!await liaisonChannelAuthorized(access.session,runtime,channelConfig))return res.status(403).json({ok:false,code:"liaison_access_denied"});
+  const safeMentions=channelConfig.canMention?mentions:[],safeFiles=channelConfig.canUpload?safeFilesInput:[];
+  try { await discordBotRequest(`/channels/${channelId}`);const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD");const text=`**${complaintText(agent,100)}**${safeMentions.length?`\n${mentionMarkup(safeMentions)}`:""}${safeContent?`\n${safeContent}`:""}`;const message=safeFiles.length?await discordBotUpload(`/channels/${channelId}/messages`,text,safeFiles,safeMentions,limits):await discordBotRequest(`/channels/${channelId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[],users:safeMentions}}});return res.status(201).json({ok:true,messageId:message?.id||null}); }
   catch(error){console.error("Liaison channel send failed",{channelId,status:error.status||0,code:error.code||""});return res.status(error.status===403?403:502).json({ok:false,code:error.code==="file_too_large"?"file_too_large":error.status===403?"channel_forbidden":"discord_unavailable"});}
 }
 

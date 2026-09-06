@@ -10,12 +10,62 @@ const DEFAULT_CONFIG = Object.freeze({
   },
   liaison: {
     sectionLabel: "Liaison gouvernement",
+    complaintKey: "complaints",
+    limits: {
+      messageMaxLength: 1800,
+      maxAttachments: 3,
+      maxAttachmentMb: 3,
+      maxTotalUploadMb: 8,
+      forumAutoArchiveMinutes: 10080
+    },
     channels: [
       { key: "complaints", label: "Dépôts de plainte", channelId: "1473895325197406328", guildKey: "cpd", type: "forum", icon: "inbox", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 10 },
       { key: "doj", label: "Communication DOJ", channelId: "1489640064207032475", guildKey: "cpd", type: "text", icon: "radio", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 20 },
       { key: "government", label: "Liaison gouvernement", channelId: "1408092769079267379", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 30 },
       { key: "lawyer", label: "Liaison avocat", channelId: "1408092768848449646", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, allowedRoleIds: [], allowedUserIds: [], sortOrder: 40 }
     ]
+  },
+  ui: {
+    siteTitle: "MDT — Chicago Police Department",
+    departmentName: "CHICAGO",
+    departmentSubtitle: "POLICE DEPARTMENT",
+    guideUrl: "https://guidejuridiquesp.netlify.app/",
+    sections: {
+      mdt: { label: "MDT", enabled: true, open: true },
+      academy: { label: "Police Academy", enabled: true, open: true },
+      liaison: { label: "Liaison gouvernement", enabled: true, open: true }
+    },
+    mdtItems: [
+      { key: "rapide", label: "Accès rapide", icon: "grid", enabled: true, sortOrder: 10 },
+      { key: "procedures", label: "Procédures", icon: "book", enabled: true, sortOrder: 20 },
+      { key: "radio", label: "Radio", icon: "radio", enabled: true, sortOrder: 30 },
+      { key: "reglement", label: "Règlement", icon: "list", enabled: true, sortOrder: 40 },
+      { key: "tenues", label: "Tenues", icon: "users", enabled: true, sortOrder: 50 },
+      { key: "organigramme", label: "Organigramme", icon: "chart", enabled: true, sortOrder: 60 }
+    ],
+    academyItems: [
+      { key: "pa", label: "Tableau de bord", icon: "grid", enabled: true, sortOrder: 10 },
+      { key: "suivi", label: "Suivi pédagogique", icon: "chart", enabled: true, sortOrder: 20 },
+      { key: "formations", label: "Formations", icon: "book", enabled: true, sortOrder: 30 },
+      { key: "recrutements", label: "Recrutements", icon: "inbox", enabled: true, sortOrder: 40 },
+      { key: "activite", label: "Historique", icon: "clock", enabled: true, sortOrder: 50 }
+    ]
+  },
+  notifications: {
+    showBadges: true,
+    showAcademyBadge: true,
+    showLiaisonBadge: true,
+    refreshSeconds: 15
+  },
+  recruitment: {
+    enabled: true,
+    notificationEnabled: true,
+    title: "Rejoindre le CPD",
+    intro: "Les informations demandées concernent uniquement votre personnage RP.",
+    closedMessage: "Les recrutements sont momentanément fermés.",
+    submitLabel: "Envoyer ma candidature →",
+    notificationGuildKey: "cpd",
+    notificationChannelId: ""
   }
 });
 
@@ -26,6 +76,33 @@ const discordId = value => /^\d{17,20}$/.test(String(value || "")) ? String(valu
 const shortText = (value, max = 80) => String(value || "").trim().slice(0, max);
 const slug = value => shortText(value, 40).toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
 const boolean = (value, fallback = true) => typeof value === "boolean" ? value : fallback;
+const allowedIcons = new Set(["grid", "users", "chart", "book", "inbox", "clock", "radio", "list"]);
+
+function safeUrl(value, fallback) {
+  try {
+    const url = new URL(String(value || ""));
+    return ["http:", "https:"].includes(url.protocol) ? url.href.slice(0, 400) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function sanitizeMenuItems(input, fallback) {
+  const source = Array.isArray(input) ? input : fallback;
+  const seen = new Set();
+  return source.slice(0, 30).map((item, index) => {
+    const key = slug(item?.key);
+    if (!key || seen.has(key)) return null;
+    seen.add(key);
+    return {
+      key,
+      label: shortText(item?.label, 70) || fallback[index]?.label || key,
+      icon: allowedIcons.has(item?.icon) ? item.icon : (fallback[index]?.icon || "list"),
+      enabled: boolean(item?.enabled),
+      sortOrder: Math.min(9999, Math.max(0, Number(item?.sortOrder) || (index + 1) * 10))
+    };
+  }).filter(Boolean).sort((a, b) => a.sortOrder - b.sortOrder);
+}
 
 function cloneDefault() {
   return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -83,12 +160,78 @@ function sanitizeConfig(input) {
     };
   }).filter(item => item && item.channelId);
 
+  const validChannelKeys = new Set(channels.map(item => item.key));
+  const sourceLimits = source.liaison?.limits && typeof source.liaison.limits === "object" ? source.liaison.limits : {};
+  const allowedArchiveDurations = new Set([60, 1440, 4320, 10080]);
+  const messageMaxLength = Math.min(1800, Math.max(200, Number(sourceLimits.messageMaxLength) || fallback.liaison.limits.messageMaxLength));
+  const maxAttachments = Math.min(8, Math.max(0, Number.isFinite(Number(sourceLimits.maxAttachments)) ? Math.floor(Number(sourceLimits.maxAttachments)) : fallback.liaison.limits.maxAttachments));
+  const maxAttachmentMb = Math.min(8, Math.max(1, Number(sourceLimits.maxAttachmentMb) || fallback.liaison.limits.maxAttachmentMb));
+  const maxTotalUploadMb = Math.min(20, Math.max(maxAttachmentMb, Number(sourceLimits.maxTotalUploadMb) || fallback.liaison.limits.maxTotalUploadMb));
+  const forumAutoArchiveMinutes = allowedArchiveDurations.has(Number(sourceLimits.forumAutoArchiveMinutes))
+    ? Number(sourceLimits.forumAutoArchiveMinutes)
+    : fallback.liaison.limits.forumAutoArchiveMinutes;
+  const sourceUi = source.ui && typeof source.ui === "object" ? source.ui : {};
+  const fallbackUi = fallback.ui;
+  const sourceSections = sourceUi.sections && typeof sourceUi.sections === "object" ? sourceUi.sections : {};
+  const sections = {};
+  for (const key of ["mdt", "academy", "liaison"]) {
+    const item = sourceSections[key] || fallbackUi.sections[key];
+    sections[key] = {
+      label: shortText(item.label, 70) || fallbackUi.sections[key].label,
+      enabled: boolean(item.enabled),
+      open: boolean(item.open)
+    };
+  }
+  const sourceNotifications = source.notifications && typeof source.notifications === "object" ? source.notifications : {};
+  const sourceRecruitment = source.recruitment && typeof source.recruitment === "object" ? source.recruitment : {};
+  const recruitmentGuildKey = validServerKeys.has(String(sourceRecruitment.notificationGuildKey || ""))
+    ? String(sourceRecruitment.notificationGuildKey)
+    : (validServerKeys.has(fallback.recruitment.notificationGuildKey) ? fallback.recruitment.notificationGuildKey : servers[0].key);
+  const defaultComplaintKey = validChannelKeys.has(fallback.liaison.complaintKey)
+    ? fallback.liaison.complaintKey
+    : (channels.find(channel => channel.type === "forum")?.key || "");
+
   return {
     servers,
     access,
     liaison: {
       sectionLabel: shortText(source.liaison?.sectionLabel, 80) || fallback.liaison.sectionLabel,
+      complaintKey: validChannelKeys.has(String(source.liaison?.complaintKey || ""))
+        ? String(source.liaison.complaintKey)
+        : defaultComplaintKey,
+      limits: {
+        messageMaxLength,
+        maxAttachments,
+        maxAttachmentMb,
+        maxTotalUploadMb,
+        forumAutoArchiveMinutes
+      },
       channels: channels.length ? channels.sort((a, b) => a.sortOrder - b.sortOrder) : fallback.liaison.channels
+    },
+    ui: {
+      siteTitle: shortText(sourceUi.siteTitle, 120) || fallbackUi.siteTitle,
+      departmentName: shortText(sourceUi.departmentName, 40) || fallbackUi.departmentName,
+      departmentSubtitle: shortText(sourceUi.departmentSubtitle, 80) || fallbackUi.departmentSubtitle,
+      guideUrl: safeUrl(sourceUi.guideUrl, fallbackUi.guideUrl),
+      sections,
+      mdtItems: sanitizeMenuItems(sourceUi.mdtItems, fallbackUi.mdtItems),
+      academyItems: sanitizeMenuItems(sourceUi.academyItems, fallbackUi.academyItems)
+    },
+    notifications: {
+      showBadges: boolean(sourceNotifications.showBadges, fallback.notifications.showBadges),
+      showAcademyBadge: boolean(sourceNotifications.showAcademyBadge, fallback.notifications.showAcademyBadge),
+      showLiaisonBadge: boolean(sourceNotifications.showLiaisonBadge, fallback.notifications.showLiaisonBadge),
+      refreshSeconds: Math.min(120, Math.max(5, Number(sourceNotifications.refreshSeconds) || fallback.notifications.refreshSeconds))
+    },
+    recruitment: {
+      enabled: boolean(sourceRecruitment.enabled, fallback.recruitment.enabled),
+      notificationEnabled: boolean(sourceRecruitment.notificationEnabled, fallback.recruitment.notificationEnabled),
+      title: shortText(sourceRecruitment.title, 120) || fallback.recruitment.title,
+      intro: shortText(sourceRecruitment.intro, 500) || fallback.recruitment.intro,
+      closedMessage: shortText(sourceRecruitment.closedMessage, 500) || fallback.recruitment.closedMessage,
+      submitLabel: shortText(sourceRecruitment.submitLabel, 80) || fallback.recruitment.submitLabel,
+      notificationGuildKey: recruitmentGuildKey,
+      notificationChannelId: discordId(sourceRecruitment.notificationChannelId)
     }
   };
 }
@@ -267,6 +410,7 @@ function publicLiaisonConfig(config) {
   let forumSeen = false;
   return {
     sectionLabel: config.liaison.sectionLabel,
+    limits: config.liaison.limits,
     channels: config.liaison.channels.filter(item => {
       if (!item.enabled || !item.canRead) return false;
       if (item.type !== "forum") return true;
@@ -277,8 +421,20 @@ function publicLiaisonConfig(config) {
       key: item.key, label: item.label, channelId: item.channelId, type: item.type, icon: item.icon,
       canWrite: item.canWrite, canUpload: item.canUpload, canMention: item.canMention,
       sortOrder: item.sortOrder
-    }))
+    })),
+    navigation: config.ui,
+    notifications: config.notifications
   };
 }
 
-module.exports = { DEFAULT_CONFIG, sanitizeConfig, getConfig, saveConfig, listHistory, restoreConfig, serverByKey, accessAllowed, publicLiaisonConfig, ownerDiscordId, isControlPanelAdmin, listAdminUsers, addAdminUser, removeAdminUser };
+function publicRecruitmentConfig(config) {
+  return {
+    enabled: config.recruitment.enabled,
+    title: config.recruitment.title,
+    intro: config.recruitment.intro,
+    closedMessage: config.recruitment.closedMessage,
+    submitLabel: config.recruitment.submitLabel
+  };
+}
+
+module.exports = { DEFAULT_CONFIG, sanitizeConfig, getConfig, saveConfig, listHistory, restoreConfig, serverByKey, accessAllowed, publicLiaisonConfig, publicRecruitmentConfig, ownerDiscordId, isControlPanelAdmin, listAdminUsers, addAdminUser, removeAdminUser };

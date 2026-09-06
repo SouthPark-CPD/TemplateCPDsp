@@ -18,6 +18,7 @@
   let availableTags = [];
   let activeThreadId = "";
   let viewer = { id: "", displayName: "" };
+  let liaisonLimits = { messageMaxLength: 1800, maxAttachments: 3, maxAttachmentMb: 3, maxTotalUploadMb: 8 };
 
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
@@ -131,9 +132,34 @@
     status.className = `status ${type || ""}`;
     status.innerHTML = message;
   };
-  const updateCount = () => { counter.textContent = `${description.value.length} / 5000`; };
+  const updateCount = () => { counter.textContent = `${description.value.length} / ${description.maxLength || 5000}`; };
   description.addEventListener("input", updateCount);
   updateCount();
+
+  function applyLimits() {
+    const maxLength = Math.min(1800, Math.max(200, Number(liaisonLimits.messageMaxLength) || 1800));
+    const maxAttachments = Math.min(8, Math.max(0, Number(liaisonLimits.maxAttachments) || 0));
+    const maxAttachmentMb = Math.min(8, Math.max(1, Number(liaisonLimits.maxAttachmentMb) || 3));
+    const maxTotalUploadMb = Math.min(20, Math.max(maxAttachmentMb, Number(liaisonLimits.maxTotalUploadMb) || 8));
+    description.maxLength = maxLength;
+    const attachmentInput = document.getElementById("complaint-attachments");
+    if (attachmentInput) {
+      attachmentInput.dataset.maxAttachments = String(maxAttachments);
+      attachmentInput.dataset.maxAttachmentBytes = String(maxAttachmentMb * 1024 * 1024);
+      attachmentInput.dataset.maxTotalBytes = String(maxTotalUploadMb * 1024 * 1024);
+    }
+    const help = document.querySelector(".file-drop small");
+    if (help) help.textContent = `Images, PDF ou documents · ${maxAttachments} fichier${maxAttachments > 1 ? "s" : ""}, ${maxAttachmentMb} Mo chacun`;
+    updateCount();
+  }
+
+  async function loadConfiguration() {
+    const response = await fetch("/api/liaison/complaints?configuration=1", { credentials: "same-origin", cache: "no-store" });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data?.liaison) return;
+    liaisonLimits = data.liaison.limits || liaisonLimits;
+    applyLimits();
+  }
 
   const date = document.getElementById("complaint-date");
   if (date && !date.value) {
@@ -142,13 +168,21 @@
     date.value = now.toISOString().slice(0, 16);
   }
 
-  const fileData = async (input) => Promise.all([...input.files].slice(0, 3).map((file) => new Promise((resolve, reject) => {
-    if (file.size > 3 * 1024 * 1024) return reject(new Error("file_too_large"));
+  const fileData = async (input) => {
+    const files = [...input.files];
+    const maxAttachments = Number(input.dataset.maxAttachments || liaisonLimits.maxAttachments || 3);
+    const maxAttachmentBytes = Number(input.dataset.maxAttachmentBytes || (liaisonLimits.maxAttachmentMb || 3) * 1024 * 1024);
+    const maxTotalBytes = Number(input.dataset.maxTotalBytes || (liaisonLimits.maxTotalUploadMb || 8) * 1024 * 1024);
+    if (files.length > maxAttachments || files.some((file) => file.size > maxAttachmentBytes) || files.reduce((sum, file) => sum + file.size, 0) > maxTotalBytes) throw new Error("file_too_large");
+    return Promise.all(files.map((file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve({ name: file.name, type: file.type || "application/octet-stream", data: String(reader.result).split(",")[1] || "" });
     reader.onerror = () => reject(new Error("file_read"));
     reader.readAsDataURL(file);
-  })));
+    })));
+  };
+
+  loadConfiguration().catch(() => {});
 
   async function prefillAgent() {
     try {
@@ -193,7 +227,7 @@
     } catch (error) {
       const messages = {
         description_required: "La description des faits est obligatoire.",
-        file_too_large: "Une pièce jointe dépasse 3 Mo.",
+        file_too_large: "Les limites de pièces jointes configurées sont dépassées.",
         forum_forbidden: "Le bot Discord n’a pas les droits nécessaires sur le forum.",
         discord_unavailable: "Discord est momentanément indisponible."
       };
@@ -277,6 +311,14 @@
     const conversation = detail.querySelector(".messages");
     requestAnimationFrame(() => { conversation.scrollTop = conversation.scrollHeight; });
     const detailMentionPicker = window.CPDMentionPicker?.init(detail.querySelector("[data-mention-picker]"));
+    const threadMessageInput = detail.querySelector('textarea[name="message"]');
+    const threadFileInput = detail.querySelector('input[name="files"]');
+    if (threadMessageInput) threadMessageInput.maxLength = Math.min(1800, Math.max(200, Number(liaisonLimits.messageMaxLength) || 1800));
+    if (threadFileInput) {
+      threadFileInput.dataset.maxAttachments = String(Math.min(8, Math.max(0, Number(liaisonLimits.maxAttachments) || 0)));
+      threadFileInput.dataset.maxAttachmentBytes = String((Math.min(8, Math.max(1, Number(liaisonLimits.maxAttachmentMb) || 3))) * 1024 * 1024);
+      threadFileInput.dataset.maxTotalBytes = String((Math.min(20, Math.max(Number(liaisonLimits.maxAttachmentMb) || 3, Number(liaisonLimits.maxTotalUploadMb) || 8))) * 1024 * 1024);
+    }
 
     document.getElementById("save-thread-tags").onclick = async () => {
       const tagStatus = document.getElementById("tag-status");

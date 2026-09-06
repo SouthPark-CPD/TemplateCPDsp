@@ -4,6 +4,7 @@ const {
   ageFromBirthDate,
   encodeModernFormData
 } = require("./application-form");
+const { getConfig } = require("./admin-config");
 const ACADEMY_GUILD_ID = "1538858756354473984";
 const APPLICATION_CATEGORY_ID = "1538858758116089927";
 const CHANNEL_TYPE_TEXT = 0;
@@ -131,7 +132,13 @@ function validateApplication(body) {
 }
 
 async function sendRecruitmentNotification(applicationId, application) {
-  const channelId = String(process.env.ACADEMY_RECRUITMENT_CHANNEL_ID || "");
+  const current = await getConfig();
+  const settings = current.value.recruitment;
+  if (settings.notificationEnabled === false) return { sent: false, reason: "notifications_disabled" };
+  const configuredChannelId = String(settings.notificationChannelId || "");
+  const channelId = /^\d{17,20}$/.test(configuredChannelId)
+    ? configuredChannelId
+    : String(process.env.ACADEMY_RECRUITMENT_CHANNEL_ID || "");
   if (!/^\d{17,20}$/.test(channelId)) return { sent: false, reason: "channel_not_configured" };
   const message = await discordRequest(`/channels/${channelId}/messages`, {
     method: "POST",

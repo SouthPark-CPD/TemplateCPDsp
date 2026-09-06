@@ -4,6 +4,7 @@
   let fallbackLabel = String(body.dataset.channelLabel || "Canal de liaison");
   const channelKey = String(body.dataset.channelKey || new URLSearchParams(location.search).get("channelKey") || "");
   let permissions = { canWrite: true, canUpload: true, canMention: true };
+  let limits = { messageMaxLength: 1800, maxAttachments: 3, maxAttachmentMb: 3, maxTotalUploadMb: 8 };
   const messagesNode = document.getElementById("channel-messages");
   const channelNameNode = document.getElementById("channel-name");
   const channelMetaNode = document.getElementById("channel-meta");
@@ -22,6 +23,17 @@
   let loading = false;
   let viewer = { id: "", displayName: "" };
 
+  function applyLimits() {
+    const maxLength = Math.min(1800, Math.max(200, Number(limits.messageMaxLength) || 1800));
+    const maxAttachments = Math.min(8, Math.max(0, Number(limits.maxAttachments) || 0));
+    const maxAttachmentMb = Math.min(8, Math.max(1, Number(limits.maxAttachmentMb) || 3));
+    const maxTotalUploadMb = Math.min(20, Math.max(maxAttachmentMb, Number(limits.maxTotalUploadMb) || 8));
+    if (messageInput) messageInput.maxLength = maxLength;
+    if (filesInput) filesInput.dataset.maxAttachments = String(maxAttachments);
+    if (filesInput) filesInput.dataset.maxAttachmentBytes = String(maxAttachmentMb * 1024 * 1024);
+    if (filesInput) filesInput.dataset.maxTotalBytes = String(maxTotalUploadMb * 1024 * 1024);
+  }
+
   async function configure() {
     if (!channelKey) return;
     const response = await fetch("/api/liaison/complaints?configuration=1", { credentials: "same-origin", cache: "no-store" });
@@ -31,6 +43,8 @@
     channelId = String(channel.channelId || "");
     fallbackLabel = String(channel.label || fallbackLabel);
     permissions = channel;
+    limits = data?.liaison?.limits || limits;
+    applyLimits();
     channelNameNode.textContent = fallbackLabel;
     const heroTitle = document.querySelector(".channel-copy h1");
     if (heroTitle) heroTitle.textContent = fallbackLabel;
@@ -194,9 +208,12 @@
 
   filesInput.addEventListener("change", () => {
     const files = [...filesInput.files];
-    if (files.length > 3 || files.some((file) => file.size > 3 * 1024 * 1024)) {
+    const maxAttachments = Number(filesInput.dataset.maxAttachments || 3);
+    const maxAttachmentBytes = Number(filesInput.dataset.maxAttachmentBytes || 3 * 1024 * 1024);
+    const maxTotalBytes = Number(filesInput.dataset.maxTotalBytes || 8 * 1024 * 1024);
+    if (files.length > maxAttachments || files.some((file) => file.size > maxAttachmentBytes) || files.reduce((sum, file) => sum + file.size, 0) > maxTotalBytes) {
       filesInput.value = "";
-      fileList.textContent = "Maximum : 3 fichiers de 3 Mo chacun.";
+      fileList.textContent = `Maximum : ${maxAttachments} fichier${maxAttachments > 1 ? "s" : ""}, ${Math.round(maxAttachmentBytes / 1024 / 1024)} Mo chacun et ${Math.round(maxTotalBytes / 1024 / 1024)} Mo au total.`;
       return;
     }
     fileList.textContent = files.length ? files.map((file) => `${file.name} (${Math.ceil(file.size / 1024)} Ko)`).join(" · ") : "";
@@ -208,7 +225,10 @@
     const content = messageInput.value.trim();
     const files = [...filesInput.files];
     if (!content && !files.length) { setStatus("Écrivez un message ou ajoutez une pièce jointe.", "error"); return; }
-    if (files.length > 3 || files.some((file) => file.size > 3 * 1024 * 1024) || files.reduce((sum, file) => sum + file.size, 0) > 8 * 1024 * 1024) { setStatus("Pièces jointes limitées à 3 fichiers et 8 Mo au total.", "error"); return; }
+    const maxAttachments = Number(filesInput.dataset.maxAttachments || 3);
+    const maxAttachmentBytes = Number(filesInput.dataset.maxAttachmentBytes || 3 * 1024 * 1024);
+    const maxTotalBytes = Number(filesInput.dataset.maxTotalBytes || 8 * 1024 * 1024);
+    if (files.length > maxAttachments || files.some((file) => file.size > maxAttachmentBytes) || files.reduce((sum, file) => sum + file.size, 0) > maxTotalBytes) { setStatus("Les limites de pièces jointes configurées sont dépassées.", "error"); return; }
     sendButton.disabled = true;
     setStatus("Envoi en cours…");
     try {

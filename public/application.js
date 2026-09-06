@@ -10,6 +10,7 @@
   const submit = document.querySelector("#submit");
   const submitError = document.querySelector("#submit-error");
   const lastStep = steps.length;
+  let submitLabel = submit?.textContent || "Envoyer ma candidature →";
   let current = 1;
 
   const labels = {
@@ -56,6 +57,38 @@
       const field = form.elements[counter.dataset.counter];
       if (field) counter.textContent = `${fieldValue(counter.dataset.counter).length} / ${field.maxLength}`;
     });
+  }
+
+  async function loadRecruitmentSettings() {
+    try {
+      const response = await fetch("/api/applications/submit", { credentials: "same-origin", cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      const settings = data?.recruitment;
+      if (!response.ok || !settings) return;
+      if (settings.title) {
+        document.title = `${settings.title} — Chicago Police Academy`;
+        const title = document.querySelector("#recruitment-title");
+        if (title) title.textContent = settings.title;
+      }
+      if (settings.intro) {
+        const intro = document.querySelector("#recruitment-intro");
+        if (intro) intro.textContent = settings.intro;
+      }
+      if (settings.submitLabel) {
+        submitLabel = settings.submitLabel;
+        submit.textContent = submitLabel;
+      }
+      if (settings.enabled === false) {
+        form.hidden = true;
+        const closed = document.querySelector("#recruitment-closed");
+        if (closed) {
+          closed.textContent = settings.closedMessage || "Les recrutements sont momentanément fermés.";
+          closed.hidden = false;
+        }
+      }
+    } catch {
+      // The form remains usable with its embedded defaults if the settings endpoint is unavailable.
+    }
   }
 
   function setFieldError(field, message) {
@@ -170,6 +203,7 @@
     } catch (error) {
       const messages = {
         invalid_application: "Certaines informations n’ont pas pu être traitées.",
+        recruitment_closed: "Les recrutements sont momentanément fermés.",
         database_not_configured: "Le service de candidature n’est pas encore configuré.",
         database_not_ready: "Le service de candidature n’est pas encore prêt.",
         database_error: "La candidature n’a pas pu être enregistrée. Réessayez dans quelques instants."
@@ -177,7 +211,7 @@
       submitError.textContent = messages[error.message] || "La candidature n’a pas pu être transmise. Réessayez.";
       submitError.classList.remove("hidden");
       submit.disabled = false;
-      submit.textContent = "Envoyer ma candidature →";
+      submit.textContent = submitLabel;
     }
   }
 
@@ -187,4 +221,5 @@
   next.addEventListener("click", () => { if (validateStep(current)) showStep(Math.min(current + 1, lastStep)); });
   previous.addEventListener("click", () => showStep(Math.max(current - 1, 1)));
   form.addEventListener("submit", event => { event.preventDefault(); if (validateStep(current)) sendApplication(); });
+  loadRecruitmentSettings();
 })();
