@@ -1,7 +1,7 @@
 /* Persistent shell; all module scripts and server authorization stay isolated. */
 (()=>{
  const R=CPDRoutes,origin=location.origin,frame=document.getElementById('module-frame');
- const message=document.getElementById('shell-message'),retry=document.getElementById('retry-session'),paMenu=document.getElementById('pa-menu'),liaisonMenu=document.getElementById('liaison-menu');
+ const message=document.getElementById('shell-message'),retry=document.getElementById('retry-session'),mdtMenu=document.getElementById('mdt-menu'),paMenu=document.getElementById('pa-menu'),liaisonMenu=document.getElementById('liaison-menu');
  const mdt=[['rapide','Accès rapide','grid'],['procedures','Procédures','book'],['radio','Radio','radio'],['reglement','Règlement','list'],['tenues','Tenues','users'],['organigramme','Organigramme','chart']];
  const pa=[['pa','Tableau de bord','grid'],['suivi','Suivi pédagogique','chart'],['formations','Formations','book'],['recrutements','Recrutements','inbox'],['activite','Historique','clock']];
  const liaison=[['liaison','Dépôts de plainte','inbox'],['doj','Communication DOJ','radio'],['liaison-gouv','Liaison gouvernement','users'],['avocat','Liaison avocat','users']];
@@ -22,6 +22,7 @@
   document.getElementById('view-title').textContent=title;frame.title=title;
   document.getElementById('section-name').textContent=route.academy?'Police Academy':(liaison.some(x=>x[0]===route.view)?'Liaison gouvernement':'MDT');
   document.querySelectorAll('[data-view]').forEach(a=>{if(a.dataset.view===route.view||(route.view==='dossier'&&a.dataset.view==='agents'))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  if(mdt.some(x=>x[0]===route.view))mdtMenu.open=true;
   if(route.academy)paMenu.open=true;
   if(liaison.some(x=>x[0]===route.view))liaisonMenu.open=true;
  }
