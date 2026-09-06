@@ -198,7 +198,10 @@ async function restoreConfig(historyId, actor) {
 }
 
 function ownerDiscordId() {
-  return discordId(process.env.CPD_ADMIN_OWNER_ID);
+  // The deployment variable remains supported, but the owner's ID is also
+  // kept as a safe fallback so the private button is not silently hidden when
+  // the variable was forgotten in Vercel.
+  return discordId(process.env.CPD_ADMIN_OWNER_ID || "689050476154585139");
 }
 
 async function isControlPanelAdmin(userId) {
