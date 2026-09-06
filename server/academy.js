@@ -55,60 +55,48 @@ function normalized(value) {
   return typeof value === "string" ? value.trim().replace(/\r\n/g, "\n") : "";
 }
 
+function clipped(value, maxLength) {
+  return normalized(value).slice(0, maxLength);
+}
+
 function within(value, min, max) {
   return value.length >= min && value.length <= max;
 }
 
-function answerLineCount(value) {
-  return String(value || "").split("\n").map(line => line.trim()).filter(Boolean).length;
-}
-
 function isModernApplication(body) {
-  return body && ["rpName", "gender", "birthDate", "nationality", "background", "additional", "discordId"]
+  return body && ["rpName", "gender", "age", "birthDate", "nationality", "background", "additional", "discordId"]
     .some(key => Object.prototype.hasOwnProperty.call(body, key));
 }
 
 function validateApplication(body) {
   if (isModernApplication(body)) {
-    const rpName = normalized(body.rpName);
-    const gender = normalized(body.gender);
-    const birthDate = normalized(body.birthDate);
-    const nationality = normalized(body.nationality);
-    const phone = normalized(body.phone);
-    const background = normalized(body.background);
-    const additional = normalized(body.additional);
-    const discordId = normalized(body.discordId);
-    const age = ageFromBirthDate(birthDate);
+    const rpName = clipped(body.rpName, 80);
+    const gender = clipped(body.gender, 20);
+    const nationality = clipped(body.nationality, 80);
+    const phone = clipped(body.phone, 30);
+    const background = clipped(body.background, 5000);
+    const additional = clipped(body.additional, 1800);
+    const discordId = clipped(body.discordId, 20);
+    const ageText = clipped(body.age, 3);
+    const legacyBirthDate = clipped(body.birthDate, 10);
+    const numericAge = /^\d{1,3}$/.test(ageText) ? Number(ageText) : ageFromBirthDate(legacyBirthDate);
+    const ageDisplay = Number.isInteger(numericAge) ? String(numericAge) : "";
+    const age = Number.isInteger(numericAge) && numericAge >= 18 && numericAge <= 80 ? numericAge : 18;
     const names = splitRpName(rpName);
-    const storageAvailability = encodeModernFormData({ rpName, gender, birthDate, nationality, discordId });
+    const storageAvailability = encodeModernFormData({ rpName, gender, age: ageDisplay, nationality, discordId });
     const application = {
-      formVersion: 2,
-      rpName, gender, birthDate, nationality, phone, background, additional, discordId,
+      formVersion: 3,
+      rpName, gender, age, ageDisplay, nationality, phone, background, additional, discordId,
       firstName: names.firstName,
       lastName: names.lastName,
-      age: age ?? 0,
       policeExperience: "Non",
       experience: background,
       availability: storageAvailability,
       storageAvailability,
       motivation: additional || "Aucune information complémentaire.",
-      qualities: `ID Discord : ${discordId}`,
+      qualities: `ID Discord : ${discordId || "Non renseigné"}`,
       accuracy: body.accuracy === true
     };
-    const phoneValid = within(phone, 1, 30)
-      && /^[0-9+() .#xX-]+$/.test(phone)
-      && (/\d/.test(phone) || /x{3,}/i.test(phone));
-    const valid = within(rpName, 2, 80)
-      && ["Homme", "Femme"].includes(gender)
-      && /^\d{17,20}$/.test(discordId)
-      && age !== null && age >= 21 && age <= 80
-      && within(nationality, 2, 80)
-      && phoneValid
-      && within(background, 100, 5000)
-      && answerLineCount(background) >= 10
-      && within(additional, 0, 1800)
-      && application.accuracy;
-    if (!valid) throw new AcademyError("invalid_application", 400);
     return application;
   }
 
@@ -180,7 +168,7 @@ function discordDescription(value) {
 }
 
 function applicationEmbeds(applicationId, user, application) {
-  if (application?.formVersion === 2 || application?.rpName) {
+  if (application?.formVersion >= 2 || application?.rpName) {
     const candidateName = application.rpName || `${application.firstName || ""} ${application.lastName || ""}`.trim();
     const discordId = application.discordId || user?.id || "";
     const source = user
@@ -195,7 +183,7 @@ function applicationEmbeds(applicationId, user, application) {
         fields: [
           { name: "Nom RP", value: discordField(candidateName), inline: true },
           { name: "Genre", value: discordField(application.gender), inline: true },
-          { name: "Date de naissance", value: discordField(application.birthDate), inline: true },
+          { name: "Âge", value: application.ageDisplay || (application.formVersion < 3 && application.age ? discordField(application.age) : "Non renseigné"), inline: true },
           { name: "Nationalité", value: discordField(application.nationality), inline: true },
           { name: "Téléphone en jeu", value: discordField(application.phone), inline: true },
           { name: "ID Discord", value: discordId ? `\`${discordField(discordId)}\`` : "Non renseigné", inline: true }

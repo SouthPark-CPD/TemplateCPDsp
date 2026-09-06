@@ -1,4 +1,5 @@
-const MODERN_FORM_PREFIX = "__CPD_FORM_V2__";
+const MODERN_FORM_PREFIX = "__CPD_FORM_V3__";
+const LEGACY_MODERN_FORM_PREFIX = "__CPD_FORM_V2__";
 
 function splitRpName(value) {
   const name = String(value || "").trim().replace(/\s+/g, " ");
@@ -34,10 +35,10 @@ function ageFromBirthDate(value, now = new Date()) {
 
 function encodeModernFormData(data) {
   const payload = {
-    version: 2,
+    version: 3,
     rpName: String(data?.rpName || "").trim(),
     gender: String(data?.gender || "").trim(),
-    birthDate: String(data?.birthDate || "").trim(),
+    age: String(data?.age || "").trim(),
     nationality: String(data?.nationality || "").trim(),
     discordId: String(data?.discordId || "").trim()
   };
@@ -45,18 +46,25 @@ function encodeModernFormData(data) {
 }
 
 function decodeModernFormData(value) {
-  if (typeof value !== "string" || !value.startsWith(MODERN_FORM_PREFIX)) return null;
+  if (typeof value !== "string") return null;
+  const prefix = value.startsWith(MODERN_FORM_PREFIX)
+    ? MODERN_FORM_PREFIX
+    : value.startsWith(LEGACY_MODERN_FORM_PREFIX)
+      ? LEGACY_MODERN_FORM_PREFIX
+      : "";
+  if (!prefix) return null;
   try {
-    const data = JSON.parse(value.slice(MODERN_FORM_PREFIX.length));
-    if (!data || data.version !== 2) return null;
-    return {
-      version: 2,
+    const data = JSON.parse(value.slice(prefix.length));
+    if (!data || ![2, 3].includes(data.version)) return null;
+    const common = {
+      version: data.version,
       rpName: String(data.rpName || ""),
       gender: String(data.gender || ""),
-      birthDate: String(data.birthDate || ""),
       nationality: String(data.nationality || ""),
       discordId: String(data.discordId || "")
     };
+    if (data.version === 3) return { ...common, age: String(data.age || "") };
+    return { ...common, birthDate: String(data.birthDate || "") };
   } catch {
     return null;
   }
@@ -64,6 +72,7 @@ function decodeModernFormData(value) {
 
 module.exports = {
   MODERN_FORM_PREFIX,
+  LEGACY_MODERN_FORM_PREFIX,
   splitRpName,
   parseBirthDate,
   ageFromBirthDate,

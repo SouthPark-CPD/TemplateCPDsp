@@ -23,13 +23,13 @@ module.exports = async function handler(req, res) {
     const application = validateApplication(bodyFromRequest(req));
     const phoneNormalized = application.phone.replace(/\D/g, "");
     const sql = neon(process.env.DATABASE_URL);
-    const existing = await sql`
+    const existing = phoneNormalized ? await sql`
       SELECT id FROM academy_recruitment_applications
       WHERE phone_normalized = ${phoneNormalized}
         AND status NOT IN ('processed', 'archived')
         AND created_at >= NOW() - INTERVAL '30 days'
       ORDER BY created_at DESC LIMIT 1
-    `;
+    ` : [];
     if (existing.length) {
       return res.status(409).json({ ok: false, code: "active_application", applicationId: publicId(existing[0].id) });
     }

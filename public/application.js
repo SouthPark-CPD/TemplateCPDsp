@@ -2,7 +2,7 @@
   const form = document.querySelector("#academy-form");
   if (!form) return;
 
-  const draftKey = "cpd_academy_draft_v3";
+  const draftKey = "cpd_academy_draft_v4";
   const steps = [...document.querySelectorAll(".form-step")];
   const indicators = [...document.querySelectorAll("[data-indicator]")];
   const previous = document.querySelector("#previous");
@@ -14,7 +14,7 @@
 
   const labels = {
     rpName: "Nom de famille et prénom RP", gender: "Genre",
-    birthDate: "Date de naissance", nationality: "Nationalité",
+    age: "Âge", nationality: "Nationalité",
     phone: "Téléphone en jeu", background: "Background & objectif",
     additional: "Élément complémentaire", discordId: "ID Discord"
   };
@@ -58,10 +58,6 @@
     });
   }
 
-  function lineCount(value) {
-    return String(value || "").split("\n").map(line => line.trim()).filter(Boolean).length;
-  }
-
   function setFieldError(field, message) {
     field.classList.add("invalid");
     const error = field.closest("label")?.querySelector("small");
@@ -87,10 +83,6 @@
               : "Veuillez vérifier ce champ.";
         setFieldError(field, message);
       }
-      if (field.dataset.minLines && field.value.trim() && lineCount(field.value) < Number(field.dataset.minLines)) {
-        valid = false;
-        setFieldError(field, `Votre réponse doit contenir au moins ${field.dataset.minLines} lignes.`);
-      }
     });
 
     [...step.querySelectorAll("input[type=checkbox]")].forEach(field => {
@@ -106,9 +98,10 @@
       const radios = [...step.querySelectorAll(`input[type=radio][name="${name}"]`)];
       const error = step.querySelector(`[data-error-for="${name}"]`);
       const checked = radios.some(field => field.checked);
-      radios.forEach(field => field.classList.toggle("invalid", !checked));
-      if (error) error.textContent = checked ? "" : "Ce champ est obligatoire.";
-      if (!checked) valid = false;
+      const required = radios.some(field => field.required);
+      radios.forEach(field => field.classList.toggle("invalid", required && !checked));
+      if (error) error.textContent = required && !checked ? "Ce champ est obligatoire." : "";
+      if (required && !checked) valid = false;
     });
 
     if (!valid) step.querySelector(".invalid")?.focus();
@@ -148,7 +141,7 @@
     return {
       rpName: fieldValue("rpName"),
       gender: fieldValue("gender"),
-      birthDate: fieldValue("birthDate"),
+      age: fieldValue("age"),
       nationality: fieldValue("nationality"),
       phone: fieldValue("phone"),
       background: fieldValue("background"),
@@ -176,7 +169,7 @@
       location.assign(`success.html?id=${encodeURIComponent(result.applicationId)}`);
     } catch (error) {
       const messages = {
-        invalid_application: "Vérifiez le format de la date, de l’ID Discord et du numéro de téléphone.",
+        invalid_application: "Certaines informations n’ont pas pu être traitées.",
         database_not_configured: "Le service de candidature n’est pas encore configuré.",
         database_not_ready: "Le service de candidature n’est pas encore prêt.",
         database_error: "La candidature n’a pas pu être enregistrée. Réessayez dans quelques instants."

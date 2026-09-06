@@ -327,16 +327,18 @@ function recruitmentCandidateName(row) {
 function recruitmentFormData(row) {
   const modern = decodeModernFormData(row?.availability);
   if (modern) {
-    return {
+    const formData = {
       rpName: modern.rpName,
       gender: modern.gender,
-      birthDate: modern.birthDate,
       nationality: modern.nationality,
       phone: row.phone,
       background: row.experience,
       additional: row.motivation === "Aucune information complémentaire." ? "" : row.motivation,
       discordId: modern.discordId
     };
+    if (modern.version >= 3) formData.age = modern.age;
+    else formData.birthDate = modern.birthDate;
+    return formData;
   }
   return {
     firstName: row.first_name,
