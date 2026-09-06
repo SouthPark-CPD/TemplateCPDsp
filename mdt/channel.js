@@ -153,7 +153,7 @@
       const response = await fetch(`/api/liaison/complaints?${query.toString()}`, { credentials: "same-origin", cache: "no-store" });
       const data = await response.json().catch(() => ({}));
       if (response.status === 401) { location.assign("/auth/login.html?error=login_required"); return; }
-      if (!response.ok || !data.ok) throw new Error(data.code || "discord_unavailable");
+      if (!response.ok || !data.ok) throw new Error(data.code || `server_error_${response.status}`);
       if (reset) messages = Array.isArray(data.messages) ? data.messages : [];
       else messages = [...messages, ...(Array.isArray(data.messages) ? data.messages : [])];
       if (data.viewer) viewer = { id: String(data.viewer.id || ""), displayName: String(data.viewer.displayName || "") };

@@ -229,8 +229,8 @@
     threads.innerHTML = '<p class="empty-state">Chargement des dépôts…</p>';
     try {
       const response = await fetch("/api/liaison/complaints", { credentials: "same-origin", cache: "no-store" });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.code || "discord_unavailable");
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.code || `server_error_${response.status}`);
       allThreads = data.threads || [];
       availableTags = data.availableTags || [];
       tagFilter.innerHTML = '<option value="all">Tous les tags</option>' + availableTags.map((tag) => `<option value="${escapeHtml(tag.name)}">${escapeHtml(tag.name)}</option>`).join("");
