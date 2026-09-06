@@ -58,7 +58,9 @@ module.exports = async function handler(req, res) {
   }
   if (result.changed) res.setHeader("Set-Cookie", adminPanel ? policeAuth.sessionCookie(result.session) : validatedSessionCookie(result));
 
-  const adminRoot = path.resolve(process.cwd(), "academy-admin");
+  // The private configuration panel is a real top-level /admin application.
+  // Academy remains served from academy-admin and keeps its existing auth flow.
+  const adminRoot = path.resolve(process.cwd(), adminPanel ? "admin" : "academy-admin");
   const absolutePath = path.resolve(adminRoot, assetPath);
   if (absolutePath !== adminRoot && !absolutePath.startsWith(`${adminRoot}${path.sep}`)) {
     return res.status(403).end();

@@ -130,7 +130,8 @@ async function sessionStatus(req, res) {
     return res.status(401).json({ authenticated: false, reason: result.reason });
   }
   if (result.changed) res.setHeader("Set-Cookie", validatedSessionCookie(result));
-  return res.status(200).json({ authenticated: true, user: result.session.user });
+  const controlPanelAdmin = await isControlPanelAdmin(result.session.user?.id);
+  return res.status(200).json({ authenticated: true, user: result.session.user, controlPanelAdmin });
 }
 
 function logout(req, res) {

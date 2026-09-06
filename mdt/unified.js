@@ -72,6 +72,7 @@
    if(response.status===401){location.replace('/auth/login.html?error=login_required');return;}
    if(!response.ok)throw new Error('session');
    const data=await response.json();if(!data.authenticated)throw new Error('session');
+   const adminLink=document.getElementById('admin-link');if(adminLink)adminLink.hidden=data.controlPanelAdmin!==true;
    authorized=data.academyAccess===true;ready=true;paMenu.hidden=!authorized;
    await loadLiaisonMenu();
    if(authorized){renderLinks('pa-links',pa);const count=Number(data.academySummary?.newCount||0);const badge=document.getElementById('pa-count');badge.textContent=String(count);badge.hidden=count<=0;refreshBadge();}

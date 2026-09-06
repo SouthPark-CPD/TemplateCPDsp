@@ -2,7 +2,6 @@ DISCORD_CLIENT_ID=1539552880774746253
 DISCORD_CLIENT_SECRET=ne-jamais-mettre-le-vrai-secret-dans-github
 DISCORD_BOT_TOKEN=ne-jamais-mettre-le-vrai-token-dans-github
 CPD_ADMIN_OWNER_ID=689050476154585139
-ACADEMY_RECRUITMENT_CHANNEL_ID=id-du-salon-des-nouvelles-candidatures
 
 # Ajouter aussi dans Discord Developer Portal :
 # https://template-cp-dsp.vercel.app/api/candidate-auth/callback
