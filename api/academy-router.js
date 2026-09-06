@@ -19,6 +19,7 @@ const {
   validatedSessionCookie
 } = require("../server/academy-admin-auth");
 const { validateSession: validatePoliceSession, sessionCookie: policeSessionCookie, clearSessionCookie: policeClearSessionCookie } = require("../server/auth");
+const { decodeModernFormData } = require("../server/application-form");
 
 const DISCORD_API = "https://discord.com/api/v10";
 const CPD_GUILD_ID = "1408092767963451615";
@@ -317,6 +318,39 @@ function textField(value, maxLength) {
   return String(value || "").trim().slice(0, maxLength);
 }
 
+function recruitmentCandidateName(row) {
+  const modern = decodeModernFormData(row?.availability);
+  if (modern?.rpName) return modern.rpName;
+  return `${row?.first_name || ""} ${row?.last_name || ""}`.trim() || "Candidat";
+}
+
+function recruitmentFormData(row) {
+  const modern = decodeModernFormData(row?.availability);
+  if (modern) {
+    return {
+      rpName: modern.rpName,
+      gender: modern.gender,
+      birthDate: modern.birthDate,
+      nationality: modern.nationality,
+      phone: row.phone,
+      background: row.experience,
+      additional: row.motivation === "Aucune information complémentaire." ? "" : row.motivation,
+      discordId: modern.discordId
+    };
+  }
+  return {
+    firstName: row.first_name,
+    lastName: row.last_name,
+    age: row.age,
+    phone: row.phone,
+    policeExperience: row.police_experience,
+    experience: row.experience,
+    availability: row.availability,
+    motivation: row.motivation,
+    qualities: row.qualities
+  };
+}
+
 function complaintText(value, maxLength, fallback = "Non renseigné") {
   const text = textField(value, maxLength).replace(/@/g, "＠");
   return text || fallback;
@@ -399,7 +433,7 @@ async function governmentComplaints(req, res) {
     const tags = Object.fromEntries((forum.available_tags || []).map(t=>[t.id,t.name]));
     const threads = [...(active.threads||[]).filter(t=>String(t.parent_id||"")===GOVERNMENT_COMPLAINT_FORUM_ID), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,updatedAt:t.thread_metadata?.archive_timestamp||t.created_at,lastMessageId:t.last_message_id||null,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${CPD_GUILD_ID}/${t.id}`}));
     const id=String(req.query.threadId||"");
-    if(id){const thread=await discordBotRequest(`/channels/${id}`);const rawMessages=await discordBotRequest(`/channels/${id}/messages?limit=100`);const messages=await enrichDiscordMessages(rawMessages);return res.json({ok:true,thread,messages,tags,availableTags:forum.available_tags||[]});}
+    if(id){const thread=await discordBotRequest(`/channels/${id}`);const rawMessages=await discordBotRequest(`/channels/${id}/messages?limit=100`);const messages=await enrichDiscordMessages(rawMessages);const viewerId=String(access.session.user?.id||"");const viewerName=await resolveCpdDisplayName(viewerId,access.session.user?.globalName||access.session.user?.username||"Agent CPD");return res.json({ok:true,thread,messages,tags,availableTags:forum.available_tags||[],viewer:{id:viewerId,displayName:viewerName}});}
     return res.json({ok:true,threads,tags,availableTags:forum.available_tags||[],archiveError});
   } catch(error){console.error("Government forum read failed",{stage,status:error.status||0,message:error.message});return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"forum_read_forbidden":"discord_unavailable",status:error.status||0,stage,channel:GOVERNMENT_COMPLAINT_FORUM_ID});}
 }
@@ -432,7 +466,7 @@ async function liaisonChannelRead(req, res) {
   const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});
   const channelId=String(req.query.channelId||""); if(!LIAISON_CHANNEL_IDS.has(channelId))return res.status(400).json({ok:false,code:"channel_not_allowed"});
   const requestedLimit=Number(req.query.limit||100); const limit=Number.isFinite(requestedLimit)?Math.min(100,Math.max(1,Math.floor(requestedLimit))):100; const before=String(req.query.before||"");
-  try { const channel=await discordBotRequest(`/channels/${channelId}`);const suffix=before?`&before=${encodeURIComponent(before)}`:"";const rawMessages=await discordBotRequest(`/channels/${channelId}/messages?limit=${limit}${suffix}`);const messages=await enrichDiscordMessages(rawMessages);return res.json({ok:true,channel:{id:channel.id,name:channel.name,type:channel.type},messages,hasMore:messages.length===limit,nextBefore:messages.length?messages[messages.length-1].id:null}); }
+  try { const channel=await discordBotRequest(`/channels/${channelId}`);const suffix=before?`&before=${encodeURIComponent(before)}`:"";const rawMessages=await discordBotRequest(`/channels/${channelId}/messages?limit=${limit}${suffix}`);const messages=await enrichDiscordMessages(rawMessages);const viewerId=String(access.session.user?.id||"");const viewerName=await resolveCpdDisplayName(viewerId,access.session.user?.globalName||access.session.user?.username||"Agent CPD");return res.json({ok:true,channel:{id:channel.id,name:channel.name,type:channel.type},messages,hasMore:messages.length===limit,nextBefore:messages.length?messages[messages.length-1].id:null,viewer:{id:viewerId,displayName:viewerName}}); }
   catch(error){console.error("Liaison channel read failed",{channelId,status:error.status||0});return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"channel_forbidden":"discord_unavailable",status:error.status||0});}
 }
 
@@ -2004,7 +2038,7 @@ async function recruitmentTickets(req, res) {
   try {
     const sql = neon(process.env.DATABASE_URL);
     const rows = await sql`
-      SELECT id, first_name, last_name, phone, status, decision,
+      SELECT id, first_name, last_name, phone, availability, status, decision,
         assigned_instructor_name, discord_message_id, created_at, updated_at
       FROM academy_recruitment_applications
       ORDER BY created_at DESC
@@ -2013,7 +2047,7 @@ async function recruitmentTickets(req, res) {
       ok: true,
       tickets: rows.map(row => ({
         applicationId: `PA-${String(row.id).padStart(6, "0")}`,
-        candidateName: `${row.first_name} ${row.last_name}`,
+        candidateName: recruitmentCandidateName(row),
         phone: row.phone,
         status: row.status,
         recruitmentDecision: row.decision,
@@ -2059,7 +2093,7 @@ async function recruitmentTicketDetail(req, res) {
       ok: true,
       ticket: {
         applicationId: `PA-${String(row.id).padStart(6, "0")}`,
-        candidateName: `${row.first_name} ${row.last_name}`,
+        candidateName: recruitmentCandidateName(row),
         phone: row.phone,
         status: row.status,
         recruitmentDecision: row.decision,
@@ -2067,12 +2101,7 @@ async function recruitmentTicketDetail(req, res) {
         assignedInstructorName: row.assigned_instructor_name || "",
         internalNote: row.internal_note || "",
         notificationSent: Boolean(row.discord_message_id),
-        formData: {
-          firstName: row.first_name, lastName: row.last_name, age: row.age,
-          phone: row.phone, policeExperience: row.police_experience,
-          experience: row.experience, availability: row.availability,
-          motivation: row.motivation, qualities: row.qualities
-        },
+        formData: recruitmentFormData(row),
         createdAt: row.created_at,
         updatedAt: row.updated_at
       }
