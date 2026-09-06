@@ -1,8 +1,8 @@
 const {
   validateSession, sessionCookie, clearSessionCookie,
-  getAcademyMember, hasInstructorRole,
+  getAcademyMember, hasConfiguredAcademyRole,
   verifyFiveMServerSecret, issueFiveMTicket, FIVEM_TICKET_MAX_AGE,
-  verifyFiveMTicket, getGuildMemberById, hasRequiredRole, newFiveMSession
+  verifyFiveMTicket, getConfiguredGuildMemberById, hasConfiguredPoliceRole, newFiveMSession
 } = require("../../server/auth");
 const { neon } = require("@neondatabase/serverless");
 
@@ -88,8 +88,8 @@ async function consumeFiveMTicket(req, res, ticket) {
       return res.redirect(302, "/auth/login.html?error=invalid_session");
     }
 
-    const member = await getGuildMemberById(payload.sub);
-    if (!hasRequiredRole(member)) {
+    const member = await getConfiguredGuildMemberById(payload.sub);
+    if (!await hasConfiguredPoliceRole(member)) {
       return res.redirect(302, "/auth/denied.html?reason=role");
     }
 
@@ -129,7 +129,7 @@ async function normalSession(req, res) {
   if (!academyCheckFresh) {
     try {
       const member = await getAcademyMember(result.session.accessToken, result.session.user?.id);
-      academyAccess = hasInstructorRole(member);
+      academyAccess = await hasConfiguredAcademyRole(member);
       if (academyAccess) {
         result.session.academyRoleCheckedAt = now;
         result.changed = true;

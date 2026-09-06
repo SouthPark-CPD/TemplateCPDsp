@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Configuration — CPD Administration</title>
+  <link rel="icon" href="../assets/cpd-seal.png">
+  <link rel="stylesheet" href="configuration.css?v=1">
+  <link rel="stylesheet" href="tablet-app.css?v=unified2">
+</head>
+<body>
+  <main class="config-page">
+    <section class="config-hero"><div><span class="eyebrow">CPD ADMINISTRATION CENTER</span><h1>Configuration du MDT</h1><p>Gérez les connexions Discord, les liaisons et les accès sans modifier le code.</p></div><div class="config-version"><span>Version active</span><strong id="config-version">—</strong><small id="config-updated">Chargement…</small></div></section>
+    <div id="config-alert" class="config-alert" role="status" hidden></div>
+    <nav class="config-tabs" aria-label="Modules de configuration">
+      <button class="active" data-panel="channels" type="button">Canaux & forums</button><button data-panel="access" type="button">Rôles & accès</button><button data-panel="menu" type="button">Menu Liaison</button><button data-panel="diagnostic" type="button">Diagnostic</button><button data-panel="history" type="button">Historique</button>
+    </nav>
+
+    <section class="config-panel active" data-config-panel="channels">
+      <div class="panel-title"><div><span>MODULE 1</span><h2>Serveurs, canaux et forums</h2><p>Ajoutez ou remplacez les destinations Discord utilisées par la tablette.</p></div><button id="add-server" class="secondary" type="button">+ Serveur</button></div>
+      <div id="server-list" class="server-grid"></div>
+      <div class="panel-title sub"><div><h2>Canaux de liaison</h2><p>Le premier canal de type forum devient le dépôt de plainte.</p></div><button id="add-channel" class="secondary" type="button">+ Canal</button></div>
+      <div id="channel-list" class="channel-list"></div>
+    </section>
+
+    <section class="config-panel" data-config-panel="access" hidden>
+      <div class="panel-title"><div><span>MODULE 2</span><h2>Rôles et accès</h2><p>Un membre peut être autorisé par rôle ou par identifiant Discord individuel.</p></div></div>
+      <div id="access-list" class="access-grid"></div>
+      <aside class="security-note">La sauvegarde est refusée si la nouvelle règle Administration te retire immédiatement l’accès au panel.</aside>
+    </section>
+
+    <section class="config-panel" data-config-panel="menu" hidden>
+      <div class="panel-title"><div><span>MODULE 3</span><h2>Menu Liaison gouvernement</h2><p>Modifiez le titre, l’ordre, les icônes et la visibilité des rubriques.</p></div></div>
+      <label class="wide-field">Nom de la section dans la tablette<input id="section-label" maxlength="80"></label>
+      <div class="menu-layout"><div><h3>Aperçu du menu</h3><div id="menu-preview" class="menu-preview"></div></div><div class="menu-help"><h3>Fonctionnement</h3><p>L’ordre est déterminé par le numéro de chaque canal. Un canal désactivé disparaît de la tablette, mais sa configuration est conservée.</p><p>Les canaux supplémentaires utilisent automatiquement l’écran de discussion avec bulles, pièces jointes et mentions.</p></div></div>
+    </section>
+
+    <section class="config-panel" data-config-panel="diagnostic" hidden>
+      <div class="panel-title"><div><span>MODULE 4</span><h2>Diagnostic Discord</h2><p>Testez la configuration affichée, même avant de la sauvegarder.</p></div><button id="run-diagnostic" class="primary" type="button">Lancer tous les tests</button></div>
+      <div class="diagnostic-summary"><article><span>Bot Discord</span><strong id="diag-bot">Non testé</strong></article><article><span>Base Neon</span><strong id="diag-db">Non testée</strong></article><article><span>Durée</span><strong id="diag-duration">—</strong></article></div>
+      <div id="diagnostic-results" class="diagnostic-results"><p class="empty">Aucun diagnostic lancé.</p></div>
+    </section>
+
+    <section class="config-panel" data-config-panel="history" hidden>
+      <div class="panel-title"><div><span>MODULE 5</span><h2>Historique et restauration</h2><p>Chaque sauvegarde conserve la version précédente et l’identité de l’administrateur.</p></div></div>
+      <div id="history-list" class="history-list"></div>
+    </section>
+
+    <footer class="save-bar"><div><span id="dirty-state">Aucune modification en attente</span><small>Les changements sont appliqués après la sauvegarde.</small></div><input id="change-summary" maxlength="240" placeholder="Résumé facultatif de la modification"><button id="reload-config" class="secondary" type="button">Annuler</button><button id="save-config" class="primary" type="button">Publier les changements</button></footer>
+  </main>
+  <script src="configuration.js?v=1"></script><script src="tablet-app.js?v=unified2"></script>
+</body>
+</html>

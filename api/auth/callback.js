@@ -1,5 +1,5 @@
 const {
-  exchangeCode, getDiscordUser, getGuildMember, hasRequiredRole,
+  exchangeCode, getDiscordUser, getConfiguredGuildMember, hasConfiguredPoliceRole,
   newSession, sessionCookie, consumeState, clearStateCookie
 } = require("../../server/auth");
 
@@ -17,10 +17,10 @@ module.exports = async function handler(req, res) {
     const tokens = await exchangeCode(req, code);
     const [user, member] = await Promise.all([
       getDiscordUser(tokens.access_token),
-      getGuildMember(tokens.access_token)
+      getConfiguredGuildMember(tokens.access_token)
     ]);
 
-    if (!hasRequiredRole(member)) {
+    if (!await hasConfiguredPoliceRole(member)) {
       res.setHeader("Set-Cookie", clearStateCookie());
       return res.redirect(302, "/auth/denied.html?reason=role");
     }

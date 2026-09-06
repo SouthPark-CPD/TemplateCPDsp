@@ -1,0 +1,220 @@
+const DEFAULT_CONFIG = Object.freeze({
+  servers: [
+    { key: "cpd", label: "Serveur CPD", guildId: "1408092767963451615", enabled: true },
+    { key: "academy", label: "Police Academy", guildId: "1538858756354473984", enabled: true }
+  ],
+  access: {
+    police: { label: "Connexion policier", guildKey: "cpd", roleIds: ["1408092768026365974"], userIds: [], mode: "any" },
+    academy: { label: "Police Academy", guildKey: "academy", roleIds: ["1538858756371386400"], userIds: [], mode: "any" },
+    admin: { label: "Administration configuration", guildKey: "academy", roleIds: ["1538858756371386400"], userIds: [], mode: "any" }
+  },
+  liaison: {
+    sectionLabel: "Liaison gouvernement",
+    channels: [
+      { key: "complaints", label: "Dépôts de plainte", channelId: "1473895325197406328", guildKey: "cpd", type: "forum", icon: "inbox", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, sortOrder: 10 },
+      { key: "doj", label: "Communication DOJ", channelId: "1489640064207032475", guildKey: "cpd", type: "text", icon: "radio", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, sortOrder: 20 },
+      { key: "government", label: "Liaison gouvernement", channelId: "1408092769079267379", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, sortOrder: 30 },
+      { key: "lawyer", label: "Liaison avocat", channelId: "1408092768848449646", guildKey: "cpd", type: "text", icon: "users", enabled: true, canRead: true, canWrite: true, canUpload: true, canMention: true, sortOrder: 40 }
+    ]
+  }
+});
+
+let cache = { expires: 0, value: null, version: 0 };
+let schemaPromise = null;
+
+const discordId = value => /^\d{17,20}$/.test(String(value || "")) ? String(value) : "";
+const shortText = (value, max = 80) => String(value || "").trim().slice(0, max);
+const slug = value => shortText(value, 40).toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+const boolean = (value, fallback = true) => typeof value === "boolean" ? value : fallback;
+
+function cloneDefault() {
+  return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+}
+
+function sanitizeConfig(input) {
+  const fallback = cloneDefault();
+  const source = input && typeof input === "object" && !Array.isArray(input) ? input : {};
+  const serverKeys = new Set();
+  const servers = (Array.isArray(source.servers) ? source.servers : fallback.servers).slice(0, 12).map((item, index) => {
+    const key = slug(item?.key) || `server-${index + 1}`;
+    if (serverKeys.has(key)) return null;
+    serverKeys.add(key);
+    return { key, label: shortText(item?.label, 80) || `Serveur ${index + 1}`, guildId: discordId(item?.guildId), enabled: boolean(item?.enabled) };
+  }).filter(item => item && item.guildId);
+  if (!servers.length) servers.push(...fallback.servers);
+  const validServerKeys = new Set(servers.map(item => item.key));
+
+  const access = {};
+  for (const name of ["police", "academy", "admin"]) {
+    const item = source.access?.[name] || fallback.access[name];
+    const fallbackItem = fallback.access[name];
+    const guildKey = validServerKeys.has(String(item.guildKey || ""))
+      ? String(item.guildKey)
+      : (validServerKeys.has(fallbackItem.guildKey) ? fallbackItem.guildKey : servers[0].key);
+    access[name] = {
+      label: shortText(item.label, 100) || fallbackItem.label,
+      guildKey,
+      roleIds: [...new Set((Array.isArray(item.roleIds) ? item.roleIds : []).map(discordId).filter(Boolean))].slice(0, 30),
+      userIds: [...new Set((Array.isArray(item.userIds) ? item.userIds : []).map(discordId).filter(Boolean))].slice(0, 30),
+      mode: item.mode === "all" ? "all" : "any"
+    };
+  }
+
+  const channelKeys = new Set();
+  const channels = (Array.isArray(source.liaison?.channels) ? source.liaison.channels : fallback.liaison.channels).slice(0, 30).map((item, index) => {
+    const key = slug(item?.key) || `liaison-${index + 1}`;
+    if (channelKeys.has(key)) return null;
+    channelKeys.add(key);
+    return {
+      key,
+      label: shortText(item?.label, 90) || `Canal ${index + 1}`,
+      channelId: discordId(item?.channelId),
+      guildKey: validServerKeys.has(String(item?.guildKey || "")) ? String(item.guildKey) : servers[0].key,
+      type: item?.type === "forum" ? "forum" : "text",
+      icon: ["inbox", "radio", "users", "book", "list"].includes(item?.icon) ? item.icon : "users",
+      enabled: boolean(item?.enabled),
+      canRead: boolean(item?.canRead),
+      canWrite: boolean(item?.canWrite),
+      canUpload: boolean(item?.canUpload),
+      canMention: boolean(item?.canMention),
+      sortOrder: Math.min(9999, Math.max(0, Number(item?.sortOrder) || (index + 1) * 10))
+    };
+  }).filter(item => item && item.channelId);
+
+  return {
+    servers,
+    access,
+    liaison: {
+      sectionLabel: shortText(source.liaison?.sectionLabel, 80) || fallback.liaison.sectionLabel,
+      channels: channels.length ? channels.sort((a, b) => a.sortOrder - b.sortOrder) : fallback.liaison.channels
+    }
+  };
+}
+
+function sqlClient() {
+  if (!process.env.DATABASE_URL) return null;
+  const { neon } = require("@neondatabase/serverless");
+  return neon(process.env.DATABASE_URL);
+}
+
+async function ensureSchema(sql) {
+  if (!schemaPromise) {
+    schemaPromise = (async () => {
+      await sql`CREATE TABLE IF NOT EXISTS cpd_admin_config (
+        config_key VARCHAR(40) PRIMARY KEY,
+        version INTEGER NOT NULL DEFAULT 1,
+        config JSONB NOT NULL,
+        updated_by_id VARCHAR(32),
+        updated_by_name VARCHAR(120),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`;
+      await sql`CREATE TABLE IF NOT EXISTS cpd_admin_config_history (
+        id BIGSERIAL PRIMARY KEY,
+        config_key VARCHAR(40) NOT NULL,
+        version INTEGER NOT NULL,
+        config JSONB NOT NULL,
+        changed_by_id VARCHAR(32),
+        changed_by_name VARCHAR(120),
+        change_summary VARCHAR(240),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`;
+      await sql`CREATE INDEX IF NOT EXISTS cpd_admin_config_history_key_created_idx
+        ON cpd_admin_config_history(config_key, created_at DESC)`;
+      await sql`INSERT INTO cpd_admin_config (config_key, version, config, updated_by_name)
+        VALUES ('main', 1, ${JSON.stringify(DEFAULT_CONFIG)}::jsonb, 'Configuration initiale')
+        ON CONFLICT (config_key) DO NOTHING`;
+    })().catch(error => {
+      schemaPromise = null;
+      throw error;
+    });
+  }
+  return schemaPromise;
+}
+
+async function getConfig(options = {}) {
+  if (!options.fresh && cache.value && cache.expires > Date.now()) return cache;
+  const sql = sqlClient();
+  if (!sql) return { value: cloneDefault(), version: 0, fallback: true, updatedAt: null, updatedByName: "" };
+  try {
+    await ensureSchema(sql);
+    const rows = await sql`SELECT version, config, updated_at, updated_by_name FROM cpd_admin_config WHERE config_key='main' LIMIT 1`;
+    const row = rows[0];
+    const result = { value: sanitizeConfig(row?.config), version: Number(row?.version || 1), fallback: false, updatedAt: row?.updated_at || null, updatedByName: row?.updated_by_name || "" };
+    cache = { ...result, expires: Date.now() + 15000 };
+    return result;
+  } catch (error) {
+    console.error("Admin configuration unavailable", { code: error.code || "unknown" });
+    return { value: cloneDefault(), version: 0, fallback: true, updatedAt: null, updatedByName: "" };
+  }
+}
+
+async function saveConfig(input, actor, summary = "Configuration modifiée") {
+  const sql = sqlClient();
+  if (!sql) throw Object.assign(new Error("DATABASE_URL manquant"), { code: "database_not_configured" });
+  await ensureSchema(sql);
+  const currentRows = await sql`SELECT version, config FROM cpd_admin_config WHERE config_key='main' LIMIT 1`;
+  const current = currentRows[0];
+  const config = sanitizeConfig(input);
+  if (current) {
+    await sql`INSERT INTO cpd_admin_config_history
+      (config_key, version, config, changed_by_id, changed_by_name, change_summary)
+      VALUES ('main', ${Number(current.version)}, ${JSON.stringify(current.config)}::jsonb,
+        ${String(actor?.id || "")}, ${String(actor?.name || "")}, ${shortText(summary, 240)})`;
+  }
+  const rows = await sql`UPDATE cpd_admin_config SET version=version+1, config=${JSON.stringify(config)}::jsonb,
+    updated_by_id=${String(actor?.id || "")}, updated_by_name=${String(actor?.name || "")}, updated_at=NOW()
+    WHERE config_key='main' RETURNING version, config, updated_at, updated_by_name`;
+  const row = rows[0];
+  cache = { value: sanitizeConfig(row.config), version: Number(row.version), fallback: false, updatedAt: row.updated_at, updatedByName: row.updated_by_name || "", expires: Date.now() + 15000 };
+  return cache;
+}
+
+async function listHistory(limit = 50) {
+  const sql = sqlClient();
+  if (!sql) return [];
+  await ensureSchema(sql);
+  return sql`SELECT id, version, changed_by_id, changed_by_name, change_summary, created_at
+    FROM cpd_admin_config_history WHERE config_key='main' ORDER BY id DESC LIMIT ${Math.min(100, Math.max(1, Number(limit) || 50))}`;
+}
+
+async function restoreConfig(historyId, actor) {
+  const sql = sqlClient();
+  if (!sql) throw Object.assign(new Error("DATABASE_URL manquant"), { code: "database_not_configured" });
+  await ensureSchema(sql);
+  const rows = await sql`SELECT id, version, config FROM cpd_admin_config_history WHERE config_key='main' AND id=${String(historyId || "0")} LIMIT 1`;
+  if (!rows.length) throw Object.assign(new Error("Version introuvable"), { code: "history_not_found" });
+  return saveConfig(rows[0].config, actor, `Restauration de la version ${rows[0].version}`);
+}
+
+function serverByKey(config, key) {
+  return config.servers.find(item => item.key === key) || config.servers[0];
+}
+
+function accessAllowed(member, policy) {
+  const roles = Array.isArray(member?.roles) ? member.roles.map(String) : [];
+  const userId = String(member?.user?.id || "");
+  if ((policy?.userIds || []).includes(userId)) return true;
+  const required = Array.isArray(policy?.roleIds) ? policy.roleIds : [];
+  if (!required.length) return false;
+  return policy.mode === "all" ? required.every(id => roles.includes(id)) : required.some(id => roles.includes(id));
+}
+
+function publicLiaisonConfig(config) {
+  let forumSeen = false;
+  return {
+    sectionLabel: config.liaison.sectionLabel,
+    channels: config.liaison.channels.filter(item => {
+      if (!item.enabled || !item.canRead) return false;
+      if (item.type !== "forum") return true;
+      if (forumSeen) return false;
+      forumSeen = true;
+      return true;
+    }).map(item => ({
+      key: item.key, label: item.label, channelId: item.channelId, type: item.type, icon: item.icon,
+      canWrite: item.canWrite, canUpload: item.canUpload, canMention: item.canMention,
+      sortOrder: item.sortOrder
+    }))
+  };
+}
+
+module.exports = { DEFAULT_CONFIG, sanitizeConfig, getConfig, saveConfig, listHistory, restoreConfig, serverByKey, accessAllowed, publicLiaisonConfig };

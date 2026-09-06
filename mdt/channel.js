@@ -1,7 +1,9 @@
 (() => {
   const body = document.body;
-  const channelId = String(body.dataset.channelId || "");
-  const fallbackLabel = String(body.dataset.channelLabel || "Canal de liaison");
+  let channelId = String(body.dataset.channelId || "");
+  let fallbackLabel = String(body.dataset.channelLabel || "Canal de liaison");
+  const channelKey = String(body.dataset.channelKey || new URLSearchParams(location.search).get("channelKey") || "");
+  let permissions = { canWrite: true, canUpload: true, canMention: true };
   const messagesNode = document.getElementById("channel-messages");
   const channelNameNode = document.getElementById("channel-name");
   const channelMetaNode = document.getElementById("channel-meta");
@@ -19,6 +21,24 @@
   let hasMore = false;
   let loading = false;
   let viewer = { id: "", displayName: "" };
+
+  async function configure() {
+    if (!channelKey) return;
+    const response = await fetch("/api/liaison/complaints?configuration=1", { credentials: "same-origin", cache: "no-store" });
+    const data = await response.json().catch(() => ({}));
+    const channel = data?.liaison?.channels?.find(item => item.key === channelKey && item.type === "text");
+    if (!response.ok || !channel) throw new Error(data.code || "channel_not_configured");
+    channelId = String(channel.channelId || "");
+    fallbackLabel = String(channel.label || fallbackLabel);
+    permissions = channel;
+    channelNameNode.textContent = fallbackLabel;
+    const heroTitle = document.querySelector(".channel-copy h1");
+    if (heroTitle) heroTitle.textContent = fallbackLabel;
+    document.title = `${fallbackLabel} — CPD`;
+    if (!permissions.canMention) document.querySelector("[data-mention-picker]")?.setAttribute("hidden", "");
+    if (!permissions.canUpload) document.querySelector(".channel-file")?.setAttribute("hidden", "");
+    if (!permissions.canWrite) composer.innerHTML = '<p class="channel-placeholder">L’écriture est désactivée pour ce canal.</p>';
+  }
 
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
@@ -206,5 +226,8 @@
       setStatus(error.message === "file_too_large" ? "Fichier trop volumineux." : "Impossible d’envoyer le message.", "error");
     } finally { sendButton.disabled = false; }
   });
-  load(true);
+  configure().then(() => load(true)).catch(error => {
+    messagesNode.innerHTML = `<p class="channel-placeholder channel-error">Canal indisponible.<br><small>${escapeHtml(error.message)}</small></p>`;
+    refreshButton.disabled = true;
+  });
 })();

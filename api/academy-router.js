@@ -14,12 +14,14 @@ const {
   getDiscordUser,
   getAcademyMember,
   hasInstructorRole,
+  hasConfiguredAcademyRole,
   newSession,
   validateSession,
   validatedSessionCookie
 } = require("../server/academy-admin-auth");
 const { validateSession: validatePoliceSession, sessionCookie: policeSessionCookie, clearSessionCookie: policeClearSessionCookie } = require("../server/auth");
 const { decodeModernFormData } = require("../server/application-form");
+const { getConfig, saveConfig, listHistory, restoreConfig, sanitizeConfig, serverByKey, accessAllowed, publicLiaisonConfig } = require("../server/admin-config");
 
 const DISCORD_API = "https://discord.com/api/v10";
 const CPD_GUILD_ID = "1408092767963451615";
@@ -104,7 +106,7 @@ async function discordCallback(req, res) {
     const user = await getDiscordUser(tokens.access_token);
     const member = await getAcademyMember(tokens.access_token, user.id);
 
-    if (!hasInstructorRole(member)) {
+    if (!await hasConfiguredAcademyRole(member)) {
       res.setHeader("Set-Cookie", [clearStateCookie(), clearSessionCookie()]);
       return res.redirect(302, "/academy-auth/denied.html");
     }
@@ -366,6 +368,15 @@ function mentionMarkup(ids) {
   return normalizeMentionIds(ids).map(id => `<@${id}>`).join(" ");
 }
 
+async function liaisonRuntime() {
+  const current = await getConfig();
+  const channels = current.value.liaison.channels.filter(item => item.enabled);
+  const forum = channels.find(item => item.type === "forum") || current.value.liaison.channels.find(item => item.type === "forum");
+  const byId = new Map(channels.map(item => [String(item.channelId), item]));
+  const guildIdFor = channel => serverByKey(current.value, channel?.guildKey)?.guildId || CPD_GUILD_ID;
+  return { current, channels, forum, byId, guildIdFor };
+}
+
 async function createGovernmentComplaint(req, res) {
   if (req.method !== "POST") return res.status(405).json({ ok: false, code: "method_not_allowed" });
   const access = await validatePoliceSession(req, false);
@@ -376,6 +387,11 @@ async function createGovernmentComplaint(req, res) {
   if (access.changed) res.setHeader("Set-Cookie", policeSessionCookie(access.session));
   const body = readJsonBody(req);
   if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  const runtime = await liaisonRuntime();
+  const forumConfig = runtime.forum;
+  if (!forumConfig?.channelId || !forumConfig.canWrite) return res.status(403).json({ ok: false, code: "forum_write_disabled" });
+  const forumId = forumConfig.channelId;
+  const guildId = runtime.guildIdFor(forumConfig);
   const subject = complaintText(body.subject, 90, "Dépôt de plainte");
   const complainant = complaintText(body.complainant, 120);
   const date = complaintText(body.date, 40);
@@ -387,6 +403,7 @@ async function createGovernmentComplaint(req, res) {
   const authorBadge = complaintText(body.authorBadge, 30);
   const description = complaintText(body.description, 4000);
   const mentions = normalizeMentionIds(body.mentions);
+  const safeMentions = forumConfig.canMention ? mentions : [];
   if (description === "Non renseigné") return res.status(400).json({ ok: false, code: "description_required" });
   const complaintId = `PL-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 900 + 100)}`;
   const author = await resolveCpdDisplayName(access.session.user?.id, access.session.user?.globalName || access.session.user?.username || "Agent CPD");
@@ -399,7 +416,7 @@ async function createGovernmentComplaint(req, res) {
     `**Plaignant :** ${complainant}`,
     `**Personnes impliquées :** ${involved}`,
     `**Témoins :** ${witnesses}`,
-    mentions.length ? `**Agents notifiés :** ${mentionMarkup(mentions)}` : "",
+    safeMentions.length ? `**Agents notifiés :** ${mentionMarkup(safeMentions)}` : "",
     "",
     "### Description des faits",
     description,
@@ -407,16 +424,16 @@ async function createGovernmentComplaint(req, res) {
     `*Dépôt créé depuis le MDT · ${new Date().toLocaleString("fr-FR", { timeZone: "UTC" })} UTC*`
   ].join("\n").slice(0, 1900);
   try {
-    const thread = await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads`, {
+    const thread = await discordBotRequest(`/channels/${forumId}/threads`, {
       method: "POST",
       body: {
         name: `${complaintId} · ${subject}`.slice(0, 100),
         auto_archive_duration: 10080,
-        message: { content, allowed_mentions: { parse: [], users: mentions } }
+        message: { content, allowed_mentions: { parse: [], users: safeMentions } }
       }
     });
-    let attachmentsUploaded=true;const files=Array.isArray(body.attachments)?body.attachments.slice(0,3):[];if(files.length&&thread?.id){try{await discordBotUpload(`/channels/${thread.id}/messages`,`Pièces jointes du dépôt ${complaintId}`,files)}catch(error){attachmentsUploaded=false;console.error("Government complaint attachments failed",error.code||error.status||error.message)}}
-    return res.status(201).json({ ok: true, complaintId, threadId: thread?.id || null, attachmentsUploaded, url: thread?.id ? `https://discord.com/channels/${CPD_GUILD_ID}/${thread.id}` : null });
+    let attachmentsUploaded=true;const files=forumConfig.canUpload&&Array.isArray(body.attachments)?body.attachments.slice(0,3):[];if(files.length&&thread?.id){try{await discordBotUpload(`/channels/${thread.id}/messages`,`Pièces jointes du dépôt ${complaintId}`,files)}catch(error){attachmentsUploaded=false;console.error("Government complaint attachments failed",error.code||error.status||error.message)}}
+    return res.status(201).json({ ok: true, complaintId, threadId: thread?.id || null, attachmentsUploaded, url: thread?.id ? `https://discord.com/channels/${guildId}/${thread.id}` : null });
   } catch (error) {
     console.error("Government complaint creation failed", { status: error.status || 0, type: error.name || "Error" });
     return res.status(error.status === 403 ? 403 : 502).json({ ok: false, code: error.status === 403 ? "forum_forbidden" : "discord_unavailable" });
@@ -426,18 +443,23 @@ async function createGovernmentComplaint(req, res) {
 async function governmentComplaints(req, res) {
   const access = await validatePoliceSession(req, false);
   if (!access.ok) return res.status(401).json({ ok:false, code:access.reason });
+  const runtime = await liaisonRuntime();
+  const forumConfig = runtime.forum;
+  if (!forumConfig?.channelId || !forumConfig.canRead) return res.status(403).json({ok:false,code:"forum_read_disabled"});
+  const forumId = forumConfig.channelId;
+  const guildId = runtime.guildIdFor(forumConfig);
   let stage="forum";
   try {
-    let forum={available_tags:[]}; try { forum=await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}`); } catch(e) { console.warn("Government forum metadata unavailable",e.status||e.message); }
-    stage="active"; const active = await discordBotRequest(`/guilds/${CPD_GUILD_ID}/threads/active`);
+    let forum={available_tags:[]}; try { forum=await discordBotRequest(`/channels/${forumId}`); } catch(e) { console.warn("Government forum metadata unavailable",e.status||e.message); }
+    stage="active"; const active = await discordBotRequest(`/guilds/${guildId}/threads/active`);
     const archivedThreads=[]; let before="";
-    let archiveError=null; try { for(let page=0;page<100;page++) { const suffix=before?`&before=${encodeURIComponent(before)}`:""; const batch=await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}/threads/archived/public?limit=100${suffix}`); archivedThreads.push(...(batch.threads||[])); if(!batch.has_more||!(batch.threads||[]).length) break; before=batch.threads[batch.threads.length-1].thread_metadata?.archive_timestamp||batch.threads[batch.threads.length-1].id; } } catch(e) { archiveError=e.status||"unknown"; }
+    let archiveError=null; try { for(let page=0;page<100;page++) { const suffix=before?`&before=${encodeURIComponent(before)}`:""; const batch=await discordBotRequest(`/channels/${forumId}/threads/archived/public?limit=100${suffix}`); archivedThreads.push(...(batch.threads||[])); if(!batch.has_more||!(batch.threads||[]).length) break; before=batch.threads[batch.threads.length-1].thread_metadata?.archive_timestamp||batch.threads[batch.threads.length-1].id; } } catch(e) { archiveError=e.status||"unknown"; }
     const tags = Object.fromEntries((forum.available_tags || []).map(t=>[t.id,t.name]));
-    const threads = [...(active.threads||[]).filter(t=>String(t.parent_id||"")===GOVERNMENT_COMPLAINT_FORUM_ID), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,updatedAt:t.thread_metadata?.archive_timestamp||t.created_at,lastMessageId:t.last_message_id||null,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${CPD_GUILD_ID}/${t.id}`}));
+    const threads = [...(active.threads||[]).filter(t=>String(t.parent_id||"")===forumId), ...archivedThreads].filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i).map(t=>({id:t.id,name:t.name,createdAt:t.created_at,updatedAt:t.thread_metadata?.archive_timestamp||t.created_at,lastMessageId:t.last_message_id||null,archived:!!t.thread_metadata?.archived,tags:(t.applied_tags||[]).map(id=>tags[id]||id),url:`https://discord.com/channels/${guildId}/${t.id}`}));
     const id=String(req.query.threadId||"");
     if(id){const thread=await discordBotRequest(`/channels/${id}`);const rawMessages=await discordBotRequest(`/channels/${id}/messages?limit=100`);const messages=await enrichDiscordMessages(rawMessages);const viewerId=String(access.session.user?.id||"");const viewerName=await resolveCpdDisplayName(viewerId,access.session.user?.globalName||access.session.user?.username||"Agent CPD");return res.json({ok:true,thread,messages,tags,availableTags:forum.available_tags||[],viewer:{id:viewerId,displayName:viewerName}});}
     return res.json({ok:true,threads,tags,availableTags:forum.available_tags||[],archiveError});
-  } catch(error){console.error("Government forum read failed",{stage,status:error.status||0,message:error.message});return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"forum_read_forbidden":"discord_unavailable",status:error.status||0,stage,channel:GOVERNMENT_COMPLAINT_FORUM_ID});}
+  } catch(error){console.error("Government forum read failed",{stage,status:error.status||0,message:error.message});return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"forum_read_forbidden":"discord_unavailable",status:error.status||0,stage,channel:forumId});}
 }
 
 async function discordBotUpload(path, content, files, allowedUsers = []) {
@@ -452,7 +474,8 @@ async function governmentComplaintMessage(req, res) {
   const files=Array.isArray(body?.attachments)?body.attachments.slice(0,3):[];
   const mentions=normalizeMentionIds(body?.mentions);
   if(!/^\d{17,20}$/.test(threadId)||(!content&&!files.length))return res.status(400).json({ok:false,code:"message_required"});
-  try { const thread=await discordBotRequest(`/channels/${threadId}`); if(String(thread?.parent_id||"")!==GOVERNMENT_COMPLAINT_FORUM_ID)return res.status(403).json({ok:false,code:"thread_forbidden"}); if(thread.thread_metadata?.archived)await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{archived:false}}); const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD"); const text=`**${complaintText(agent,100)}**${mentions.length?`\n${mentionMarkup(mentions)}`:""}${content?`\n${content}`:""}`; const message=files.length?await discordBotUpload(`/channels/${threadId}/messages`,text,files,mentions):await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[],users:mentions}}}); return res.status(201).json({ok:true,messageId:message?.id||null}); }
+  const runtime=await liaisonRuntime(),forumConfig=runtime.forum;if(!forumConfig?.canWrite)return res.status(403).json({ok:false,code:"forum_write_disabled"});
+  try { const thread=await discordBotRequest(`/channels/${threadId}`); if(String(thread?.parent_id||"")!==String(forumConfig.channelId))return res.status(403).json({ok:false,code:"thread_forbidden"}); if(thread.thread_metadata?.archived)await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{archived:false}}); const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD"); const text=`**${complaintText(agent,100)}**${mentions.length&&forumConfig.canMention?`\n${mentionMarkup(mentions)}`:""}${content?`\n${content}`:""}`; const safeMentions=forumConfig.canMention?mentions:[]; const safeFiles=forumConfig.canUpload?files:[]; const message=safeFiles.length?await discordBotUpload(`/channels/${threadId}/messages`,text,safeFiles,safeMentions):await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[],users:safeMentions}}}); return res.status(201).json({ok:true,messageId:message?.id||null}); }
   catch(error){return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"thread_forbidden":"discord_unavailable"});}
 }
 
@@ -460,13 +483,14 @@ async function updateGovernmentComplaint(req, res) {
   const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});
   const body=readJsonBody(req),threadId=String(body?.threadId||""),ids=Array.isArray(body?.appliedTags)?body.appliedTags.map(String).slice(0,20):[];
   if(!/^\d{17,20}$/.test(threadId))return res.status(400).json({ok:false,code:"thread_required"});
-  try { const forum=await discordBotRequest(`/channels/${GOVERNMENT_COMPLAINT_FORUM_ID}`);const valid=new Set((forum.available_tags||[]).map(t=>String(t.id)));if(ids.some(id=>!valid.has(id)))return res.status(400).json({ok:false,code:"invalid_tag"});const thread=await discordBotRequest(`/channels/${threadId}`);if(String(thread?.parent_id||"")!==GOVERNMENT_COMPLAINT_FORUM_ID)return res.status(403).json({ok:false,code:"thread_forbidden"});if(thread.thread_metadata?.archived)await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{archived:false}});await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{applied_tags:ids}});const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD");const names=(forum.available_tags||[]).filter(t=>ids.includes(String(t.id))).map(t=>t.name).join(", ")||"Sans tag";await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:`**Historique MDT**\n${complaintText(agent,100)} a modifié le statut/tags : ${complaintText(names,250)}`,allowed_mentions:{parse:[]}}});return res.json({ok:true,appliedTags:ids}); }
+  const runtime=await liaisonRuntime(),forumConfig=runtime.forum;if(!forumConfig?.canWrite)return res.status(403).json({ok:false,code:"forum_write_disabled"});
+  try { const forum=await discordBotRequest(`/channels/${forumConfig.channelId}`);const valid=new Set((forum.available_tags||[]).map(t=>String(t.id)));if(ids.some(id=>!valid.has(id)))return res.status(400).json({ok:false,code:"invalid_tag"});const thread=await discordBotRequest(`/channels/${threadId}`);if(String(thread?.parent_id||"")!==String(forumConfig.channelId))return res.status(403).json({ok:false,code:"thread_forbidden"});if(thread.thread_metadata?.archived)await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{archived:false}});await discordBotRequest(`/channels/${threadId}`,{method:"PATCH",body:{applied_tags:ids}});const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD");const names=(forum.available_tags||[]).filter(t=>ids.includes(String(t.id))).map(t=>t.name).join(", ")||"Sans tag";await discordBotRequest(`/channels/${threadId}/messages`,{method:"POST",body:{content:`**Historique MDT**\n${complaintText(agent,100)} a modifié le statut/tags : ${complaintText(names,250)}`,allowed_mentions:{parse:[]}}});return res.json({ok:true,appliedTags:ids}); }
   catch(error){return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"thread_forbidden":"discord_unavailable"});}
 }
 
 async function liaisonChannelRead(req, res) {
   const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});
-  const channelId=String(req.query.channelId||""); if(!LIAISON_CHANNEL_IDS.has(channelId))return res.status(400).json({ok:false,code:"channel_not_allowed"});
+  const channelId=String(req.query.channelId||""); const runtime=await liaisonRuntime(),channelConfig=runtime.byId.get(channelId); if(!channelConfig||channelConfig.type!=="text"||!channelConfig.canRead)return res.status(400).json({ok:false,code:"channel_not_allowed"});
   const requestedLimit=Number(req.query.limit||100); const limit=Number.isFinite(requestedLimit)?Math.min(100,Math.max(1,Math.floor(requestedLimit))):100; const before=String(req.query.before||"");
   try { const channel=await discordBotRequest(`/channels/${channelId}`);const suffix=before?`&before=${encodeURIComponent(before)}`:"";const rawMessages=await discordBotRequest(`/channels/${channelId}/messages?limit=${limit}${suffix}`);const messages=await enrichDiscordMessages(rawMessages);const viewerId=String(access.session.user?.id||"");const viewerName=await resolveCpdDisplayName(viewerId,access.session.user?.globalName||access.session.user?.username||"Agent CPD");return res.json({ok:true,channel:{id:channel.id,name:channel.name,type:channel.type},messages,hasMore:messages.length===limit,nextBefore:messages.length?messages[messages.length-1].id:null,viewer:{id:viewerId,displayName:viewerName}}); }
   catch(error){console.error("Liaison channel read failed",{channelId,status:error.status||0});return res.status(error.status===403?403:502).json({ok:false,code:error.status===403?"channel_forbidden":"discord_unavailable",status:error.status||0});}
@@ -506,8 +530,9 @@ async function liaisonMentionCandidates(req, res) {
 
 async function liaisonChannelSend(req, res) {
   const access=await validatePoliceSession(req,false); if(!access.ok)return res.status(401).json({ok:false,code:access.reason});const body=readJsonBody(req),channelId=String(body?.channelId||"");const content=complaintText(body?.message,1800,"");const files=Array.isArray(body?.attachments)?body.attachments.slice(0,3):[];const mentions=normalizeMentionIds(body?.mentions);
-  if(!LIAISON_CHANNEL_IDS.has(channelId)||(!content&&!files.length))return res.status(400).json({ok:false,code:!LIAISON_CHANNEL_IDS.has(channelId)?"channel_not_allowed":"message_required"});
-  try { await discordBotRequest(`/channels/${channelId}`);const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD");const text=`**${complaintText(agent,100)}**${mentions.length?`\n${mentionMarkup(mentions)}`:""}${content?`\n${content}`:""}`;const message=files.length?await discordBotUpload(`/channels/${channelId}/messages`,text,files,mentions):await discordBotRequest(`/channels/${channelId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[],users:mentions}}});return res.status(201).json({ok:true,messageId:message?.id||null}); }
+  const runtime=await liaisonRuntime(),channelConfig=runtime.byId.get(channelId);if(!channelConfig||channelConfig.type!=="text"||!channelConfig.canWrite||(!content&&!files.length))return res.status(400).json({ok:false,code:!channelConfig?"channel_not_allowed":!channelConfig.canWrite?"channel_write_disabled":"message_required"});
+  const safeMentions=channelConfig.canMention?mentions:[],safeFiles=channelConfig.canUpload?files:[];
+  try { await discordBotRequest(`/channels/${channelId}`);const agent=await resolveCpdDisplayName(access.session.user?.id,access.session.user?.globalName||access.session.user?.username||"Agent CPD");const text=`**${complaintText(agent,100)}**${safeMentions.length?`\n${mentionMarkup(safeMentions)}`:""}${content?`\n${content}`:""}`;const message=safeFiles.length?await discordBotUpload(`/channels/${channelId}/messages`,text,safeFiles,safeMentions):await discordBotRequest(`/channels/${channelId}/messages`,{method:"POST",body:{content:text,allowed_mentions:{parse:[],users:safeMentions}}});return res.status(201).json({ok:true,messageId:message?.id||null}); }
   catch(error){console.error("Liaison channel send failed",{channelId,status:error.status||0,code:error.code||""});return res.status(error.status===403?403:502).json({ok:false,code:error.code==="file_too_large"?"file_too_large":error.status===403?"channel_forbidden":"discord_unavailable"});}
 }
 
@@ -762,6 +787,112 @@ async function instructorAccess(req, res) {
   }
   if (access.changed) res.setHeader("Set-Cookie", validatedSessionCookie(access));
   return access.session;
+}
+
+async function configurationAdminAccess(req, res) {
+  const session = await instructorAccess(req, res);
+  if (!session) return null;
+  const current = await getConfig({ fresh: true });
+  const policy = current.value.access.admin;
+  const server = serverByKey(current.value, policy.guildKey);
+  try {
+    const member = await discordBotRequest(`/guilds/${server.guildId}/members/${session.user.id}`);
+    if (!accessAllowed(member, policy)) {
+      res.status(403).json({ ok: false, code: "admin_role_required" });
+      return null;
+    }
+    return { session, current, member };
+  } catch (error) {
+    res.status(error.status === 404 ? 403 : 502).json({ ok: false, code: error.status === 404 ? "admin_role_required" : "discord_unavailable" });
+    return null;
+  }
+}
+
+async function publicLiaisonSettings(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  const access = await validatePoliceSession(req, false);
+  if (!access.ok) return res.status(401).json({ ok: false, code: access.reason });
+  const current = await getConfig();
+  return res.status(200).json({ ok: true, version: current.version, liaison: publicLiaisonConfig(current.value) });
+}
+
+async function adminConfiguration(req, res) {
+  res.setHeader("Cache-Control", "private, no-store");
+  const admin = await configurationAdminAccess(req, res);
+  if (!admin) return;
+  const actor = { id: admin.session.user.id, name: admin.session.user.globalName || admin.session.user.username || "Administrateur" };
+  if (req.method === "GET") {
+    const history = await listHistory(60);
+    return res.status(200).json({
+      ok: true,
+      config: admin.current.value,
+      meta: { version: admin.current.version, updatedAt: admin.current.updatedAt, updatedByName: admin.current.updatedByName, fallback: admin.current.fallback },
+      history: history.map(row => ({ id: String(row.id), version: Number(row.version), changedById: row.changed_by_id || "", changedByName: row.changed_by_name || "", summary: row.change_summary || "", createdAt: row.created_at })),
+      user: { id: actor.id, displayName: actor.name }
+    });
+  }
+  if (req.method !== "POST") return res.status(405).end();
+  const body = readJsonBody(req);
+  if (!body) return res.status(400).json({ ok: false, code: "invalid_json" });
+  try {
+    if (body.operation === "restore") {
+      const saved = await restoreConfig(body.historyId, actor);
+      return res.status(200).json({ ok: true, config: saved.value, meta: { version: saved.version, updatedAt: saved.updatedAt, updatedByName: saved.updatedByName } });
+    }
+    const proposed = sanitizeConfig(body.config);
+    const adminPolicy = proposed.access.admin;
+    const adminServer = serverByKey(proposed, adminPolicy.guildKey);
+    const proposedMember = await discordBotRequest(`/guilds/${adminServer.guildId}/members/${actor.id}`);
+    if (!accessAllowed(proposedMember, adminPolicy)) return res.status(400).json({ ok: false, code: "admin_lockout" });
+    const saved = await saveConfig(proposed, actor, textField(body.summary, 240) || "Configuration modifiée depuis le panel");
+    liaisonMentionCache = { expires: 0, members: [] };
+    cpdDisplayNameCache = { expires: 0, names: new Map() };
+    return res.status(200).json({ ok: true, config: saved.value, meta: { version: saved.version, updatedAt: saved.updatedAt, updatedByName: saved.updatedByName } });
+  } catch (error) {
+    console.error("Admin configuration save failed", { code: error.code || "unknown", status: error.status || 0 });
+    const status = error.code === "history_not_found" ? 404 : error.code === "database_not_configured" ? 503 : 500;
+    return res.status(status).json({ ok: false, code: error.code || "configuration_save_failed" });
+  }
+}
+
+async function adminDiscordDiagnostic(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+  res.setHeader("Cache-Control", "private, no-store");
+  const admin = await configurationAdminAccess(req, res);
+  if (!admin) return;
+  const body = readJsonBody(req) || {};
+  const config = sanitizeConfig(body.config || admin.current.value);
+  const started = Date.now();
+  const servers = [];
+  const channels = [];
+  for (const server of config.servers) {
+    try {
+      const guild = await discordBotRequest(`/guilds/${server.guildId}`);
+      servers.push({ key: server.key, id: server.guildId, label: server.label, ok: true, discordName: guild.name || server.label, status: 200 });
+    } catch (error) {
+      servers.push({ key: server.key, id: server.guildId, label: server.label, ok: false, status: error.status || 0, code: error.status === 404 ? "serveur_inaccessible" : "discord_unavailable" });
+    }
+  }
+  for (const channel of config.liaison.channels) {
+    const server = serverByKey(config, channel.guildKey);
+    try {
+      const discordChannel = await discordBotRequest(`/channels/${channel.channelId}`);
+      let readStatus = "non_testé";
+      if (channel.canRead) {
+        if (channel.type === "forum") {
+          await discordBotRequest(`/guilds/${server.guildId}/threads/active`);
+          await discordBotRequest(`/channels/${channel.channelId}/threads/archived/public?limit=1`);
+        } else {
+          await discordBotRequest(`/channels/${channel.channelId}/messages?limit=1`);
+        }
+        readStatus = "ok";
+      }
+      channels.push({ key: channel.key, id: channel.channelId, label: channel.label, type: channel.type, ok: true, status: 200, discordName: discordChannel.name || channel.label, readStatus });
+    } catch (error) {
+      channels.push({ key: channel.key, id: channel.channelId, label: channel.label, type: channel.type, ok: false, status: error.status || 0, code: error.status === 403 ? "permission_refusée" : error.status === 404 ? "canal_introuvable" : "discord_unavailable" });
+    }
+  }
+  return res.status(200).json({ ok: true, checkedAt: new Date().toISOString(), durationMs: Date.now() - started, botConfigured: Boolean(process.env.DISCORD_BOT_TOKEN), databaseConfigured: Boolean(process.env.DATABASE_URL), servers, channels });
 }
 
 async function eligibleAgent(discordId) {
@@ -2262,6 +2393,8 @@ module.exports = async function handler(req, res) {
     case "session": return sessionStatus(req, res);
     case "logout": return logout(req, res);
     case "database-check": return databaseCheck(req, res);
+    case "admin-configuration": return adminConfiguration(req, res);
+    case "admin-discord-diagnostic": return adminDiscordDiagnostic(req, res);
     case "agents": return agentsList(req, res);
     case "training-overview": return trainingOverview(req, res);
     case "activity": return activityLog(req, res);
@@ -2285,7 +2418,7 @@ module.exports = async function handler(req, res) {
     case "recruitment-ticket": return recruitmentTicketDetail(req, res);
     case "recruitment-decision": return saveRecruitmentDecision(req, res);
     case "ticket-sync": return syncRecruitmentTicket(req, res);
-    case "government-complaint-create": { if(req.method === "GET" && String(req.query.mentionCandidates || "") === "1") return liaisonMentionCandidates(req,res); if(req.method === "GET" && req.query.channelId) return liaisonChannelRead(req,res); if(req.method === "POST") { const body=readJsonBody(req); if(body?.channelId) return liaisonChannelSend(req,res); if(body?.action === "update") return updateGovernmentComplaint(req,res); if(body && (body.threadId || body.message)) return governmentComplaintMessage(req,res); } if(req.method === "GET") return governmentComplaints(req,res); return createGovernmentComplaint(req,res); }
+    case "government-complaint-create": { if(req.method === "GET" && String(req.query.configuration || "") === "1") return publicLiaisonSettings(req,res); if(req.method === "GET" && String(req.query.mentionCandidates || "") === "1") return liaisonMentionCandidates(req,res); if(req.method === "GET" && req.query.channelId) return liaisonChannelRead(req,res); if(req.method === "POST") { const body=readJsonBody(req); if(body?.channelId) return liaisonChannelSend(req,res); if(body?.action === "update") return updateGovernmentComplaint(req,res); if(body && (body.threadId || body.message)) return governmentComplaintMessage(req,res); } if(req.method === "GET") return governmentComplaints(req,res); return createGovernmentComplaint(req,res); }
     default: return res.status(404).json({ ok: false, code: "route_not_found" });
   }
 };

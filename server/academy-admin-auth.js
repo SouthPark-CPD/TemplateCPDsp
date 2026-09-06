@@ -1,5 +1,6 @@
 const crypto = require("node:crypto");
 const policeAuth = require("./auth");
+const { getConfig, serverByKey, accessAllowed } = require("./admin-config");
 const COOKIE_NAME = "cpd_academy_admin_session";
 const STATE_COOKIE_NAME = "cpd_academy_admin_oauth_state";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
@@ -172,19 +173,26 @@ async function getDiscordUser(accessToken) {
 }
 
 async function getAcademyMember(accessToken, userId = "") {
+  const { value: config, fallback } = await getConfig();
+  const guildId = fallback ? ACADEMY_GUILD_ID : serverByKey(config, config.access.academy.guildKey)?.guildId || ACADEMY_GUILD_ID;
   const botToken = process.env.DISCORD_BOT_TOKEN;
   if (botToken && /^\d{17,20}$/.test(String(userId))) {
-    return discordRequest(`${DISCORD_API}/guilds/${ACADEMY_GUILD_ID}/members/${userId}`, {
+    return discordRequest(`${DISCORD_API}/guilds/${guildId}/members/${userId}`, {
       headers: { Authorization: `Bot ${botToken}` }
     });
   }
-  return discordRequest(`${DISCORD_API}/users/@me/guilds/${ACADEMY_GUILD_ID}/member`, {
+  return discordRequest(`${DISCORD_API}/users/@me/guilds/${guildId}/member`, {
     headers: { Authorization: `Bearer ${accessToken}` }
   });
 }
 
 function hasInstructorRole(member) {
   return Array.isArray(member.roles) && member.roles.includes(INSTRUCTOR_ROLE_ID);
+}
+
+async function hasConfiguredAcademyRole(member) {
+  const { value: config, fallback } = await getConfig();
+  return fallback ? hasInstructorRole(member) : accessAllowed(member, config.access.academy);
 }
 
 function newSession(user, tokens, member = null) {
@@ -220,6 +228,8 @@ async function validateSession(req, forceRoleCheck = false) {
   }
 
   const now = Math.floor(Date.now() / 1000);
+  const currentConfig = await getConfig();
+  const accessConfigVersion = Number(currentConfig.version || 0);
 
   // Une session police issue de FiveM n'a volontairement aucun access/refresh token
   // OAuth utilisateur. Elle a deja ete validee par policeAuth avec le bot Discord.
@@ -240,17 +250,20 @@ async function validateSession(req, forceRoleCheck = false) {
   }
 
   const checkedAt = source === "police" ? session.academyRoleCheckedAt : session.roleCheckedAt;
-  const roleCheckDue = forceRoleCheck || session.academyNameResolved !== true || !checkedAt || now - checkedAt >= ROLE_CHECK_INTERVAL;
+  const roleCheckDue = forceRoleCheck || session.academyNameResolved !== true || !checkedAt
+    || now - checkedAt >= ROLE_CHECK_INTERVAL
+    || Number(session.academyAccessConfigVersion ?? -1) !== accessConfigVersion;
   if (roleCheckDue) {
     try {
       const member = await getAcademyMember(session.accessToken, session.user?.id);
-      if (!hasInstructorRole(member)) return { ok: false, reason: "missing_role" };
+      if (!await hasConfiguredAcademyRole(member)) return { ok: false, reason: "missing_role" };
       const academyName = member.nick || member.user?.global_name || member.user?.username || session.user.globalName;
       if (source === "police") session.user.academyGlobalName = academyName;
       else session.user.globalName = academyName;
       session.academyNameResolved = true;
       if (source === "police") session.academyRoleCheckedAt = now;
       else session.roleCheckedAt = now;
+      session.academyAccessConfigVersion = accessConfigVersion;
       changed = true;
     } catch (error) {
       const lastSuccessfulCheck = Number(checkedAt || 0);
@@ -292,6 +305,7 @@ module.exports = {
   getDiscordUser,
   getAcademyMember,
   hasInstructorRole,
+  hasConfiguredAcademyRole,
   newSession,
   validateSession,
   validatedSessionCookie

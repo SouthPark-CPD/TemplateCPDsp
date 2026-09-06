@@ -1,4 +1,5 @@
 const crypto = require("node:crypto");
+const { getConfig, serverByKey, accessAllowed } = require("./admin-config");
 
 const COOKIE_NAME = "cpd_session";
 const FIVEM_COOKIE_NAME = "cpd_session_fivem";
@@ -282,6 +283,30 @@ function hasRequiredRole(member) {
   return Array.isArray(member.roles) && member.roles.includes(ROLE_ID);
 }
 
+async function hasConfiguredPoliceRole(member) {
+  const { value: config, fallback } = await getConfig();
+  if (fallback) return hasRequiredRole(member);
+  return accessAllowed(member, config.access.police);
+}
+
+async function configuredPoliceGuildId() {
+  const { value: config, fallback } = await getConfig();
+  return fallback ? GUILD_ID : serverByKey(config, config.access.police.guildKey)?.guildId || GUILD_ID;
+}
+
+async function getConfiguredGuildMember(accessToken) {
+  const guildId = await configuredPoliceGuildId();
+  return discordRequest(`${DISCORD_API}/users/@me/guilds/${guildId}/member`, { headers: { Authorization: `Bearer ${accessToken}` } });
+}
+
+async function getConfiguredGuildMemberById(userId) {
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  if (!botToken) throw new Error("DISCORD_BOT_TOKEN manquant");
+  if (!/^\d{17,20}$/.test(String(userId || ""))) throw Object.assign(new Error("Discord ID invalide"), { status: 400 });
+  const guildId = await configuredPoliceGuildId();
+  return discordRequest(`${DISCORD_API}/guilds/${guildId}/members/${userId}`, { headers: { Authorization: `Bot ${botToken}` } });
+}
+
 function hasInstructorRole(member) {
   return Array.isArray(member.roles) && member.roles.includes(INSTRUCTOR_ROLE_ID);
 }
@@ -336,6 +361,8 @@ async function validateSession(req, forceRoleCheck = false) {
   const now = Math.floor(Date.now() / 1000);
   let changed = false;
   const authMode = session.authMode || "discord";
+  const currentConfig = await getConfig();
+  const accessConfigVersion = Number(currentConfig.version || 0);
 
   if (authMode === "fivem") {
     if (!session.user?.id || !/^\d{17,20}$/.test(String(session.user.id))) {
@@ -356,19 +383,22 @@ async function validateSession(req, forceRoleCheck = false) {
     }
   }
 
-  const roleCheckDue = forceRoleCheck || session.cpdNameResolved !== true || !session.roleCheckedAt || now - session.roleCheckedAt >= ROLE_CHECK_INTERVAL;
+  const roleCheckDue = forceRoleCheck || session.cpdNameResolved !== true || !session.roleCheckedAt
+    || now - session.roleCheckedAt >= ROLE_CHECK_INTERVAL
+    || Number(session.accessConfigVersion ?? -1) !== accessConfigVersion;
   if (roleCheckDue) {
     try {
       const member = authMode === "fivem"
-        ? await getGuildMemberById(session.user.id)
-        : await getGuildMember(session.accessToken);
+        ? await getConfiguredGuildMemberById(session.user.id)
+        : await getConfiguredGuildMember(session.accessToken);
 
-      if (!hasRequiredRole(member)) return { ok: false, reason: "missing_role" };
+      if (!await hasConfiguredPoliceRole(member)) return { ok: false, reason: "missing_role" };
       session.user.globalName = member.nick || member.user?.global_name || member.user?.username || session.user.globalName;
       session.user.username = member.user?.username || session.user.username;
       session.user.avatar = member.user?.avatar || session.user.avatar || null;
       session.cpdNameResolved = true;
       session.roleCheckedAt = now;
+      session.accessConfigVersion = accessConfigVersion;
       changed = true;
     } catch (error) {
       if (error.status === 401 || error.status === 403 || error.status === 404) {
@@ -387,6 +417,7 @@ module.exports = {
   env, siteUrl, createStateCookie, consumeState, clearStateCookie,
   sessionCookie, clearSessionCookie, exchangeCode, getDiscordUser,
   getGuildMember, getGuildMemberById, getAcademyMember, hasRequiredRole, hasInstructorRole,
+  getConfiguredGuildMember, getConfiguredGuildMemberById, hasConfiguredPoliceRole,
   newSession, newFiveMSession, validateSession,
   verifyFiveMServerSecret, issueFiveMTicket, verifyFiveMTicket
 };
