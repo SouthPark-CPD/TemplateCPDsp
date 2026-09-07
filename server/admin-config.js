@@ -57,9 +57,8 @@ const DEFAULT_CONFIG = Object.freeze({
     gangItems: [
       { key: "gang-dashboard", label: "Vue d’ensemble", icon: "grid", enabled: true, sortOrder: 10 },
       { key: "gang-map", label: "Carte tactique", icon: "chart", enabled: true, sortOrder: 20 },
-      { key: "gang-gangs", label: "Dossiers gangs & individus", icon: "users", enabled: true, sortOrder: 30 },
-      { key: "gang-intel", label: "Surveillance & renseignement", icon: "book", enabled: true, sortOrder: 40 },
-      { key: "gang-operations", label: "Opérations", icon: "radio", enabled: true, sortOrder: 50 }
+      { key: "gang-gangs", label: "Dossiers & suivi", icon: "users", enabled: true, sortOrder: 30 },
+      { key: "gang-operations", label: "Opérations", icon: "radio", enabled: true, sortOrder: 40 }
     ]
   },
   notifications: {

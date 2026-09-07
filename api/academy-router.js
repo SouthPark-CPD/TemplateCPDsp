@@ -24,6 +24,7 @@ const { validateSession: validatePoliceSession, sessionCookie: policeSessionCook
 const { decodeModernFormData } = require("../server/application-form");
 const { getConfig, saveConfig, listHistory, restoreConfig, sanitizeConfig, serverByKey, accessAllowed, publicLiaisonConfig, ownerDiscordId, isControlPanelAdmin, listAdminUsers, addAdminUser, removeAdminUser } = require("../server/admin-config");
 const { gangUnitData, gangUnitAdminData, saveTerritory, saveMarker, saveGang, saveIndividual, saveReport, saveOperation, saveWatchlist, archiveEntity } = require("../server/gang-unit");
+const { policeMedia } = require("../server/police-media");
 
 const DISCORD_API = "https://discord.com/api/v10";
 const CPD_GUILD_ID = "1408092767963451615";
@@ -2556,6 +2557,7 @@ module.exports = async function handler(req, res) {
     case "gang-unit-operation-save": return saveOperation(req, res);
     case "gang-unit-watchlist-save": return saveWatchlist(req, res);
     case "gang-unit-archive": return archiveEntity(req, res);
+    case "police-media": return policeMedia(req, res);
     case "government-complaint-create": { if(req.method === "GET" && String(req.query.configuration || "") === "1") return publicLiaisonSettings(req,res); if(req.method === "GET" && String(req.query.mentionCandidates || "") === "1") return liaisonMentionCandidates(req,res); if(req.method === "GET" && req.query.channelId) return liaisonChannelRead(req,res); if(req.method === "POST") { const body=readJsonBody(req); if(body?.channelId) return liaisonChannelSend(req,res); if(body?.action === "update") return updateGovernmentComplaint(req,res); if(body && (body.threadId || body.message)) return governmentComplaintMessage(req,res); } if(req.method === "GET") return governmentComplaints(req,res); return createGovernmentComplaint(req,res); }
     case "prosecutor-request-create": return req.method === "GET" ? governmentComplaints(req, res, "prosecutor") : createProsecutorRequest(req, res);
     default: return res.status(404).json({ ok: false, code: "route_not_found" });

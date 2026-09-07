@@ -9,9 +9,15 @@
   const next = document.querySelector("#next");
   const submit = document.querySelector("#submit");
   const submitError = document.querySelector("#submit-error");
+  const gate = document.querySelector("#candidate-gate");
+  const gateError = document.querySelector("#candidate-auth-error");
+  const verifiedUser = document.querySelector("#verified-user");
+  const candidateSession = document.querySelector("#candidate-session");
   const lastStep = steps.length;
   let submitLabel = submit?.textContent || "Envoyer ma candidature →";
   let current = 1;
+  let candidateVerified = false;
+  let recruitmentClosed = false;
 
   const labels = {
     rpName: "Nom de famille et prénom RP", gender: "Genre",
@@ -37,6 +43,41 @@
       return;
     }
     field.value = value;
+  }
+
+  function syncFormAccess() {
+    gate.hidden = candidateVerified;
+    form.hidden = !candidateVerified || recruitmentClosed;
+  }
+
+  function escapeHtml(value) { return String(value || "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char])); }
+  async function verifyCandidate() {
+    const params = new URLSearchParams(location.search);
+    const authError = params.get("auth_error");
+    if (authError && gateError) {
+      gateError.textContent = authError === "cancelled" ? "La connexion Discord a été annulée." : "La connexion Discord n’a pas pu être vérifiée. Réessayez.";
+      gateError.hidden = false;
+    }
+    try {
+      const response = await fetch("/api/candidate-auth/session", { credentials: "same-origin", cache: "no-store" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data?.authenticated || !data.user?.id) return;
+      setFieldValue("discordId", data.user.id);
+      if (verifiedUser) {
+        const name = data.user.globalName || data.user.username || "Compte Discord";
+        const avatar = data.user.avatar ? `https://cdn.discordapp.com/avatars/${encodeURIComponent(data.user.id)}/${encodeURIComponent(data.user.avatar)}.png?size=80` : "";
+        verifiedUser.innerHTML = `${avatar ? `<img src="${avatar}" alt="">` : ""}<span><small>Compte vérifié</small><b>${escapeHtml(name)}</b></span>`;
+        verifiedUser.hidden = false;
+      }
+      if (candidateSession) {
+        const name = data.user.globalName || data.user.username || "Compte Discord";
+        const avatar = data.user.avatar ? `https://cdn.discordapp.com/avatars/${encodeURIComponent(data.user.id)}/${encodeURIComponent(data.user.avatar)}.png?size=80` : "";
+        candidateSession.innerHTML = `${avatar ? `<img src="${avatar}" alt="">` : ""}<div><small>DISCORD CONNECTÉ ET VÉRIFIÉ</small><strong>${escapeHtml(name)}</strong><span>ID Discord : ${escapeHtml(data.user.id)}</span></div><a href="/api/candidate-auth/logout">Changer de compte</a>`;
+        candidateSession.hidden = false;
+      }
+      candidateVerified = true;
+      syncFormAccess();
+    } catch { /* The gate remains visible: submissions stay server-protected. */ }
   }
 
   function saveDraft() {
@@ -79,7 +120,8 @@
         submit.textContent = submitLabel;
       }
       if (settings.enabled === false) {
-        form.hidden = true;
+        recruitmentClosed = true;
+        syncFormAccess();
         const closed = document.querySelector("#recruitment-closed");
         if (closed) {
           closed.textContent = settings.closedMessage || "Les recrutements sont momentanément fermés.";
@@ -206,7 +248,8 @@
         recruitment_closed: "Les recrutements sont momentanément fermés.",
         database_not_configured: "Le service de candidature n’est pas encore configuré.",
         database_not_ready: "Le service de candidature n’est pas encore prêt.",
-        database_error: "La candidature n’a pas pu être enregistrée. Réessayez dans quelques instants."
+        database_error: "La candidature n’a pas pu être enregistrée. Réessayez dans quelques instants.",
+        candidate_login_required: "Votre session Discord a expiré. Reconnectez-vous avant d’envoyer la candidature."
       };
       submitError.textContent = messages[error.message] || "La candidature n’a pas pu être transmise. Réessayez.";
       submitError.classList.remove("hidden");
@@ -222,4 +265,5 @@
   previous.addEventListener("click", () => showStep(Math.max(current - 1, 1)));
   form.addEventListener("submit", event => { event.preventDefault(); if (validateStep(current)) sendApplication(); });
   loadRecruitmentSettings();
+  verifyCandidate();
 })();

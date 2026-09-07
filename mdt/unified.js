@@ -1,400 +1,216 @@
-/* Persistent shell; all module scripts and server authorization stay isolated. */
+/* Tablet launcher shell. Access controls remain enforced by each server route. */
 (() => {
   const R = CPDRoutes;
   const origin = location.origin;
   const frame = document.getElementById("module-frame");
-  const message = document.getElementById("shell-message");
+  const launcher = document.getElementById("launcher");
+  const workspace = document.getElementById("workspace");
+  const launcherMessage = document.getElementById("shell-message");
+  const workspaceMessage = document.getElementById("workspace-message");
   const retry = document.getElementById("retry-session");
-  const mdtMenu = document.getElementById("mdt-menu");
-  const paMenu = document.getElementById("pa-menu");
-  const liaisonMenu = document.getElementById("liaison-menu");
-  const gangMenu = document.getElementById("gang-menu");
-
-  const defaultMdt = [
-    ["rapide", "Accès rapide", "grid"],
-    ["procedures", "Procédures", "book"],
-    ["radio", "Radio", "radio"],
-    ["reglement", "Règlement", "list"],
-    ["tenues", "Tenues", "users"],
-    ["organigramme", "Organigramme", "chart"]
-  ];
-  const defaultAcademy = [
-    ["pa", "Tableau de bord", "grid"],
-    ["suivi", "Suivi pédagogique", "chart"],
-    ["formations", "Formations", "book"],
-    ["recrutements", "Recrutements", "inbox"],
-    ["activite", "Historique", "clock"]
-  ];
-  const defaultLiaison = [
-    ["liaison", "Dépôts de plainte", "inbox"],
-    ["prosecutor", "Demande procureur", "book"],
-    ["doj", "Communication DOJ", "radio"],
-    ["liaison-gouv", "Communication gouvernement", "users"],
-    ["avocat", "Communication avocat", "users"]
-  ];
-  const defaultGang = [["gang-dashboard", "Vue d’ensemble", "grid"], ["gang-map", "Carte tactique", "chart"], ["gang-gangs", "Dossiers gangs & individus", "users"], ["gang-intel", "Surveillance & renseignement", "book"], ["gang-operations", "Opérations", "radio"]];
-  const defaultNavigation = {
-    siteTitle: "MDT — Chicago Police Department",
-    departmentName: "CHICAGO",
-    departmentSubtitle: "POLICE DEPARTMENT",
-    guideUrl: "https://guidejuridiquesp.netlify.app/",
-    sections: {
-      mdt: { label: "MDT", enabled: true, open: true },
-      academy: { label: "Police Academy", enabled: true, open: true },
-      liaison: { label: "Liaison gouvernement", enabled: true, open: true },
-      gang: { label: "Gang Unit", enabled: true, open: true }
-    },
-    mdtItems: defaultMdt.map(([key, label, icon], index) => ({ key, label, icon, enabled: true, sortOrder: (index + 1) * 10 })),
-    academyItems: defaultAcademy.map(([key, label, icon], index) => ({ key, label, icon, enabled: true, sortOrder: (index + 1) * 10 })),
-    gangItems: defaultGang.map(([key, label, icon], index) => ({ key, label, icon, enabled: true, sortOrder: (index + 1) * 10 }))
+  const grid = document.getElementById("app-grid");
+  const defaultSections = {
+    mdt: { label: "MDT", enabled: true },
+    academy: { label: "Police Academy", enabled: true },
+    liaison: { label: "Communication gouvernement", enabled: true },
+    gang: { label: "Gang Unit", enabled: true }
   };
-  const paths = {
-    grid: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
-    users: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M16 3a4 4 0 0 1 0 8 M22 21v-2a4 4 0 0 0-3-3.87 M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0",
-    chart: "M4 4v16h16 M8 16v-4 M12 16V8 M16 16V5",
-    book: "M12 5v16 M12 5C8 2 4 3 2 4v16c4-2 7-1 10 1 3-2 6-3 10-1V4c-4-2-7-1-10 1",
-    inbox: "M3 4h18v16H3z M3 13h5l2 3h4l2-3h5",
-    clock: "M12 8v5l3 2 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0",
-    radio: "M5 9h14v12H5z M8 3v6 M8 13h8 M8 17h2",
-    list: "M8 6h13 M8 12h13 M8 18h13 M3 6h1 M3 12h1 M3 18h1"
+  const icons = {
+    shield: "M12 3 20 6v5c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-3Zm-3.1 9 2 2 4.2-4.3",
+    academy: "m4 10 8-4 8 4-8 4-8-4Zm3 3v4.5c2.8 1.4 7.2 1.4 10 0V13 M20 10v5",
+    message: "M4 5h16v11H8l-4 3V5Zm4 4h8M8 12h5",
+    map: "M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Zm0 0v14m6-12v14"
   };
-  const escapeHtml = value => String(value ?? "").replace(/[&<>'"]/g, char => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
-  }[char]));
-  const icon = key => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${paths[key] || paths.list}"></path></svg>`;
-
-  let mdt = [...defaultMdt];
-  let academy = [...defaultAcademy];
-  let liaison = [...defaultLiaison];
-  let gang = [...defaultGang];
-  let navigation = defaultNavigation;
-  let notificationSettings = { showBadges: true, showAcademyBadge: true, showLiaisonBadge: true, refreshSeconds: 15 };
-  let authorized = false;
-  let gangAuthorized = false;
+  let sections = { ...defaultSections };
+  let navigation = {};
+  let academyAccess = false;
+  let gangAccess = false;
   let ready = false;
+  let activeFolder = null;
   let current = null;
   let loadingTimer;
-  let notificationTimer;
+  let homeTimer;
+  let badges = { academy: 0, liaison: 0, gang: 0 };
   window.CPDUnifiedShell = true;
 
-  function renderLinks(id, items) {
-    const target = document.getElementById(id);
-    if (!target) return;
-    target.innerHTML = items.map(([key, label, keyIcon, url]) => {
-      const route = R.resolve(url || R.routes[key], origin);
-      if (!route) return "";
-      return `<a class="${key === "rapide" ? "nav-mdt-quick" : ""}" href="${escapeHtml(R.shellUrl(route, origin))}" data-view="${escapeHtml(route.view)}">${icon(keyIcon)}<span>${escapeHtml(label)}</span></a>`;
-    }).join("");
+  const icon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${icons[name] || icons.message}"></path></svg>`;
+  const displayDate = () => new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short" }).format(new Date()).replace(/^./, letter => letter.toUpperCase());
+  function updateClock() {
+    document.getElementById("tablet-time").textContent = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" }).format(new Date());
+    document.getElementById("tablet-date").textContent = displayDate();
   }
-
-  function configuredItems(items, fallback) {
-    if (!Array.isArray(items) || !items.length) return [...fallback];
-    return items
-      .filter(item => item && item.enabled !== false && typeof item.key === "string")
-      .slice()
-      .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))
-      .map(item => [item.key, item.label || item.key, item.icon || "list"]);
+  function sectionLabel(key) { return sections[key]?.label || defaultSections[key].label; }
+  function appDefinitions() {
+    return [
+      { key: "mdt", label: sectionLabel("mdt"), subtitle: "Référentiel opérationnel", view: "rapide", icon: "shield", tone: "mdt", visible: sections.mdt?.enabled !== false },
+      { key: "academy", label: sectionLabel("academy"), subtitle: "Formation & suivi", view: "pa", icon: "academy", tone: "academy", visible: academyAccess && sections.academy?.enabled !== false },
+      { key: "liaison", label: sectionLabel("liaison"), subtitle: "Échanges institutionnels", view: "liaison", icon: "message", tone: "liaison", visible: sections.liaison?.enabled !== false },
+      { key: "gang", label: sectionLabel("gang"), subtitle: "Renseignement opérationnel", view: "gang-dashboard", icon: "map", tone: "gang", visible: gangAccess && sections.gang?.enabled !== false }
+    ];
   }
-
-  function updateSection(element, key, fallbackLabel) {
-    if (!element) return;
-    const setting = navigation.sections?.[key] || {};
-    const summary = element.querySelector("summary");
-    if (summary?.firstChild) summary.firstChild.nodeValue = `${setting.label || fallbackLabel} `;
-    element.hidden = setting.enabled === false || (key === "academy" && !authorized) || (key === "gang" && !gangAuthorized);
-    element.open = setting.open !== false;
+  const folders = {
+    mdt: [["rapide", "Accès rapide", "shield"], ["procedures", "Procédures", "message"], ["radio", "Radio", "message"], ["reglement", "Règlement", "academy"], ["tenues", "Tenues & véhicules", "academy"], ["organigramme", "Organigramme", "academy"]],
+    academy: [["pa", "Tableau de bord", "academy"], ["suivi", "Suivi pédagogique", "academy"], ["formations", "Formations", "message"], ["recrutements", "Recrutements", "message"], ["activite", "Historique", "map"]],
+    liaison: [["liaison", "Dépôts de plainte", "message"], ["prosecutor", "Demande procureur", "academy"], ["doj", "Communication DOJ", "message"], ["liaison-gouv", "Communication gouvernement", "message"], ["avocat", "Communication avocat", "message"]],
+    gang: [["gang-dashboard", "Vue d’ensemble", "map"], ["gang-map", "Carte tactique", "map"], ["gang-gangs", "Dossiers & suivi", "academy"], ["gang-operations", "Opérations", "shield"]]
+  };
+  function folderItems(key) {
+    const settingKey = { mdt: "mdtItems", academy: "academyItems", gang: "gangItems" }[key];
+    const configured = settingKey ? navigation[settingKey] : null;
+    if (!Array.isArray(configured) || !configured.length) return folders[key] || [];
+    return configured.filter(item => item?.enabled !== false && R.routes[item.key] && !(key === "gang" && item.key === "gang-intel")).sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0)).map(item => [item.key, item.label || item.key, item.icon || "message"]);
   }
-
-  function applyNavigation() {
-    const safeNavigation = navigation || defaultNavigation;
-    document.title = safeNavigation.siteTitle || defaultNavigation.siteTitle;
-    const departmentName = document.getElementById("department-name");
-    const departmentSubtitle = document.getElementById("department-subtitle");
-    if (departmentName) departmentName.textContent = safeNavigation.departmentName || defaultNavigation.departmentName;
-    if (departmentSubtitle) departmentSubtitle.textContent = safeNavigation.departmentSubtitle || defaultNavigation.departmentSubtitle;
-    const guide = document.querySelector('.nav-footer a[data-guide-link]');
-    if (guide && safeNavigation.guideUrl) guide.href = safeNavigation.guideUrl;
-
-    updateSection(mdtMenu, "mdt", "MDT");
-    updateSection(paMenu, "academy", "Police Academy");
-    updateSection(liaisonMenu, "liaison", "Liaison gouvernement");
-    updateSection(gangMenu, "gang", "Gang Unit");
-    mdt = configuredItems(safeNavigation.mdtItems, defaultMdt);
-    academy = configuredItems(safeNavigation.academyItems, defaultAcademy);
-    gang = configuredItems(safeNavigation.gangItems, defaultGang);
-    renderLinks("mdt-links", mdt);
-    renderLinks("pa-links", authorized ? academy : []);
-    renderLinks("liaison-links", liaison);
-    renderLinks("gang-links", gangAuthorized ? gang : []);
-  }
-
-  function applyNotificationSettings(value) {
-    notificationSettings = {
-      showBadges: value?.showBadges !== false,
-      showAcademyBadge: value?.showAcademyBadge !== false,
-      showLiaisonBadge: value?.showLiaisonBadge !== false,
-      refreshSeconds: Math.min(120, Math.max(5, Number(value?.refreshSeconds) || 15))
-    };
-    const academyBadge = document.getElementById("pa-count");
-    const liaisonBadge = document.getElementById("liaison-count");
-    if (!notificationSettings.showBadges || !notificationSettings.showAcademyBadge) {
-      if (academyBadge) academyBadge.hidden = true;
+  function renderLauncher() {
+    const title = document.getElementById("launcher-title");
+    const kicker = document.getElementById("launcher-kicker");
+    const description = document.getElementById("launcher-description");
+    const back = document.getElementById("folder-back");
+    if (!activeFolder) {
+      kicker.textContent = "TABLETTE CPD";
+      title.textContent = "Accueil";
+      description.textContent = "Ouvrez une application pour accéder à son portail.";
+      back.hidden = true;
+      grid.innerHTML = appDefinitions().filter(app => app.visible).map(app => `<button class="app-card" type="button" data-section="${app.key}">${badges[app.key] ? `<em class="app-badge">${badges[app.key] > 99 ? "99+" : badges[app.key]}</em>` : ""}<span class="app-icon app-${app.tone}">${icon(app.icon)}</span><strong>${app.label}</strong><small>${app.subtitle}</small></button>`).join("");
+      return;
     }
-    if (!notificationSettings.showBadges || !notificationSettings.showLiaisonBadge) {
-      if (liaisonBadge) liaisonBadge.hidden = true;
-    }
-    scheduleNotifications();
+    const app = appDefinitions().find(entry => entry.key === activeFolder);
+    if (!app) { activeFolder = null; return renderLauncher(); }
+    kicker.textContent = "APPLICATION";
+    title.textContent = app.label;
+    description.textContent = "Choisissez un module.";
+    back.hidden = false;
+    grid.innerHTML = folderItems(activeFolder).map(([view, label, iconName]) => `<button class="app-card" type="button" data-view="${view}"><span class="app-icon app-${app.tone}">${icon(iconName)}</span><strong>${label}</strong></button>`).join("");
   }
-
-  async function loadLiaisonMenu() {
+  function setView(route) {
+    current = route;
+    const group = route.academy ? "academy" : route.gang ? "gang" : (["liaison", "prosecutor", "doj", "liaison-gouv", "avocat"].includes(route.view) || route.view.startsWith("channel:")) ? "liaison" : "mdt";
+    const labels = { rapide: "Accès rapide", procedures: "Procédures", radio: "Radio", reglement: "Règlement", tenues: "Tenues & véhicules", organigramme: "Organigramme", liaison: "Dépôts de plainte", prosecutor: "Demande procureur", doj: "Communication DOJ", "liaison-gouv": "Communication gouvernement", avocat: "Communication avocat", pa: "Tableau de bord", suivi: "Suivi pédagogique", formations: "Formations", recrutements: "Recrutements", activite: "Historique", "gang-dashboard": "Vue d’ensemble", "gang-map": "Carte tactique", "gang-gangs": "Dossiers & suivi", "gang-intel": "Dossiers & suivi", "gang-operations": "Opérations" };
+    document.getElementById("section-name").textContent = sectionLabel(group);
+    document.getElementById("view-title").textContent = labels[route.view] || "Communication";
+    frame.title = labels[route.view] || "MDT";
+  }
+  function showHome(push = true) {
+    clearTimeout(loadingTimer);
+    current = null;
+    activeFolder = null;
+    frame.hidden = true;
+    launcher.hidden = false;
+    workspace.hidden = true;
+    launcherMessage.hidden = !ready;
+    retry.hidden = true;
+    if (push) history.pushState(null, "", "/mdt/index.html");
+  }
+  function navigate(route, push = true) {
+    if (!ready || !route) return;
+    if ((route.academy && !academyAccess) || (route.gang && !gangAccess)) return showHome(push);
+    if (push) history.pushState(null, "", R.shellUrl(route, origin));
+    setView(route);
+    launcher.hidden = true;
+    workspace.hidden = false;
+    frame.hidden = false;
+    workspaceMessage.hidden = false;
+    workspaceMessage.textContent = "Chargement…";
+    clearTimeout(loadingTimer);
+    loadingTimer = setTimeout(() => { workspaceMessage.textContent = "Le chargement prend plus de temps que prévu."; }, 15000);
+    frame.src = route.url;
+  }
+  function routeFor(view) { return R.resolve(R.routes[view], origin); }
+  async function loadConfiguration() {
     try {
       const response = await fetch("/api/liaison/complaints?configuration=1", { credentials: "same-origin", cache: "no-store" });
       const data = await response.json();
-      if (!response.ok || !data?.liaison?.channels) return;
-      navigation = data.liaison.navigation || defaultNavigation;
-      applyNotificationSettings(data.liaison.notifications);
-      liaison = data.liaison.channels.map(item => {
-        if (item.key === "prosecutor-requests") return ["prosecutor", item.label, item.icon || "book", "/mdt/prosecutor-request.html"];
-        if (item.type === "forum") return ["liaison", item.label, item.icon || "inbox", "/mdt/liaison.html"];
-        const legacy = { doj: "doj", government: "liaison-gouv", lawyer: "avocat" }[item.key];
-        const view = legacy || `channel:${item.key}`;
-        const url = legacy ? R.routes[legacy] : `/mdt/channel.html?channelKey=${encodeURIComponent(item.key)}`;
-        return [view, item.label, item.icon || "users", url];
-      });
-      applyNavigation();
-    } catch {
-      applyNavigation();
-    }
+      if (response.ok && data?.liaison?.navigation) {
+        navigation = data.liaison.navigation;
+        if (navigation.sections) sections = { ...defaultSections, ...navigation.sections };
+      }
+    } catch { /* Default launcher remains usable. */ }
   }
-
-  const navToggle = document.getElementById("nav-toggle");
-  navToggle.addEventListener("click", () => {
-    const collapsed = document.body.classList.toggle("nav-collapsed");
-    navToggle.setAttribute("aria-expanded", String(!collapsed));
-    navToggle.setAttribute("aria-label", collapsed ? "Afficher le menu" : "Réduire le menu");
-  });
-
-  function refreshBadge() {
-    const badge = document.getElementById("pa-count");
-    if (!authorized || !notificationSettings.showBadges || !notificationSettings.showAcademyBadge) {
-      if (badge) badge.hidden = true;
-      return;
-    }
-    fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" })
-      .then(response => response.ok ? response.json() : null)
-      .then(data => {
-        if (!badge || !data?.academyAccess) return;
-        const count = Number(data.academySummary?.newCount || 0);
-        badge.textContent = String(count);
-        badge.hidden = count <= 0;
-      }).catch(() => {});
-  }
-
-  function refreshLiaisonBadge() {
-    const badge = document.getElementById("liaison-count");
-    if (!notificationSettings.showBadges || !notificationSettings.showLiaisonBadge) {
-      if (badge) badge.hidden = true;
-      return;
-    }
-    fetch("/api/liaison/complaints", { credentials: "same-origin", cache: "no-store" })
-      .then(response => response.ok ? response.json() : null)
-      .then(data => {
-        if (!badge || !data?.threads) return;
+  async function refreshBadges(data) {
+    badges = { academy: Number(data?.academySummary?.newCount || 0), liaison: 0, gang: 0 };
+    const tasks = [
+      fetch("/api/liaison/complaints", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).then(result => {
+        const threads = result?.threads || [];
         const seen = JSON.parse(localStorage.getItem("liaisonSeen") || "{}");
         if (localStorage.getItem("liaisonBaseline") !== "1") {
-          data.threads.forEach(thread => { if (thread.lastMessageId) seen[thread.id] = thread.lastMessageId; });
+          threads.forEach(thread => { if (thread.lastMessageId) seen[thread.id] = thread.lastMessageId; });
           localStorage.setItem("liaisonSeen", JSON.stringify(seen));
           localStorage.setItem("liaisonBaseline", "1");
-        }
-        const count = data.threads.filter(thread => thread.lastMessageId && seen[thread.id] !== thread.lastMessageId).length;
-        badge.textContent = String(count);
-        badge.hidden = count <= 0;
-      }).catch(() => {});
-  }
-
-  function scheduleNotifications() {
-    clearInterval(notificationTimer);
-    notificationTimer = setInterval(() => {
-      refreshBadge();
-      refreshLiaisonBadge();
-    }, notificationSettings.refreshSeconds * 1000);
-  }
-
-  function displayRoute(route) {
-    current = route;
-    const item = [...mdt, ...liaison, ...academy, ...gang].find(entry => entry[0] === route.view);
-    const title = item?.[1] || (route.view === "dossier" ? "Dossier agent" : "Sessions de formation");
-    document.getElementById("view-title").textContent = title;
-    frame.title = title;
-    const inAcademy = academy.some(entry => entry[0] === route.view);
-    const inLiaison = liaison.some(entry => entry[0] === route.view);
-    const inGang = gang.some(entry => entry[0] === route.view);
-    document.getElementById("section-name").textContent = inAcademy
-      ? (navigation.sections?.academy?.label || "Police Academy")
-      : (inLiaison ? (navigation.sections?.liaison?.label || "Liaison gouvernement") : (inGang ? (navigation.sections?.gang?.label || "Gang Unit") : (navigation.sections?.mdt?.label || "MDT")));
-    document.querySelectorAll("[data-view]").forEach(link => {
-      if (link.dataset.view === route.view || (route.view === "dossier" && link.dataset.view === "agents")) link.setAttribute("aria-current", "page");
-      else link.removeAttribute("aria-current");
-    });
-    if (mdt.some(entry => entry[0] === route.view)) mdtMenu.open = true;
-    if (inAcademy) paMenu.open = true;
-    if (inLiaison) liaisonMenu.open = true;
-    if (inGang) gangMenu.open = true;
-  }
-
-  function navigate(route, push = true) {
-    if (!ready || !route) return;
-    if (route.academy && !authorized) {
-      message.textContent = "L’accès à la Police Academy est réservé aux instructeurs.";
-      message.hidden = false;
-      return;
-    }
-    if (route.gang && !gangAuthorized) {
-      message.textContent = "L’accès à la Gang Unit est réservé aux agents habilités.";
-      message.hidden = false;
-      return;
-    }
-    if (push) history.pushState(null, "", R.shellUrl(route, origin));
-    displayRoute(route);
-    frame.hidden = false;
-    message.hidden = false;
-    message.textContent = "Chargement…";
-    retry.hidden = true;
-    clearTimeout(loadingTimer);
-    loadingTimer = setTimeout(() => {
-      message.textContent = "Le chargement prend plus de temps que prévu.";
-      retry.hidden = false;
-    }, 15000);
-    frame.src = route.url;
-  }
-
-  document.querySelector(".unified-nav").addEventListener("click", event => {
-    const link = event.target.closest("a[data-view]");
-    if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-    event.preventDefault();
-    navigate(R.fromShell(link.href, origin) || R.resolve(R.routes[link.dataset.view], origin));
-  });
-
-  frame.addEventListener("load", () => {
-    clearTimeout(loadingTimer);
-    try {
-      const childWindow = frame.contentWindow;
-      const childDocument = frame.contentDocument;
-      const url = new URL(childWindow.location.href);
-      if (url.href === "about:blank") return;
-      if (url.origin !== origin) {
-        message.textContent = "Impossible d’afficher cette page.";
-        message.hidden = false;
-        return;
-      }
-      if (url.pathname.startsWith("/auth/") || url.pathname.startsWith("/academy-auth/")) {
-        if (url.pathname.includes("denied")) {
-          frame.hidden = true;
-          message.textContent = "Accès refusé à cette rubrique.";
-          message.hidden = false;
           return;
         }
-        location.replace(url.pathname + url.search);
-        return;
-      }
-      if (url.pathname === "/") {
-        location.replace("/");
-        return;
-      }
-      const route = R.resolve(url.href, origin);
-      if (!route) {
-        message.textContent = "Cette rubrique est indisponible.";
-        message.hidden = false;
-        retry.hidden = false;
-        return;
-      }
-      displayRoute(route);
-      history.replaceState(null, "", R.shellUrl(route, origin));
-      message.hidden = true;
-      retry.hidden = true;
-      childDocument.addEventListener("click", event => {
-        const link = event.target.closest("a[href]");
-        if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || link.hasAttribute("download")) return;
-        const destination = new URL(link.href, childWindow.location.href);
-        if (destination.origin !== origin) return;
-        if (destination.pathname === url.pathname && destination.search === url.search && destination.hash) return;
-        let target = R.resolve(destination.href, origin);
-        if (destination.pathname === "/mdt/index.html" || destination.pathname === "/mdt/" || destination.pathname === "/mdt/portail.html") target = R.fromShell(destination.href, origin);
-        if (target) {
-          event.preventDefault();
-          navigate(target);
-        } else if (destination.pathname.includes("/logout")) {
-          event.preventDefault();
-          location.assign(destination.pathname);
-        }
-      });
-    } catch {
-      message.textContent = "Impossible de charger la rubrique. Réessayez.";
-      message.hidden = false;
-      retry.hidden = false;
-    }
-  });
-
+        const unread = threads.filter(thread => thread.lastMessageId && seen[thread.id] !== thread.lastMessageId);
+        badges.liaison = unread.length;
+      }).catch(() => {})
+    ];
+    if (gangAccess) tasks.push(fetch("/api/gang-unit/data", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).then(result => {
+      const urgent = (result?.watchlist || []).filter(item => item.priority === "urgente").length;
+      const active = (result?.operations || []).filter(item => item.status === "active").length;
+      badges.gang = urgent + active;
+    }).catch(() => {}));
+    await Promise.all(tasks);
+    if (!activeFolder) renderLauncher();
+  }
+  async function refreshBadgesWithSession() {
+    try {
+      const response = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" });
+      if (response.ok) return refreshBadges(await response.json());
+    } catch { /* Keep the previous notification state visible. */ }
+  }
   async function session() {
     retry.disabled = true;
     try {
       const response = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" });
-      if (response.status === 401) {
-        location.replace("/auth/login.html?error=login_required");
-        return;
-      }
-      if (!response.ok) throw new Error("session");
+      if (response.status === 401) return location.replace("/auth/login.html?error=login_required");
       const data = await response.json();
-      if (!data.authenticated) throw new Error("session");
-      const adminLink = document.getElementById("admin-link");
-      if (adminLink) adminLink.hidden = data.controlPanelAdmin !== true;
-      authorized = data.academyAccess === true;
-      gangAuthorized = data.gangAccess === true;
-      ready = true;
-      paMenu.hidden = !authorized;
-      gangMenu.hidden = !gangAuthorized;
-      await loadLiaisonMenu();
-      applyNavigation();
-      if (authorized) {
-        const count = Number(data.academySummary?.newCount || 0);
-        const badge = document.getElementById("pa-count");
-        if (badge) {
-          badge.textContent = String(count);
-          badge.hidden = count <= 0 || !notificationSettings.showBadges || !notificationSettings.showAcademyBadge;
-        }
-        refreshBadge();
-      } else {
-        document.getElementById("pa-links")?.replaceChildren();
-      }
+      if (!response.ok || !data?.authenticated) throw new Error("session");
+      academyAccess = data.academyAccess === true;
+      gangAccess = data.gangAccess === true;
       document.getElementById("agent-name").textContent = data.user?.globalName || data.user?.username || "Agent CPD";
-      let route = R.fromShell(location.href, origin);
-      if (route?.academy && (!authorized || navigation.sections?.academy?.enabled === false)) {
-        route = R.resolve(R.routes.procedures, origin);
-        history.replaceState(null, "", R.shellUrl(route, origin));
-      }
-      if (route?.gang && (!gangAuthorized || navigation.sections?.gang?.enabled === false)) {
-        route = R.resolve(R.routes.procedures, origin);
-        history.replaceState(null, "", R.shellUrl(route, origin));
-      }
-      refreshLiaisonBadge();
-      navigate(route, false);
+      document.getElementById("admin-link").hidden = data.controlPanelAdmin !== true;
+      await loadConfiguration();
+      ready = true;
+      renderLauncher();
+      refreshBadges(data);
+      clearInterval(homeTimer);
+      homeTimer = setInterval(refreshBadgesWithSession, 60000);
+      const requested = new URL(location.href).searchParams.get("view");
+      requested ? navigate(R.fromShell(location.href, origin), false) : showHome(false);
     } catch {
-      message.textContent = "Impossible de vérifier vos accès. Réessayez.";
-      message.hidden = false;
+      launcherMessage.textContent = "Impossible de vérifier vos accès. Réessayez.";
       retry.hidden = false;
-    } finally {
-      retry.disabled = false;
-    }
+    } finally { retry.disabled = false; }
   }
-
-  retry.addEventListener("click", () => ready && current ? navigate(current, false) : session());
-  addEventListener("message", event => {
-    if (event.origin !== origin) return;
-    if (event.data?.type === "academy-recruitment-updated") refreshBadge();
-    if (event.data?.type === "liaison-updated") refreshLiaisonBadge();
+  grid.addEventListener("click", event => {
+    const button = event.target.closest("button");
+    if (!button) return;
+    if (button.dataset.section) { activeFolder = button.dataset.section; renderLauncher(); }
+    if (button.dataset.view) navigate(routeFor(button.dataset.view));
   });
-  addEventListener("popstate", () => navigate(R.fromShell(location.href, origin), false));
-  applyNavigation();
-  scheduleNotifications();
-  session();
+  document.getElementById("folder-back").addEventListener("click", () => { activeFolder = null; renderLauncher(); });
+  document.getElementById("home-button").addEventListener("click", () => showHome());
+  retry.addEventListener("click", session);
+  frame.addEventListener("load", () => {
+    clearTimeout(loadingTimer);
+    try {
+      const childWindow = frame.contentWindow, childDocument = frame.contentDocument, url = new URL(childWindow.location.href);
+      if (url.href === "about:blank") return;
+      if (url.origin !== origin) throw new Error("cross-origin");
+      if (url.pathname.startsWith("/auth/") || url.pathname.startsWith("/academy-auth/")) return location.replace(url.pathname + url.search);
+      const route = R.resolve(url.href, origin);
+      if (!route) throw new Error("unknown-route");
+      setView(route);
+      history.replaceState(null, "", R.shellUrl(route, origin));
+      workspaceMessage.hidden = true;
+      childDocument.addEventListener("click", event => {
+        const link = event.target.closest("a[href]");
+        if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || link.hasAttribute("download")) return;
+        const target = R.resolve(new URL(link.href, childWindow.location.href).href, origin);
+        if (target) { event.preventDefault(); navigate(target); }
+      });
+    } catch {
+      workspaceMessage.textContent = "Impossible de charger la rubrique.";
+      workspaceMessage.hidden = false;
+    }
+  });
+  addEventListener("popstate", () => { const hasView = new URL(location.href).searchParams.has("view"); hasView ? navigate(R.fromShell(location.href, origin), false) : showHome(false); });
+  updateClock(); setInterval(updateClock, 15000); session();
 })();

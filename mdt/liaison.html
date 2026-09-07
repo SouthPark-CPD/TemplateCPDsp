@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/mdt/liaison.css?v=3">
   <link rel="stylesheet" href="/mdt/chat-bubbles.css?v=1">
   <link rel="stylesheet" href="/mdt/mentions.css?v=1">
+  <link rel="stylesheet" href="/mdt/embedded-shell.css?v=1">
 </head>
 <body>
   <main class="liaison-page">
@@ -36,6 +37,7 @@
     <section id="complaint-list" class="forum-view" hidden><div class="list-toolbar"><div><span class="detail-kicker">CENTRE DE SUIVI</span><h2>Dépôts de plainte <span id="thread-total"></span></h2></div><div class="toolbar-actions"><label class="search-box"><span>⌕</span><input id="thread-search" type="search" placeholder="Rechercher un dépôt…"></label><select id="thread-status-filter" aria-label="Filtrer par statut"><option value="all">Tous les statuts</option><option value="active">Actifs</option><option value="archived">Archivés</option></select><select id="thread-tag-filter" aria-label="Filtrer par tag"><option value="all">Tous les tags</option></select><button id="refresh-complaints" class="secondary" type="button"><span>↻</span> Actualiser</button></div></div><div id="threads" class="threads"></div><article id="thread-detail" class="thread-detail" hidden></article></section>
     <div id="complaint-status" class="status" role="status" aria-live="polite" hidden></div>
   </main>
+  <script src="/mdt/embedded-shell.js?v=1"></script>
   <script src="/mdt/mentions.js?v=1"></script>
   <script src="/mdt/liaison.js?v=9"></script>
 </body>

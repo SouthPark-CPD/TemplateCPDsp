@@ -47,6 +47,7 @@
     { "src": "/api/gang-unit/operation/save", "dest": "/api/academy-router?action=gang-unit-operation-save" },
     { "src": "/api/gang-unit/watchlist/save", "dest": "/api/academy-router?action=gang-unit-watchlist-save" },
     { "src": "/api/gang-unit/archive", "dest": "/api/academy-router?action=gang-unit-archive" },
+    { "src": "/api/police-media", "dest": "/api/academy-router?action=police-media" },
     { "src": "/api/academy-admin-data/agents", "dest": "/api/academy-router?action=agents" },
     { "src": "/api/academy-admin-data/agent", "dest": "/api/academy-router?action=agent" },
     { "src": "/api/database-check", "dest": "/api/academy-router?action=database-check" },

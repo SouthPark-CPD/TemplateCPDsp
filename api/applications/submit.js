@@ -1,6 +1,7 @@
 const { neon } = require("@neondatabase/serverless");
 const { AcademyError, validateApplication, sendRecruitmentNotification } = require("../../server/academy");
 const { getConfig, publicRecruitmentConfig } = require("../../server/admin-config");
+const { readSession } = require("../../server/candidate-auth");
 
 function bodyFromRequest(req) {
   if (req.body && typeof req.body === "object") return req.body;
@@ -21,13 +22,15 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: true, recruitment: publicRecruitmentConfig(current.value) });
   }
   if (req.method !== "POST") return res.status(405).json({ ok: false, code: "method_not_allowed" });
+  const candidateSession = readSession(req);
+  if (!candidateSession?.user?.id) return res.status(401).json({ ok: false, code: "candidate_login_required" });
   if (!process.env.DATABASE_URL) return res.status(503).json({ ok: false, code: "database_not_configured" });
   if (Number(req.headers["content-length"] || 0) > 30000) return res.status(413).json({ ok: false, code: "payload_too_large" });
 
   try {
     const settings = (await getConfig({ fresh: true })).value.recruitment;
     if (!settings.enabled) return res.status(403).json({ ok: false, code: "recruitment_closed" });
-    const application = validateApplication(bodyFromRequest(req));
+    const application = validateApplication({ ...bodyFromRequest(req), discordId: String(candidateSession.user.id) });
     const phoneNormalized = application.phone.replace(/\D/g, "");
     const sql = neon(process.env.DATABASE_URL);
     const existing = phoneNormalized ? await sql`

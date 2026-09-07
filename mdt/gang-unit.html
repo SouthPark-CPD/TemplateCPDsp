@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gang Unit — MDT</title><link rel="stylesheet" href="gang-unit.css?v=3"></head>
-<body><main class="gang-shell">
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gang Unit — MDT</title><link rel="stylesheet" href="gang-unit.css?v=9"><link rel="stylesheet" href="embedded-shell.css?v=2"></head>
+<body class="gang-unit-page"><main class="gang-shell">
   <header class="hero"><div><span class="eyebrow">CPD · ACCÈS RESTREINT</span><h1>Gang Unit</h1><p>Renseignement criminel, territoires et opérations sensibles.</p></div><div class="secure"><i></i> Session habilitée</div></header>
   <div id="notice" class="notice" hidden></div>
   <div class="module-context"><span id="gang-view-label">Vue d’ensemble</span><small>Gang Unit · accès réservé</small></div>
@@ -19,4 +19,4 @@
 
   <section class="tab" data-panel="watchlist"><div class="module-head"><div><span class="eyebrow">ALERTES</span><h2>Liste de surveillance</h2></div><button class="button primary" data-new="watchlist">+ Ajouter une cible</button></div><div class="module-layout"><section id="watchlist-list" class="card-list"></section><section class="panel editor" id="watchlist-editor" hidden><div class="panel-head"><h2 id="watchlist-editor-title">Cible surveillée</h2><button class="text-button" data-close-editor="watchlist" type="button">Fermer</button></div><form id="watchlist-form"><input id="watchlist-id" type="hidden"><div class="form-grid"><label>Type<select id="watchlist-type"><option value="individual">Individu</option><option value="gang">Gang</option><option value="vehicle">Véhicule</option><option value="location">Lieu</option></select></label><label>Priorité<select id="watchlist-priority"><option value="normale">Normale</option><option value="haute">Haute</option><option value="urgente">Urgente</option></select></label></div><label>Cible<input id="watchlist-name" maxlength="160" required></label><label>Statut<select id="watchlist-status"><option value="active">Active</option><option value="suspendue">Suspendue</option><option value="archivee">Archivée</option></select></label><label>Agent responsable<input id="watchlist-assigned" maxlength="120"></label><label>Motif / consignes<textarea id="watchlist-reason" maxlength="5000"></textarea></label><div class="form-actions"><button class="text-button archive-button" data-archive="watchlist" type="button" hidden>Archiver</button><button class="button primary" type="submit">Enregistrer</button></div></form></section></div></section>
 
-</main><script src="gang-unit.js?v=6"></script></body></html>
+</main><script src="embedded-shell.js?v=1"></script><script src="gang-unit.js?v=12"></script></body></html>

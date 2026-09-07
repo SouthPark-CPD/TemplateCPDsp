@@ -28,7 +28,7 @@ test("la carte applique immédiatement le territoire renvoyé après sauvegarde"
   assert.match(source, /state\.territories\.splice\(index, 1, territory\)/);
 });
 
-test("archives et journal ne sont plus proposés dans le menu Gang Unit", () => {
+test("la navigation Gang Unit garde les dossiers fusionnés et écarte les anciennes pages", () => {
   const config = sanitizeConfig({ ui: { gangItems: [
     { key: "gang-archives", label: "Archives", enabled: true },
     { key: "gang-activity", label: "Journal", enabled: true }
@@ -36,5 +36,6 @@ test("archives et journal ne sont plus proposés dans le menu Gang Unit", () => 
   const keys = config.ui.gangItems.map(item => item.key);
   assert.equal(keys.includes("gang-archives"), false);
   assert.equal(keys.includes("gang-activity"), false);
-  assert.deepEqual(keys, ["gang-dashboard", "gang-map", "gang-gangs", "gang-intel", "gang-operations"]);
+  assert.equal(keys.includes("gang-intel"), false);
+  assert.deepEqual(keys, ["gang-dashboard", "gang-map", "gang-gangs", "gang-operations"]);
 });

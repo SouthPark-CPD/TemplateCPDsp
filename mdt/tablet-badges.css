@@ -1,0 +1,1 @@
+.app-card{position:relative}.app-badge{position:absolute;top:5px;right:14px;z-index:2;min-width:21px;height:21px;padding:0 6px;display:grid;place-items:center;border:2px solid #0b1d36;border-radius:999px;background:#e95f68;color:white;font-size:10px;font-style:normal;font-weight:800;box-shadow:0 4px 12px #0007}@media(max-width:550px){.app-badge{right:4px}}
