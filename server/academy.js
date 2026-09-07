@@ -257,7 +257,7 @@ function applicationIdFromChannel(channelId) {
   return `PA-${channelId.slice(-6)}`;
 }
 
-async function createApplicationTicket(user, application) {
+async function createApplicationTicket(user, application, options = {}) {
   await ensureCandidateIsMember(user.id);
   const active = await findActiveApplication(user.id);
   if (active) {
@@ -269,7 +269,7 @@ async function createApplicationTicket(user, application) {
 
   const category = await getCategory();
   const inheritedOverwrites = Array.isArray(category.permission_overwrites)
-    ? category.permission_overwrites.filter(overwrite => overwrite.id !== user.id)
+    ? category.permission_overwrites.filter(overwrite => overwrite.id !== user.id && overwrite.id !== ACADEMY_GUILD_ID)
     : [];
 
   let channel = null;
@@ -281,24 +281,26 @@ async function createApplicationTicket(user, application) {
         name: channelSlug(application.firstName, application.lastName, user.id),
         type: CHANNEL_TYPE_TEXT,
         parent_id: APPLICATION_CATEGORY_ID,
-        topic: `candidate:${user.id} | status:active | création en cours`,
+        topic: `${options.applicationId || ""} | candidate:${user.id} | status:active | création en cours`,
         permission_overwrites: [
           ...inheritedOverwrites,
+          { id: ACADEMY_GUILD_ID, type: 0, allow: "0", deny: "1024" },
           { id: user.id, type: MEMBER_OVERWRITE, allow: CANDIDATE_PERMISSIONS, deny: "0" }
         ]
       })
     });
 
-    const applicationId = applicationIdFromChannel(channel.id);
+    const applicationId = options.applicationId || applicationIdFromChannel(channel.id);
+    if (options.onCreated) await options.onCreated(channel);
     await discordRequest(`/channels/${channel.id}`, {
       method: "PATCH",
       body: JSON.stringify({ topic: `${applicationId} | candidate:${user.id} | status:active | ${application.firstName} ${application.lastName}` })
     });
 
-    await discordRequest(`/channels/${channel.id}/messages`, {
+    const message = await discordRequest(`/channels/${channel.id}/messages`, {
       method: "POST",
       body: JSON.stringify({
-        content: `<@${user.id}>, votre candidature **${applicationId}** a bien été créée. L’équipe Police Academy vous répondra dans ce salon.`,
+        content: `@everyone\n<@${user.id}>, votre candidature **${applicationId}** a bien été créée. L’équipe Police Academy vous répondra dans ce salon.`,
         embeds: applicationEmbeds(applicationId, user, application),
         components: [
           {
@@ -314,18 +316,19 @@ async function createApplicationTicket(user, application) {
             ]
           }
         ],
-        allowed_mentions: { parse: [], users: [user.id] }
+        allowed_mentions: { parse: ["everyone"], users: [user.id] }
       })
     });
 
     return {
       applicationId,
       channelId: channel.id,
+      messageId: message.id,
       channelName: channel.name || channelSlug(application.firstName, application.lastName, user.id),
       channelUrl: `https://discord.com/channels/${ACADEMY_GUILD_ID}/${channel.id}`
     };
   } catch (error) {
-    if (channel?.id) {
+    if (channel?.id && !options.onCreated) {
       await discordRequest(`/channels/${channel.id}`, { method: "DELETE" }).catch(() => {});
     }
     throw error;
@@ -342,4 +345,5 @@ module.exports = {
   applicationIdFromChannel,
   createApplicationTicket,
   sendRecruitmentNotification
+  , discordRequest, ensureCandidateIsMember, CANDIDATE_PERMISSIONS, applicationEmbeds
 };

@@ -136,8 +136,9 @@
     const r = viewport.getBoundingClientRect(), old = mapState.zoom, value = Math.min(12, Math.max(1, next));
     if (value === old) return;
     const localX = Number.isFinite(clientX) ? clientX - r.left : r.width / 2, localY = Number.isFinite(clientY) ? clientY - r.top : r.height / 2;
-    const mapX = (localX - mapState.pan.x) / old, mapY = (localY - mapState.pan.y) / old;
-    mapState.zoom = value; mapState.pan.x = localX - mapX * value; mapState.pan.y = localY - mapY * value; applyMapTransform();
+    const offsetX = parseFloat(stage.style.left) || 0, offsetY = parseFloat(stage.style.top) || 0;
+    const mapX = (localX - offsetX - mapState.pan.x) / old, mapY = (localY - offsetY - mapState.pan.y) / old;
+    mapState.zoom = value; mapState.pan.x = localX - offsetX - mapX * value; mapState.pan.y = localY - offsetY - mapY * value; applyMapTransform();
   }
   function resetMap() { mapState.zoom = 1; mapState.pan = { x: 0, y: 0 }; applyMapTransform(); }
   addEventListener("resize", () => { layoutMapStage(); applyMapTransform(); });

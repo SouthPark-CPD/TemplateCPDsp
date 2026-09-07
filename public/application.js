@@ -241,7 +241,11 @@
       }
       if (!response.ok || !result.ok) throw new Error(result.code || "internal_error");
       localStorage.removeItem(draftKey);
-      location.assign(`success.html?id=${encodeURIComponent(result.applicationId)}`);
+      const successParams = new URLSearchParams({id:result.applicationId});
+      if (/^\d{17,20}$/.test(result.channelId || '')) successParams.set('channel',result.channelId);
+      if (result.ticketPending) successParams.set('pending','1');
+      if (result.existing) successParams.set('existing','1');
+      location.assign(`success.html?${successParams}`);
     } catch (error) {
       const messages = {
         invalid_application: "Certaines informations n’ont pas pu être traitées.",
@@ -250,6 +254,7 @@
         database_not_ready: "Le service de candidature n’est pas encore prêt.",
         database_error: "La candidature n’a pas pu être enregistrée. Réessayez dans quelques instants.",
         candidate_login_required: "Votre session Discord a expiré. Reconnectez-vous avant d’envoyer la candidature."
+        , academy_membership_required: "Rejoignez à nouveau le serveur Police Academy en vous reconnectant via Discord.", ticket_busy: "Votre ticket est en cours de création. Réessayez dans quelques instants.", active_application: "Une candidature est déjà en cours pour ces informations."
       };
       submitError.textContent = messages[error.message] || "La candidature n’a pas pu être transmise. Réessayez.";
       submitError.classList.remove("hidden");

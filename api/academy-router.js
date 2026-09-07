@@ -2298,6 +2298,9 @@ async function recruitmentTickets(req, res) {
 
   try {
     const sql = neon(process.env.DATABASE_URL);
+    await require("../server/recruitment-tickets").ensureTicketSchema(sql);
+    const ticketStates = await sql`SELECT application_id,ticket_status,channel_id FROM academy_recruitment_tickets`;
+    const ticketById = new Map(ticketStates.map(ticket => [ticket.application_id,ticket]));
     const rows = await sql`
       SELECT id, first_name, last_name, phone, availability, status, decision,
         assigned_instructor_name, discord_message_id, created_at, updated_at
@@ -2314,6 +2317,7 @@ async function recruitmentTickets(req, res) {
         recruitmentDecision: row.decision,
         assignedInstructorName: row.assigned_instructor_name || "",
         notificationSent: Boolean(row.discord_message_id),
+        ticketStatus: ticketById.get(`PA-${String(row.id).padStart(6, "0")}`)?.ticket_status || "missing",
         createdAt: row.created_at,
         updatedAt: row.updated_at
       }))
@@ -2325,6 +2329,7 @@ async function recruitmentTickets(req, res) {
 }
 
 async function recruitmentTicketDetail(req, res) {
+  if (req.method === "POST") return recruitmentTicketAction(req, res);
   if (req.method !== "GET") return res.status(405).end();
   res.setHeader("Cache-Control", "private, no-store");
   const session = await instructorAccess(req, res);
@@ -2350,6 +2355,7 @@ async function recruitmentTicketDetail(req, res) {
     `;
     if (!rows.length) return res.status(404).json({ ok: false, code: "recruitment_ticket_not_found" });
     const row = rows[0];
+    const discordTicket = await require("../server/recruitment-tickets").readTicket(sql, applicationId.toUpperCase());
     return res.status(200).json({
       ok: true,
       ticket: {
@@ -2361,6 +2367,7 @@ async function recruitmentTicketDetail(req, res) {
         assignedInstructorId: row.assigned_instructor_id || "",
         assignedInstructorName: row.assigned_instructor_name || "",
         internalNote: row.internal_note || "",
+        discordTicket,
         notificationSent: Boolean(row.discord_message_id),
         formData: recruitmentFormData(row),
         createdAt: row.created_at,
@@ -2371,6 +2378,25 @@ async function recruitmentTicketDetail(req, res) {
     console.error("Academy recruitment ticket detail failed", error);
     return res.status(500).json({ ok: false, code: "recruitment_ticket_unavailable" });
   }
+}
+
+async function recruitmentTicketAction(req, res) {
+  const session = await instructorAccess(req,res); if (!session) return;
+  const input = readJsonBody(req), applicationId = String(input?.applicationId || "").toUpperCase(), action = input?.action;
+  if (!/^PA-\d{1,20}$/.test(applicationId) || !["create","close","reopen","delete","refresh"].includes(action)) return res.status(400).json({ok:false,code:"invalid_ticket_action"});
+  try {
+    const sql = neon(process.env.DATABASE_URL), service = require("../server/recruitment-tickets");
+    if (action === "create") {
+      await service.ensureTicketSchema(sql);
+      const id = applicationId.replace(/^PA-0*/, "") || "0";
+      const [row] = await sql`SELECT * FROM academy_recruitment_applications WHERE id=${id}`;
+      if (!row) return res.status(404).json({ok:false,code:"recruitment_ticket_not_found"});
+      const application = service.storedApplication(row), candidateId = row.candidate_discord_id || application.discordId;
+      if (!/^\d{17,20}$/.test(candidateId || "")) return res.status(409).json({ok:false,code:"candidate_identity_missing"});
+      await service.createForApplication(sql,row,{id:candidateId,username:application.rpName,globalName:application.rpName},application);
+    } else await service.ticketAction(sql,applicationId,action,session.user);
+    return res.json({ok:true});
+  } catch(error) { console.error("Recruitment ticket action failed",{code:error.code || "unknown"}); return res.status(error.status || 500).json({ok:false,code:error.code || "ticket_action_failed"}); }
 }
 
 async function saveRecruitmentDecision(req, res) {

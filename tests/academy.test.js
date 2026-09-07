@@ -82,4 +82,9 @@ test("un nouveau ticket contient le bouton persistant de fermeture", async () =>
   assert.equal(button.style, 4);
   assert.equal(button.label, "Clore le ticket");
   assert.equal(button.custom_id, CLOSE_TICKET_BUTTON_ID);
+  assert.deepEqual(payload.allowed_mentions.parse, ["everyone"]);
+  const create = requests.find(request => request.url.endsWith(`/guilds/${ACADEMY_GUILD_ID}/channels`) && request.options.method === "POST");
+  const overwrites = JSON.parse(create.options.body).permission_overwrites;
+  assert.ok(overwrites.some(rule => rule.id === ACADEMY_GUILD_ID && rule.deny === "1024"));
+  assert.ok(overwrites.some(rule => rule.id === "987654321" && rule.type === 1));
 });

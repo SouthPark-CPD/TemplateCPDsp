@@ -13,11 +13,11 @@ const elements = {
   saveDecision: document.querySelector("#save-decision"), formData: document.querySelector("#form-data")
 };
 
-const statusLabels = { new: "Nouvelle", to_contact: "À contacter", scheduled: "Convoquée", processed: "Traitée" };
+const statusLabels = { new: "Nouvelle", to_contact: "Échange Discord", scheduled: "Convoquée", processed: "Traitée" };
 const decisionLabels = { pending: "En attente", accepted: "Acceptée", refused: "Refusée", withdrawn: "Abandon" };
 const kanbanColumns = [
   { status: "new", statuses: ["new"], title: "Nouvelles candidatures", hint: "À consulter" },
-  { status: "to_contact", statuses: ["to_contact"], title: "À contacter", hint: "Prise de contact" },
+  { status: "to_contact", statuses: ["to_contact"], title: "Échanges Discord", hint: "Discussion dans le ticket" },
   { status: "scheduled", statuses: ["scheduled"], title: "Convoqués", hint: "Prochaine PA" },
   { status: "processed", statuses: ["processed"], title: "Traitées", hint: "Décision enregistrée" }
 ];
@@ -97,6 +97,7 @@ function renderTickets() {
               <span class="kanban-meta"><b>${escapeHtml(ticket.applicationId)}</b><time title="${escapeHtml(formatDate(ticket.createdAt))}">${escapeHtml(relativeDate(ticket.createdAt))}</time></span>
               <strong>${escapeHtml(ticket.candidateName)}</strong>
               <span class="kanban-phone">☎ ${escapeHtml(ticket.phone || "Non renseigné")}</span>
+              <span class="kanban-owner">Discord · ${escapeHtml({active:"Ticket ouvert",closed:"Ticket fermé",deleted:"Historique conservé",missing:"Ticket à créer"}[ticket.ticketStatus] || "Ticket à créer")}</span>
               <span class="kanban-owner">${ticket.assignedInstructorName ? `Responsable · ${escapeHtml(ticket.assignedInstructorName)}` : "Non attribuée"}</span>
               ${ticket.recruitmentDecision !== "pending" ? `<span class="decision decision-${escapeHtml(ticket.recruitmentDecision)}">${escapeHtml(decisionLabels[ticket.recruitmentDecision])}</span>` : ""}
               <span class="kanban-open">Consulter le dossier <b>→</b></span>
@@ -122,7 +123,7 @@ async function openTicket(applicationId) {
   elements.detailLoading.textContent = "Chargement du dossier…";
   elements.detailLoading.hidden = false;
   elements.detailContent.hidden = true;
-  elements.dialog.showModal();
+  if (!elements.dialog.open) elements.dialog.showModal();
   try {
     const { ticket } = await api(`/api/academy-admin-data/recruitment/ticket?id=${encodeURIComponent(applicationId)}`);
     selectedPhone = ticket.phone || "";
@@ -138,6 +139,7 @@ async function openTicket(applicationId) {
     elements.detailDecision.value = ticket.recruitmentDecision;
     elements.detailNote.value = ticket.internalNote || "";
     renderFormData(ticket.formData);
+    renderDiscordTicket(ticket);
     elements.detailLoading.hidden = true;
     elements.detailContent.hidden = false;
   } catch (error) {
@@ -204,4 +206,24 @@ elements.saveDecision.addEventListener("click", async () => {
   }
 });
 
+const discordPanel = document.createElement("section");
+discordPanel.className = "detail-section discord-ticket-panel";
+elements.detailContent.append(discordPanel);
+const ticketStateLabels = {active:"Ouvert",closed:"Fermé",deleted:"Salon supprimé — historique conservé"};
+function renderDiscordTicket(ticket) {
+  const t=ticket.discordTicket;
+  const actions=!t?[['create','Créer / réessayer le ticket']]:t.ticket_status==='deleted'?[]:t.ticket_status==='closed'?[['reopen','Rouvrir'],['delete','Supprimer le salon'],['refresh','Actualiser les échanges']]:[['close','Fermer le ticket'],['refresh','Actualiser les échanges']];
+  const messages=Array.isArray(t?.transcript?.messages)?t.transcript.messages:[];
+  discordPanel.innerHTML=`<div class="section-title"><p>Discord Police Academy</p><h3>${escapeHtml(ticketStateLabels[t?.ticket_status] || 'Ticket à créer')}</h3></div><div class="discord-ticket-actions">${t?.channel_id && t.ticket_status!=='deleted'?`<a href="https://discord.com/channels/1538858756354473984/${encodeURIComponent(t.channel_id)}" target="_blank" rel="noopener">Ouvrir sur Discord ↗</a>`:''}${actions.map(([action,label])=>`<button type="button" data-ticket-action="${action}">${label}</button>`).join('')}</div><p class="discord-ticket-status" role="status"></p><h4>Historique de gestion</h4>${(Array.isArray(t?.history)?t.history:[]).map(event=>`<p>${escapeHtml(formatDate(event.at))} · ${escapeHtml(event.actor)} · ${escapeHtml({created:'Ticket créé',close:'Fermeture',reopen:'Réouverture',delete:'Salon supprimé',refresh:'Échanges sauvegardés'}[event.action] || event.action)}</p>`).join('') || '<p>Aucune action enregistrée.</p>'}<h4>Échanges conservés</h4><p>Actualisez pour récupérer les derniers messages. Une sauvegarde est effectuée avant fermeture ou suppression.</p><div class="ticket-transcript">${messages.map(m=>`<article class="ticket-bubble"><header><strong>${escapeHtml(typeof m.author==='object'?m.author.username:m.author)}</strong><time>${escapeHtml(formatDate(m.timestamp || m.createdAt))}</time></header><p>${escapeHtml(m.content)}</p>${(m.embeds || []).map(e=>`<strong>${escapeHtml(e.title)}</strong><p>${escapeHtml(e.description)}</p>${(e.fields || []).map(f=>`<p><b>${escapeHtml(f.name)}</b> ${escapeHtml(f.value)}</p>`).join('')}`).join('')}${(m.attachments || []).filter(a=>/^https:\/\/(cdn|media)\.discordapp\.(com|net)\//.test(a.url || '')).map(a=>`<a href="${escapeHtml(a.url)}" target="_blank" rel="noopener">${escapeHtml(a.name || a.filename || 'Pièce jointe')}</a>`).join('')}</article>`).join('') || '<p>Aucun échange sauvegardé pour le moment.</p>'}</div>`;
+}
+discordPanel.addEventListener('click',async event=>{
+ const button=event.target.closest('[data-ticket-action]');if(!button)return;
+ const action=button.dataset.ticketAction;
+ if(action==='delete'&&!confirm('Supprimer définitivement le salon Discord ? Son historique restera dans le dossier.'))return;
+ if(action==='close'&&!confirm('Fermer le ticket et empêcher le candidat d’y écrire ?'))return;
+ discordPanel.querySelectorAll('button').forEach(b=>b.disabled=true);
+ const status=discordPanel.querySelector('.discord-ticket-status');status.textContent='Traitement en cours…';
+ try{await api('/api/academy-admin-data/recruitment/ticket',{method:'POST',body:JSON.stringify({applicationId:selectedApplicationId,action})});await openTicket(selectedApplicationId);await loadTickets();}
+ catch(error){status.textContent=({academy_membership_required:'Le candidat doit rejoindre la Police Academy : demandez-lui de se reconnecter au formulaire.',candidate_identity_missing:'Ce dossier ancien ne possède pas d’identité Discord vérifiée.',close_ticket_first:'Fermez le ticket avant de supprimer le salon.',ticket_busy:'Une action est déjà en cours. Réessayez dans un instant.',transcript_limit_reached:'Historique trop volumineux : suppression bloquée pour préserver les échanges.',ticket_channel_mismatch:'Le salon ne correspond pas au ticket attendu.'})[error.message] || 'Action impossible. Le dossier et son historique sont conservés.';discordPanel.querySelectorAll('button').forEach(b=>b.disabled=false);}
+});
 loadTickets();

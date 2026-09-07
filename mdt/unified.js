@@ -2,6 +2,7 @@
 (() => {
   const R = CPDRoutes;
   const origin = location.origin;
+  const timedFetch = (url, options = {}) => { const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 20000); return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer)); };
   const frame = document.getElementById("module-frame");
   const launcher = document.getElementById("launcher");
   const workspace = document.getElementById("workspace");
@@ -31,6 +32,7 @@
   let loadingTimer;
   let homeTimer;
   let badges = { academy: 0, liaison: 0, gang: 0 };
+  let moduleBadges = {};
   window.CPDUnifiedShell = true;
 
   const icon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${icons[name] || icons.message}"></path></svg>`;
@@ -79,7 +81,7 @@
     title.textContent = app.label;
     description.textContent = "Choisissez un module.";
     back.hidden = false;
-    grid.innerHTML = folderItems(activeFolder).map(([view, label, iconName]) => `<button class="app-card" type="button" data-view="${view}"><span class="app-icon app-${app.tone}">${icon(iconName)}</span><strong>${label}</strong></button>`).join("");
+    grid.innerHTML = folderItems(activeFolder).map(([view, label, iconName]) => `<button class="app-card" type="button" data-view="${view}">${moduleBadges[view] ? `<em class="app-badge" aria-label="${moduleBadges[view]} éléments à traiter">${moduleBadges[view] > 99 ? "99+" : moduleBadges[view]}</em>` : ""}<span class="app-icon app-${app.tone}">${icon(iconName)}</span><strong>${label}</strong></button>`).join("");
   }
   function setView(route) {
     current = route;
@@ -96,7 +98,9 @@
     frame.hidden = true;
     launcher.hidden = false;
     workspace.hidden = true;
-    launcherMessage.hidden = !ready;
+    launcherMessage.hidden = ready;
+    if (ready) launcherMessage.textContent = "";
+    renderLauncher();
     retry.hidden = true;
     if (push) history.pushState(null, "", "/mdt/index.html");
   }
@@ -117,7 +121,7 @@
   function routeFor(view) { return R.resolve(R.routes[view], origin); }
   async function loadConfiguration() {
     try {
-      const response = await fetch("/api/liaison/complaints?configuration=1", { credentials: "same-origin", cache: "no-store" });
+      const response = await timedFetch("/api/liaison/complaints?configuration=1", { credentials: "same-origin", cache: "no-store" });
       const data = await response.json();
       if (response.ok && data?.liaison?.navigation) {
         navigation = data.liaison.navigation;
@@ -126,9 +130,10 @@
     } catch { /* Default launcher remains usable. */ }
   }
   async function refreshBadges(data) {
-    badges = { academy: Number(data?.academySummary?.newCount || 0), liaison: 0, gang: 0 };
+    badges = { academy: Number(data?.academySummary?.pendingCount ?? data?.academySummary?.newCount ?? 0), liaison: 0, gang: 0 };
+    moduleBadges = { recrutements: badges.academy };
     const tasks = [
-      fetch("/api/liaison/complaints", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).then(result => {
+      timedFetch("/api/liaison/complaints", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).then(result => {
         const threads = result?.threads || [];
         const seen = JSON.parse(localStorage.getItem("liaisonSeen") || "{}");
         if (localStorage.getItem("liaisonBaseline") !== "1") {
@@ -139,26 +144,29 @@
         }
         const unread = threads.filter(thread => thread.lastMessageId && seen[thread.id] !== thread.lastMessageId);
         badges.liaison = unread.length;
+        moduleBadges.liaison = unread.length;
       }).catch(() => {})
     ];
-    if (gangAccess) tasks.push(fetch("/api/gang-unit/data", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).then(result => {
-      const urgent = (result?.watchlist || []).filter(item => item.priority === "urgente").length;
+    if (gangAccess) tasks.push(timedFetch("/api/gang-unit/data", { credentials: "same-origin", cache: "no-store" }).then(response => response.ok ? response.json() : null).then(result => {
+      const urgent = (result?.watchlist || []).filter(item => item.priority === "urgente" && item.status === "active").length;
       const active = (result?.operations || []).filter(item => item.status === "active").length;
       badges.gang = urgent + active;
+      moduleBadges["gang-gangs"] = urgent;
+      moduleBadges["gang-operations"] = active;
     }).catch(() => {}));
     await Promise.all(tasks);
-    if (!activeFolder) renderLauncher();
+    renderLauncher();
   }
   async function refreshBadgesWithSession() {
     try {
-      const response = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" });
+      const response = await timedFetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" });
       if (response.ok) return refreshBadges(await response.json());
     } catch { /* Keep the previous notification state visible. */ }
   }
   async function session() {
     retry.disabled = true;
     try {
-      const response = await fetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" });
+      const response = await timedFetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" });
       if (response.status === 401) return location.replace("/auth/login.html?error=login_required");
       const data = await response.json();
       if (!response.ok || !data?.authenticated) throw new Error("session");
@@ -175,6 +183,7 @@
       const requested = new URL(location.href).searchParams.get("view");
       requested ? navigate(R.fromShell(location.href, origin), false) : showHome(false);
     } catch {
+      launcherMessage.hidden = false;
       launcherMessage.textContent = "Impossible de vérifier vos accès. Réessayez.";
       retry.hidden = false;
     } finally { retry.disabled = false; }
@@ -212,5 +221,6 @@
     }
   });
   addEventListener("popstate", () => { const hasView = new URL(location.href).searchParams.has("view"); hasView ? navigate(R.fromShell(location.href, origin), false) : showHome(false); });
+  addEventListener("message", event => { if (event.origin === origin && event.source === frame.contentWindow && event.data?.type === "academy-recruitment-updated") refreshBadgesWithSession(); });
   updateClock(); setInterval(updateClock, 15000); session();
 })();

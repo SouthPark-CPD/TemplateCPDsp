@@ -1,7 +1,8 @@
 const { neon } = require("@neondatabase/serverless");
-const { AcademyError, validateApplication, sendRecruitmentNotification } = require("../../server/academy");
+const { AcademyError, validateApplication } = require("../../server/academy");
 const { getConfig, publicRecruitmentConfig } = require("../../server/admin-config");
 const { readSession } = require("../../server/candidate-auth");
+const { ensureTicketSchema, createForApplication, storedApplication } = require("../../server/recruitment-tickets");
 
 function bodyFromRequest(req) {
   if (req.body && typeof req.body === "object") return req.body;
@@ -33,44 +34,44 @@ module.exports = async function handler(req, res) {
     const application = validateApplication({ ...bodyFromRequest(req), discordId: String(candidateSession.user.id) });
     const phoneNormalized = application.phone.replace(/\D/g, "");
     const sql = neon(process.env.DATABASE_URL);
-    const existing = phoneNormalized ? await sql`
-      SELECT id FROM academy_recruitment_applications
-      WHERE phone_normalized = ${phoneNormalized}
+    await ensureTicketSchema(sql);
+    const existing = await sql`
+      SELECT * FROM academy_recruitment_applications
+      WHERE (candidate_discord_id = ${candidateSession.user.id} OR (${phoneNormalized} <> '' AND phone_normalized = ${phoneNormalized}))
         AND status NOT IN ('processed', 'archived')
         AND created_at >= NOW() - INTERVAL '30 days'
       ORDER BY created_at DESC LIMIT 1
-    ` : [];
+    `;
     if (existing.length) {
-      return res.status(409).json({ ok: false, code: "active_application", applicationId: publicId(existing[0].id) });
+      const row = existing[0];
+      if (row.candidate_discord_id !== candidateSession.user.id) return res.status(409).json({ok:false,code:"active_application"});
+      const ticket = await createForApplication(sql,row,candidateSession.user,storedApplication(row));
+      return res.status(200).json({ ok: true, existing:true, applicationId: publicId(row.id), ...ticket });
     }
 
     const [created] = await sql`
       INSERT INTO academy_recruitment_applications (
         first_name, last_name, age, phone, phone_normalized, police_experience,
         experience, availability, motivation, qualities, status, decision,
-        created_at, updated_at
+        candidate_discord_id, created_at, updated_at
       ) VALUES (
         ${application.firstName}, ${application.lastName}, ${application.age},
         ${application.phone}, ${phoneNormalized}, ${application.policeExperience},
         ${application.experience}, ${application.storageAvailability || application.availability}, ${application.motivation},
-        ${application.qualities}, 'new', 'pending', NOW(), NOW()
-      ) RETURNING id
+        ${application.qualities}, 'new', 'pending', ${candidateSession.user.id}, NOW(), NOW()
+      ) RETURNING *
     `;
     const applicationId = publicId(created.id);
 
-    let notification = { sent: false };
+    let ticket = null;
     try {
-      notification = await sendRecruitmentNotification(applicationId, application);
-      if (notification.sent) {
-        await sql`UPDATE academy_recruitment_applications
-          SET discord_channel_id=${notification.channelId}, discord_message_id=${notification.messageId}, updated_at=NOW()
-          WHERE id=${created.id}`;
-      }
+      ticket = await createForApplication(sql, created, candidateSession.user, application);
     } catch (error) {
-      console.error("Recruitment application saved but Discord notification failed", error);
+      console.error("Recruitment ticket creation pending", {code:error.code || "unknown"});
+      return res.status(201).json({ok:true,applicationId,ticketPending:true});
     }
 
-    return res.status(201).json({ ok: true, applicationId, notificationSent: notification.sent === true });
+    return res.status(201).json({ ok: true, applicationId, ...ticket });
   } catch (error) {
     if (error instanceof AcademyError) return res.status(error.status).json({ ok: false, code: error.code });
     console.error("Recruitment application submission failed", error);
