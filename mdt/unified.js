@@ -33,6 +33,8 @@
   let homeTimer;
   let badges = { academy: 0, liaison: 0, gang: 0 };
   let moduleBadges = {};
+  let badgeRefreshPending = false;
+  const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   window.CPDUnifiedShell = true;
 
   const icon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${icons[name] || icons.message}"></path></svg>`;
@@ -72,7 +74,7 @@
       title.textContent = "Accueil";
       description.textContent = "Ouvrez une application pour accéder à son portail.";
       back.hidden = true;
-      grid.innerHTML = appDefinitions().filter(app => app.visible).map(app => `<button class="app-card" type="button" data-section="${app.key}">${badges[app.key] ? `<em class="app-badge">${badges[app.key] > 99 ? "99+" : badges[app.key]}</em>` : ""}<span class="app-icon app-${app.tone}">${icon(app.icon)}</span><strong>${app.label}</strong><small>${app.subtitle}</small></button>`).join("");
+      grid.innerHTML = appDefinitions().filter(app => app.visible).map(app => `<button class="app-card" type="button" data-section="${app.key}">${badges[app.key] ? `<em class="app-badge">${badges[app.key] > 99 ? "99+" : badges[app.key]}</em>` : ""}<span class="app-icon app-${app.tone}">${icon(app.icon)}</span><strong>${escapeHtml(app.label)}</strong><small>${escapeHtml(app.subtitle)}</small></button>`).join("");
       return;
     }
     const app = appDefinitions().find(entry => entry.key === activeFolder);
@@ -81,7 +83,7 @@
     title.textContent = app.label;
     description.textContent = "Choisissez un module.";
     back.hidden = false;
-    grid.innerHTML = folderItems(activeFolder).map(([view, label, iconName]) => `<button class="app-card" type="button" data-view="${view}">${moduleBadges[view] ? `<em class="app-badge" aria-label="${moduleBadges[view]} éléments à traiter">${moduleBadges[view] > 99 ? "99+" : moduleBadges[view]}</em>` : ""}<span class="app-icon app-${app.tone}">${icon(iconName)}</span><strong>${label}</strong></button>`).join("");
+    grid.innerHTML = folderItems(activeFolder).map(([view, label, iconName]) => `<button class="app-card" type="button" data-view="${view}">${moduleBadges[view] ? `<em class="app-badge" aria-label="${moduleBadges[view]} éléments à traiter">${moduleBadges[view] > 99 ? "99+" : moduleBadges[view]}</em>` : ""}<span class="app-icon app-${app.tone}">${icon(iconName)}</span><strong>${escapeHtml(label)}</strong></button>`).join("");
   }
   function setView(route) {
     current = route;
@@ -158,10 +160,13 @@
     renderLauncher();
   }
   async function refreshBadgesWithSession() {
+    if (document.hidden || badgeRefreshPending) return;
+    badgeRefreshPending = true;
     try {
       const response = await timedFetch("/api/auth/session", { credentials: "same-origin", cache: "no-store" });
       if (response.ok) return refreshBadges(await response.json());
     } catch { /* Keep the previous notification state visible. */ }
+    finally { badgeRefreshPending = false; }
   }
   async function session() {
     retry.disabled = true;
@@ -222,5 +227,6 @@
   });
   addEventListener("popstate", () => { const hasView = new URL(location.href).searchParams.has("view"); hasView ? navigate(R.fromShell(location.href, origin), false) : showHome(false); });
   addEventListener("message", event => { if (event.origin === origin && event.source === frame.contentWindow && event.data?.type === "academy-recruitment-updated") refreshBadgesWithSession(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && ready) refreshBadgesWithSession(); });
   updateClock(); setInterval(updateClock, 15000); session();
 })();

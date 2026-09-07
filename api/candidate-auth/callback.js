@@ -14,7 +14,7 @@ module.exports = async function handler(req, res) {
     res.setHeader("Set-Cookie", [clearStateCookie(), sessionCookie(user)]);
     return res.redirect(302, "/public/application.html");
   } catch (error) {
-    console.error("Candidate Discord authorization failed", error);
+    console.error("Candidate Discord authorization failed", require("../../server/request-security").safeError(error));
     res.setHeader("Set-Cookie", clearStateCookie());
     return res.redirect(302, "/public/application.html?auth_error=join");
   }

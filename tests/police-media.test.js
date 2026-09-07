@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { parseImagePayload, MEDIA_ID, MAX_IMAGE_BYTES } = require("../server/police-media");
 
 test("accepte une petite capture PNG valide", () => {
-  const source = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+  const source = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64');
   const result = parseImagePayload({ name: "capture.png", type: "image/png", data: `data:image/png;base64,${source.toString("base64")}` });
   assert.equal(result.ok, true);
   assert.equal(result.buffer.length, source.length);

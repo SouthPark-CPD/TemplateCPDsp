@@ -17,6 +17,7 @@ function publicId(id) {
 }
 
 module.exports = async function handler(req, res) {
+  if (!require('../../server/request-security').guardMutation(req, res, 30000)) return;
   res.setHeader("Cache-Control", "no-store");
   if (req.method === "GET") {
     const current = await getConfig();
@@ -74,7 +75,8 @@ module.exports = async function handler(req, res) {
     return res.status(201).json({ ok: true, applicationId, ...ticket });
   } catch (error) {
     if (error instanceof AcademyError) return res.status(error.status).json({ ok: false, code: error.code });
-    console.error("Recruitment application submission failed", error);
+    if (error.code === '23505') return res.status(409).json({ok:false,code:'active_application'});
+    console.error("Recruitment application submission failed", require("../../server/request-security").safeError(error));
     const code = error.code === "42P01" ? "database_not_ready" : "database_error";
     return res.status(500).json({ ok: false, code });
   }

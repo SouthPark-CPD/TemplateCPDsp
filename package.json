@@ -2,7 +2,8 @@
   "name": "cpd-portal",
   "version": "1.0.0",
   "private": true,
+  "scripts": { "test": "node --test tests/*.test.js" },
   "dependencies": {
-    "@neondatabase/serverless": "latest"
+    "@neondatabase/serverless": "1.1.0"
   }
 }

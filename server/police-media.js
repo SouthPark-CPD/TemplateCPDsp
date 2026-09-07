@@ -16,6 +16,11 @@ function parseImagePayload(input) {
   let buffer;
   try { buffer = Buffer.from(match[2].replace(/\s/g, ""), "base64"); } catch { return { ok: false, code: "invalid_image" }; }
   if (!buffer.length || buffer.length > MAX_IMAGE_BYTES) return { ok: false, code: "image_too_large" };
+  const signature = type === 'image/png' ? buffer.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))
+    : type === 'image/jpeg' ? buffer.length >= 3 && buffer[0] === 255 && buffer[1] === 216 && buffer[2] === 255
+    : type === 'image/webp' ? buffer.length >= 12 && buffer.toString('ascii',0,4) === 'RIFF' && buffer.toString('ascii',8,12) === 'WEBP'
+    : buffer.length >= 6 && ['GIF87a','GIF89a'].includes(buffer.toString('ascii',0,6));
+  if (!signature) return { ok: false, code: 'invalid_image' };
   return { ok: true, type, name, buffer, base64: buffer.toString("base64"), hash: crypto.createHash("sha256").update(buffer).digest("hex") };
 }
 

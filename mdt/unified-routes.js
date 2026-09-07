@@ -1,7 +1,7 @@
 /* Fixed internal routes only; never use an arbitrary iframe URL. */
 (function(root){
  const routes={procedures:'/mdt/procedures.html',radio:'/mdt/code.html',reglement:'/mdt/reglement.html',tenues:'/mdt/tenues-vehicules.html',organigramme:'/mdt/organigramme.html',rapide:'/mdt/acces-rapide.html',liaison:'/mdt/liaison.html',prosecutor:'/mdt/prosecutor-request.html',doj:'/mdt/communication-doj.html', 'liaison-gouv':'/mdt/liaison-gouvernement.html',avocat:'/mdt/liaison-avocat.html',channel:'/mdt/channel.html',pa:'/academy-admin/index.html',suivi:'/academy-admin/effectifs.html',formations:'/academy-admin/evaluations.html',recrutements:'/academy-admin/recrutements.html',activite:'/academy-admin/activite.html',dossier:'/academy-admin/dossier.html',sessions:'/academy-admin/sessions.html','gang-dashboard':'/mdt/gang-unit.html?view=dashboard','gang-map':'/mdt/gang-unit.html?view=map','gang-gangs':'/mdt/gang-unit.html?view=gangs','gang-intel':'/mdt/gang-unit.html?view=gangs','gang-operations':'/mdt/gang-unit.html?view=operations'};
- const params=['id','agent','tab','mode','template','date','schedule','participants','status','channelKey'];
+ const params=['id','agent','tab','mode','template','date','schedule','participants','status','channelKey','sub','kind','target'];
  function resolve(value,origin){
   const u=new URL(value,origin);if(u.origin!==origin)return null;
   if(u.pathname==='/academy-admin/'||u.pathname==='/academy-admin')u.pathname=routes.pa;

@@ -21,6 +21,7 @@ const CONTENT_TYPES = {
 
 function withClipboardSupport(body, extension) {
   if (extension !== ".html") return body;
+  body = require('../server/page-response').withMotion(body);
   const html = body.toString("utf8");
   if (html.includes("police-clipboard.js")) return body;
   return Buffer.from(html.replace(/<\/head>/i, '<link rel="stylesheet" href="/assets/police-clipboard.css?v=2"><script defer src="/assets/police-clipboard.js?v=2"></script></head>'));
@@ -77,9 +78,11 @@ module.exports = async function handler(req, res) {
     const stat = await fs.stat(absolutePath);
     const finalPath = stat.isDirectory() ? path.join(absolutePath, "index.html") : absolutePath;
     const extension = path.extname(finalPath).toLowerCase();
+    if (!CONTENT_TYPES[extension]) return res.status(404).end();
+    res.setHeader('Content-Type', CONTENT_TYPES[extension]);
+    if (require('../server/page-response').prepareAsset(req,res,stat.isDirectory() ? await fs.stat(finalPath) : stat,extension)) return;
     const body = withClipboardSupport(await fs.readFile(finalPath), extension);
     res.setHeader("Content-Type", CONTENT_TYPES[extension] || "application/octet-stream");
-    res.setHeader("Cache-Control", "private, no-store");
     res.setHeader("X-Content-Type-Options", "nosniff");
     if (req.method === "HEAD") return res.status(200).end();
     return res.status(200).send(body);

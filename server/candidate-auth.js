@@ -47,7 +47,7 @@ function decrypt(value) {
 function cookies(req) {
   return String(req.headers.cookie || "").split(";").reduce((result, item) => {
     const index = item.indexOf("=");
-    if (index > 0) result[item.slice(0, index).trim()] = decodeURIComponent(item.slice(index + 1).trim());
+    if (index > 0) result[item.slice(0, index).trim()] = require("./request-security").decodeCookie(item.slice(index + 1).trim());
     return result;
   }, {});
 }

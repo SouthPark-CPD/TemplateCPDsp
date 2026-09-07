@@ -1,0 +1,17 @@
+.env
+.env.*
+**/.env
+**/.env.*
+.git
+.codex
+.agents
+tests
+*.log
+*.sql
+*.md
+*.txt
+*.cmd
+*.ps1
+*.example
+*.pem
+*.key

@@ -1,0 +1,16 @@
+/* Short, compositor-friendly feedback for the in-game tablet. */
+:root{--cpd-ease:cubic-bezier(.2,.7,.2,1)}
+button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:wait}
+:where(button,a,input,select,textarea):focus-visible{outline:2px solid #8fc8ff;outline-offset:3px}
+@media(prefers-reduced-motion:no-preference){
+ :where(button,.button,.app-icon,.kanban-card,.case-result){transition:background-color .15s ease,border-color .15s ease,box-shadow .15s ease,opacity .15s ease,transform .15s var(--cpd-ease)}
+ :where(button,.button):active:not(:disabled){transform:translateY(1px)}
+ dialog[open]{animation:cpd-dialog-in .18s var(--cpd-ease) both}
+ dialog[open]::backdrop{animation:cpd-fade-in .15s ease both}
+ .launcher:not([hidden]),.workspace:not([hidden]),.case-file-body{animation:cpd-fade-in .16s ease both}
+ #module-frame:not([hidden]){animation:cpd-fade-in .18s ease both}
+ @keyframes cpd-dialog-in{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+ @keyframes cpd-fade-in{from{opacity:0}to{opacity:1}}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

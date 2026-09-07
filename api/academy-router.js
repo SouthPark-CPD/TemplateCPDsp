@@ -164,7 +164,7 @@ async function databaseCheck(req, res) {
       tables: ready ? "ready" : "missing"
     });
   } catch (error) {
-    console.error("Academy database check failed", error);
+    console.error("Academy database check failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "database_error" });
   }
 }
@@ -702,7 +702,7 @@ async function trainingTemplates(req, res) {
       templates: templates.map(row => mapTemplate(row, byTemplate.get(String(row.id)) || []))
     });
   } catch (error) {
-    console.error("Academy templates read failed", error);
+    console.error("Academy templates read failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: error.code === "42P01" ? "templates_table_missing" : "templates_unavailable" });
   }
 }
@@ -763,7 +763,7 @@ async function saveTrainingTemplate(req, res) {
     });
     return res.status(id ? 200 : 201).json({ ok: true, id: templateId });
   } catch (error) {
-    console.error("Academy template save failed", error);
+    console.error("Academy template save failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: error.code === "42P01" ? "templates_table_missing" : "template_save_failed" });
   }
 }
@@ -788,7 +788,7 @@ async function toggleTrainingTemplate(req, res) {
     });
     return res.status(200).json({ ok: true, id, active: body.active });
   } catch (error) {
-    console.error("Academy template toggle failed", error);
+    console.error("Academy template toggle failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "template_toggle_failed" });
   }
 }
@@ -852,7 +852,7 @@ async function writeActivityLog(sql, session, entry) {
       )
     `;
   } catch (error) {
-    console.error("Academy activity log write failed", error);
+    console.error("Academy activity log write failed", require("../server/request-security").safeError(error));
   }
 }
 
@@ -1101,7 +1101,7 @@ async function agentsList(req, res) {
       agents
     });
   } catch (error) {
-    console.error("Academy agents list failed", error);
+    console.error("Academy agents list failed", require("../server/request-security").safeError(error));
     const code = error.code || (error.status === 403 ? "discord_members_forbidden" : "agents_unavailable");
     return res.status(500).json({ ok: false, code });
   }
@@ -1199,7 +1199,7 @@ async function trainingOverview(req, res) {
       agents
     });
   } catch (error) {
-    console.error("Academy training overview failed", error);
+    console.error("Academy training overview failed", require("../server/request-security").safeError(error));
     const code = error.status === 403 ? "discord_members_forbidden" : "training_overview_unavailable";
     return res.status(500).json({ ok: false, code });
   }
@@ -1242,7 +1242,7 @@ async function activityLog(req, res) {
       }))
     });
   } catch (error) {
-    console.error("Academy activity log read failed", error);
+    console.error("Academy activity log read failed", require("../server/request-security").safeError(error));
     const code = error.code === "42P01" ? "activity_table_missing" : "activity_unavailable";
     return res.status(500).json({ ok: false, code });
   }
@@ -1372,7 +1372,7 @@ async function academyDashboard(req, res) {
       }))
     });
   } catch (error) {
-    console.error("Academy dashboard failed", error);
+    console.error("Academy dashboard failed", require("../server/request-security").safeError(error));
     const code = error.status === 403 ? "discord_members_forbidden" : "dashboard_unavailable";
     return res.status(500).json({ ok: false, code });
   }
@@ -1463,7 +1463,7 @@ async function agentDetail(req, res) {
       }))
     });
   } catch (error) {
-    console.error("Academy agent detail failed", error);
+    console.error("Academy agent detail failed", require("../server/request-security").safeError(error));
     const code = error.status === 403 ? "discord_members_forbidden" : "agent_detail_unavailable";
     return res.status(500).json({ ok: false, code });
   }
@@ -1517,7 +1517,7 @@ async function saveAgentFile(req, res) {
     });
     return res.status(200).json({ ok: true, updatedAt: saved.updated_at });
   } catch (error) {
-    console.error("Academy agent file save failed", error);
+    console.error("Academy agent file save failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "agent_file_save_failed" });
   }
 }
@@ -1616,12 +1616,12 @@ async function createTraining(req, res) {
       if (scheduledRows.length && scheduledRows[0].discord_message_id) {
         await discordBotRequest(`/channels/${scheduledRows[0].discord_channel_id}/messages/${scheduledRows[0].discord_message_id}`, {
           method: "PATCH", body: scheduleMessagePayload(publicSchedule(scheduledRows[0]), false)
-        }).catch(error => console.error("Completed schedule message update failed", error));
+        }).catch(error => console.error("Completed schedule message update failed", require("../server/request-security").safeError(error)));
       }
     }
     return res.status(201).json({ ok: true, id: String(created.id) });
   } catch (error) {
-    console.error("Academy training creation failed", error);
+    console.error("Academy training creation failed", require("../server/request-security").safeError(error));
     const code = error.code === "23502"
       ? "optional_fields_not_nullable"
       : error.code === "23514"
@@ -1753,12 +1753,12 @@ async function createTrainingSession(req, res) {
       if (scheduledRows.length && scheduledRows[0].discord_message_id) {
         await discordBotRequest(`/channels/${scheduledRows[0].discord_channel_id}/messages/${scheduledRows[0].discord_message_id}`, {
           method: "PATCH", body: scheduleMessagePayload(publicSchedule(scheduledRows[0]), false)
-        }).catch(error => console.error("Completed schedule message update failed", error));
+        }).catch(error => console.error("Completed schedule message update failed", require("../server/request-security").safeError(error)));
       }
     }
     return res.status(201).json({ ok: true, createdCount: createdIds.length, trainingIds: createdIds });
   } catch (error) {
-    console.error("Academy training session creation failed", error);
+    console.error("Academy training session creation failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "training_session_creation_failed" });
   }
 }
@@ -1803,7 +1803,7 @@ async function trainingSessions(req, res) {
       }))
     });
   } catch (error) {
-    console.error("Academy training sessions read failed", error);
+    console.error("Academy training sessions read failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "training_sessions_unavailable" });
   }
 }
@@ -1939,7 +1939,7 @@ async function scheduledSessions(req, res) {
     const rows = await sql`SELECT * FROM academy_scheduled_sessions ORDER BY starts_at DESC LIMIT 100`;
     return res.status(200).json({ ok: true, sessions: rows.map(publicSchedule) });
   } catch (error) {
-    console.error("Academy planning read failed", error);
+    console.error("Academy planning read failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: error.code === "42P01" ? "planning_table_missing" : "planning_unavailable" });
   }
 }
@@ -2032,7 +2032,7 @@ async function saveScheduledSession(req, res) {
     });
     return res.status(existing ? 200 : 201).json({ ok: true, schedule: publicSchedule(row) });
   } catch (error) {
-    console.error("Academy planning save failed", error);
+    console.error("Academy planning save failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: error.code === "42P01" ? "planning_table_missing" : "planning_save_failed" });
   }
 }
@@ -2088,14 +2088,14 @@ async function scheduledSessionAction(req, res) {
       if (row.discord_message_id) {
         await discordBotRequest(`/channels/${row.discord_channel_id}/messages/${row.discord_message_id}`, {
           method: "PATCH", body: scheduleMessagePayload(publicSchedule(row), false)
-        }).catch(error => console.error("Attendance schedule message update failed", error));
+        }).catch(error => console.error("Attendance schedule message update failed", require("../server/request-security").safeError(error)));
       }
     }
     const activityTypes = { cancel: "schedule_cancelled", resend: "schedule_resent", remind: "schedule_reminded", attendance: "schedule_attendance_updated" };
     await writeActivityLog(sql, session, { actionType: activityTypes[action], targetType: "schedule", targetId: id, targetName: row.training_type, details: {} });
     return res.status(200).json({ ok: true, schedule: publicSchedule(row) });
   } catch (error) {
-    console.error("Academy planning action failed", error);
+    console.error("Academy planning action failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "schedule_action_failed" });
   }
 }
@@ -2133,7 +2133,7 @@ async function processScheduleReminders(req, res) {
     }
     return res.status(200).json({ ok: true, processed: rows.length, sent });
   } catch (error) {
-    console.error("Academy automatic reminders failed", error);
+    console.error("Academy automatic reminders failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: error.code === "42703" ? "reminder_columns_missing" : "schedule_reminders_failed" });
   }
 }
@@ -2160,10 +2160,10 @@ async function syncScheduledResponse(req, res) {
     participant.response = responseValue;
     participant.responseAt = new Date().toISOString();
     [row] = await sql`UPDATE academy_scheduled_sessions SET participants=${JSON.stringify(participants)}::jsonb, updated_at=NOW() WHERE id=${row.id} RETURNING *`;
-    await discordBotRequest(`/channels/${row.discord_channel_id}/messages/${row.discord_message_id}`, { method: "PATCH", body: scheduleMessagePayload(publicSchedule(row), false) }).catch(error => console.error("Convocation response message update failed", error));
+    await discordBotRequest(`/channels/${row.discord_channel_id}/messages/${row.discord_message_id}`, { method: "PATCH", body: scheduleMessagePayload(publicSchedule(row), false) }).catch(error => console.error("Convocation response message update failed", require("../server/request-security").safeError(error)));
     return res.status(200).json({ ok: true, response: responseValue, scheduleId: String(row.id) });
   } catch (error) {
-    console.error("Academy schedule response sync failed", error);
+    console.error("Academy schedule response sync failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "schedule_response_failed" });
   }
 }
@@ -2226,7 +2226,7 @@ async function updateTraining(req, res) {
     });
     return res.status(200).json({ ok: true, id: String(rows[0].id), updatedAt: rows[0].updated_at });
   } catch (error) {
-    console.error("Academy training update failed", error);
+    console.error("Academy training update failed", require("../server/request-security").safeError(error));
     const code = error.code === "23502"
       ? "optional_fields_not_nullable"
       : error.code === "23514"
@@ -2284,7 +2284,7 @@ async function archiveTraining(req, res) {
     });
     return res.status(200).json({ ok: true, archived });
   } catch (error) {
-    console.error("Academy training archive failed", error);
+    console.error("Academy training archive failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "training_archive_failed" });
   }
 }
@@ -2323,7 +2323,7 @@ async function recruitmentTickets(req, res) {
       }))
     });
   } catch (error) {
-    console.error("Academy recruitment tickets list failed", error);
+    console.error("Academy recruitment tickets list failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "recruitment_tickets_unavailable" });
   }
 }
@@ -2375,7 +2375,7 @@ async function recruitmentTicketDetail(req, res) {
       }
     });
   } catch (error) {
-    console.error("Academy recruitment ticket detail failed", error);
+    console.error("Academy recruitment ticket detail failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "recruitment_ticket_unavailable" });
   }
 }
@@ -2452,7 +2452,7 @@ async function saveRecruitmentDecision(req, res) {
       updatedBy: session.user.globalName || session.user.username
     });
   } catch (error) {
-    console.error("Academy recruitment decision save failed", error);
+    console.error("Academy recruitment decision save failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "recruitment_decision_save_failed" });
   }
 }
@@ -2535,12 +2535,13 @@ async function syncRecruitmentTicket(req, res) {
     `;
     return res.status(200).json({ ok: true, applicationId, ticketStatus });
   } catch (error) {
-    console.error("Academy ticket sync failed", error);
+    console.error("Academy ticket sync failed", require("../server/request-security").safeError(error));
     return res.status(500).json({ ok: false, code: "ticket_sync_failed" });
   }
 }
 
 module.exports = async function handler(req, res) {
+  if (!require('../server/request-security').guardMutation(req, res)) return;
   switch (actionFromRequest(req)) {
     case "discord": return discordLogin(req, res);
     case "callback": return discordCallback(req, res);

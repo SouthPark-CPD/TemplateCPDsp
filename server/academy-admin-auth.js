@@ -53,7 +53,7 @@ function decrypt(value) {
 function parseCookies(req) {
   return String(req.headers.cookie || "").split(";").reduce((cookies, item) => {
     const index = item.indexOf("=");
-    if (index > 0) cookies[item.slice(0, index).trim()] = decodeURIComponent(item.slice(index + 1).trim());
+    if (index > 0) cookies[item.slice(0, index).trim()] = require("./request-security").decodeCookie(item.slice(index + 1).trim());
     return cookies;
   }, {});
 }

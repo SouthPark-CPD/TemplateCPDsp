@@ -10,6 +10,10 @@
     }
   },
   "routes": [
+    { "src": "/(?:server|tests|node_modules|\\.git|\\.vercel|\\.codex|\\.agents)(?:/.*)?", "status": 404 },
+    { "src": "/(?:\\.gitignore|\\.vercelignore|.*\\.(?:pem|key))", "status": 404 },
+    { "src": "/(?:.*\\.(?:sql|md|toml|lock|cmd|ps1|log|example)|package(?:-lock)?\\.json|vercel\\.json|.*\\.env(?:\\..*)?|INSTALLATION.*|INSTRUCTIONS.*|INSTRUCTIONS?[^/]*\\.txt)", "status": 404 },
+    { "src": "/(.*)", "headers": { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "strict-origin-when-cross-origin", "Permissions-Policy": "camera=(), microphone=(), geolocation=()" }, "continue": true },
     { "src": "/api/liaison/complaints", "dest": "/api/academy-router?action=government-complaint-create" },
     { "src": "/api/liaison/prosecutor-requests", "dest": "/api/academy-router?action=prosecutor-request-create" },
     { "src": "/api/admin/configuration", "dest": "/api/academy-router?action=admin-configuration" },

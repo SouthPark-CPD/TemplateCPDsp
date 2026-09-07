@@ -227,6 +227,7 @@
   }
 
   async function sendApplication() {
+    if (submit.disabled) return;
     submit.disabled = true;
     submit.textContent = "Transmission en cours…";
     submitError.classList.add("hidden");
