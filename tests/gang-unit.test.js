@@ -28,6 +28,14 @@ test("la carte applique immédiatement le territoire renvoyé après sauvegarde"
   assert.match(source, /state\.territories\.splice\(index, 1, territory\)/);
 });
 
+test("territoires et repères peuvent être retirés de la carte vers les archives", () => {
+  const source = fs.readFileSync(path.join(__dirname, "..", "mdt", "gang-unit.js"), "utf8");
+  assert.match(source, /data-map-archive-type="territory"/);
+  assert.match(source, /data-map-archive-type="marker"/);
+  assert.match(source, /archives Gang Unit du backend admin/);
+  assert.match(source, /api\("\/api\/gang-unit\/archive"/);
+});
+
 test("la navigation Gang Unit garde les dossiers fusionnés et écarte les anciennes pages", () => {
   const config = sanitizeConfig({ ui: { gangItems: [
     { key: "gang-archives", label: "Archives", enabled: true },

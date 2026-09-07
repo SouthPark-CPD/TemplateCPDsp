@@ -6,13 +6,23 @@ const DISCORD_API = "https://discord.com/api/v10";
 const STATUS = new Set(["controle", "dispute", "conteste", "abandonne"]);
 const THREAT = new Set(["faible", "moderee", "elevee", "critique"]);
 const OPERATION = new Set(["planifiee", "active", "terminee", "annulee"]);
-const WATCH = new Set(["active", "suspendue", "archivee"]);
+const WATCH = new Set(["prevue", "active", "suspendue", "terminee", "archivee"]);
 let schemaPromise = null;
 
 const text = (value, max) => String(value || "").trim().slice(0, max);
 const id = value => /^\d+$/.test(String(value || "")) ? String(value) : "";
 const discordId = value => /^\d{17,20}$/.test(String(value || ""));
 const safeEnum = (value, allowed, fallback) => allowed.has(String(value || "")) ? String(value) : fallback;
+
+function dossierDetails(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const limits = { phone: 80, lawyerPhone: 80, address: 300, appearance: 2000, tattoos: 1000, clothing: 1000, weapons: 1500, activities: 2000, vehicles: 1500, neighborhood: 300, allies: 1500, rivals: 1500, lastSeen: 500, status: 40, affiliation: 40, participants: 2000, objective: 3000, location: 300, instructions: 3000, startsAt: 40, endsAt: 40, observedAt: 40, observationType: 80, source: 300, photo: 300 };
+  const result = {};
+  for (const [key, limit] of Object.entries(limits)) if (typeof value[key] === "string") result[key] = text(value[key], limit);
+  if (Array.isArray(value.links)) result.links = value.links.slice(0, 100).filter(link => ["gang", "individual", "watchlist", "report", "operation"].includes(link?.type) && id(link?.id)).map(link => ({ type: link.type, id: id(link.id) })).filter((link, index, all) => all.findIndex(other => other.type === link.type && other.id === link.id) === index);
+  for (const key of ["startsAt", "endsAt", "observedAt"]) if (result[key] && Number.isNaN(Date.parse(result[key]))) delete result[key];
+  return result;
+}
 
 function body(req) {
   if (req.body && typeof req.body === "object") return req.body;
@@ -126,6 +136,11 @@ async function ensureSchema(sql) {
         target_type VARCHAR(40) NOT NULL, target_id VARCHAR(40), target_name VARCHAR(160), details JSONB NOT NULL DEFAULT '{}'::jsonb, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`;
       await sql`CREATE INDEX IF NOT EXISTS gang_unit_activity_recent_idx ON gang_unit_activity(created_at DESC)`;
+      await sql`ALTER TABLE gang_unit_gangs ADD COLUMN IF NOT EXISTS dossier_details JSONB NOT NULL DEFAULT '{}'::jsonb`;
+      await sql`ALTER TABLE gang_unit_individuals ADD COLUMN IF NOT EXISTS dossier_details JSONB NOT NULL DEFAULT '{}'::jsonb`;
+      await sql`ALTER TABLE gang_unit_reports ADD COLUMN IF NOT EXISTS dossier_details JSONB NOT NULL DEFAULT '{}'::jsonb`;
+      await sql`ALTER TABLE gang_unit_watchlist ADD COLUMN IF NOT EXISTS dossier_details JSONB NOT NULL DEFAULT '{}'::jsonb`;
+      await sql`ALTER TABLE gang_unit_operations ADD COLUMN IF NOT EXISTS dossier_details JSONB NOT NULL DEFAULT '{}'::jsonb`;
     })().catch(error => { schemaPromise = null; throw error; });
   }
   return schemaPromise;
@@ -139,11 +154,11 @@ async function log(sql, access, actionType, targetType, target) {
 
 function territory(row) { return { id: String(row.id), name: row.name, gangName: row.gang_name, color: row.color, status: row.status, polygon: row.polygon, notes: row.notes || "", updatedByName: row.updated_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
 function marker(row) { return { id: String(row.id), title: row.title, markerType: row.marker_type, gangName: row.gang_name || "", x: Number(row.x), y: Number(row.y), notes: row.notes || "", updatedByName: row.updated_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
-function gang(row) { return { id: String(row.id), name: row.name, aliases: row.aliases || "", members: row.members || "", color: row.color, threatLevel: row.threat_level, status: row.status, notes: row.notes || "", updatedByName: row.updated_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
-function individual(row) { return { id: String(row.id), displayName: row.display_name, aliases: row.aliases || "", gangId: row.gang_id ? String(row.gang_id) : "", gangName: row.gang_name || "", roleTitle: row.role_title || "", threatLevel: row.threat_level, vehicles: row.vehicles || "", notes: row.notes || "", updatedByName: row.updated_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
-function report(row) { return { id: String(row.id), title: row.title, category: row.category, territoryId: row.territory_id ? String(row.territory_id) : "", content: row.content, reliability: row.reliability, createdByName: row.created_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
-function operation(row) { return { id: String(row.id), codeName: row.code_name, status: row.status, objective: row.objective || "", location: row.location || "", startsAt: row.starts_at, participants: row.participants || "", targets: row.targets || "", resultSummary: row.result_summary || "", notes: row.notes || "", updatedByName: row.updated_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
-function watch(row) { return { id: String(row.id), targetType: row.target_type, targetName: row.target_name, priority: row.priority, reason: row.reason || "", status: row.status, assignedTo: row.assigned_to || "", updatedByName: row.updated_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
+function gang(row) { return { details: row.dossier_details || {}, id: String(row.id), name: row.name, aliases: row.aliases || "", members: row.members || "", color: row.color, threatLevel: row.threat_level, status: row.status, notes: row.notes || "", updatedByName: row.updated_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
+function individual(row) { return { details: row.dossier_details || {}, id: String(row.id), displayName: row.display_name, aliases: row.aliases || "", gangId: row.gang_id ? String(row.gang_id) : "", gangName: row.gang_name || "", roleTitle: row.role_title || "", threatLevel: row.threat_level, vehicles: row.vehicles || "", notes: row.notes || "", updatedByName: row.updated_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
+function report(row) { return { details: row.dossier_details || {}, id: String(row.id), title: row.title, category: row.category, territoryId: row.territory_id ? String(row.territory_id) : "", content: row.content, reliability: row.reliability, createdByName: row.created_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
+function operation(row) { return { details: row.dossier_details || {}, id: String(row.id), codeName: row.code_name, status: row.status, objective: row.objective || "", location: row.location || "", startsAt: row.starts_at, participants: row.participants || "", targets: row.targets || "", resultSummary: row.result_summary || "", notes: row.notes || "", updatedByName: row.updated_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
+function watch(row) { return { details: row.dossier_details || {}, id: String(row.id), targetType: row.target_type, targetName: row.target_name, priority: row.priority, reason: row.reason || "", status: row.status, assignedTo: row.assigned_to || "", updatedByName: row.updated_by_name || "", createdAt: row.created_at, updatedAt: row.updated_at }; }
 function activity(row) { return { id: String(row.id), actorName: row.actor_name || "Agent", actionType: row.action_type, targetType: row.target_type, targetId: row.target_id || "", targetName: row.target_name || "", details: row.details || {}, createdAt: row.created_at }; }
 
 async function withAccess(req, res, callback, authorize = gangUnitAccess) {
@@ -248,7 +263,8 @@ async function saveGang(req, res) {
     const input = body(req), entityId = id(input?.id), name = text(input?.name, 120), user = actor(access);
     if (!name) return res.status(400).json({ ok: false, code: "invalid_gang" });
     const color = /^#[0-9a-f]{6}$/i.test(String(input?.color || "")) ? String(input.color) : "#c95757", threat = safeEnum(input?.threatLevel, THREAT, "moderee"), status = text(input?.status, 32) || "actif", aliases = text(input?.aliases, 1000), members = text(input?.members, 3000), notes = text(input?.notes, 5000);
-    const rows = entityId ? await sql`UPDATE gang_unit_gangs SET name=${name}, aliases=${aliases}, members=${members}, color=${color}, threat_level=${threat}, status=${status}, notes=${notes}, updated_by_id=${user.id}, updated_by_name=${user.name}, updated_at=NOW() WHERE id=${entityId} AND is_archived=FALSE RETURNING *` : await sql`INSERT INTO gang_unit_gangs (name, aliases, members, color, threat_level, status, notes, created_by_id, created_by_name, updated_by_id, updated_by_name) VALUES (${name}, ${aliases}, ${members}, ${color}, ${threat}, ${status}, ${notes}, ${user.id}, ${user.name}, ${user.id}, ${user.name}) RETURNING *`;
+    const details = input?.details === undefined ? null : JSON.stringify(dossierDetails(input.details));
+    const rows = entityId ? await sql`UPDATE gang_unit_gangs SET dossier_details=COALESCE(${details}::jsonb, dossier_details), name=${name}, aliases=${aliases}, members=${members}, color=${color}, threat_level=${threat}, status=${status}, notes=${notes}, updated_by_id=${user.id}, updated_by_name=${user.name}, updated_at=NOW() WHERE id=${entityId} AND is_archived=FALSE RETURNING *` : await sql`INSERT INTO gang_unit_gangs (dossier_details, name, aliases, members, color, threat_level, status, notes, created_by_id, created_by_name, updated_by_id, updated_by_name) VALUES (COALESCE(${details}::jsonb, '{}'::jsonb), ${name}, ${aliases}, ${members}, ${color}, ${threat}, ${status}, ${notes}, ${user.id}, ${user.name}, ${user.id}, ${user.name}) RETURNING *`;
     if (!rows.length) return res.status(404).json({ ok: false, code: "gang_not_found" });
     await log(sql, access, entityId ? "gang_updated" : "gang_created", "gang", { id: rows[0].id, name });
     return res.status(200).json({ ok: true, gang: gang(rows[0]) });
@@ -261,7 +277,8 @@ async function saveIndividual(req, res) {
     const input = body(req), entityId = id(input?.id), name = text(input?.displayName, 160), user = actor(access);
     if (!name) return res.status(400).json({ ok: false, code: "invalid_individual" });
     const gangId = id(input?.gangId) || null, gangName = text(input?.gangName, 120), aliases = text(input?.aliases, 1000), roleTitle = text(input?.roleTitle, 120), threat = safeEnum(input?.threatLevel, THREAT, "moderee"), vehicles = text(input?.vehicles, 1500), notes = text(input?.notes, 5000);
-    const rows = entityId ? await sql`UPDATE gang_unit_individuals SET display_name=${name}, aliases=${aliases}, gang_id=${gangId}, gang_name=${gangName}, role_title=${roleTitle}, threat_level=${threat}, vehicles=${vehicles}, notes=${notes}, updated_by_id=${user.id}, updated_by_name=${user.name}, updated_at=NOW() WHERE id=${entityId} AND is_archived=FALSE RETURNING *` : await sql`INSERT INTO gang_unit_individuals (display_name, aliases, gang_id, gang_name, role_title, threat_level, vehicles, notes, created_by_id, created_by_name, updated_by_id, updated_by_name) VALUES (${name}, ${aliases}, ${gangId}, ${gangName}, ${roleTitle}, ${threat}, ${vehicles}, ${notes}, ${user.id}, ${user.name}, ${user.id}, ${user.name}) RETURNING *`;
+    const details = input?.details === undefined ? null : JSON.stringify(dossierDetails(input.details));
+    const rows = entityId ? await sql`UPDATE gang_unit_individuals SET dossier_details=COALESCE(${details}::jsonb, dossier_details), display_name=${name}, aliases=${aliases}, gang_id=${gangId}, gang_name=${gangName}, role_title=${roleTitle}, threat_level=${threat}, vehicles=${vehicles}, notes=${notes}, updated_by_id=${user.id}, updated_by_name=${user.name}, updated_at=NOW() WHERE id=${entityId} AND is_archived=FALSE RETURNING *` : await sql`INSERT INTO gang_unit_individuals (dossier_details, display_name, aliases, gang_id, gang_name, role_title, threat_level, vehicles, notes, created_by_id, created_by_name, updated_by_id, updated_by_name) VALUES (COALESCE(${details}::jsonb, '{}'::jsonb), ${name}, ${aliases}, ${gangId}, ${gangName}, ${roleTitle}, ${threat}, ${vehicles}, ${notes}, ${user.id}, ${user.name}, ${user.id}, ${user.name}) RETURNING *`;
     if (!rows.length) return res.status(404).json({ ok: false, code: "individual_not_found" });
     await log(sql, access, entityId ? "individual_updated" : "individual_created", "individual", { id: rows[0].id, name });
     return res.status(200).json({ ok: true, individual: individual(rows[0]) });
@@ -274,9 +291,13 @@ async function saveReport(req, res) {
     const input = body(req), title = text(input?.title, 160), content = text(input?.content, 10000), territoryId = id(input?.territoryId) || null;
     if (!title || !content) return res.status(400).json({ ok: false, code: "invalid_report" });
     const category = ["observation", "operation", "source", "incident"].includes(input?.category) ? input.category : "observation", reliability = ["fiable", "a_confirmer", "incertaine"].includes(input?.reliability) ? input.reliability : "a_confirmer", user = actor(access);
-    const [row] = await sql`INSERT INTO gang_unit_reports (title, category, territory_id, content, reliability, created_by_id, created_by_name) VALUES (${title}, ${category}, ${territoryId}, ${content}, ${reliability}, ${user.id}, ${user.name}) RETURNING *`;
-    await log(sql, access, "report_created", "report", { id: row.id, name: title });
-    return res.status(201).json({ ok: true, report: report(row) });
+    const details = JSON.stringify(dossierDetails(input?.details)), entityId = id(input?.id);
+    const [row] = entityId
+      ? await sql`UPDATE gang_unit_reports SET dossier_details=${details}::jsonb, title=${title}, category=${category}, territory_id=${territoryId}, content=${content}, reliability=${reliability}, updated_at=NOW() WHERE id=${entityId} AND is_archived=FALSE RETURNING *`
+      : await sql`INSERT INTO gang_unit_reports (dossier_details, title, category, territory_id, content, reliability, created_by_id, created_by_name) VALUES (${details}::jsonb, ${title}, ${category}, ${territoryId}, ${content}, ${reliability}, ${user.id}, ${user.name}) RETURNING *`;
+    if (!row) return res.status(404).json({ ok: false, code: "report_not_found" });
+    await log(sql, access, entityId ? "report_updated" : "report_created", "report", { id: row.id, name: title });
+    return res.status(entityId ? 200 : 201).json({ ok: true, report: report(row) });
   });
 }
 
@@ -286,7 +307,8 @@ async function saveOperation(req, res) {
     const input = body(req), entityId = id(input?.id), codeName = text(input?.codeName, 160), user = actor(access);
     if (!codeName) return res.status(400).json({ ok: false, code: "invalid_operation" });
     const startsAt = input?.startsAt && !Number.isNaN(Date.parse(input.startsAt)) ? new Date(input.startsAt).toISOString() : null, status = safeEnum(input?.status, OPERATION, "planifiee"), objective = text(input?.objective, 5000), location = text(input?.location, 160), participants = text(input?.participants, 2000), targets = text(input?.targets, 2000), resultSummary = text(input?.resultSummary, 5000), notes = text(input?.notes, 5000);
-    const rows = entityId ? await sql`UPDATE gang_unit_operations SET code_name=${codeName}, status=${status}, objective=${objective}, location=${location}, starts_at=${startsAt}, participants=${participants}, targets=${targets}, result_summary=${resultSummary}, notes=${notes}, updated_by_id=${user.id}, updated_by_name=${user.name}, updated_at=NOW() WHERE id=${entityId} AND is_archived=FALSE RETURNING *` : await sql`INSERT INTO gang_unit_operations (code_name, status, objective, location, starts_at, participants, targets, result_summary, notes, created_by_id, created_by_name, updated_by_id, updated_by_name) VALUES (${codeName}, ${status}, ${objective}, ${location}, ${startsAt}, ${participants}, ${targets}, ${resultSummary}, ${notes}, ${user.id}, ${user.name}, ${user.id}, ${user.name}) RETURNING *`;
+    const details = input?.details === undefined ? null : JSON.stringify(dossierDetails(input.details));
+    const rows = entityId ? await sql`UPDATE gang_unit_operations SET dossier_details=COALESCE(${details}::jsonb, dossier_details), code_name=${codeName}, status=${status}, objective=${objective}, location=${location}, starts_at=${startsAt}, participants=${participants}, targets=${targets}, result_summary=${resultSummary}, notes=${notes}, updated_by_id=${user.id}, updated_by_name=${user.name}, updated_at=NOW() WHERE id=${entityId} AND is_archived=FALSE RETURNING *` : await sql`INSERT INTO gang_unit_operations (dossier_details, code_name, status, objective, location, starts_at, participants, targets, result_summary, notes, created_by_id, created_by_name, updated_by_id, updated_by_name) VALUES (COALESCE(${details}::jsonb, '{}'::jsonb), ${codeName}, ${status}, ${objective}, ${location}, ${startsAt}, ${participants}, ${targets}, ${resultSummary}, ${notes}, ${user.id}, ${user.name}, ${user.id}, ${user.name}) RETURNING *`;
     if (!rows.length) return res.status(404).json({ ok: false, code: "operation_not_found" });
     await log(sql, access, entityId ? "operation_updated" : "operation_created", "operation", { id: rows[0].id, name: codeName });
     return res.status(200).json({ ok: true, operation: operation(rows[0]) });
@@ -299,7 +321,8 @@ async function saveWatchlist(req, res) {
     const input = body(req), entityId = id(input?.id), targetName = text(input?.targetName, 160), user = actor(access);
     if (!targetName) return res.status(400).json({ ok: false, code: "invalid_watchlist" });
     const targetType = ["individual", "gang", "vehicle", "location"].includes(input?.targetType) ? input.targetType : "individual", priority = ["normale", "haute", "urgente"].includes(input?.priority) ? input.priority : "normale", status = safeEnum(input?.status, WATCH, "active"), reason = text(input?.reason, 5000), assignedTo = text(input?.assignedTo, 120);
-    const rows = entityId ? await sql`UPDATE gang_unit_watchlist SET target_type=${targetType}, target_name=${targetName}, priority=${priority}, reason=${reason}, status=${status}, assigned_to=${assignedTo}, updated_by_id=${user.id}, updated_by_name=${user.name}, updated_at=NOW() WHERE id=${entityId} AND is_archived=FALSE RETURNING *` : await sql`INSERT INTO gang_unit_watchlist (target_type, target_name, priority, reason, status, assigned_to, created_by_id, created_by_name, updated_by_id, updated_by_name) VALUES (${targetType}, ${targetName}, ${priority}, ${reason}, ${status}, ${assignedTo}, ${user.id}, ${user.name}, ${user.id}, ${user.name}) RETURNING *`;
+    const details = input?.details === undefined ? null : JSON.stringify(dossierDetails(input.details));
+    const rows = entityId ? await sql`UPDATE gang_unit_watchlist SET dossier_details=COALESCE(${details}::jsonb, dossier_details), target_type=${targetType}, target_name=${targetName}, priority=${priority}, reason=${reason}, status=${status}, assigned_to=${assignedTo}, updated_by_id=${user.id}, updated_by_name=${user.name}, updated_at=NOW() WHERE id=${entityId} AND is_archived=FALSE RETURNING *` : await sql`INSERT INTO gang_unit_watchlist (dossier_details, target_type, target_name, priority, reason, status, assigned_to, created_by_id, created_by_name, updated_by_id, updated_by_name) VALUES (COALESCE(${details}::jsonb, '{}'::jsonb), ${targetType}, ${targetName}, ${priority}, ${reason}, ${status}, ${assignedTo}, ${user.id}, ${user.name}, ${user.id}, ${user.name}) RETURNING *`;
     if (!rows.length) return res.status(404).json({ ok: false, code: "watchlist_not_found" });
     await log(sql, access, entityId ? "watchlist_updated" : "watchlist_created", "watchlist", { id: rows[0].id, name: targetName });
     return res.status(200).json({ ok: true, watchlist: watch(rows[0]) });
@@ -357,4 +380,4 @@ async function restoreEntity(req, res, authorize = gangUnitAccess) {
   }, authorize);
 }
 
-module.exports = { gangUnitAccess, gangUnitData, gangUnitAdminData, saveTerritory, saveMarker, saveGang, saveIndividual, saveReport, saveOperation, saveWatchlist, archiveEntity, restoreEntity, territoryWriteMode };
+module.exports = { gangUnitAccess, gangUnitData, gangUnitAdminData, saveTerritory, saveMarker, saveGang, saveIndividual, saveReport, saveOperation, saveWatchlist, archiveEntity, restoreEntity, territoryWriteMode, dossierDetails };
