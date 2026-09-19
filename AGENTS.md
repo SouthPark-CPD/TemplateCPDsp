@@ -1,6 +1,6 @@
-# AGENTS.md — CPD / Police Academy
+# AGENTS.md — LAPD / Police Academy
 
-Ce dépôt correspond au site MDT / Police Academy du serveur RP Chicago Police Department.
+Ce dépôt correspond au site MDT / Police Academy du serveur RP Los Angeles Police Department.
 
 ## Mission de Codex
 

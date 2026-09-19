@@ -1,4 +1,4 @@
-# Portail Chicago Police Department
+# Portail Los Angeles Police Department
 
 - `/` : accueil général avec les accès Visiteur et Policier
 - `/public/` : espace public
@@ -59,7 +59,7 @@ Après ajout ou modification des variables Vercel, lancer un nouveau déploiemen
 
 Chaque nouveau ticket contient maintenant le bouton `Clore le ticket`.
 
-Le bot `CPD - Administration Center` traite ensuite les boutons :
+Le bot `LAPD - Administration Center` traite ensuite les boutons :
 
 ```text
 Clore le ticket

@@ -197,8 +197,8 @@ function buildPrintSheet() {
 
   elements.printSheet.innerHTML = `
     <header class="print-header">
-      <img src="../assets/cpd-seal.png" alt="">
-      <div><p>Chicago Police Department</p><h1>Fiche de suivi — Police Academy</h1><span>Document généré le ${escapeHtml(generatedAt)}</span></div>
+      <img src="../assets/lapd-seal.png" alt="">
+      <div><p>Los Angeles Police Department</p><h1>Fiche de suivi — Police Academy</h1><span>Document généré le ${escapeHtml(generatedAt)}</span></div>
     </header>
     <section class="print-identity">
       <div><span>Agent</span><strong>${escapeHtml(elements.rpName.value.trim() || elements.name.textContent)}</strong></div>
@@ -341,7 +341,7 @@ async function loadDossier() {
   } catch (error) {
     if (error.message === "unauthorized") return;
     const messages = {
-      agent_not_eligible: "Cet utilisateur n’est pas un agent éligible du CPD.",
+      agent_not_eligible: "Cet utilisateur n’est pas un agent éligible du LAPD.",
       discord_members_forbidden: "Discord refuse l’accès à cet agent. Vérifiez les droits du bot.",
       database_not_configured: "La base de données n’est pas configurée sur Vercel."
     };

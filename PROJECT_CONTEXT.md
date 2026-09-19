@@ -2,10 +2,10 @@
 
 ## 1. Présentation
 
-Projet : CPD Administration Center / MDT / Police Academy
+Projet : LAPD Administration Center / MDT / Police Academy
 
 Objectif global :
-fournir un site web RP moderne pour le Chicago Police Department avec plusieurs espaces fonctionnels et un back-office Police Academy relié à Discord et Neon.
+fournir un site web RP moderne pour le Los Angeles Police Department avec plusieurs espaces fonctionnels et un back-office Police Academy relié à Discord et Neon.
 
 Le projet est hébergé sur Vercel et le code est versionné sur GitHub.
 
@@ -52,20 +52,20 @@ Ne jamais supposer qu'il existe encore ou qu'il porte toujours ce nom : vérifie
 
 L'accès Policier utilise Discord OAuth2.
 
-Le site doit vérifier l'appartenance / le rôle CPD côté serveur.
+Le site doit vérifier l'appartenance / le rôle LAPD côté serveur.
 
 L'utilisateur souhaitait une session persistante afin d'éviter une reconnexion Discord systématique.
 
-### Serveur CPD principal
+### Serveur LAPD principal
 
 Guild ID :
 `1408092767963451615`
 
-Rôle principal CPD historiquement vérifié :
+Rôle principal LAPD historiquement vérifié :
 `1408092768026365974`
 
 Nom :
-Chicago Police Department
+Los Angeles Police Department
 
 ### Serveur Police Academy
 
@@ -85,7 +85,7 @@ Catégorie Discord historiquement utilisée pour les tickets Academy :
 ## 5. Bot Discord
 
 Nom historique :
-`CPD – Administration Center`
+`LAPD – Administration Center`
 
 Le même bot a été utilisé pour :
 - OAuth / interactions Discord selon l'architecture du projet ;
@@ -171,7 +171,7 @@ Le système cible doit pouvoir distinguer :
 
 ## 10. Police Academy — agents
 
-Le back-office doit pouvoir récupérer ou synchroniser des agents CPD à partir de Discord.
+Le back-office doit pouvoir récupérer ou synchroniser des agents LAPD à partir de Discord.
 
 Chaque agent peut disposer de plusieurs rôles Discord.
 

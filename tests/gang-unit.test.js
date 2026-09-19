@@ -47,3 +47,19 @@ test("la navigation Gang Unit garde les dossiers fusionnés et écarte les ancie
   assert.equal(keys.includes("gang-intel"), false);
   assert.deepEqual(keys, ["gang-dashboard", "gang-map", "gang-gangs", "gang-operations"]);
 });
+
+test("les anciennes valeurs de marque enregistrées sont présentées en LAPD", () => {
+  const config = sanitizeConfig({
+    servers: [{ key: "cpd", label: "Serveur CPD", guildId: "1408092767963451615", enabled: true }],
+    ui: {
+      siteTitle: "MDT — Chicago Police Department",
+      departmentName: "CHICAGO"
+    },
+    recruitment: { title: "Rejoindre le CPD" }
+  });
+
+  assert.equal(config.servers[0].label, "Serveur LAPD");
+  assert.equal(config.ui.siteTitle, "MDT — Los Angeles Police Department");
+  assert.equal(config.ui.departmentName, "LOS ANGELES");
+  assert.equal(config.recruitment.title, "Rejoindre le LAPD");
+});

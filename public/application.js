@@ -107,7 +107,7 @@
       const settings = data?.recruitment;
       if (!response.ok || !settings) return;
       if (settings.title) {
-        document.title = `${settings.title} — Chicago Police Academy`;
+        document.title = `${settings.title} — Los Angeles Police Academy`;
         const title = document.querySelector("#recruitment-title");
         if (title) title.textContent = settings.title;
       }

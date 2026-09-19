@@ -70,7 +70,7 @@
     const description = document.getElementById("launcher-description");
     const back = document.getElementById("folder-back");
     if (!activeFolder) {
-      kicker.textContent = "TABLETTE CPD";
+      kicker.textContent = "TABLETTE LAPD";
       title.textContent = "Accueil";
       description.textContent = "Ouvrez une application pour accéder à son portail.";
       back.hidden = true;
@@ -177,7 +177,7 @@
       if (!response.ok || !data?.authenticated) throw new Error("session");
       academyAccess = data.academyAccess === true;
       gangAccess = data.gangAccess === true;
-      document.getElementById("agent-name").textContent = data.user?.globalName || data.user?.username || "Agent CPD";
+      document.getElementById("agent-name").textContent = data.user?.globalName || data.user?.username || "Agent LAPD";
       document.getElementById("admin-link").hidden = data.controlPanelAdmin !== true;
       await loadConfiguration();
       ready = true;

@@ -1,4 +1,4 @@
-# Pack de transfert Codex — CPD MDT / Police Academy
+# Pack de transfert Codex — LAPD MDT / Police Academy
 
 Ce dossier sert uniquement à transmettre le contexte du projet à Codex.
 

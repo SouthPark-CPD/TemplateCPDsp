@@ -15,5 +15,5 @@ for /f "usebackq eol=# tokens=1,* delims==" %%A in (".env.local") do (
   set "%%A=!taskEnvValue!"
 )
 
-echo Demarrage du portail CPD avec les variables locales...
+echo Demarrage du portail LAPD avec les variables locales...
 npx.cmd --yes vercel@latest dev --listen 3000 --yes

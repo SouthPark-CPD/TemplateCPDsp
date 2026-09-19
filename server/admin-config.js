@@ -1,6 +1,6 @@
 const DEFAULT_CONFIG = Object.freeze({
   servers: [
-    { key: "cpd", label: "Serveur CPD", guildId: "1408092767963451615", enabled: true },
+    { key: "cpd", label: "Serveur LAPD", guildId: "1408092767963451615", enabled: true },
     { key: "academy", label: "Police Academy", guildId: "1538858756354473984", enabled: true }
   ],
   access: {
@@ -29,8 +29,8 @@ const DEFAULT_CONFIG = Object.freeze({
     ]
   },
   ui: {
-    siteTitle: "MDT — Chicago Police Department",
-    departmentName: "CHICAGO",
+    siteTitle: "MDT — Los Angeles Police Department",
+    departmentName: "LOS ANGELES",
     departmentSubtitle: "POLICE DEPARTMENT",
     guideUrl: "https://guidejuridiquesp.netlify.app/",
     sections: {
@@ -70,7 +70,7 @@ const DEFAULT_CONFIG = Object.freeze({
   recruitment: {
     enabled: true,
     notificationEnabled: true,
-    title: "Rejoindre le CPD",
+    title: "Rejoindre le LAPD",
     intro: "Les informations demandées concernent uniquement votre personnage RP.",
     closedMessage: "Les recrutements sont momentanément fermés.",
     submitLabel: "Envoyer ma candidature →",
@@ -127,6 +127,11 @@ function cloneDefault() {
   return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 }
 
+function updatedLegacyBrand(value, legacyValue, currentValue, maxLength) {
+  const stored = shortText(value, maxLength);
+  return stored === legacyValue ? currentValue : stored;
+}
+
 function sanitizeConfig(input) {
   const fallback = cloneDefault();
   const source = input && typeof input === "object" && !Array.isArray(input) ? input : {};
@@ -135,7 +140,9 @@ function sanitizeConfig(input) {
     const key = slug(item?.key) || `server-${index + 1}`;
     if (serverKeys.has(key)) return null;
     serverKeys.add(key);
-    return { key, label: shortText(item?.label, 80) || `Serveur ${index + 1}`, guildId: discordId(item?.guildId), enabled: boolean(item?.enabled) };
+    const storedLabel = shortText(item?.label, 80);
+    const label = key === "cpd" && storedLabel === "Serveur CPD" ? "Serveur LAPD" : storedLabel;
+    return { key, label: label || `Serveur ${index + 1}`, guildId: discordId(item?.guildId), enabled: boolean(item?.enabled) };
   }).filter(item => item && item.guildId);
   if (!servers.length) servers.push(...fallback.servers);
   const validServerKeys = new Set(servers.map(item => item.key));
@@ -239,8 +246,8 @@ function sanitizeConfig(input) {
       channels: channels.length ? channels.sort((a, b) => a.sortOrder - b.sortOrder) : fallback.liaison.channels
     },
     ui: {
-      siteTitle: shortText(sourceUi.siteTitle, 120) || fallbackUi.siteTitle,
-      departmentName: shortText(sourceUi.departmentName, 40) || fallbackUi.departmentName,
+      siteTitle: updatedLegacyBrand(sourceUi.siteTitle, "MDT — Chicago Police Department", fallbackUi.siteTitle, 120) || fallbackUi.siteTitle,
+      departmentName: updatedLegacyBrand(sourceUi.departmentName, "CHICAGO", fallbackUi.departmentName, 40) || fallbackUi.departmentName,
       departmentSubtitle: shortText(sourceUi.departmentSubtitle, 80) || fallbackUi.departmentSubtitle,
       guideUrl: safeUrl(sourceUi.guideUrl, fallbackUi.guideUrl),
       sections,
@@ -257,7 +264,7 @@ function sanitizeConfig(input) {
     recruitment: {
       enabled: boolean(sourceRecruitment.enabled, fallback.recruitment.enabled),
       notificationEnabled: boolean(sourceRecruitment.notificationEnabled, fallback.recruitment.notificationEnabled),
-      title: shortText(sourceRecruitment.title, 120) || fallback.recruitment.title,
+      title: updatedLegacyBrand(sourceRecruitment.title, "Rejoindre le CPD", fallback.recruitment.title, 120) || fallback.recruitment.title,
       intro: shortText(sourceRecruitment.intro, 500) || fallback.recruitment.intro,
       closedMessage: shortText(sourceRecruitment.closedMessage, 500) || fallback.recruitment.closedMessage,
       submitLabel: shortText(sourceRecruitment.submitLabel, 80) || fallback.recruitment.submitLabel,

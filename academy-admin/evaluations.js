@@ -23,7 +23,7 @@ const resultLabels = { planifiee:"Planifiée / incomplète", valide:"Validée", 
 
 const starterTemplates = [
   { name:"Entretien d’entrée Police Academy", category:"entretien", description:"Entretien structuré sur la motivation, la disponibilité, le comportement et la compréhension du rôle.", criteria:[
-    ["Motivation","Pourquoi souhaitez-vous rejoindre le Chicago Police Department ?","question",2,true,"Rechercher une motivation RP cohérente et personnelle."],
+    ["Motivation","Pourquoi souhaitez-vous rejoindre le Los Angeles Police Department ?","question",2,true,"Rechercher une motivation RP cohérente et personnelle."],
     ["Motivation","Que pensez-vous pouvoir apporter au département ?","question",1,false,""],
     ["Disponibilités","Quelles sont vos disponibilités habituelles pour les formations et patrouilles ?","question",1,false,""],
     ["Comportement","Comment réagissez-vous face à un ordre avec lequel vous n’êtes pas d’accord ?","question",2,true,"Évaluer la discipline, le dialogue et le respect de la hiérarchie."],

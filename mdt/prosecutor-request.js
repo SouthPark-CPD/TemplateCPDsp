@@ -7,8 +7,8 @@
   const safeUrl = value => { try { const url = new URL(String(value || "")); return /^https?:$/.test(url.protocol) ? url.href : ""; } catch { return ""; } };
   const formatDate = value => { const parsed = new Date(value); return Number.isNaN(parsed.getTime()) ? "Date inconnue" : new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(parsed); };
   const normalizedName = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
-  const initials = name => String(name || "CPD").trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "CPD";
-  const authorName = author => author?.displayName || author?.display_name || author?.nick || author?.global_name || author?.globalName || author?.username || "Agent CPD";
+  const initials = name => String(name || "LAPD").trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase() || "LAPD";
+  const authorName = author => author?.displayName || author?.display_name || author?.nick || author?.global_name || author?.globalName || author?.username || "Agent LAPD";
   const avatarUrl = author => author?.id && author?.avatar ? `https://cdn.discordapp.com/avatars/${encodeURIComponent(author.id)}/${encodeURIComponent(author.avatar)}.${String(author.avatar).startsWith("a_") ? "gif" : "png"}?size=64` : "";
   const formatTime = value => { const parsed = new Date(value); return Number.isNaN(parsed.getTime()) ? "" : new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" }).format(parsed); };
   const dayKey = value => { const parsed = new Date(value); return Number.isNaN(parsed.getTime()) ? "unknown" : `${parsed.getFullYear()}-${parsed.getMonth()}-${parsed.getDate()}`; };
@@ -35,7 +35,7 @@
       const currentDay = dayKey(message.timestamp), separator = currentDay !== previousDay ? `<div class="chat-day"><span>${esc(formatDay(message.timestamp))}</span></div>` : "";
       previousDay = currentDay;
       const avatar = safeUrl(avatarUrl(message.author));
-      return `${separator}<article class="chat-message${own ? " own" : ""}${dossier ? " dossier" : ""}"><div class="chat-avatar">${avatar && !proxy ? `<img src="${esc(avatar)}" alt="">` : esc(initials(dossier ? "CPD" : name))}</div><div class="chat-stack"><div class="chat-meta"><strong>${esc(dossier ? "Dossier initial" : name)}</strong>${own ? '<span class="message-you">Vous</span>' : ""}<time>${esc(formatTime(message.timestamp))}</time></div><div class="chat-bubble">${content ? `<div class="chat-copy">${renderMessage(content, message.mentions)}</div>` : ""}${renderAttachments(message)}</div></div></article>`;
+      return `${separator}<article class="chat-message${own ? " own" : ""}${dossier ? " dossier" : ""}"><div class="chat-avatar">${avatar && !proxy ? `<img src="${esc(avatar)}" alt="">` : esc(initials(dossier ? "LAPD" : name))}</div><div class="chat-stack"><div class="chat-meta"><strong>${esc(dossier ? "Dossier initial" : name)}</strong>${own ? '<span class="message-you">Vous</span>' : ""}<time>${esc(formatTime(message.timestamp))}</time></div><div class="chat-bubble">${content ? `<div class="chat-copy">${renderMessage(content, message.mentions)}</div>` : ""}${renderAttachments(message)}</div></div></article>`;
     }).join("");
   };
   const setStatus = (message, type = "") => { status.hidden = false; status.className = `status ${type}`; status.innerHTML = message; };

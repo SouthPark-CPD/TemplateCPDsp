@@ -3,7 +3,7 @@
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
   }[character]));
-  const initials = (name) => String(name || "CPD").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "CPD";
+  const initials = (name) => String(name || "LAPD").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "LAPD";
   const loadCandidates = () => {
     if (!candidatesPromise) {
       candidatesPromise = fetch("/api/liaison/complaints?mentionCandidates=1", { credentials: "same-origin", cache: "no-store" })

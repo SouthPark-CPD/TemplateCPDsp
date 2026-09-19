@@ -48,7 +48,7 @@
     channelNameNode.textContent = fallbackLabel;
     const heroTitle = document.querySelector(".channel-copy h1");
     if (heroTitle) heroTitle.textContent = fallbackLabel;
-    document.title = `${fallbackLabel} — CPD`;
+    document.title = `${fallbackLabel} — LAPD`;
     if (!permissions.canMention) document.querySelector("[data-mention-picker]")?.setAttribute("hidden", "");
     if (!permissions.canUpload) document.querySelector(".channel-file")?.setAttribute("hidden", "");
     if (!permissions.canWrite) composer.innerHTML = '<p class="channel-placeholder">L’écriture est désactivée pour ce canal.</p>';
@@ -86,8 +86,8 @@
     if (distance === 1) return "Hier";
     return new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: date.getFullYear() === today.getFullYear() ? undefined : "numeric" }).format(date);
   };
-  const initials = (name) => String(name || "CPD").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "CPD";
-  const authorName = (author) => author?.displayName || author?.display_name || author?.nick || author?.global_name || author?.globalName || author?.username || "Agent CPD";
+  const initials = (name) => String(name || "LAPD").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "LAPD";
+  const authorName = (author) => author?.displayName || author?.display_name || author?.nick || author?.global_name || author?.globalName || author?.username || "Agent LAPD";
   const avatarUrl = (author) => {
     if (!author?.id || !author?.avatar) return "";
     const extension = String(author.avatar).startsWith("a_") ? "gif" : "png";

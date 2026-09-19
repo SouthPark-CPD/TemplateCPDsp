@@ -84,7 +84,7 @@ async function policeMedia(req, res) {
     const parsed = parseImagePayload(input);
     if (!parsed.ok) return res.status(400).json(parsed);
     const userId = String(session.user?.id || "");
-    const userName = String(session.user?.globalName || session.user?.username || "Agent CPD").slice(0, 120);
+    const userName = String(session.user?.globalName || session.user?.username || "Agent LAPD").slice(0, 120);
     const [rate] = await sql`SELECT COUNT(*)::int AS count FROM cpd_pasted_images WHERE uploaded_by_id=${userId} AND created_at > NOW() - INTERVAL '1 hour'`;
     if (Number(rate?.count || 0) >= 60) return res.status(429).json({ ok: false, code: "upload_rate_limited" });
     const [existing] = await sql`SELECT id FROM cpd_pasted_images WHERE content_hash=${parsed.hash} AND uploaded_by_id=${userId} AND created_at > NOW() - INTERVAL '30 days' ORDER BY created_at DESC LIMIT 1`;

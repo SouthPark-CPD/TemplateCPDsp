@@ -1,5 +1,5 @@
 /* ==========================================================
-   DONNÉES — Règlement intérieur CPD
+   DONNÉES — Règlement intérieur LAPD
    Fichier chargé dynamiquement par reglement.html via fetch().
    Ce fichier n'apparaît PAS dans le "Ctrl+U" de reglement.html.
 ========================================================== */
@@ -8,7 +8,7 @@ window.CPD_DATA = [
   {
     id:"general",
     label:"Généralités",
-    desc:"Principes fondamentaux applicables à l'ensemble des membres du CPD.",
+    desc:"Principes fondamentaux applicables à l'ensemble des membres du LAPD.",
     articles:[
       {
         number:"01",
@@ -18,7 +18,7 @@ window.CPD_DATA = [
           <p>
             Le présent règlement définit les règles de conduite,
             les obligations professionnelles et les procédures
-            applicables à tous les membres du Chicago Police Department.
+            applicables à tous les membres du Los Angeles Police Department.
           </p>
           <p>
             Tout membre du service est réputé avoir pris connaissance
@@ -38,7 +38,7 @@ window.CPD_DATA = [
         severity:"info",
         body:`
           <p>
-            Le règlement s'applique à tous les membres du CPD,
+            Le règlement s'applique à tous les membres du LAPD,
             quel que soit leur grade, leur unité ou leur fonction.
           </p>
           <ul>
@@ -149,7 +149,7 @@ window.CPD_DATA = [
         body:`
           <p>
             Constitue un abus d'autorité tout usage du grade,
-            de la fonction ou des moyens du CPD dans un but
+            de la fonction ou des moyens du LAPD dans un but
             personnel ou disproportionné.
           </p>
           <ul>
@@ -174,7 +174,7 @@ window.CPD_DATA = [
         severity:"warning",
         body:`
           <p>
-            L'agent représente le CPD auprès du public.
+            L'agent représente le LAPD auprès du public.
             Son comportement doit donc rester professionnel
             pendant toute période d'exercice de ses fonctions.
           </p>
@@ -218,7 +218,7 @@ window.CPD_DATA = [
             <li>Identités des informateurs.</li>
             <li>Informations sur les enquêtes.</li>
             <li>Informations personnelles des citoyens.</li>
-            <li>Informations internes au CPD.</li>
+            <li>Informations internes au LAPD.</li>
           </ul>
           <p>
             Toute diffusion non autorisée d'informations confidentielles
@@ -549,7 +549,7 @@ window.CPD_DATA = [
         severity:"warning",
         body:`
           <p>
-            Les véhicules du CPD sont destinés exclusivement
+            Les véhicules du LAPD sont destinés exclusivement
             aux missions autorisées.
           </p>
           <ul>
@@ -582,7 +582,7 @@ window.CPD_DATA = [
       },
       {
         number:"29",
-        title:"Accident avec un véhicule du CPD",
+        title:"Accident avec un véhicule du LAPD",
         severity:"warning",
         body:`
           <p>
@@ -709,7 +709,7 @@ window.CPD_DATA = [
   {
     id:"detention",
     label:"Détention",
-    desc:"Traitement des personnes placées sous contrôle du CPD.",
+    desc:"Traitement des personnes placées sous contrôle du LAPD.",
     articles:[
       {
         number:"36",
@@ -1002,7 +1002,7 @@ window.CPD_DATA = [
         severity:"critical",
         body:`
           <p>
-            Tout membre du CPD est responsable de connaître
+            Tout membre du LAPD est responsable de connaître
             les règles applicables à ses fonctions.
           </p>
           <p>
@@ -1034,7 +1034,7 @@ window.CPD_DATA = [
         body:`
           <p>
             Le présent règlement entre en vigueur dès sa publication
-            sur les supports officiels du Chicago Police Department.
+            sur les supports officiels du Los Angeles Police Department.
           </p>
           <div class="notice green">
             <div class="notice-title">Fin du document</div>

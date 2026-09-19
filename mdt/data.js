@@ -1,5 +1,5 @@
 /* ==========================================================
-   DONNÉES — Procédures CPD
+   DONNÉES — Procédures LAPD
    Fichier chargé dynamiquement par index.html via fetch().
    Ce fichier n'apparaît PAS dans le "Ctrl+U" de index.html.
 ========================================================== */
@@ -11,7 +11,7 @@ window.CPD_DATA = [
 
     label:"Général",
 
-    desc:"Procédures générales utilisées dans le cadre des opérations du CPD.",
+    desc:"Procédures générales utilisées dans le cadre des opérations du LAPD.",
 
     Procédures:[
 

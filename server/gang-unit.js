@@ -72,7 +72,7 @@ async function gangUnitAdminAccess(req, res) {
 }
 
 function actor(access) {
-  return { id: String(access.session.user?.id || ""), name: text(access.session.user?.globalName || access.session.user?.username, 120) || "Agent CPD" };
+  return { id: String(access.session.user?.id || ""), name: text(access.session.user?.globalName || access.session.user?.username, 120) || "Agent LAPD" };
 }
 
 async function ensureSchema(sql) {

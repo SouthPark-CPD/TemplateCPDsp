@@ -1,5 +1,5 @@
 /* ==========================================================
-   DONNÉES — Guide radio CPD
+   DONNÉES — Guide radio LAPD
    Fichier chargé dynamiquement par code.html via fetch().
    Ce fichier n'apparaît PAS dans le "Ctrl+U" de code.html.
 ========================================================== */
@@ -149,7 +149,7 @@ window.CPD_DATA = [
 
   {
     id:"unites",
-    label:"Codes d'unité du CPD",
+    label:"Codes d'unité du LAPD",
     desc:"Correspondance entre les indicatifs radio et les différents types d'unités.",
 
     codes:[

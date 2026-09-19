@@ -1,5 +1,5 @@
 (() => {
-  const TOKEN = /!\[Capture CPD\]\(\/api\/police-media\?id=([0-9a-f-]{36})\)/gi;
+  const TOKEN = /!\[Capture (?:LAPD|CPD)\]\(\/api\/police-media\?id=([0-9a-f-]{36})\)/gi;
   const MAX_DIMENSION = 1920;
   const MAX_BYTES = 1_500_000;
   let toastTimer;
@@ -89,7 +89,7 @@
     const response = await fetch("/api/police-media", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: optimized.name, type: optimized.type, data: await dataUrl(optimized) }) });
     const result = await response.json().catch(() => ({}));
     if (!response.ok || !result.ok) throw new Error(result.code || "upload_failed");
-    return { id: result.id, token: `![Capture CPD](/api/police-media?id=${result.id})` };
+    return { id: result.id, token: `![Capture LAPD](/api/police-media?id=${result.id})` };
   }
 
   function insertToken(field, token) {
@@ -120,7 +120,7 @@
     tray.innerHTML = ids.map(id => `<figure class="cpd-clipboard-thumb"><a href="/api/police-media?id=${id}" target="_blank" rel="noopener"><img src="/api/police-media?id=${id}" alt="Capture jointe" loading="lazy"><figcaption>Capture jointe</figcaption></a><button class="cpd-clipboard-remove" type="button" data-remove-media="${id}" aria-label="Retirer cette capture">×</button></figure>`).join("");
     tray.hidden = !ids.length;
     tray.querySelectorAll("[data-remove-media]").forEach(button => button.addEventListener("click", () => {
-      const id = button.dataset.removeMedia, pattern = new RegExp(`(?:\\r?\\n)?!\\[Capture CPD\\]\\(\\/api\\/police-media\\?id=${id}\\)(?:\\r?\\n)?`, "gi");
+      const id = button.dataset.removeMedia, pattern = new RegExp(`(?:\\r?\\n)?!\\[Capture (?:LAPD|CPD)\\]\\(\\/api\\/police-media\\?id=${id}\\)(?:\\r?\\n)?`, "gi");
       field.value = field.value.replace(pattern, "\n").replace(/^\n|\n$/g, "");
       field.dispatchEvent(new Event("input", { bubbles: true }));
       syncPreview(field);

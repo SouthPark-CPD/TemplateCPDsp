@@ -26,7 +26,7 @@ function canonicalResult(result) {
 
 const errorMessages = {
   database_not_configured: "La base de données Academy n’est pas configurée.",
-  discord_members_forbidden: "Le bot Discord ne peut pas lire les membres du serveur CPD.",
+  discord_members_forbidden: "Le bot Discord ne peut pas lire les membres du serveur LAPD.",
   dashboard_unavailable: "Le tableau de bord est momentanément indisponible."
 };
 

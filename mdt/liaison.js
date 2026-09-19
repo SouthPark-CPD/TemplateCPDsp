@@ -30,8 +30,8 @@
     } catch { return ""; }
   };
   const normalizedName = (value) => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
-  const initials = (name) => String(name || "CPD").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "CPD";
-  const authorName = (author) => author?.displayName || author?.display_name || author?.nick || author?.global_name || author?.globalName || author?.username || "Agent CPD";
+  const initials = (name) => String(name || "LAPD").trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "LAPD";
+  const authorName = (author) => author?.displayName || author?.display_name || author?.nick || author?.global_name || author?.globalName || author?.username || "Agent LAPD";
   const avatarUrl = (author) => {
     if (!author?.id || !author?.avatar) return "";
     const extension = String(author.avatar).startsWith("a_") ? "gif" : "png";
@@ -123,7 +123,7 @@
         return `${daySeparator}<div class="chat-system"><span aria-hidden="true">✓</span><p>${renderMessage(identity.content, message.mentions)}</p><time datetime="${escapeHtml(message.timestamp || "")}">${escapeHtml(formatTime(message.timestamp))}</time></div>`;
       }
       const avatar = identity.proxied ? "" : safeUrl(avatarUrl(message.author));
-      return `${daySeparator}<article class="chat-message${identity.own ? " own" : ""}${identity.dossier ? " dossier" : ""}"><div class="chat-avatar">${avatar ? `<img src="${escapeHtml(avatar)}" alt="">` : escapeHtml(initials(identity.dossier ? "CPD" : identity.name))}</div><div class="chat-stack"><div class="chat-meta"><strong>${escapeHtml(identity.dossier ? "Dossier initial" : identity.name)}</strong>${identity.own ? '<span class="message-you">Vous</span>' : ""}<time datetime="${escapeHtml(message.timestamp || "")}">${escapeHtml(formatTime(message.timestamp))}</time></div><div class="chat-bubble">${identity.content ? `<div class="chat-copy">${renderMessage(identity.content, message.mentions)}</div>` : ""}${attachments}</div></div></article>`;
+      return `${daySeparator}<article class="chat-message${identity.own ? " own" : ""}${identity.dossier ? " dossier" : ""}"><div class="chat-avatar">${avatar ? `<img src="${escapeHtml(avatar)}" alt="">` : escapeHtml(initials(identity.dossier ? "LAPD" : identity.name))}</div><div class="chat-stack"><div class="chat-meta"><strong>${escapeHtml(identity.dossier ? "Dossier initial" : identity.name)}</strong>${identity.own ? '<span class="message-you">Vous</span>' : ""}<time datetime="${escapeHtml(message.timestamp || "")}">${escapeHtml(formatTime(message.timestamp))}</time></div><div class="chat-bubble">${identity.content ? `<div class="chat-copy">${renderMessage(identity.content, message.mentions)}</div>` : ""}${attachments}</div></div></article>`;
     }).join("");
   };
 

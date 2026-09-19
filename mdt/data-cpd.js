@@ -1,5 +1,5 @@
 /* ==========================================================
-   DONNÉES — CPD
+   DONNÉES — LAPD
    Divisions & Units
    Chargé dynamiquement par organigramme.html
 ========================================================== */
