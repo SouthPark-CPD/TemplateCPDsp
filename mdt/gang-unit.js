@@ -109,9 +109,10 @@
     $("#report-territory").innerHTML = '<option value="">Non lié</option>' + state.territories.map(item => `<option value="${esc(item.id)}">${esc(item.name)} · ${esc(item.gangName)}</option>`).join("");
   }
 
-  const viewport = $("#map-viewport"), stage = $("#map-stage"), map = $("#territory-map"), layer = $("#territory-layer"), draftLayer = $("#draft-layer");
-  function layoutMapStage() { const rect = viewport.getBoundingClientRect(), ratio = 1493 / 1287; if (!rect.width || !rect.height) return; const width = Math.min(rect.width, rect.height * ratio), height = width / ratio; stage.style.width = `${width}px`; stage.style.height = `${height}px`; stage.style.left = `${(rect.width - width) / 2}px`; stage.style.top = `${(rect.height - height) / 2}px`; }
-  function applyMapTransform() { stage.style.transform = `translate(${mapState.pan.x}px, ${mapState.pan.y}px) scale(${mapState.zoom})`; }
+  const viewport = $("#map-viewport"), stage = $("#map-stage"), mapImage = stage.querySelector("img"), map = $("#territory-map"), layer = $("#territory-layer"), draftLayer = $("#draft-layer");
+  const mapLayout = { width: 0, height: 0 };
+  function layoutMapStage() { const rect = viewport.getBoundingClientRect(), ratio = mapImage.naturalWidth && mapImage.naturalHeight ? mapImage.naturalWidth / mapImage.naturalHeight : 1; if (!rect.width || !rect.height) return; mapLayout.width = Math.min(rect.width, rect.height * ratio); mapLayout.height = mapLayout.width / ratio; stage.style.left = `${(rect.width - mapLayout.width) / 2}px`; stage.style.top = `${(rect.height - mapLayout.height) / 2}px`; applyMapTransform(); }
+  function applyMapTransform() { if (!mapLayout.width || !mapLayout.height) return; stage.style.width = `${mapLayout.width * mapState.zoom}px`; stage.style.height = `${mapLayout.height * mapState.zoom}px`; stage.style.transform = `translate(${mapState.pan.x}px, ${mapState.pan.y}px)`; }
   function mapPoint(event) { const svgPoint = map.createSVGPoint(); svgPoint.x = event.clientX; svgPoint.y = event.clientY; const matrix = map.getScreenCTM(); if (!matrix) return { x: -1, y: -1 }; const point = svgPoint.matrixTransform(matrix.inverse()); return { x: Number((point.x / 10).toFixed(3)), y: Number((point.y / 10).toFixed(3)) }; }
   function pointString(points) { return points.map(point => `${point.x * 10},${point.y * 10}`).join(" "); }
   function renderMap() {
@@ -133,7 +134,7 @@
     $("#draw-count").textContent = `${draft.length} point${draft.length > 1 ? "s" : ""}`;
   }
   function zoom(next, clientX, clientY) {
-    const r = viewport.getBoundingClientRect(), old = mapState.zoom, value = Math.min(12, Math.max(1, next));
+    const r = viewport.getBoundingClientRect(), old = mapState.zoom, sourceWidth = mapImage.naturalWidth || 8192, sharpZoom = sourceWidth / Math.max(1, mapLayout.width * (devicePixelRatio || 1)), value = Math.min(12, Math.max(1, sharpZoom), Math.max(1, next));
     if (value === old) return;
     const localX = Number.isFinite(clientX) ? clientX - r.left : r.width / 2, localY = Number.isFinite(clientY) ? clientY - r.top : r.height / 2;
     const offsetX = parseFloat(stage.style.left) || 0, offsetY = parseFloat(stage.style.top) || 0;
@@ -141,7 +142,8 @@
     mapState.zoom = value; mapState.pan.x = localX - offsetX - mapX * value; mapState.pan.y = localY - offsetY - mapY * value; applyMapTransform();
   }
   function resetMap() { mapState.zoom = 1; mapState.pan = { x: 0, y: 0 }; applyMapTransform(); }
-  addEventListener("resize", () => { layoutMapStage(); applyMapTransform(); });
+  mapImage.addEventListener("load", layoutMapStage);
+  addEventListener("resize", layoutMapStage);
   function setMapMode(mode) { mapState.mode = mode; viewport.classList.toggle("drawing", mode === "draw" || mode === "marker"); $("#map-draw").classList.toggle("primary", mode === "draw"); $("#map-pan").classList.toggle("primary", mode === "pan"); markerButton.classList.toggle("primary", mode === "marker"); $("#draw-actions").hidden = mode !== "draw"; $("#map-help").textContent = mode === "draw" ? "1. Clique pour poser les sommets. 2. Fais glisser un sommet pour l’ajuster. 3. Termine puis enregistre." : mode === "marker" ? "Clique à l’emplacement du repère. Choisis ensuite son symbole et ses informations." : "Glisse pour déplacer la carte, pince ou utilise +/− pour zoomer. Clique sur un repère pour ouvrir sa fiche."; }
   $("#map-pan").addEventListener("click", () => setMapMode("pan"));
   const markerButton = document.createElement("button"); markerButton.type = "button"; markerButton.className = "button"; markerButton.textContent = "Ajouter un repère"; $("#map-pan").before(markerButton);
