@@ -197,7 +197,7 @@ function buildPrintSheet() {
 
   elements.printSheet.innerHTML = `
     <header class="print-header">
-      <img src="../assets/lapd-seal.png" alt="">
+      <img src="../assets/lapd-seal.png?v=official-20260919" alt="">
       <div><p>Los Angeles Police Department</p><h1>Fiche de suivi — Police Academy</h1><span>Document généré le ${escapeHtml(generatedAt)}</span></div>
     </header>
     <section class="print-identity">
